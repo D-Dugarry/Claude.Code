@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════════════
 #  n43_to_Excel — Conversor de ficheros Norma 43 (AEB 43) a Excel
-#  Versión: v01 (altura dinámica)
+#  Versión: v02
 # ═══════════════════════════════════════════════════════════════════
 #
 #  Descripción:
@@ -21,45 +21,41 @@
 #    - openpyxl       → generación del fichero Excel
 #    - Pillow (PIL)   → escalado de imagen (opcional; hay fallback)
 #
-#  Comportamiento de la ventana:
-#    La ventana se expande y contrae dinámicamente según los
-#    elementos visibles. Inicialmente solo se muestran el título,
-#    subtítulo, botones, barra de progreso, ruta y pie.
-#    Al seleccionar un fichero aparece el recuadro de cabecera
-#    y la ventana crece. Al convertir aparece además el recuadro
-#    con el nombre del Excel. Al seleccionar otro fichero, el
-#    nombre del Excel se oculta y la ventana se contrae.
-#    El caracolillo usa place() y se adapta automáticamente.
+#  Cambios respecto a v01:
+#    - Ancho de ventana ampliado a 1100px
+#    - Todos los elementos siempre visibles (sin pack_forget)
+#    - Botones y barra de progreso bajo el subtítulo
+#    - Nombre del Excel con recuadro, debajo de los datos de cabecera
+#    - Leyenda "Nombre del fichero Excel:" siempre visible
+#    - Altura de ventana calculada una sola vez al arrancar
 #
 # ═══════════════════════════════════════════════════════════════════
 #
 #  ÍNDICE DE BLOQUES                                         Línea
 #  ─────────────────────────────────────────────────────────────────
-#   (los números de línea se verifican al final del fichero)
-#
-#   1. Imports y carga condicional de Pillow ................   67
-#   2. read_n43_header()  — lectura de cabecera N43 ........   91
-#   3. fmt_saldo()        — formato numérico español .......  141
-#   4. parse_n43()        — parser completo N43 → Excel ....  157
-#      4a. Estilos y cabecera de la hoja ...................  186
-#      4b. Lectura línea a línea del fichero ...............  201
-#      4c. Escritura de filas con estilos alternados .......  259
-#      4d. Fila de totales y ajustes finales ...............  300
-#   5. Constantes de la GUI ................................  343
-#   6. run_gui()  — interfaz gráfica principal .............  353
-#      6a. Ventana, centrado y recalc_size .................  397
-#      6b. Título y subtítulo ..............................  421
-#      6c. Botones y barra de progreso .....................  431
-#      6d. Ruta del fichero seleccionado ...................  458
-#      6e. Recuadro de datos de cabecera (oculto) ..........  469
-#      6f. Recuadro nombre fichero Excel (oculto) ..........  507
-#      6g. Pie de página ...................................  529
-#      6h. Variables de estado .............................  541
-#      6i. seleccionar()  — callback botón seleccionar .....  548
-#      6j. convertir()    — callback botón convertir .......  625
-#      6k. Imagen Caracolillo y crédito ....................  692
-#      6l. Arranque (tamaño inicial) .......................  747
-#   7. Punto de entrada (__main__) .........................  761
+#   1. Imports y carga condicional de Pillow ................   63
+#   2. read_n43_header()  — lectura de cabecera N43 ........   87
+#   3. fmt_saldo()        — formato numérico español .......  137
+#   4. parse_n43()        — parser completo N43 → Excel ....  153
+#      4a. Estilos y cabecera de la hoja ...................  182
+#      4b. Lectura línea a línea del fichero ...............  197
+#      4c. Escritura de filas con estilos alternados .......  255
+#      4d. Fila de totales y ajustes finales ...............  296
+#   5. Constantes de la GUI ................................  339
+#   6. run_gui()  — interfaz gráfica principal .............  349
+#      6a. Ventana y función de centrado ...................  387
+#      6b. Título y subtítulo ..............................  402
+#      6c. Botones y barra de progreso .....................  412
+#      6d. Ruta del fichero seleccionado ...................  439
+#      6e. Recuadro de datos de cabecera ...................  450
+#      6f. Recuadro nombre fichero Excel ...................  487
+#      6g. Pie de página ...................................  509
+#      6h. Variables de estado .............................  521
+#      6i. seleccionar()  — callback botón seleccionar .....  526
+#      6j. convertir()    — callback botón convertir .......  589
+#      6k. Imagen Caracolillo y crédito ....................  648
+#      6l. Cálculo del alto y arranque .....................  702
+#   7. Punto de entrada (__main__) .........................  716
 #
 # ═══════════════════════════════════════════════════════════════════
 
@@ -362,20 +358,14 @@ def run_gui():
       2. Subtítulo con instrucciones
       3. Botones (seleccionar + convertir) y barra de progreso
       4. Ruta del fichero .n43 seleccionado (frame sunken)
-      5. Datos de cabecera N43 (LabelFrame - oculto inicialmente)
-      6. Nombre del fichero Excel (frame sunken - oculto inicialmente)
+      5. Datos de cabecera N43 (LabelFrame con grid 2×8)
+      6. Nombre del fichero Excel generado (frame sunken)
       7. Pie de página (texto gris)
       8. Espaciador + Caracolillo y crédito (esquina inf-dcha)
 
-    Elementos dinámicos:
-      - frame_header : oculto → aparece tras primera selección
-      - frame_excel  : oculto → aparece tras conversión,
-                       se oculta al seleccionar otro fichero
-
-    Cada vez que un elemento se muestra u oculta, recalc_size()
-    recalcula la altura de la ventana y la recentra en pantalla.
-    El caracolillo usa place() y se adapta automáticamente al
-    nuevo tamaño sin intervención.
+    Todos los elementos están siempre visibles. Los campos de
+    datos se rellenan al seleccionar un fichero, y el nombre
+    del Excel se muestra tras la conversión.
 
     Ciclo de estados de los botones:
       ┌──────────────────┬─────────────────────────┬───────────────────┐
@@ -394,7 +384,7 @@ def run_gui():
     root.resizable(False, False)
     root.configure(bg=BG)
 
-    # ── 6a. Ventana, centrado y recalc_size ──────────────────────
+    # ── 6a. Ventana y función de centrado ────────────────────────
 
     def center_window(w, h):
         """Centra la ventana en la pantalla según resolución."""
@@ -403,15 +393,6 @@ def run_gui():
         x  = (sx - w) // 2
         y  = (sy - h) // 2
         root.geometry(f"{w}x{h}+{x}+{y}")
-
-    def recalc_size():
-        """
-        Recalcula la altura de la ventana según los elementos
-        actualmente empaquetados (pack) y la recentra.
-        Se llama cada vez que un elemento se muestra u oculta.
-        """
-        root.update_idletasks()
-        center_window(WIN_W, root.winfo_reqheight())
 
     try:
         root.iconbitmap(default="")
@@ -466,18 +447,17 @@ def run_gui():
              bg="#E2EAF4", fg="#555555", anchor="w",
              wraplength=520, justify="left", padx=18, pady=6).pack(fill="x")
 
-    # ── 6e. Recuadro de datos de cabecera (oculto inicialmente) ──
-    #    LabelFrame con grid de 2 filas:
+    # ── 6e. Recuadro de datos de cabecera ────────────────────────
+    #    LabelFrame con grid de 2 filas, siempre visible:
     #      Fila 0: Entidad | Oficina | Cuenta
     #      Fila 1: Fecha inicio | Saldo inicial | Fecha fin | Saldo final
-    #    Se empaqueta (pack) tras la primera selección de fichero.
-    #    Una vez visible, permanece siempre (no se vuelve a ocultar).
+    #    Los valores muestran "—" hasta que se selecciona un fichero.
 
     frame_header = tk.LabelFrame(
         root, text=" Datos de cabecera ",
         font=("Arial", 13, "bold"), bg=BG, fg="#1F4E79",
         bd=2, relief="groove", padx=10, pady=8)
-    # NO se empaqueta aquí — se hará en seleccionar()
+    frame_header.pack(fill="x", padx=30, pady=(GAP, 0))
 
     header_labels = {}
     campos = [
@@ -504,14 +484,14 @@ def run_gui():
     for c in (1, 3, 5, 7):
         frame_header.columnconfigure(c, weight=1)
 
-    # ── 6f. Recuadro nombre fichero Excel (oculto inicialmente) ──
+    # ── 6f. Recuadro nombre fichero Excel ────────────────────────
     #    Frame sunken (mismo estilo que la ruta del .n43).
-    #    Contiene la leyenda "Nombre del fichero Excel:" y el valor.
-    #    Se empaqueta (pack) tras la conversión.
-    #    Se oculta (pack_forget) al seleccionar otro fichero.
+    #    La leyenda "Nombre del fichero Excel:" siempre visible.
+    #    El valor se rellena tras la conversión y se limpia al
+    #    seleccionar otro fichero.
 
     frame_excel = tk.Frame(root, bg="#E2EAF4", bd=1, relief="sunken")
-    # NO se empaqueta aquí — se hará en convertir()
+    frame_excel.pack(fill="x", padx=30, pady=(GAP, 0))
 
     excel_name_var = tk.StringVar(value="")
     frame_excel_inner = tk.Frame(frame_excel, bg="#E2EAF4")
@@ -540,10 +520,8 @@ def run_gui():
 
     # ── 6h. Variables de estado ──────────────────────────────────
 
-    selected_path  = {"value": None}
-    n43_header     = {"info": None, "excel_name": None}
-    header_visible = {"shown": False}
-    excel_visible  = {"shown": False}
+    selected_path = {"value": None}
+    n43_header    = {"info": None, "excel_name": None}
 
     # ── 6i. seleccionar() — callback del botón seleccionar ───────
     #
@@ -552,11 +530,9 @@ def run_gui():
     #    2. Actualizar la ruta mostrada en pantalla
     #    3. Cambiar estado visual del botón a "Cambiar…" (atenuado)
     #    4. Restaurar botón convertir (por si venía de conversión)
-    #    5. Ocultar recuadro del Excel (pack_forget) si estaba visible
+    #    5. Limpiar nombre del Excel (se mostrará tras convertir)
     #    6. Leer cabecera del N43 y rellenar el grid
     #    7. Calcular el nombre del fichero Excel de salida
-    #    8. Mostrar recuadro de cabecera (solo la primera vez)
-    #    9. Recalcular tamaño de ventana
 
     def seleccionar():
         p = filedialog.askopenfilename(
@@ -576,11 +552,8 @@ def run_gui():
             # 4. Restaurar botón convertir
             btn_convertir.config(state="normal", bg="#70AD47")
 
-            # 5. Ocultar recuadro del Excel si estaba visible
-            if excel_visible["shown"]:
-                frame_excel.pack_forget()
-                excel_name_var.set("")
-                excel_visible["shown"] = False
+            # 5. Limpiar nombre del Excel (leyenda se mantiene visible)
+            excel_name_var.set("")
 
             # 6-7. Leer cabecera y generar nombre Excel
             try:
@@ -613,15 +586,6 @@ def run_gui():
                 n43_header["info"] = None
                 n43_header["excel_name"] = None
 
-            # 8. Mostrar recuadro de cabecera (solo la primera vez)
-            if not header_visible["shown"]:
-                frame_header.pack(fill="x", padx=30, pady=(GAP, 0),
-                                  after=frame_path)
-                header_visible["shown"] = True
-
-            # 9. Recalcular tamaño de ventana
-            recalc_size()
-
     # ── 6j. convertir() — callback del botón convertir ───────────
     #
     #  Flujo:
@@ -631,9 +595,8 @@ def run_gui():
     #    4. Mostrar mensaje de éxito con nº de movimientos
     #    5. Actualizar estados de botones (seleccionar restaurado,
     #       convertir atenuado)
-    #    6. Mostrar recuadro con el nombre del Excel generado
-    #    7. Recalcular tamaño de ventana
-    #    8. Abrir la carpeta del fichero en el explorador
+    #    6. Mostrar nombre del fichero Excel generado
+    #    7. Abrir la carpeta del fichero en el explorador
 
     def convertir():
         if not selected_path["value"]:
@@ -668,17 +631,10 @@ def run_gui():
                 text="📂  Seleccionar otro fichero .n43", bg="#2E75B6")
             btn_convertir.config(state="disabled", bg="#A8D08D")
 
-            # 6. Mostrar recuadro con nombre del Excel
+            # 6. Mostrar nombre del Excel generado en el recuadro
             excel_name_var.set(n43_header.get("excel_name", ""))
-            if not excel_visible["shown"]:
-                frame_excel.pack(fill="x", padx=30, pady=(GAP, 0),
-                                 after=frame_header)
-                excel_visible["shown"] = True
 
-            # 7. Recalcular tamaño de ventana
-            recalc_size()
-
-            # 8. Abrir carpeta en explorador
+            # 7. Abrir carpeta en explorador
             os.startfile(os.path.dirname(p_out))
 
         except Exception as e:
@@ -692,8 +648,7 @@ def run_gui():
     # ── 6k. Imagen Caracolillo y crédito ─────────────────────────
     #    Bloque posicionado con place() en la esquina inferior
     #    derecha (20px de margen). No participa del flujo pack,
-    #    así que permanece siempre en la esquina inferior derecha
-    #    independientemente de que la ventana crezca o se contraiga.
+    #    así que permanece fijo independientemente del contenido.
     #
     #    La imagen se busca como "Caracolillo_Fósil.png" en la
     #    misma carpeta del script. Se escala a 40px de alto.
@@ -744,15 +699,15 @@ def run_gui():
     # Anclar a esquina inferior derecha con 20px de margen
     right_block.place(relx=1.0, rely=1.0, x=-20, y=-20, anchor="se")
 
-    # ── 6l. Arranque (tamaño inicial) ────────────────────────────
+    # ── 6l. Cálculo del alto y arranque ──────────────────────────
     #
-    #  En el estado inicial solo están empaquetados: título,
-    #  subtítulo, botones, progreso, ruta, pie y espaciador.
-    #  recalc_size() calcula la altura necesaria y centra la ventana.
-    #  A medida que se muestren frame_header y frame_excel, la
-    #  ventana crecerá. Al ocultar frame_excel, se contraerá.
+    #  Todos los elementos están siempre visibles, así que el alto
+    #  necesario se obtiene directamente de winfo_reqheight().
+    #  Se fija como constante y se centra la ventana.
 
-    recalc_size()
+    root.update_idletasks()
+    WIN_H = root.winfo_reqheight()
+    center_window(WIN_W, WIN_H)
 
     root.mainloop()
 
