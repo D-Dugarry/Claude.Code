@@ -83,6 +83,15 @@ except (ImportError, AttributeError):
     HAS_PIL = False
 
 
+def resource_path(filename):
+    """Resuelve rutas de recursos tanto en script como en .exe (PyInstaller)."""
+    if getattr(sys, 'frozen', False):
+        base = sys._MEIPASS
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, filename)
+
+
 # ─────────────────────────────────────────────────────────────────
 #  2. READ_N43_HEADER — Lectura de cabecera del fichero N43
 # ─────────────────────────────────────────────────────────────────
@@ -658,8 +667,7 @@ def run_gui():
     IMG_H = 40
     right_block = tk.Frame(root, bg=BG)
 
-    script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-    img_path   = os.path.join(script_dir, "Caracolillo_Fósil.png")
+    img_path = resource_path("Caracolillo_Fósil.png")
 
     img_ok = False
     if os.path.isfile(img_path):
