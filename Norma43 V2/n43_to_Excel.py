@@ -71,6 +71,7 @@ from openpyxl.utils import get_column_letter
 from datetime import date
 import os
 import sys
+import json
 
 # Pillow se usa para escalar la imagen del caracolillo con calidad
 # (LANCZOS). Si no está instalado, se usa el subsample nativo de
@@ -90,6 +91,33 @@ def resource_path(filename):
     else:
         base = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, filename)
+
+
+def _config_path():
+    """Ruta del fichero de configuración persistente (junto al exe o script)."""
+    if getattr(sys, 'frozen', False):
+        base = os.path.dirname(sys.executable)
+    else:
+        base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base, "n43_config.json")
+
+
+def load_config() -> dict:
+    try:
+        with open(_config_path(), encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_config(data: dict):
+    try:
+        cfg = load_config()
+        cfg.update(data)
+        with open(_config_path(), "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -121,7 +149,7 @@ def read_n43_header(path_n43: str) -> dict:
         dict con claves: entidad, oficina, cuenta, fecha_ini (date),
         fecha_fin (date), saldo_ini (float), divisa, saldo_fin (float)
     """
-    info = {}
+    info = {"num_movimientos": 0}
     with open(path_n43, encoding="latin-1") as f:
         for linea in f:
             reg = linea[:2]
@@ -136,6 +164,8 @@ def read_n43_header(path_n43: str) -> dict:
                 signo = -1 if linea[32] == "1" else 1
                 info["saldo_ini"] = int(linea[33:47]) * signo * 0.01
                 info["divisa"] = linea[47:50].strip()
+            elif reg == "22":
+                info["num_movimientos"] += 1
             elif reg == "33":
                 signo = -1 if linea[58] == "1" else 1
                 info["saldo_fin"] = int(linea[59:73]) * signo * 0.01
@@ -414,7 +444,11 @@ def run_gui():
              font=("Arial", 18, "bold"), bg="#1F4E79", fg="white",
              pady=15).pack(fill="x")
 
-    tk.Label(root, text="Selecciona un fichero con extensión .n43 "
+    frame_body   = tk.Frame(root, bg=BG)
+    frame_body.pack(fill="x")
+    frame_config = tk.Frame(root, bg=BG)   # oculto hasta activar configuración
+
+    tk.Label(frame_body, text="Selecciona un fichero con extensión .n43 "
                         "para convertirlo a Excel .xlsx",
              font=("Arial", 14), bg=BG, fg="#333333").pack(pady=(GAP, 0))
 
@@ -423,7 +457,7 @@ def run_gui():
     #    Separación de 50px entre ambos botones (25px + 25px).
     #    Los comandos se asignan más abajo, tras definir las funciones.
 
-    frame_btns = tk.Frame(root, bg=BG)
+    frame_btns = tk.Frame(frame_body, bg=BG)
     frame_btns.pack(pady=(GAP, 0))
 
     btn_seleccionar = tk.Button(
@@ -441,7 +475,7 @@ def run_gui():
         state="disabled")
     btn_convertir.pack(side="left", padx=(25, 0))
 
-    progress = ttk.Progressbar(root, orient="horizontal",
+    progress = ttk.Progressbar(frame_body, orient="horizontal",
                                length=700, mode="indeterminate")
     progress.pack(pady=(GAP, 0))
 
@@ -450,11 +484,15 @@ def run_gui():
     #    Texto inicial: "Ningún fichero seleccionado"
 
     path_var = tk.StringVar(value="Ningún fichero seleccionado")
-    frame_path = tk.Frame(root, bg="#E2EAF4", bd=1, relief="sunken")
+    frame_path = tk.Frame(frame_body, bg="#E2EAF4", bd=1, relief="sunken")
     frame_path.pack(fill="x", padx=30, pady=(GAP, 0))
-    tk.Label(frame_path, textvariable=path_var, font=("Arial", 12),
-             bg="#E2EAF4", fg="#555555", anchor="w",
-             wraplength=520, justify="left", padx=18, pady=6).pack(fill="x")
+    frame_path_inner = tk.Frame(frame_path, bg="#E2EAF4")
+    frame_path_inner.pack(fill="x", padx=18, pady=6)
+    tk.Label(frame_path_inner, text="Nombre del fichero Norma-43:",
+             font=("Arial", 12, "bold"), bg="#E2EAF4", fg="#555555",
+             anchor="w").pack(side="left")
+    tk.Label(frame_path_inner, textvariable=path_var, font=("Arial", 12),
+             bg="#E2EAF4", fg="#333333", anchor="w", padx=8).pack(side="left", fill="x", expand=True)
 
     # ── 6e. Recuadro de datos de cabecera ────────────────────────
     #    LabelFrame con grid de 2 filas, siempre visible:
@@ -463,21 +501,22 @@ def run_gui():
     #    Los valores muestran "—" hasta que se selecciona un fichero.
 
     frame_header = tk.LabelFrame(
-        root, text=" Datos de cabecera ",
+        frame_body, text=" Datos de cabecera ",
         font=("Arial", 13, "bold"), bg=BG, fg="#1F4E79",
         bd=2, relief="groove", padx=10, pady=8)
     frame_header.pack(fill="x", padx=30, pady=(GAP, 0))
 
     header_labels = {}
     campos = [
-        # (etiqueta,         clave,       fila, columna)
-        ("Entidad:",       "entidad",   0, 0),
-        ("Oficina:",       "oficina",   0, 2),
-        ("Cuenta:",        "cuenta",    0, 4),
-        ("Fecha inicio:",  "fecha_ini", 1, 0),
-        ("Saldo inicial:", "saldo_ini", 1, 2),
-        ("Fecha fin:",     "fecha_fin", 1, 4),
-        ("Saldo final:",   "saldo_fin", 1, 6),
+        # (etiqueta,         clave,              fila, columna)
+        ("Entidad:",       "entidad",          0, 0),
+        ("Oficina:",       "oficina",          0, 2),
+        ("Cuenta:",        "cuenta",           0, 4),
+        ("Movimientos:",   "num_movimientos",  0, 6),
+        ("Fecha inicio:",  "fecha_ini",        1, 0),
+        ("Saldo inicial:", "saldo_ini",        1, 2),
+        ("Fecha fin:",     "fecha_fin",        1, 4),
+        ("Saldo final:",   "saldo_fin",        1, 6),
     ]
     for texto, key, row, col in campos:
         tk.Label(frame_header, text=texto,
@@ -499,7 +538,7 @@ def run_gui():
     #    El valor se rellena tras la conversión y se limpia al
     #    seleccionar otro fichero.
 
-    frame_excel = tk.Frame(root, bg="#E2EAF4", bd=1, relief="sunken")
+    frame_excel = tk.Frame(frame_body, bg="#E2EAF4", bd=1, relief="sunken")
     frame_excel.pack(fill="x", padx=30, pady=(GAP, 0))
 
     excel_name_var = tk.StringVar(value="")
@@ -510,27 +549,102 @@ def run_gui():
              font=("Arial", 12, "bold"), bg="#E2EAF4", fg="#555555",
              anchor="w").pack(side="left")
 
-    lbl_excel_name = tk.Label(frame_excel_inner, textvariable=excel_name_var,
-                              font=("Arial", 12), bg="#E2EAF4", fg="#333333",
-                              anchor="w", padx=8)
-    lbl_excel_name.pack(side="left", fill="x", expand=True)
+    entry_excel_name = tk.Entry(frame_excel_inner, textvariable=excel_name_var,
+                                font=("Arial", 12), bg="white", fg="#333333",
+                                relief="sunken", bd=1, insertbackground="#333333",
+                                state="disabled")
+    entry_excel_name.pack(side="left", fill="x", expand=True, padx=(8, 0))
 
     # ── 6g. Pie de página ────────────────────────────────────────
 
-    lbl_footer = tk.Label(root,
+    lbl_footer = tk.Label(frame_body,
              text="El Excel se guarda en la misma carpeta que el fichero .n43",
              font=("Arial", 14), bg=BG, fg="#888888")
     lbl_footer.pack(pady=(GAP, 0))
 
-    # Espaciador inferior: reserva espacio para el bloque caracolillo
-    # que está posicionado con place() y no participa del pack.
-    spacer = tk.Frame(root, bg=BG, height=BOTTOM_RESERVE)
+    spacer = tk.Frame(frame_body, bg=BG, height=BOTTOM_RESERVE)
     spacer.pack()
 
     # ── 6h. Variables de estado ──────────────────────────────────
 
-    selected_path = {"value": None}
-    n43_header    = {"info": None, "excel_name": None}
+    selected_path   = {"value": None}
+    n43_header      = {"info": None, "excel_name": None}
+    n43_dir_var     = tk.StringVar()
+    output_dir_var  = tk.StringVar()
+    auto_n43_var    = tk.BooleanVar(value=True)
+    auto_output_var = tk.BooleanVar(value=True)
+
+    # ── 6h-bis. Funciones y panel de configuración ───────────────
+
+    def cambiar_dir(var, config_key):
+        d = filedialog.askdirectory(title="Seleccionar carpeta",
+                                    initialdir=var.get() or "")
+        if d:
+            var.set(d)
+            save_config({config_key: d})
+
+    def show_body():
+        frame_config.pack_forget()
+        frame_body.pack(fill="x")
+
+    def show_config():
+        cfg = load_config()
+        n43_dir_var.set(cfg.get("last_dir", ""))
+        output_dir_var.set(cfg.get("last_output_dir", ""))
+        auto_n43_var.set(cfg.get("auto_update_n43_dir", True))
+        auto_output_var.set(cfg.get("auto_update_output_dir", True))
+        frame_body.pack_forget()
+        frame_config.pack(fill="x")
+
+    tk.Label(frame_config, text="⚙  Configuración",
+             font=("Arial", 16, "bold"), bg=BG, fg="#1F4E79"
+             ).pack(pady=(GAP * 2, GAP))
+
+    frm_n43 = tk.LabelFrame(frame_config, text="  Carpeta de ficheros .n43  ",
+                             font=("Arial", 12, "bold"), bg=BG, fg="#333333",
+                             bd=2, relief="groove", padx=10, pady=8)
+    frm_n43.pack(fill="x", padx=30, pady=(0, GAP))
+    frm_n43_row = tk.Frame(frm_n43, bg=BG)
+    frm_n43_row.pack(fill="x")
+    tk.Entry(frm_n43_row, textvariable=n43_dir_var, font=("Arial", 11),
+             bg="white", fg="#333333", relief="sunken",
+             state="readonly").pack(side="left", fill="x", expand=True)
+    tk.Button(frm_n43_row, text="Cambiar", font=("Arial", 11),
+              bg="#2E75B6", fg="white", bd=0, padx=14, pady=6, cursor="hand2",
+              command=lambda: cambiar_dir(n43_dir_var, "last_dir")
+              ).pack(side="left", padx=(8, 0))
+    tk.Checkbutton(frm_n43, text="Actualizar Ruta con la última seleccionada",
+                   variable=auto_n43_var, bg=BG, fg="#555555",
+                   activebackground=BG, font=("Arial", 10),
+                   command=lambda: save_config({"auto_update_n43_dir": auto_n43_var.get()})
+                   ).pack(anchor="w", pady=(4, 0))
+
+    frm_out = tk.LabelFrame(frame_config, text="  Carpeta de salida Excel  ",
+                             font=("Arial", 12, "bold"), bg=BG, fg="#333333",
+                             bd=2, relief="groove", padx=10, pady=8)
+    frm_out.pack(fill="x", padx=30, pady=(0, GAP))
+    frm_out_row = tk.Frame(frm_out, bg=BG)
+    frm_out_row.pack(fill="x")
+    tk.Entry(frm_out_row, textvariable=output_dir_var, font=("Arial", 11),
+             bg="white", fg="#333333", relief="sunken",
+             state="readonly").pack(side="left", fill="x", expand=True)
+    tk.Button(frm_out_row, text="Cambiar", font=("Arial", 11),
+              bg="#2E75B6", fg="white", bd=0, padx=14, pady=6, cursor="hand2",
+              command=lambda: cambiar_dir(output_dir_var, "last_output_dir")
+              ).pack(side="left", padx=(8, 0))
+    tk.Checkbutton(frm_out, text="Actualizar Ruta con la última seleccionada",
+                   variable=auto_output_var, bg=BG, fg="#555555",
+                   activebackground=BG, font=("Arial", 10),
+                   command=lambda: save_config({"auto_update_output_dir": auto_output_var.get()})
+                   ).pack(anchor="w", pady=(4, 0))
+
+    tk.Button(frame_config, text="✅  Cerrar configuración",
+              font=("Arial", 13, "bold"), bg="#70AD47", fg="white",
+              activebackground="#507E35", bd=0, padx=30, pady=14,
+              cursor="hand2", command=show_body
+              ).pack(pady=(GAP, 0))
+
+    tk.Frame(frame_config, bg=BG, height=BOTTOM_RESERVE).pack()
 
     # ── 6i. seleccionar() — callback del botón seleccionar ───────
     #
@@ -544,8 +658,10 @@ def run_gui():
     #    7. Calcular el nombre del fichero Excel de salida
 
     def seleccionar():
+        cfg = load_config()
         p = filedialog.askopenfilename(
             title="Selecciona el fichero N43",
+            initialdir=cfg.get("last_dir", ""),
             filetypes=[("Ficheros N43", "*.n43 *.N43"),
                        ("Todos los ficheros", "*.*")]
         )
@@ -553,16 +669,19 @@ def run_gui():
             # 1-2. Guardar ruta y mostrar nombre
             selected_path["value"] = p
             path_var.set(os.path.basename(p))
+            if cfg.get("auto_update_n43_dir", True):
+                save_config({"last_dir": os.path.dirname(p)})
 
-            # 3. Atenuar botón seleccionar
+            # 3. Cambiar texto del botón seleccionar (mismo fondo, texto amarillo)
             btn_seleccionar.config(text="📂  Cambiar el fichero .n43",
-                                   bg="#8FACCF")
+                                   fg="#FFE066")
 
             # 4. Restaurar botón convertir
             btn_convertir.config(state="normal", bg="#70AD47")
 
-            # 5. Limpiar nombre del Excel (leyenda se mantiene visible)
+            # 5. Limpiar nombre del Excel y deshabilitar entry mientras se lee
             excel_name_var.set("")
+            entry_excel_name.config(state="disabled")
 
             # 6-7. Leer cabecera y generar nombre Excel
             try:
@@ -572,6 +691,8 @@ def run_gui():
                 header_labels["entidad"].config(text=info["entidad"])
                 header_labels["oficina"].config(text=info["oficina"])
                 header_labels["cuenta"].config(text=info["cuenta"])
+                header_labels["num_movimientos"].config(
+                    text=str(info["num_movimientos"]))
                 header_labels["fecha_ini"].config(
                     text=info["fecha_ini"].strftime("%d/%m/%Y"))
                 header_labels["fecha_fin"].config(
@@ -582,13 +703,16 @@ def run_gui():
                     text=fmt_saldo(info.get("saldo_fin", 0)))
 
                 # Nombre: ENTIDAD_CUENTA(4últ)_FECHAINI_FECHAFIN.xlsx
-                n43_header["excel_name"] = (
+                excel_name = (
                     f"{info['entidad']}_"
                     f"{info['cuenta'][-4:]}_"
                     f"{info['fecha_ini'].strftime('%Y%m%d')}_"
                     f"{info['fecha_fin'].strftime('%Y%m%d')}"
                     f".xlsx"
                 )
+                n43_header["excel_name"] = excel_name
+                excel_name_var.set(excel_name)
+                entry_excel_name.config(state="normal")
             except Exception:
                 for lbl in header_labels.values():
                     lbl.config(text="—")
@@ -612,38 +736,63 @@ def run_gui():
             return
         p_in = selected_path["value"]
 
-        # 1. Ruta de salida
-        if n43_header.get("excel_name"):
-            p_out = os.path.join(os.path.dirname(p_in),
-                                 n43_header["excel_name"])
-        else:
-            p_out = os.path.splitext(p_in)[0] + ".xlsx"
+        # 1. Nombre propuesto desde el Entry
+        excel_name = excel_name_var.get().strip()
+        if not excel_name:
+            excel_name = os.path.basename(os.path.splitext(p_in)[0]) + ".xlsx"
+        elif not excel_name.lower().endswith(".xlsx"):
+            excel_name += ".xlsx"
 
-        # 2. Barra de progreso
+        # 2. Diálogo "Guardar como" con la última carpeta de salida recordada
+        cfg = load_config()
+        p_out = filedialog.asksaveasfilename(
+            title="Guardar Excel como...",
+            initialdir=cfg.get("last_output_dir", os.path.dirname(p_in)),
+            initialfile=excel_name,
+            defaultextension=".xlsx",
+            filetypes=[("Excel", "*.xlsx"), ("Todos los ficheros", "*.*")]
+        )
+        if not p_out:
+            return  # Usuario canceló
+
+        # 3. Barra de progreso
         progress.start(10)
         root.update()
 
         try:
-            # 3. Conversión
-            n = parse_n43(p_in, p_out)
+            # 4. Conversión
+            parse_n43(p_in, p_out)
             progress.stop()
             progress["value"] = 100
 
-            # 4. Mensaje de éxito
+            # 5. Recordar la carpeta de salida usada (si auto-update activo)
+            if cfg.get("auto_update_output_dir", True):
+                save_config({"last_output_dir": os.path.dirname(p_out)})
+
+            # 6. Mensaje de éxito
             messagebox.showinfo(
                 "✅ Conversión completada",
-                f"Se han importado {n} movimientos.\n\n"
-                f"Fichero guardado en:\n{p_out}")
+                f"Se ha importado el fichero:\n"
+                f"{os.path.basename(p_in)}\n"
+                f"\n"
+                f"1º. He interpretado su contenido,\n"
+                f"2º. Lo he convertido en una Tabla,\n"
+                f"3º. Y guardado en la ruta:\n"
+                f"{os.path.dirname(p_out)}\n"
+                f"\n"
+                f"Con el nombre:\n"
+                f"{os.path.basename(p_out)}")
 
-            # 5. Actualizar estados de botones
+            # 7. Actualizar estados de botones
             btn_seleccionar.config(
-                text="📂  Seleccionar otro fichero .n43", bg="#2E75B6")
+                text="📂  Seleccionar otro fichero .n43", fg="white")
             btn_convertir.config(state="disabled", bg="#A8D08D")
 
-            # 6. Mostrar nombre del Excel generado en el recuadro
-            excel_name_var.set(n43_header.get("excel_name", ""))
+            # 8. Mostrar nombre definitivo y bloquear entry hasta nueva selección
+            excel_name_var.set(os.path.basename(p_out))
+            entry_excel_name.config(state="disabled")
 
-            # 7. Abrir carpeta en explorador
+            # 9. Abrir carpeta en explorador
             os.startfile(os.path.dirname(p_out))
 
         except Exception as e:
@@ -691,20 +840,38 @@ def run_gui():
             except Exception:
                 pass
 
+    # Tooltip "Configurar": aparece al pasar el ratón, oculto por defecto
+    lbl_hint = tk.Label(right_block, text="⚙  Configurar",
+                        font=("Arial", 9, "italic"), bg=BG, fg="#555555",
+                        cursor="hand2")
+    lbl_hint.grid(row=0, column=0, sticky="e")
+    lbl_hint.grid_remove()
+
     if img_ok:
-        tk.Label(right_block, image=root._caracolillo,
-                 bg=BG).pack(anchor="e")
+        lbl_img = tk.Label(right_block, image=root._caracolillo,
+                           bg=BG, cursor="hand2")
     else:
-        # Placeholder: recuadro rojo si la imagen no se encuentra
-        tk.Canvas(right_block, width=IMG_H, height=IMG_H,
-                  bg="white", highlightthickness=1,
-                  highlightbackground="red").pack(anchor="e")
+        lbl_img = tk.Canvas(right_block, width=IMG_H, height=IMG_H,
+                            bg="white", highlightthickness=1,
+                            highlightbackground="red", cursor="hand2")
+    lbl_img.grid(row=1, column=0, sticky="e")
 
-    # Crédito: Dugarry'AñoActual
     tk.Label(right_block, text=f"Dugarry'{año_actual}",
-             font=("Arial", 8), bg=BG, fg="#AAAAAA").pack(anchor="e")
+             font=("Arial", 8), bg=BG, fg="#AAAAAA").grid(row=2, column=0, sticky="e")
 
-    # Anclar a esquina inferior derecha con 20px de margen
+    def _on_enter(_):
+        lbl_hint.grid()
+
+    def _on_leave(_):
+        lbl_hint.grid_remove()
+
+    lbl_img.bind("<Enter>",    _on_enter)
+    lbl_img.bind("<Leave>",    _on_leave)
+    lbl_hint.bind("<Enter>",   _on_enter)
+    lbl_hint.bind("<Leave>",   _on_leave)
+    lbl_img.bind("<Button-1>",  lambda _: show_config())
+    lbl_hint.bind("<Button-1>", lambda _: show_config())
+
     right_block.place(relx=1.0, rely=1.0, x=-20, y=-20, anchor="se")
 
     # ── 6l. Cálculo del alto y arranque ──────────────────────────
