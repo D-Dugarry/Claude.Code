@@ -1,5 +1,5 @@
-# Fichero de configuración de rutas (generado en tiempo de ejecución)
-Norma43 V2/n43_config.json
+# Ficheros de prueba (datos locales, no necesarios en el repo)
+Norma43 V2/n43_Files/
 
 # Ficheros Excel generados
 Norma43 V2/*.xlsx
@@ -7,4 +7,3 @@ Norma43 V2/*.xlsx
 # Build de PyInstaller
 Norma43 V2/build/
 Norma43 V2/dist/
-Norma43 V2/*.spec
