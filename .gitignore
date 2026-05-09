@@ -1,10 +1,10 @@
 # Ficheros de prueba y configuración local (no necesarios en el repo)
-Norma43 V2/n43_Files/
-Norma43 V2/n43_config.json
+Norma43/n43_Files/
+Norma43/n43_config.json
 
 # Ficheros Excel generados
-Norma43 V2/*.xlsx
+Norma43/*.xlsx
 
 # Build de PyInstaller
-Norma43 V2/build/
-Norma43 V2/dist/
+Norma43/build/
+Norma43/dist/
