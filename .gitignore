@@ -1,5 +1,6 @@
-# Ficheros de prueba (datos locales, no necesarios en el repo)
+# Ficheros de prueba y configuración local (no necesarios en el repo)
 Norma43 V2/n43_Files/
+Norma43 V2/n43_config.json
 
 # Ficheros Excel generados
 Norma43 V2/*.xlsx
