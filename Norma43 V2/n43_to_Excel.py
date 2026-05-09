@@ -71,7 +71,7 @@ from openpyxl.utils import get_column_letter
 from datetime import date
 import os
 import sys
-import json
+import winreg
 
 # Pillow se usa para escalar la imagen del caracolillo con calidad
 # (LANCZOS). Si no está instalado, se usa el subsample nativo de
@@ -93,29 +93,40 @@ def resource_path(filename):
     return os.path.join(base, filename)
 
 
-def _config_path():
-    """Ruta del fichero de configuración persistente (junto al exe o script)."""
-    if getattr(sys, 'frozen', False):
-        base = os.path.dirname(sys.executable)
-    else:
-        base = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base, "n43_config.json")
+_REG_KEY = r"Software\n43_to_Excel"
 
 
 def load_config() -> dict:
+    data = {}
     try:
-        with open(_config_path(), encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, _REG_KEY)
+        for name in ("last_dir", "last_output_dir"):
+            try:
+                val, _ = winreg.QueryValueEx(key, name)
+                data[name] = val
+            except FileNotFoundError:
+                pass
+        for name in ("auto_update_n43_dir", "auto_update_output_dir"):
+            try:
+                val, _ = winreg.QueryValueEx(key, name)
+                data[name] = bool(val)
+            except FileNotFoundError:
+                pass
+        winreg.CloseKey(key)
+    except FileNotFoundError:
+        pass
+    return data
 
 
 def save_config(data: dict):
     try:
-        cfg = load_config()
-        cfg.update(data)
-        with open(_config_path(), "w", encoding="utf-8") as f:
-            json.dump(cfg, f, ensure_ascii=False, indent=2)
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, _REG_KEY)
+        for name, val in data.items():
+            if isinstance(val, bool):
+                winreg.SetValueEx(key, name, 0, winreg.REG_DWORD, int(val))
+            else:
+                winreg.SetValueEx(key, name, 0, winreg.REG_SZ, str(val))
+        winreg.CloseKey(key)
     except Exception:
         pass
 
