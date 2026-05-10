@@ -1,12 +1,12 @@
 # ═══════════════════════════════════════════════════════════════════
 #  n43_to_Excel — Conversor de ficheros Norma 43 (AEB 43) a Excel
-#  Versión: v02
+#  Versión: v03
 # ═══════════════════════════════════════════════════════════════════
 #
 #  Descripción:
 #    Aplicación de escritorio con interfaz gráfica (tkinter) que
-#    lee un fichero bancario en formato Norma 43 (.n43) y genera
-#    un libro Excel (.xlsx) con los movimientos formateados.
+#    lee ficheros bancarios en formato Norma 43 (.n43) y genera
+#    libro(s) Excel (.xlsx) con los movimientos formateados.
 #
 #  Formato Norma 43 — tipos de registro:
 #    11  Cabecera de cuenta  (entidad, oficina, cuenta, fechas, saldo)
@@ -21,41 +21,40 @@
 #    - openpyxl       → generación del fichero Excel
 #    - Pillow (PIL)   → escalado de imagen (opcional; hay fallback)
 #
-#  Cambios respecto a v01:
-#    - Ancho de ventana ampliado a 1100px
-#    - Todos los elementos siempre visibles (sin pack_forget)
-#    - Botones y barra de progreso bajo el subtítulo
-#    - Nombre del Excel con recuadro, debajo de los datos de cabecera
-#    - Leyenda "Nombre del fichero Excel:" siempre visible
-#    - Altura de ventana calculada una sola vez al arrancar
+#  Cambios respecto a v02:
+#    - Selección múltiple de ficheros .n43
+#    - Opción para permitir cuentas diferentes
+#    - Opción para guardar cada cuenta en Excel separados
+#    - Mismo cuenta → movimientos encadenados en una sola hoja
+#    - Listbox para nombres de ficheros n43 (10 filas + scrollbar)
+#    - Listbox dinámico para nombres Excel en modo multi separado
+#    - Filtrado automático al mezclar cuentas sin permiso explícito
 #
 # ═══════════════════════════════════════════════════════════════════
 #
-#  ÍNDICE DE BLOQUES                                         Línea
+#  ÍNDICE DE BLOQUES                                         Aprox.
 #  ─────────────────────────────────────────────────────────────────
-#   1. Imports y carga condicional de Pillow ................   63
-#   2. read_n43_header()  — lectura de cabecera N43 ........   87
-#   3. fmt_saldo()        — formato numérico español .......  137
-#   4. parse_n43()        — parser completo N43 → Excel ....  153
-#      4a. Estilos y cabecera de la hoja ...................  182
-#      4b. Lectura línea a línea del fichero ...............  197
-#      4c. Escritura de filas con estilos alternados .......  255
-#      4d. Fila de totales y ajustes finales ...............  296
-#   5. Constantes de la GUI ................................  339
-#   6. run_gui()  — interfaz gráfica principal .............  349
-#      6a. Ventana y función de centrado ...................  387
-#      6b. Título y subtítulo ..............................  402
-#      6c. Botones y barra de progreso .....................  412
-#      6d. Ruta del fichero seleccionado ...................  439
-#      6e. Recuadro de datos de cabecera ...................  450
-#      6f. Recuadro nombre fichero Excel ...................  487
-#      6g. Pie de página ...................................  509
-#      6h. Variables de estado .............................  521
-#      6i. seleccionar()  — callback botón seleccionar .....  526
-#      6j. convertir()    — callback botón convertir .......  589
-#      6k. Imagen Caracolillo y crédito ....................  648
-#      6l. Cálculo del alto y arranque .....................  702
-#   7. Punto de entrada (__main__) .........................  716
+#   1. Imports y carga condicional de Pillow ................   65
+#   2. read_n43_header()  — lectura de cabecera N43 ........   89
+#   3. fmt_saldo()        — formato numérico español .......  139
+#   4. Funciones de parseo N43 → Excel
+#      _read_n43_rows()   — lectura encadenable ............  155
+#      _write_rows_to_sheet() — escritura con estilos .......  205
+#      _write_n43_sheet() — hoja simple ....................  295
+#      _write_combined_to_sheet() — hoja encadenada ........  305
+#      parse_n43()        — fichero único → Excel ...........  320
+#      parse_n43_combined() — misma cuenta → un Excel ......  330
+#      parse_n43_accounts() — varias cuentas → un Excel ....  345
+#   5. Constantes de la GUI ................................  370
+#   6. run_gui()  — interfaz gráfica principal .............  380
+#      6a-6g. Widgets principales ..........................  420
+#      6h. Variables de estado .............................  500
+#      6h-bis. Panel de configuración ......................  510
+#      6i. seleccionar() .................................  620
+#      6j. convertir() ...................................  710
+#      6k. Imagen Caracolillo y crédito ....................  810
+#      6l. Inicialización y arranque .......................  865
+#   7. Punto de entrada (__main__) .........................  880
 #
 # ═══════════════════════════════════════════════════════════════════
 
@@ -68,14 +67,12 @@ from tkinter import filedialog, messagebox, ttk
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from collections import OrderedDict
 from datetime import date
 import os
 import sys
 import winreg
 
-# Pillow se usa para escalar la imagen del caracolillo con calidad
-# (LANCZOS). Si no está instalado, se usa el subsample nativo de
-# tkinter como fallback (menor calidad pero funcional).
 try:
     from PIL import Image, ImageTk
     RESAMPLE = getattr(Image, "Resampling", Image).LANCZOS
@@ -106,7 +103,8 @@ def load_config() -> dict:
                 data[name] = val
             except FileNotFoundError:
                 pass
-        for name in ("auto_update_n43_dir", "auto_update_output_dir"):
+        for name in ("auto_update_n43_dir", "auto_update_output_dir",
+                     "multi_select", "multi_account", "separate_excel"):
             try:
                 val, _ = winreg.QueryValueEx(key, name)
                 data[name] = bool(val)
@@ -136,30 +134,6 @@ def save_config(data: dict):
 # ─────────────────────────────────────────────────────────────────
 
 def read_n43_header(path_n43: str) -> dict:
-    """
-    Lee los datos de cabecera de un fichero Norma 43.
-
-    Extrae información de dos tipos de registro:
-      - Registro 11 (cabecera de cuenta):
-            Pos  2-5   → Código entidad (4 dígitos)
-            Pos  6-9   → Código oficina (4 dígitos)
-            Pos 10-19  → Número de cuenta (10 dígitos)
-            Pos 20-25  → Fecha inicio (AAMMDD)
-            Pos 26-31  → Fecha fin    (AAMMDD)
-            Pos 32     → Signo saldo inicial (1=deudor, 2=acreedor)
-            Pos 33-46  → Saldo inicial en céntimos (14 dígitos)
-            Pos 47-49  → Código divisa (978=EUR)
-      - Registro 33 (cierre de cuenta):
-            Pos 58     → Signo saldo final
-            Pos 59-72  → Saldo final en céntimos (14 dígitos)
-
-    Args:
-        path_n43: Ruta al fichero .n43
-
-    Returns:
-        dict con claves: entidad, oficina, cuenta, fecha_ini (date),
-        fecha_fin (date), saldo_ini (float), divisa, saldo_fin (float)
-    """
     info = {"num_movimientos": 0}
     with open(path_n43, encoding="latin-1") as f:
         for linea in f:
@@ -188,48 +162,83 @@ def read_n43_header(path_n43: str) -> dict:
 # ─────────────────────────────────────────────────────────────────
 
 def fmt_saldo(valor: float) -> str:
-    """
-    Formatea un valor monetario al estilo español.
-    Ejemplo: 1234.50 → '1.234,50 €'
-
-    Usa un triple-replace para convertir la salida de f-string
-    (que usa coma para miles y punto para decimales en inglés)
-    al formato español (punto para miles, coma para decimales).
-    """
     return f"{valor:,.2f} €".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
 # ─────────────────────────────────────────────────────────────────
-#  4. PARSE_N43 — Parser completo del fichero N43 → Excel
+#  4. FUNCIONES DE PARSEO N43 → EXCEL
 # ─────────────────────────────────────────────────────────────────
 
-def parse_n43(path_n43: str, path_out: str) -> int:
+def _read_n43_rows(path_n43: str, state: dict = None) -> tuple:
     """
-    Lee un fichero Norma 43, extrae todos los movimientos y genera
-    un libro Excel (.xlsx) con formato profesional.
+    Lee movimientos de un fichero N43 con estado encadenable entre ficheros.
 
-    Columnas generadas:
-      Orden | Oficina | F.Operación | F.Valor | Importe |
-      Saldo | Documento | Referencia | RCM01..RCM05
-
-    Args:
-        path_n43: Ruta al fichero .n43 de entrada
-        path_out: Ruta del fichero .xlsx de salida
-
-    Returns:
-        Número de movimientos importados (registros tipo 22)
+    state: dict con claves 'saldo', 'num_orden', 'anualidad'.
+      - saldo=None → usa el saldo_ini del propio registro 11 (primer fichero).
+      - saldo=float → continúa acumulando desde ese valor (ficheros encadenados).
+    Devuelve (rows, state_actualizado).
     """
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Extracto"
+    if state is None:
+        state = {"saldo": None, "num_orden": 0, "anualidad": ""}
 
+    saldo_acum  = state["saldo"]
+    num_orden   = state["num_orden"]
+    anualidad   = state["anualidad"]
+    usar_propio = saldo_acum is None
+    rows        = []
+    current_row = None
+
+    with open(path_n43, encoding="latin-1") as f:
+        for linea in f:
+            reg = linea[:2]
+            if reg == "11" and usar_propio:
+                signo      = -1 if linea[32] == "1" else 1
+                saldo_acum = int(linea[33:47]) * signo * 0.01
+                usar_propio = False
+            elif reg == "22":
+                año = "20" + linea[10:12]
+                if linea[16:18] != anualidad:
+                    # Reiniciar numeración sólo cuando cambia el año (YY)
+                    if linea[16:18][:2] != anualidad[:2]:
+                        num_orden = 0
+                    anualidad = linea[16:18]
+                num_orden += 1
+                signo   = -1 if linea[27] == "1" else 1
+                importe = int(linea[28:42]) * signo * 0.01
+                saldo_acum += importe
+                current_row = [
+                    f"{año}{num_orden:06d}",
+                    linea[6:10].strip(),
+                    date(int("20" + linea[10:12]),
+                         int(linea[12:14]), int(linea[14:16])),
+                    date(int("20" + linea[16:18]),
+                         int(linea[18:20]), int(linea[20:22])),
+                    importe,
+                    round(saldo_acum, 2),
+                    linea[42:52].strip(),
+                    linea[52:102].strip(),
+                    "", "", "", "", ""
+                ]
+                rows.append(current_row)
+            elif reg == "23" and current_row:
+                idx = int(linea[2:4])
+                if 1 <= idx <= 5:
+                    current_row[7 + idx] = linea[4:79].strip()
+
+    state["saldo"]     = saldo_acum
+    state["num_orden"] = num_orden
+    state["anualidad"] = anualidad
+    return rows, state
+
+
+def _write_rows_to_sheet(ws, rows: list):
+    """Escribe en ws una lista de filas ya leídas, con cabecera y estilos completos."""
     headers = [
         "Orden", "Oficina", "F.Operación", "F.Valor", "Importe",
         "Saldo", "Documento", "Referencia",
         "RCM01", "RCM02", "RCM03", "RCM04", "RCM05"
     ]
 
-    # ── 4a. Estilos y cabecera de la hoja ────────────────────────
     header_fill  = PatternFill("solid", start_color="1F4E79", end_color="1F4E79")
     header_font  = Font(name="Arial", bold=True, color="FFFFFF", size=10)
     header_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -244,82 +253,15 @@ def parse_n43(path_n43: str, path_out: str) -> int:
         cell.alignment = header_align
         cell.border    = cell_border
 
-    # ── 4b. Lectura línea a línea del fichero ────────────────────
-    #
-    #  El saldo se calcula acumulativamente: parte del saldo inicial
-    #  (registro 11) y suma cada importe de movimiento (registro 22).
-    #
-    #  El campo "Orden" se construye como AÑO + número secuencial
-    #  de 6 dígitos, reiniciándose cuando cambia la anualidad de
-    #  la fecha de valor.
-    #
-    #  Los registros 23 contienen conceptos complementarios (RCM01
-    #  a RCM05). Se asocian al último movimiento leído.
-
-    rows, saldo_acum, num_orden = [], 0.0, 0
-    current_row = None
-    anualidad = ""
-
-    with open(path_n43, encoding="latin-1") as f:
-        for linea in f:
-            reg = linea[:2]
-
-            if reg == "11":
-                # Cabecera: obtener saldo inicial para acumular
-                signo = -1 if linea[32] == "1" else 1
-                saldo_acum = int(linea[33:47]) * signo * 0.01
-
-            elif reg == "22":
-                # Movimiento: extraer datos y acumular saldo
-                año = "20" + linea[10:12]
-                if linea[16:18] != anualidad:
-                    num_orden = 0
-                    anualidad = linea[16:18]
-                num_orden += 1
-                signo = -1 if linea[27] == "1" else 1
-                importe = int(linea[28:42]) * signo * 0.01
-                saldo_acum += importe
-                current_row = [
-                    f"{año}{num_orden:06d}",               # Orden
-                    linea[6:10].strip(),                    # Oficina origen
-                    date(int("20" + linea[10:12]),          # F.Operación
-                         int(linea[12:14]),
-                         int(linea[14:16])),
-                    date(int("20" + linea[16:18]),          # F.Valor
-                         int(linea[18:20]),
-                         int(linea[20:22])),
-                    importe,                                # Importe
-                    round(saldo_acum, 2),                   # Saldo acumulado
-                    linea[42:52].strip(),                   # Documento
-                    linea[52:102].strip(),                  # Referencia
-                    "", "", "", "", ""                      # RCM01..RCM05
-                ]
-                rows.append(current_row)
-
-            elif reg == "23" and current_row:
-                # Concepto complementario (1 a 5)
-                idx = int(linea[2:4])
-                if 1 <= idx <= 5:
-                    current_row[7 + idx] = linea[4:79].strip()
-
-    # ── 4c. Escritura de filas con estilos alternados ────────────
-    #
-    #  Filas pares: fondo azul claro (#EBF3FB)
-    #  Filas impares: fondo blanco
-    #  Formato de fecha: DD/MM/YYYY
-    #  Formato de importes: #,##0.00 € (negativos en rojo)
-    #  Formato de saldo: #,##0.00 € (siempre positivo en display)
-
     fill_even    = PatternFill("solid", start_color="EBF3FB", end_color="EBF3FB")
     fill_odd     = PatternFill("solid", start_color="FFFFFF", end_color="FFFFFF")
     font_data    = Font(name="Arial", size=9)
     align_center = Alignment(horizontal="center", vertical="center")
     align_right  = Alignment(horizontal="right",  vertical="center")
     align_left   = Alignment(horizontal="left",   vertical="center")
-
-    date_fmt  = "DD/MM/YYYY"
-    money_fmt = '#,##0.00 €;[RED]-#,##0.00 €'
-    money_pos = '#,##0.00 €'
+    date_fmt     = "DD/MM/YYYY"
+    money_fmt    = '#,##0.00 €;[RED]-#,##0.00 €'
+    money_pos    = '#,##0.00 €'
 
     for r_idx, row in enumerate(rows, 2):
         fill = fill_even if r_idx % 2 == 0 else fill_odd
@@ -328,29 +270,24 @@ def parse_n43(path_n43: str, path_out: str) -> int:
             cell.font   = font_data
             cell.fill   = fill
             cell.border = cell_border
-
-            if c_idx in (3, 4):          # Fechas
+            if c_idx in (3, 4):
                 cell.number_format = date_fmt
                 cell.alignment     = align_center
-            elif c_idx == 5:             # Importe (puede ser negativo)
+            elif c_idx == 5:
                 cell.number_format = money_fmt
                 cell.alignment     = align_right
-            elif c_idx == 6:             # Saldo
+            elif c_idx == 6:
                 cell.number_format = money_pos
                 cell.alignment     = align_right
-            elif c_idx in (1, 2, 7):     # Orden, Oficina, Documento
+            elif c_idx in (1, 2, 7):
                 cell.alignment = align_center
-            else:                        # Referencia, RCMs
+            else:
                 cell.alignment = align_left
 
-    # ── 4d. Fila de totales y ajustes finales ────────────────────
-
-    # Anchos de columna predefinidos
     col_widths = [14, 8, 12, 12, 14, 14, 12, 30, 25, 25, 25, 25, 25]
     for i, w in enumerate(col_widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
-    # Fila de totales con fondo azul y texto blanco
     last_data_row = len(rows) + 1
     total_row     = last_data_row + 1
     ws.row_dimensions[total_row].height = 20
@@ -366,33 +303,120 @@ def parse_n43(path_n43: str, path_out: str) -> int:
 
     ws.cell(row=total_row, column=1, value="TOTAL").alignment = \
         Alignment(horizontal="center")
-
-    # Suma de importes (fórmula Excel)
     ws.cell(row=total_row, column=5,
             value=f"=SUM(E2:E{last_data_row})").number_format = money_fmt
     ws.cell(row=total_row, column=5).alignment = align_right
-
-    # Saldo final = suma importes + saldo inicial
     ws.cell(row=total_row, column=6,
             value=f"=E{total_row}+{rows[0][5] - rows[0][4] if rows else 0:.2f}"
             ).number_format = money_pos
 
-    # Inmovilizar primera fila y activar autofiltro
-    ws.freeze_panes  = "A2"
+    ws.freeze_panes = "A2"
     ws.auto_filter.ref = f"A1:{get_column_letter(len(headers))}{last_data_row}"
 
-    wb.save(path_out)
+
+def _write_n43_sheet(ws, path_n43: str) -> int:
+    """Lee un único fichero N43 y lo escribe en ws. Devuelve nº de filas."""
+    rows, _ = _read_n43_rows(path_n43)
+    _write_rows_to_sheet(ws, rows)
     return len(rows)
+
+
+def _write_combined_to_sheet(ws, paths: list, infos: list = None) -> int:
+    """Varios ficheros de la misma cuenta → una hoja con saldo y numeración encadenados."""
+    # Ordenar por fecha_ini si tenemos infos
+    if infos and len(infos) == len(paths):
+        pairs = sorted(zip(paths, infos), key=lambda x: x[1]["fecha_ini"])
+        paths = [p for p, _ in pairs]
+
+    state = {"saldo": None, "num_orden": 0, "anualidad": ""}
+    all_rows = []
+    for path in paths:
+        rows, state = _read_n43_rows(path, state)
+        all_rows.extend(rows)
+
+    _write_rows_to_sheet(ws, all_rows)
+    return len(all_rows)
+
+
+def parse_n43(path_n43: str, path_out: str) -> int:
+    """Fichero único → Excel."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Extracto"
+    count = _write_n43_sheet(ws, path_n43)
+    wb.save(path_out)
+    return count
+
+
+def parse_n43_combined(paths: list, path_out: str, infos: list = None) -> int:
+    """Varios ficheros de la misma cuenta → un Excel, una hoja, movimientos encadenados."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Extracto"
+    count = _write_combined_to_sheet(ws, paths, infos)
+    wb.save(path_out)
+    return count
+
+
+def parse_n43_accounts(groups: OrderedDict, path_out: str) -> dict:
+    """
+    Varias cuentas → un Excel con una hoja por cuenta.
+    groups: OrderedDict { cuenta: {"paths": [...], "infos": [...]} }
+    Devuelve {cuenta: nº_filas}.
+    """
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    results = {}
+
+    for cuenta, grp in groups.items():
+        paths = grp["paths"]
+        infos = grp["infos"]
+        if infos:
+            first_info = min(infos, key=lambda x: x["fecha_ini"])
+            sheet_name = f"Cta{cuenta[-4:]}_{first_info['fecha_ini'].strftime('%m%y')}"
+        else:
+            sheet_name = f"Cta{cuenta[-4:]}"
+        sheet_name = sheet_name[:31]
+
+        existing = [s.title for s in wb.worksheets]
+        if sheet_name in existing:
+            base, n = sheet_name[:28], 2
+            while f"{base}_{n}" in existing:
+                n += 1
+            sheet_name = f"{base}_{n}"
+
+        ws = wb.create_sheet(title=sheet_name)
+        if len(paths) == 1:
+            count = _write_n43_sheet(ws, paths[0])
+        else:
+            count = _write_combined_to_sheet(ws, paths, infos)
+        results[cuenta] = count
+
+    wb.save(path_out)
+    return results
+
+
+def _excel_name_for_group(cuenta: str, infos: list) -> str:
+    """Genera el nombre ENTIDAD_CUENTA4_FECHAINI_FECHAFIN.xlsx para un grupo."""
+    first = min(infos, key=lambda x: x["fecha_ini"])
+    last  = max(infos, key=lambda x: x["fecha_fin"])
+    return (f"{first['entidad']}_{cuenta[-4:]}_"
+            f"{first['fecha_ini'].strftime('%Y%m%d')}_"
+            f"{last['fecha_fin'].strftime('%Y%m%d')}.xlsx")
 
 
 # ─────────────────────────────────────────────────────────────────
 #  5. CONSTANTES DE LA GUI
 # ─────────────────────────────────────────────────────────────────
 
-WIN_W          = 1100    # Ancho fijo de la ventana (px)
-GAP            = 20      # Separación uniforme entre elementos (px)
-BOTTOM_RESERVE = 75      # Reserva inferior: caracolillo (40px)
-                         #   + crédito (~15px) + margen (20px)
+WIN_W          = 1100
+GAP            = 20
+BOTTOM_RESERVE = 75
+
+# Colores para checkboxes según estado
+CB_FG_ON   = "#1a1a1a"   # texto activo (negro)
+CB_FG_OFF  = "#BBBBBB"   # texto desactivado (gris claro)
+CB_SEL_CLR = "#D0E8F7"   # fondo del cuadrito cuando está marcado
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -400,32 +424,6 @@ BOTTOM_RESERVE = 75      # Reserva inferior: caracolillo (40px)
 # ─────────────────────────────────────────────────────────────────
 
 def run_gui():
-    """
-    Construye y ejecuta la interfaz gráfica del conversor.
-
-    Disposición de elementos (de arriba a abajo):
-      1. Barra de título (azul oscuro)
-      2. Subtítulo con instrucciones
-      3. Botones (seleccionar + convertir) y barra de progreso
-      4. Ruta del fichero .n43 seleccionado (frame sunken)
-      5. Datos de cabecera N43 (LabelFrame con grid 2×8)
-      6. Nombre del fichero Excel generado (frame sunken)
-      7. Pie de página (texto gris)
-      8. Espaciador + Caracolillo y crédito (esquina inf-dcha)
-
-    Todos los elementos están siempre visibles. Los campos de
-    datos se rellenan al seleccionar un fichero, y el nombre
-    del Excel se muestra tras la conversión.
-
-    Ciclo de estados de los botones:
-      ┌──────────────────┬─────────────────────────┬───────────────────┐
-      │ Estado           │ Botón Seleccionar       │ Botón Convertir   │
-      ├──────────────────┼─────────────────────────┼───────────────────┤
-      │ Inicio           │ #2E75B6 "Seleccionar…"  │ disabled          │
-      │ Fichero cargado  │ #8FACCF "Cambiar…"      │ #70AD47 enabled   │
-      │ Tras convertir   │ #2E75B6 "Seleccionar…"  │ #A8D08D disabled  │
-      └──────────────────┴─────────────────────────┴───────────────────┘
-    """
     BG = "#F0F4F8"
     año_actual = date.today().year
 
@@ -434,10 +432,13 @@ def run_gui():
     root.resizable(False, False)
     root.configure(bg=BG)
 
+    multi_select_var   = tk.BooleanVar(value=False)
+    multi_account_var  = tk.BooleanVar(value=False)
+    separate_excel_var = tk.BooleanVar(value=False)
+
     # ── 6a. Ventana y función de centrado ────────────────────────
 
     def center_window(w, h):
-        """Centra la ventana en la pantalla según resolución."""
         sx = root.winfo_screenwidth()
         sy = root.winfo_screenheight()
         x  = (sx - w) // 2
@@ -457,16 +458,13 @@ def run_gui():
 
     frame_body   = tk.Frame(root, bg=BG)
     frame_body.pack(fill="x")
-    frame_config = tk.Frame(root, bg=BG)   # oculto hasta activar configuración
+    frame_config = tk.Frame(root, bg=BG)
 
     tk.Label(frame_body, text="Selecciona un fichero con extensión .n43 "
                         "para convertirlo a Excel .xlsx",
              font=("Arial", 14), bg=BG, fg="#333333").pack(pady=(GAP, 0))
 
     # ── 6c. Botones y barra de progreso ──────────────────────────
-    #    Colocados justo debajo del subtítulo.
-    #    Separación de 50px entre ambos botones (25px + 25px).
-    #    Los comandos se asignan más abajo, tras definir las funciones.
 
     frame_btns = tk.Frame(frame_body, bg=BG)
     frame_btns.pack(pady=(GAP, 0))
@@ -490,26 +488,29 @@ def run_gui():
                                length=700, mode="indeterminate")
     progress.pack(pady=(GAP, 0))
 
-    # ── 6d. Ruta del fichero seleccionado ────────────────────────
-    #    Frame sunken que muestra el nombre del fichero .n43.
-    #    Texto inicial: "Ningún fichero seleccionado"
+    # ── 6d. Listbox ficheros n43 (10 filas + scrollbar) ──────────
 
-    path_var = tk.StringVar(value="Ningún fichero seleccionado")
     frame_path = tk.Frame(frame_body, bg="#E2EAF4", bd=1, relief="sunken")
     frame_path.pack(fill="x", padx=30, pady=(GAP, 0))
     frame_path_inner = tk.Frame(frame_path, bg="#E2EAF4")
     frame_path_inner.pack(fill="x", padx=18, pady=6)
     tk.Label(frame_path_inner, text="Nombre del fichero Norma-43:",
              font=("Arial", 12, "bold"), bg="#E2EAF4", fg="#555555",
-             anchor="w").pack(side="left")
-    tk.Label(frame_path_inner, textvariable=path_var, font=("Arial", 12),
-             bg="#E2EAF4", fg="#333333", anchor="w", padx=8).pack(side="left", fill="x", expand=True)
+             anchor="w").pack(anchor="w")
+
+    frame_path_lbx = tk.Frame(frame_path_inner, bg="#E2EAF4")
+    frame_path_lbx.pack(fill="x", pady=(4, 0))
+    path_scrollbar = tk.Scrollbar(frame_path_lbx, orient="vertical")
+    path_listbox = tk.Listbox(frame_path_lbx, height=10,
+                              font=("Arial", 11), bg="white", fg="#333333",
+                              selectmode="extended", bd=1, relief="sunken",
+                              yscrollcommand=path_scrollbar.set,
+                              activestyle="none")
+    path_scrollbar.config(command=path_listbox.yview)
+    path_scrollbar.pack(side="right", fill="y")
+    path_listbox.pack(side="left", fill="x", expand=True)
 
     # ── 6e. Recuadro de datos de cabecera ────────────────────────
-    #    LabelFrame con grid de 2 filas, siempre visible:
-    #      Fila 0: Entidad | Oficina | Cuenta
-    #      Fila 1: Fecha inicio | Saldo inicial | Fecha fin | Saldo final
-    #    Los valores muestran "—" hasta que se selecciona un fichero.
 
     frame_header = tk.LabelFrame(
         frame_body, text=" Datos de cabecera ",
@@ -519,7 +520,6 @@ def run_gui():
 
     header_labels = {}
     campos = [
-        # (etiqueta,         clave,              fila, columna)
         ("Entidad:",       "entidad",          0, 0),
         ("Oficina:",       "oficina",          0, 2),
         ("Cuenta:",        "cuenta",           0, 4),
@@ -539,73 +539,66 @@ def run_gui():
         lbl.grid(row=row, column=col + 1, sticky="w")
         header_labels[key] = lbl
 
-    # Distribuir columnas de valores equitativamente
     for c in (1, 3, 5, 7):
         frame_header.columnconfigure(c, weight=1)
 
-    # ── 6f. Recuadro nombre fichero Excel ────────────────────────
-    #    Frame sunken (mismo estilo que la ruta del .n43).
-    #    La leyenda "Nombre del fichero Excel:" siempre visible.
-    #    El valor se rellena tras la conversión y se limpia al
-    #    seleccionar otro fichero.
+    # ── 6f. Recuadro nombre fichero(s) Excel ─────────────────────
 
     frame_excel = tk.Frame(frame_body, bg="#E2EAF4", bd=1, relief="sunken")
     frame_excel.pack(fill="x", padx=30, pady=(GAP, 0))
-
-    excel_name_var = tk.StringVar(value="")
     frame_excel_inner = tk.Frame(frame_excel, bg="#E2EAF4")
     frame_excel_inner.pack(fill="x", padx=18, pady=6)
-
     tk.Label(frame_excel_inner, text="Nombre del fichero Excel:",
              font=("Arial", 12, "bold"), bg="#E2EAF4", fg="#555555",
-             anchor="w").pack(side="left")
+             anchor="w").pack(anchor="w")
 
-    entry_excel_name = tk.Entry(frame_excel_inner, textvariable=excel_name_var,
+    frame_excel_single = tk.Frame(frame_excel_inner, bg="#E2EAF4")
+    excel_name_var = tk.StringVar(value="")
+    entry_excel_name = tk.Entry(frame_excel_single, textvariable=excel_name_var,
                                 font=("Arial", 12), bg="white", fg="#333333",
                                 relief="sunken", bd=1, insertbackground="#333333",
                                 state="disabled")
-    entry_excel_name.pack(side="left", fill="x", expand=True, padx=(8, 0))
+    entry_excel_name.pack(fill="x", pady=(4, 0))
+    frame_excel_single.pack(fill="x")
+
+    frame_excel_multi = tk.Frame(frame_excel_inner, bg="#E2EAF4")
+    excel_scrollbar = tk.Scrollbar(frame_excel_multi, orient="vertical")
+    excel_listbox = tk.Listbox(frame_excel_multi, height=10,
+                               font=("Arial", 11), bg="white", fg="#333333",
+                               bd=1, relief="sunken",
+                               yscrollcommand=excel_scrollbar.set,
+                               activestyle="none")
+    excel_scrollbar.config(command=excel_listbox.yview)
+    excel_scrollbar.pack(side="right", fill="y")
+    excel_listbox.pack(side="left", fill="x", expand=True)
+
+    def update_excel_display():
+        if separate_excel_var.get():
+            frame_excel_single.pack_forget()
+            frame_excel_multi.pack(fill="x", pady=(4, 0))
+        else:
+            frame_excel_multi.pack_forget()
+            frame_excel_single.pack(fill="x")
+        root.update_idletasks()
+        root.geometry(f"{WIN_W}x{root.winfo_reqheight()}")
 
     # ── 6g. Pie de página ────────────────────────────────────────
 
-    lbl_footer = tk.Label(frame_body,
+    tk.Label(frame_body,
              text="El Excel se guarda en la misma carpeta que el fichero .n43",
-             font=("Arial", 14), bg=BG, fg="#888888")
-    lbl_footer.pack(pady=(GAP, 0))
-
-    spacer = tk.Frame(frame_body, bg=BG, height=BOTTOM_RESERVE)
-    spacer.pack()
+             font=("Arial", 14), bg=BG, fg="#888888").pack(pady=(GAP, 0))
+    tk.Frame(frame_body, bg=BG, height=BOTTOM_RESERVE).pack()
 
     # ── 6h. Variables de estado ──────────────────────────────────
 
-    selected_path   = {"value": None}
-    n43_header      = {"info": None, "excel_name": None}
+    selected_paths  = []
+    n43_header      = {"infos": [], "groups": OrderedDict(), "excel_names": []}
     n43_dir_var     = tk.StringVar()
     output_dir_var  = tk.StringVar()
     auto_n43_var    = tk.BooleanVar(value=True)
     auto_output_var = tk.BooleanVar(value=True)
 
-    # ── 6h-bis. Funciones y panel de configuración ───────────────
-
-    def cambiar_dir(var, config_key):
-        d = filedialog.askdirectory(title="Seleccionar carpeta",
-                                    initialdir=var.get() or "")
-        if d:
-            var.set(d)
-            save_config({config_key: d})
-
-    def show_body():
-        frame_config.pack_forget()
-        frame_body.pack(fill="x")
-
-    def show_config():
-        cfg = load_config()
-        n43_dir_var.set(cfg.get("last_dir", ""))
-        output_dir_var.set(cfg.get("last_output_dir", ""))
-        auto_n43_var.set(cfg.get("auto_update_n43_dir", True))
-        auto_output_var.set(cfg.get("auto_update_output_dir", True))
-        frame_body.pack_forget()
-        frame_config.pack(fill="x")
+    # ── 6h-bis. Panel de configuración ───────────────────────────
 
     tk.Label(frame_config, text="⚙  Configuración",
              font=("Arial", 16, "bold"), bg=BG, fg="#1F4E79"
@@ -625,8 +618,9 @@ def run_gui():
               command=lambda: cambiar_dir(n43_dir_var, "last_dir")
               ).pack(side="left", padx=(8, 0))
     tk.Checkbutton(frm_n43, text="Actualizar Ruta con la última seleccionada",
-                   variable=auto_n43_var, bg=BG, fg="#555555",
+                   variable=auto_n43_var, bg=BG, fg="#333333",
                    activebackground=BG, font=("Arial", 10),
+                   selectcolor=CB_SEL_CLR,
                    command=lambda: save_config({"auto_update_n43_dir": auto_n43_var.get()})
                    ).pack(anchor="w", pady=(4, 0))
 
@@ -644,189 +638,433 @@ def run_gui():
               command=lambda: cambiar_dir(output_dir_var, "last_output_dir")
               ).pack(side="left", padx=(8, 0))
     tk.Checkbutton(frm_out, text="Actualizar Ruta con la última seleccionada",
-                   variable=auto_output_var, bg=BG, fg="#555555",
+                   variable=auto_output_var, bg=BG, fg="#333333",
                    activebackground=BG, font=("Arial", 10),
+                   selectcolor=CB_SEL_CLR,
                    command=lambda: save_config({"auto_update_output_dir": auto_output_var.get()})
                    ).pack(anchor="w", pady=(4, 0))
+
+    # LabelFrame de opciones de selección
+    frm_sel = tk.LabelFrame(frame_config, text="  Opciones de selección  ",
+                             font=("Arial", 12, "bold"), bg=BG, fg="#333333",
+                             bd=2, relief="groove", padx=10, pady=10)
+    frm_sel.pack(fill="x", padx=30, pady=(0, GAP))
+
+    cb_multi_select = tk.Checkbutton(
+        frm_sel,
+        text="Selección múltiple de ficheros",
+        variable=multi_select_var,
+        bg=BG, fg=CB_FG_ON,
+        activebackground=BG, activeforeground=CB_FG_ON,
+        disabledforeground=CB_FG_OFF,
+        selectcolor=CB_SEL_CLR,
+        font=("Arial", 11, "bold"),
+        command=lambda: on_multi_select_toggle())
+    cb_multi_select.pack(anchor="w", pady=(0, 4))
+
+    # Separador visual entre nivel 1 y nivel 2
+    tk.Frame(frm_sel, bg="#CCCCCC", height=1).pack(fill="x", padx=8, pady=(0, 6))
+
+    cb_multi_account = tk.Checkbutton(
+        frm_sel,
+        text="Permitir cuentas diferentes",
+        variable=multi_account_var,
+        bg=BG, fg=CB_FG_OFF,
+        activebackground=BG, activeforeground=CB_FG_ON,
+        disabledforeground=CB_FG_OFF,
+        selectcolor=CB_SEL_CLR,
+        font=("Arial", 11),
+        state="disabled",
+        command=lambda: on_multi_account_toggle())
+    cb_multi_account.pack(anchor="w", padx=(20, 0), pady=(0, 4))
+
+    cb_separate_excel = tk.Checkbutton(
+        frm_sel,
+        text="Guardar cada cuenta en un Excel separado",
+        variable=separate_excel_var,
+        bg=BG, fg=CB_FG_OFF,
+        activebackground=BG, activeforeground=CB_FG_ON,
+        disabledforeground=CB_FG_OFF,
+        selectcolor=CB_SEL_CLR,
+        font=("Arial", 11),
+        state="disabled",
+        command=lambda: on_separate_excel_toggle())
+    cb_separate_excel.pack(anchor="w", padx=(44, 0))
 
     tk.Button(frame_config, text="✅  Cerrar configuración",
               font=("Arial", 13, "bold"), bg="#70AD47", fg="white",
               activebackground="#507E35", bd=0, padx=30, pady=14,
-              cursor="hand2", command=show_body
+              cursor="hand2", command=lambda: show_body()
               ).pack(pady=(GAP, 0))
-
     tk.Frame(frame_config, bg=BG, height=BOTTOM_RESERVE).pack()
 
+    # ── Funciones del panel de configuración ─────────────────────
+
+    def cambiar_dir(var, config_key):
+        d = filedialog.askdirectory(title="Seleccionar carpeta",
+                                    initialdir=var.get() or "")
+        if d:
+            var.set(d)
+            save_config({config_key: d})
+
+    def show_body():
+        frame_config.pack_forget()
+        frame_body.pack(fill="x")
+
+    def _refresh_cascade():
+        """Actualiza estado visual y funcional de los checkboxes dependientes."""
+        if multi_select_var.get():
+            cb_multi_account.config(state="normal", fg=CB_FG_ON)
+            if multi_account_var.get():
+                cb_separate_excel.config(state="normal", fg=CB_FG_ON)
+            else:
+                cb_separate_excel.config(state="disabled", fg=CB_FG_OFF)
+        else:
+            cb_multi_account.config(state="disabled", fg=CB_FG_OFF)
+            cb_separate_excel.config(state="disabled", fg=CB_FG_OFF)
+
+    def show_config():
+        cfg = load_config()
+        n43_dir_var.set(cfg.get("last_dir", ""))
+        output_dir_var.set(cfg.get("last_output_dir", ""))
+        auto_n43_var.set(cfg.get("auto_update_n43_dir", True))
+        auto_output_var.set(cfg.get("auto_update_output_dir", True))
+        multi_select_var.set(cfg.get("multi_select", False))
+        multi_account_var.set(cfg.get("multi_account", False))
+        separate_excel_var.set(cfg.get("separate_excel", False))
+        _refresh_cascade()
+        frame_body.pack_forget()
+        frame_config.pack(fill="x")
+
+    def on_multi_select_toggle():
+        if not multi_select_var.get():
+            multi_account_var.set(False)
+            separate_excel_var.set(False)
+            update_excel_display()
+        _refresh_cascade()
+        save_config({
+            "multi_select":   multi_select_var.get(),
+            "multi_account":  multi_account_var.get(),
+            "separate_excel": separate_excel_var.get(),
+        })
+
+    def on_multi_account_toggle():
+        if not multi_account_var.get():
+            separate_excel_var.set(False)
+            update_excel_display()
+        _refresh_cascade()
+        save_config({
+            "multi_account":  multi_account_var.get(),
+            "separate_excel": separate_excel_var.get(),
+        })
+
+    def on_separate_excel_toggle():
+        save_config({"separate_excel": separate_excel_var.get()})
+        update_excel_display()
+        # Actualizar nombres en listbox si ya hay ficheros cargados
+        _refresh_excel_names()
+
+    def _refresh_excel_names():
+        """Recalcula y muestra los nombres Excel según la configuración actual."""
+        groups = n43_header.get("groups", OrderedDict())
+        excel_names = n43_header.get("excel_names", [])
+        if not groups:
+            return
+        if separate_excel_var.get():
+            excel_listbox.delete(0, "end")
+            for name in excel_names:
+                excel_listbox.insert("end", name)
+        else:
+            if len(groups) == 1:
+                excel_name_var.set(excel_names[0] if excel_names else "")
+                entry_excel_name.config(state="normal")
+            else:
+                first_info = list(groups.values())[0]["infos"][0]
+                excel_name_var.set(f"{first_info['entidad']}_multi.xlsx")
+                entry_excel_name.config(state="normal")
+
     # ── 6i. seleccionar() — callback del botón seleccionar ───────
-    #
-    #  Flujo:
-    #    1. Abrir diálogo de selección de fichero (.n43)
-    #    2. Actualizar la ruta mostrada en pantalla
-    #    3. Cambiar estado visual del botón a "Cambiar…" (atenuado)
-    #    4. Restaurar botón convertir (por si venía de conversión)
-    #    5. Limpiar nombre del Excel (se mostrará tras convertir)
-    #    6. Leer cabecera del N43 y rellenar el grid
-    #    7. Calcular el nombre del fichero Excel de salida
 
     def seleccionar():
         cfg = load_config()
-        p = filedialog.askopenfilename(
-            title="Selecciona el fichero N43",
-            initialdir=cfg.get("last_dir", ""),
-            filetypes=[("Ficheros N43", "*.n43 *.N43"),
-                       ("Todos los ficheros", "*.*")]
-        )
-        if p:
-            # 1-2. Guardar ruta y mostrar nombre
-            selected_path["value"] = p
-            path_var.set(os.path.basename(p))
-            if cfg.get("auto_update_n43_dir", True):
-                save_config({"last_dir": os.path.dirname(p)})
 
-            # 3. Cambiar texto del botón seleccionar (mismo fondo, texto amarillo)
+        if multi_select_var.get():
+            paths = list(filedialog.askopenfilenames(
+                title="Selecciona ficheros N43",
+                initialdir=cfg.get("last_dir", ""),
+                filetypes=[("Ficheros N43", "*.n43 *.N43"),
+                           ("Todos los ficheros", "*.*")]
+            ))
+        else:
+            p = filedialog.askopenfilename(
+                title="Selecciona el fichero N43",
+                initialdir=cfg.get("last_dir", ""),
+                filetypes=[("Ficheros N43", "*.n43 *.N43"),
+                           ("Todos los ficheros", "*.*")]
+            )
+            paths = [p] if p else []
+
+        if not paths:
+            return
+
+        # Leer todas las cabeceras
+        try:
+            infos = [read_n43_header(p) for p in paths]
+        except Exception as e:
+            messagebox.showerror("Error al leer cabeceras", str(e))
+            return
+
+        # Filtrar automáticamente si hay cuentas mezcladas sin permiso
+        if len(paths) > 1 and not multi_account_var.get():
+            primera_cuenta = infos[0]["cuenta"]
+            descartados = [(p, i) for p, i in zip(paths, infos)
+                           if i["cuenta"] != primera_cuenta]
+            if descartados:
+                n_desc = len(descartados)
+                ctas_desc = ", ".join(
+                    sorted(set(i["cuenta"][-4:] for _, i in descartados)))
+                messagebox.showinfo(
+                    "Ficheros filtrados automáticamente",
+                    f"Se han excluido {n_desc} fichero(s) porque pertenecen\n"
+                    f"a cuentas distintas a la primera seleccionada "
+                    f"({primera_cuenta[-4:]}).\n\n"
+                    f"Cuentas excluidas: {ctas_desc}\n\n"
+                    f"Activa 'Permitir cuentas diferentes' en la configuración\n"
+                    f"si deseas trabajar con varias cuentas a la vez.")
+                pairs = [(p, i) for p, i in zip(paths, infos)
+                         if i["cuenta"] == primera_cuenta]
+                paths = [p for p, _ in pairs]
+                infos = [i for _, i in pairs]
+
+        selected_paths.clear()
+        selected_paths.extend(paths)
+
+        if cfg.get("auto_update_n43_dir", True):
+            save_config({"last_dir": os.path.dirname(paths[0])})
+
+        # Listbox de ficheros n43
+        path_listbox.delete(0, "end")
+        for p in paths:
+            path_listbox.insert("end", os.path.basename(p))
+
+        if len(paths) == 1:
             btn_seleccionar.config(text="📂  Cambiar el fichero .n43",
                                    fg="#FFE066")
+        else:
+            btn_seleccionar.config(
+                text=f"📂  Cambiar los {len(paths)} ficheros .n43",
+                fg="#FFE066")
+        btn_convertir.config(state="normal", bg="#70AD47")
 
-            # 4. Restaurar botón convertir
-            btn_convertir.config(state="normal", bg="#70AD47")
+        # Limpiar display Excel
+        excel_name_var.set("")
+        entry_excel_name.config(state="disabled")
+        excel_listbox.delete(0, "end")
 
-            # 5. Limpiar nombre del Excel y deshabilitar entry mientras se lee
-            excel_name_var.set("")
-            entry_excel_name.config(state="disabled")
+        # Agrupar por cuenta (OrderedDict mantiene orden de aparición)
+        groups = OrderedDict()
+        for path, info in zip(paths, infos):
+            cuenta = info["cuenta"]
+            if cuenta not in groups:
+                groups[cuenta] = {"paths": [], "infos": []}
+            groups[cuenta]["paths"].append(path)
+            groups[cuenta]["infos"].append(info)
 
-            # 6-7. Leer cabecera y generar nombre Excel
-            try:
-                info = read_n43_header(p)
-                n43_header["info"] = info
+        # Ordenar cada grupo por fecha_ini
+        for g in groups.values():
+            pairs = sorted(zip(g["paths"], g["infos"]),
+                           key=lambda x: x[1]["fecha_ini"])
+            g["paths"] = [p for p, _ in pairs]
+            g["infos"] = [i for _, i in pairs]
 
-                header_labels["entidad"].config(text=info["entidad"])
-                header_labels["oficina"].config(text=info["oficina"])
-                header_labels["cuenta"].config(text=info["cuenta"])
+        n43_header["infos"]  = infos
+        n43_header["groups"] = groups
+
+        # Generar nombres Excel (uno por cuenta)
+        excel_names = [_excel_name_for_group(c, g["infos"])
+                       for c, g in groups.items()]
+        n43_header["excel_names"] = excel_names
+
+        # Actualizar cabecera resumen
+        try:
+            all_infos = infos
+            if len(groups) == 1:
+                cuenta   = list(groups.keys())[0]
+                grp_infos = list(groups.values())[0]["infos"]
+                header_labels["entidad"].config(text=grp_infos[0]["entidad"])
+                header_labels["oficina"].config(text=grp_infos[0]["oficina"])
+                header_labels["cuenta"].config(text=cuenta)
                 header_labels["num_movimientos"].config(
-                    text=str(info["num_movimientos"]))
+                    text=str(sum(i["num_movimientos"] for i in grp_infos)))
                 header_labels["fecha_ini"].config(
-                    text=info["fecha_ini"].strftime("%d/%m/%Y"))
+                    text=min(i["fecha_ini"] for i in grp_infos).strftime("%d/%m/%Y"))
                 header_labels["fecha_fin"].config(
-                    text=info["fecha_fin"].strftime("%d/%m/%Y"))
-                header_labels["saldo_ini"].config(
-                    text=fmt_saldo(info["saldo_ini"]))
-                header_labels["saldo_fin"].config(
-                    text=fmt_saldo(info.get("saldo_fin", 0)))
+                    text=max(i["fecha_fin"] for i in grp_infos).strftime("%d/%m/%Y"))
+                # Saldo sólo tiene sentido para un único fichero
+                if len(grp_infos) == 1:
+                    header_labels["saldo_ini"].config(
+                        text=fmt_saldo(grp_infos[0]["saldo_ini"]))
+                    header_labels["saldo_fin"].config(
+                        text=fmt_saldo(grp_infos[0].get("saldo_fin", 0)))
+                else:
+                    header_labels["saldo_ini"].config(text="—")
+                    header_labels["saldo_fin"].config(text="—")
+            else:
+                ctas = list(groups.keys())
+                resumen = ", ".join(c[-4:] for c in ctas[:4])
+                if len(ctas) > 4:
+                    resumen += "…"
+                header_labels["entidad"].config(text=all_infos[0]["entidad"])
+                header_labels["oficina"].config(text="—")
+                header_labels["cuenta"].config(text=resumen)
+                header_labels["num_movimientos"].config(
+                    text=str(sum(i["num_movimientos"] for i in all_infos)))
+                header_labels["fecha_ini"].config(
+                    text=min(i["fecha_ini"] for i in all_infos).strftime("%d/%m/%Y"))
+                header_labels["fecha_fin"].config(
+                    text=max(i["fecha_fin"] for i in all_infos).strftime("%d/%m/%Y"))
+                header_labels["saldo_ini"].config(text="—")
+                header_labels["saldo_fin"].config(text="—")
+        except Exception:
+            for lbl in header_labels.values():
+                lbl.config(text="—")
 
-                # Nombre: ENTIDAD_CUENTA(4últ)_FECHAINI_FECHAFIN.xlsx
-                excel_name = (
-                    f"{info['entidad']}_"
-                    f"{info['cuenta'][-4:]}_"
-                    f"{info['fecha_ini'].strftime('%Y%m%d')}_"
-                    f"{info['fecha_fin'].strftime('%Y%m%d')}"
-                    f".xlsx"
-                )
-                n43_header["excel_name"] = excel_name
-                excel_name_var.set(excel_name)
-                entry_excel_name.config(state="normal")
-            except Exception:
-                for lbl in header_labels.values():
-                    lbl.config(text="—")
-                n43_header["info"] = None
-                n43_header["excel_name"] = None
+        _refresh_excel_names()
 
     # ── 6j. convertir() — callback del botón convertir ───────────
-    #
-    #  Flujo:
-    #    1. Determinar ruta de salida (nombre personalizado o default)
-    #    2. Iniciar barra de progreso
-    #    3. Ejecutar parse_n43()
-    #    4. Mostrar mensaje de éxito con nº de movimientos
-    #    5. Actualizar estados de botones (seleccionar restaurado,
-    #       convertir atenuado)
-    #    6. Mostrar nombre del fichero Excel generado
-    #    7. Abrir la carpeta del fichero en el explorador
 
     def convertir():
-        if not selected_path["value"]:
+        if not selected_paths:
             return
-        p_in = selected_path["value"]
 
-        # 1. Nombre propuesto desde el Entry
-        excel_name = excel_name_var.get().strip()
-        if not excel_name:
-            excel_name = os.path.basename(os.path.splitext(p_in)[0]) + ".xlsx"
-        elif not excel_name.lower().endswith(".xlsx"):
-            excel_name += ".xlsx"
+        cfg    = load_config()
+        groups = n43_header.get("groups", OrderedDict())
+        if not groups:
+            return
 
-        # 2. Diálogo "Guardar como" con la última carpeta de salida recordada
-        cfg = load_config()
-        p_out = filedialog.asksaveasfilename(
-            title="Guardar Excel como...",
-            initialdir=cfg.get("last_output_dir", os.path.dirname(p_in)),
-            initialfile=excel_name,
-            defaultextension=".xlsx",
-            filetypes=[("Excel", "*.xlsx"), ("Todos los ficheros", "*.*")]
-        )
-        if not p_out:
-            return  # Usuario canceló
+        n_accounts = len(groups)
 
-        # 3. Barra de progreso
-        progress.start(10)
-        root.update()
+        if not separate_excel_var.get():
+            # ── Un único fichero Excel ────────────────────────────
+            if n_accounts == 1:
+                cuenta    = list(groups.keys())[0]
+                grp       = list(groups.values())[0]
+                excel_name = excel_name_var.get().strip()
+                if not excel_name:
+                    excel_name = _excel_name_for_group(cuenta, grp["infos"])
+                elif not excel_name.lower().endswith(".xlsx"):
+                    excel_name += ".xlsx"
+            else:
+                excel_name = excel_name_var.get().strip() or "extracto_multi.xlsx"
+                if not excel_name.lower().endswith(".xlsx"):
+                    excel_name += ".xlsx"
 
-        try:
-            # 4. Conversión
-            parse_n43(p_in, p_out)
-            progress.stop()
-            progress["value"] = 100
+            p_out = filedialog.asksaveasfilename(
+                title="Guardar Excel como...",
+                initialdir=cfg.get("last_output_dir",
+                                   os.path.dirname(selected_paths[0])),
+                initialfile=excel_name,
+                defaultextension=".xlsx",
+                filetypes=[("Excel", "*.xlsx"),
+                           ("Todos los ficheros", "*.*")]
+            )
+            if not p_out:
+                return
 
-            # 5. Recordar la carpeta de salida usada (si auto-update activo)
-            if cfg.get("auto_update_output_dir", True):
-                save_config({"last_output_dir": os.path.dirname(p_out)})
+            progress.start(10)
+            root.update()
+            try:
+                if n_accounts == 1:
+                    grp = list(groups.values())[0]
+                    if len(grp["paths"]) == 1:
+                        parse_n43(grp["paths"][0], p_out)
+                    else:
+                        parse_n43_combined(grp["paths"], p_out, grp["infos"])
+                else:
+                    parse_n43_accounts(groups, p_out)
 
-            # 6. Mensaje de éxito
-            messagebox.showinfo(
-                "✅ Conversión completada",
-                f"Se ha importado el fichero:\n"
-                f"{os.path.basename(p_in)}\n"
-                f"\n"
-                f"1º. He interpretado su contenido,\n"
-                f"2º. Lo he convertido en una Tabla,\n"
-                f"3º. Y guardado en la ruta:\n"
-                f"{os.path.dirname(p_out)}\n"
-                f"\n"
-                f"Con el nombre:\n"
-                f"{os.path.basename(p_out)}")
+                progress.stop()
+                progress["value"] = 100
 
-            # 7. Actualizar estados de botones
-            btn_seleccionar.config(
-                text="📂  Seleccionar otro fichero .n43", fg="white")
-            btn_convertir.config(state="disabled", bg="#A8D08D")
+                if cfg.get("auto_update_output_dir", True):
+                    save_config({"last_output_dir": os.path.dirname(p_out)})
 
-            # 8. Mostrar nombre definitivo y bloquear entry hasta nueva selección
-            excel_name_var.set(os.path.basename(p_out))
-            entry_excel_name.config(state="disabled")
+                n_src = (os.path.basename(selected_paths[0])
+                         if len(selected_paths) == 1
+                         else f"{len(selected_paths)} ficheros")
+                messagebox.showinfo(
+                    "✅ Conversión completada",
+                    f"Se ha importado:\n{n_src}\n\n"
+                    f"1º. He interpretado su contenido,\n"
+                    f"2º. Lo he convertido en una Tabla,\n"
+                    f"3º. Y guardado en la ruta:\n"
+                    f"{os.path.dirname(p_out)}\n\n"
+                    f"Con el nombre:\n{os.path.basename(p_out)}")
 
-            # 9. Abrir carpeta en explorador
-            os.startfile(os.path.dirname(p_out))
+                btn_seleccionar.config(
+                    text="📂  Seleccionar otro fichero .n43", fg="white")
+                btn_convertir.config(state="disabled", bg="#A8D08D")
+                excel_name_var.set(os.path.basename(p_out))
+                entry_excel_name.config(state="disabled")
+                os.startfile(os.path.dirname(p_out))
 
-        except Exception as e:
-            progress.stop()
-            messagebox.showerror("Error en la conversión", str(e))
+            except Exception as e:
+                progress.stop()
+                messagebox.showerror("Error en la conversión", str(e))
 
-    # Asignar comandos a los botones (definidos después de las funciones)
+        else:
+            # ── Un Excel por cuenta ───────────────────────────────
+            out_dir = filedialog.askdirectory(
+                title="Selecciona la carpeta donde guardar los Excel",
+                initialdir=cfg.get("last_output_dir",
+                                   os.path.dirname(selected_paths[0]))
+            )
+            if not out_dir:
+                return
+
+            excel_names = n43_header.get("excel_names", [])
+            out_paths   = [os.path.join(out_dir, name) for name in excel_names]
+
+            progress.start(10)
+            root.update()
+            try:
+                for (cuenta, grp), p_out in zip(groups.items(), out_paths):
+                    if len(grp["paths"]) == 1:
+                        parse_n43(grp["paths"][0], p_out)
+                    else:
+                        parse_n43_combined(grp["paths"], p_out, grp["infos"])
+
+                progress.stop()
+                progress["value"] = 100
+
+                if cfg.get("auto_update_output_dir", True):
+                    save_config({"last_output_dir": out_dir})
+
+                excel_listbox.delete(0, "end")
+                for name in excel_names:
+                    excel_listbox.insert("end", name)
+
+                messagebox.showinfo(
+                    "✅ Conversión completada",
+                    f"Se han generado {n_accounts} fichero(s) Excel\n"
+                    f"en la carpeta:\n{out_dir}")
+
+                btn_seleccionar.config(
+                    text="📂  Seleccionar otro fichero .n43", fg="white")
+                btn_convertir.config(state="disabled", bg="#A8D08D")
+                os.startfile(out_dir)
+
+            except Exception as e:
+                progress.stop()
+                messagebox.showerror("Error en la conversión", str(e))
+
     btn_seleccionar.config(command=seleccionar)
     btn_convertir.config(command=convertir)
 
     # ── 6k. Imagen Caracolillo y crédito ─────────────────────────
-    #    Bloque posicionado con place() en la esquina inferior
-    #    derecha (20px de margen). No participa del flujo pack,
-    #    así que permanece fijo independientemente del contenido.
-    #
-    #    La imagen se busca como "Caracolillo_Fósil.png" en la
-    #    misma carpeta del script. Se escala a 40px de alto.
-    #    Fallback si no existe o no se puede cargar: recuadro
-    #    blanco con borde rojo.
 
     IMG_H = 40
     right_block = tk.Frame(root, bg=BG)
-
     img_path = resource_path("Caracolillo_Fósil.png")
 
     img_ok = False
@@ -842,7 +1080,6 @@ def run_gui():
             except Exception:
                 pass
         else:
-            # Fallback: subsample nativo de tkinter (sin Pillow)
             try:
                 raw    = tk.PhotoImage(file=img_path)
                 factor = max(1, raw.height() // IMG_H)
@@ -851,7 +1088,6 @@ def run_gui():
             except Exception:
                 pass
 
-    # Tooltip "Configurar": aparece al pasar el ratón, oculto por defecto
     lbl_hint = tk.Label(right_block, text="⚙  Configurar",
                         font=("Arial", 9, "italic"), bg=BG, fg="#555555",
                         cursor="hand2")
@@ -885,16 +1121,17 @@ def run_gui():
 
     right_block.place(relx=1.0, rely=1.0, x=-20, y=-20, anchor="se")
 
-    # ── 6l. Cálculo del alto y arranque ──────────────────────────
-    #
-    #  Todos los elementos están siempre visibles, así que el alto
-    #  necesario se obtiene directamente de winfo_reqheight().
-    #  Se fija como constante y se centra la ventana.
+    # ── 6l. Inicialización desde config y arranque ───────────────
+
+    startup_cfg = load_config()
+    multi_select_var.set(startup_cfg.get("multi_select", False))
+    multi_account_var.set(startup_cfg.get("multi_account", False))
+    separate_excel_var.set(startup_cfg.get("separate_excel", False))
+    _refresh_cascade()
+    update_excel_display()
 
     root.update_idletasks()
-    WIN_H = root.winfo_reqheight()
-    center_window(WIN_W, WIN_H)
-
+    center_window(WIN_W, root.winfo_reqheight())
     root.mainloop()
 
 
