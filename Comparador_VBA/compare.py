@@ -161,6 +161,7 @@ def _normalize(code: str) -> list[str]:
 def compare(
     modules_a: dict[str, VBAModule],
     modules_b: dict[str, VBAModule],
+    modulo_filtro: str | None = None,
 ) -> list[ModuleDiff]:
     all_names = sorted(set(modules_a) | set(modules_b))
     diffs: list[ModuleDiff] = []
@@ -169,6 +170,11 @@ def compare(
         mod_a = modules_a.get(name)
         mod_b = modules_b.get(name)
         kind = (mod_a or mod_b).kind
+
+        # Si hay filtro y este módulo no es el seleccionado → marcar como "skip"
+        if modulo_filtro and name != modulo_filtro:
+            diffs.append(ModuleDiff(name=name, kind=kind, status="skip"))
+            continue
 
         if mod_a is None:
             diffs.append(ModuleDiff(name=name, kind=kind, status="only_b",
@@ -294,9 +300,13 @@ def render_excel(diffs: list[ModuleDiff], label_a: str, label_b: str,
                  output_path: str, incluir_iguales: bool = False) -> None:
     wb = openpyxl.Workbook()
 
-    # mapa nombre original → nombre de hoja seguro (solo para módulos con diferencias)
+    # mapa nombre original → nombre de hoja seguro
+    # "skip" nunca tiene hoja (ni con incluir_iguales)
+    # "equal" solo tiene hoja si incluir_iguales=True
     sheet_name_map: dict[str, str] = {}
     for d in diffs:
+        if d.status == "skip":
+            continue
         if d.status != "equal" or incluir_iguales:
             safe = re.sub(r"[\\/*?:\[\]]", "_", d.name)[:31]
             sheet_name_map[d.name] = safe
@@ -337,10 +347,13 @@ def _build_summary_sheet(ws, diffs: list[ModuleDiff], label_a: str, label_b: str
         cell.font = _header_font()
         cell.alignment = Alignment(horizontal="center")
 
+    FILL_SKIP  = PatternFill("solid", fgColor="D3D3D3")  # gris — Sin Comparar
     STATUS_ES = {"equal": "Sin cambios", "modified": "Modificado",
-                 "only_a": "Solo en A", "only_b": "Solo en B"}
+                 "only_a": "Solo en A", "only_b": "Solo en B",
+                 "skip":  "Sin Comparar"}
     STATUS_FILL = {"equal": None, "modified": FILL_CHANGE,
-                   "only_a": FILL_DEL, "only_b": FILL_ADD}
+                   "only_a": FILL_DEL, "only_b": FILL_ADD,
+                   "skip":  FILL_SKIP}
 
     for d in diffs:
         changes = sum(1 for tag, *_ in d.opcodes if tag != "equal") if d.opcodes else (

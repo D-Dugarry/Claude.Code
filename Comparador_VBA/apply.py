@@ -59,9 +59,9 @@ def read_diff_excel(diff_path: str) -> dict[str, str]:
         if not orig_name:
             orig_name = sheet_name
 
-        # saltear módulos sin diferencias (estado "equal" en F1)
+        # saltear módulos sin diferencias o no comparados
         status = ws.cell(1, COL_STATUS).value
-        if status == "equal":
+        if status in ("equal", "skip"):
             continue
 
         # reconstruir código desde columna E, filas 3+

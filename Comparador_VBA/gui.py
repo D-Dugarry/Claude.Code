@@ -90,7 +90,12 @@ class App(tk.Tk):
 
         self._log_queue: queue.Queue = queue.Queue()
         self._cfg = _load_config()
-        self._diff_path: str = ""          # ruta del último diff generado
+        self._diff_path: str = ""
+
+        # Filtro de módulo único
+        self._modulos_excel1: list[str] = []
+        self._modulos_excel2: list[str] = []
+        self._carga_session:  int = 0        # evita que cargas viejas sobreescriban
 
         self._build_styles()
         self._build_ui()
@@ -175,6 +180,9 @@ class App(tk.Tk):
         self.var_a   = tk.StringVar()
         self.var_b   = tk.StringVar()
         self.var_out = tk.StringVar()
+        self.var_mod1 = tk.StringVar()
+        self.var_mod2 = tk.StringVar()
+        self.var_solo_modulo = tk.BooleanVar(value=False)
 
         self._fila_abrir(cmp, 0, "Excel 1:",         self.var_a,
                          [("Excel con macros", "*.xlsm *.xlam"), ("Todos", "*.*")])
@@ -183,9 +191,41 @@ class App(tk.Tk):
         self._fila_guardar(cmp, 2, "Guardar diff en:", self.var_out,
                            [("Excel", "*.xlsx")])
 
-        # Fila de botones + resultado
+        # Fila checkbox — oculta hasta que ambos Excel estén seleccionados
+        self._frm_chk = tk.Frame(cmp, bg=BG_APP)
+        # NO se hace grid aquí, se mostrará dinámicamente
+        ttk.Checkbutton(
+            self._frm_chk,
+            text="Comparar sólo un módulo",
+            variable=self.var_solo_modulo,
+            command=self._toggle_solo_modulo
+        ).pack(side=tk.LEFT)
+
+        # Fila selección de módulos — oculta hasta activar checkbox
+        self._frm_mods = tk.Frame(cmp, bg=BG_APP)
+        self._frm_mods.columnconfigure(1, weight=1)
+        # NO se hace grid aquí
+
+        tk.Label(self._frm_mods, text="Módulo Excel 1:", bg=BG_APP,
+                 font=FONT_UI, anchor="w").grid(
+            row=0, column=0, sticky="w", padx=(0, 10), pady=3)
+        self._cmb_mod1 = ttk.Combobox(
+            self._frm_mods, textvariable=self.var_mod1,
+            state="readonly", font=FONT_UI)
+        self._cmb_mod1.grid(row=0, column=1, sticky="ew", pady=3)
+        self._cmb_mod1.bind("<<ComboboxSelected>>", self._on_mod1_selected)
+
+        tk.Label(self._frm_mods, text="Módulo Excel 2:", bg=BG_APP,
+                 font=FONT_UI, anchor="w").grid(
+            row=1, column=0, sticky="w", padx=(0, 10), pady=3)
+        self._cmb_mod2 = ttk.Combobox(
+            self._frm_mods, textvariable=self.var_mod2,
+            state="readonly", font=FONT_UI)
+        self._cmb_mod2.grid(row=1, column=1, sticky="ew", pady=3)
+
+        # Fila de botones + resultado  (siempre en row=5, las filas 3/4 son opcionales)
         frm_cb = tk.Frame(cmp, bg=BG_APP)
-        frm_cb.grid(row=3, column=0, columnspan=3, pady=(10, 4), sticky="ew")
+        frm_cb.grid(row=5, column=0, columnspan=3, pady=(10, 4), sticky="ew")
         frm_cb.columnconfigure(1, weight=1)
 
         # Izquierda: solo botón GENERAR (Abrir aparece dinámicamente a su derecha)
@@ -298,9 +338,11 @@ class App(tk.Tk):
                     self.var_diff, self.var_dest1, self.var_dest2):
             var.trace_add("write", lambda *_: self._guardar_config())
 
-        # Limpiar resultado al cambiar cualquiera de los dos Excel de origen
-        self.var_a.trace_add("write", lambda *_: self._limpiar_resultado())
-        self.var_b.trace_add("write", lambda *_: self._limpiar_resultado())
+        # Al cambiar Excel 1 o Excel 2 → limpiar resultado + gestionar visibilidad checkbox
+        self.var_a.trace_add("write", lambda *_: (
+            self._limpiar_resultado(), self._reset_filtro(), self._actualizar_checkbox()))
+        self.var_b.trace_add("write", lambda *_: (
+            self._limpiar_resultado(), self._reset_filtro(), self._actualizar_checkbox()))
 
     # ── Helpers filas ─────────────────────────────────────────────────────────
 
@@ -337,10 +379,15 @@ class App(tk.Tk):
 
     # ── Resultado comparación ─────────────────────────────────────────────────
 
-    def _mostrar_resultado(self, total: int, con_dif: int, diff_path: str):
+    def _mostrar_resultado(self, total: int, con_dif: int, diff_path: str,
+                           filtro: str | None = None):
         """Actualiza el área de resultado (llamado desde el hilo principal)."""
-        self._lbl_stats.config(
-            text=f"{total} módulos  ·  {con_dif} con diferencias")
+        if filtro:
+            estado = "con diferencias" if con_dif else "sin diferencias"
+            txt = f"Módulo '{filtro}'  ·  {estado}"
+        else:
+            txt = f"{total} módulos  ·  {con_dif} con diferencias"
+        self._lbl_stats.config(text=txt)
         self._lbl_stats.pack(side=tk.LEFT, padx=(0, 18))
 
         self._lbl_identicos.pack_forget()
@@ -379,10 +426,100 @@ class App(tk.Tk):
             "dest2":    self.var_dest2.get(),
         })
 
+    # ── Checkbox y selección de módulo ───────────────────────────────────────
+
+    def _actualizar_checkbox(self):
+        """Muestra el checkbox solo cuando ambos Excel están seleccionados."""
+        if self.var_a.get().strip() and self.var_b.get().strip():
+            self._frm_chk.grid(row=3, column=0, columnspan=3,
+                               sticky="w", pady=(6, 0))
+        else:
+            self._frm_chk.grid_forget()
+
+    def _toggle_solo_modulo(self):
+        """Activar/desactivar el modo comparación de módulo único."""
+        if self.var_solo_modulo.get():
+            self._frm_mods.grid(row=4, column=0, columnspan=3,
+                                sticky="ew", pady=(4, 0))
+            self._cargar_modulos()
+        else:
+            self._frm_mods.grid_forget()
+            self.var_mod1.set("")
+            self.var_mod2.set("")
+
+    def _reset_filtro(self):
+        """Resetea el checkbox y las listas de módulos."""
+        self.var_solo_modulo.set(False)
+        self._frm_mods.grid_forget()
+        self.var_mod1.set("")
+        self.var_mod2.set("")
+        self._modulos_excel1 = []
+        self._modulos_excel2 = []
+
+    def _cargar_modulos(self):
+        """Carga en paralelo las listas de módulos de ambos Excel."""
+        a = self.var_a.get().strip()
+        b = self.var_b.get().strip()
+        if not a or not b:
+            self._log_final("ERROR: Selecciona ambos Excel antes de activar el filtro.", ok=False)
+            self.var_solo_modulo.set(False)
+            return
+
+        self._carga_session += 1
+        session = self._carga_session
+
+        self._cmb_mod1.set("Cargando...")
+        self._cmb_mod2.set("Cargando...")
+        self._cmb_mod1["values"] = []
+        self._cmb_mod2["values"] = []
+        self._log_final("Cargando lista de módulos...", ok=True)
+
+        threading.Thread(
+            target=self._thread_cargar_mods, args=(a, b, session), daemon=True).start()
+
+    def _thread_cargar_mods(self, path_a: str, path_b: str, session: int):
+        """Carga módulos de ambos ficheros en un único hilo COM."""
+        pythoncom.CoInitialize()
+        try:
+            mods_a = sorted(extract_vba(path_a).keys())
+            mods_b = sorted(extract_vba(path_b).keys())
+        except Exception as e:
+            self.after(0, lambda: self._log_final(f"ERROR cargando módulos: {e}", ok=False))
+            return
+        finally:
+            pythoncom.CoUninitialize()
+
+        # Ignorar si ya se inició una carga más nueva
+        if session != self._carga_session:
+            return
+
+        self._modulos_excel1 = mods_a
+        self._modulos_excel2 = mods_b
+        self.after(0, lambda: self._actualizar_cmbs(mods_a, mods_b))
+
+    def _actualizar_cmbs(self, mods_a: list[str], mods_b: list[str]):
+        self._cmb_mod1["values"] = mods_a
+        self._cmb_mod2["values"] = mods_b
+        self._cmb_mod1.set("")
+        self._cmb_mod2.set("")
+        self._limpiar_log()
+        self._log_final(
+            f"Listo — {len(mods_a)} módulos en Excel 1, {len(mods_b)} en Excel 2. "
+            "Selecciona el módulo a comparar.", ok=True)
+
+    def _on_mod1_selected(self, _event=None):
+        """Al seleccionar módulo en Excel 1, pre-selecciona el mismo en Excel 2."""
+        sel = self.var_mod1.get()
+        if sel and sel in self._modulos_excel2:
+            self.var_mod2.set(sel)
+
+    # ── Config ────────────────────────────────────────────────────────────────
+
     def _borrar_comparar(self):
         for v in (self.var_a, self.var_b, self.var_out):
             v.set("")
         self._limpiar_resultado()
+        self._reset_filtro()
 
     def _borrar_aplicar(self):
         for v in (self.var_diff, self.var_dest1, self.var_dest2):
@@ -436,12 +573,26 @@ class App(tk.Tk):
         if not a:   self._log_final("ERROR: Selecciona el Excel 1.", ok=False); return
         if not b:   self._log_final("ERROR: Selecciona el Excel 2.", ok=False); return
         if not out: self._log_final("ERROR: Indica dónde guardar el diff.", ok=False); return
+
+        # Filtro de módulo único
+        filtro: str | None = None
+        if self.var_solo_modulo.get():
+            m1 = self.var_mod1.get().strip()
+            m2 = self.var_mod2.get().strip()
+            if not m1:
+                self._log_final("ERROR: Selecciona el módulo de Excel 1.", ok=False); return
+            if not m2:
+                self._log_final("ERROR: Selecciona el módulo de Excel 2.", ok=False); return
+            filtro = m1   # se compara m1 en A vs m2 en B (misma posición)
+            # Si los nombres son distintos, usamos una estrategia de renombre temporal
+            self._filtro_m2 = m2   # guardamos el de Excel 2 por si difieren
+
         self._limpiar_log()
         self._limpiar_resultado()
         threading.Thread(
-            target=self._thread_comparar, args=(a, b, out), daemon=True).start()
+            target=self._thread_comparar, args=(a, b, out, filtro), daemon=True).start()
 
-    def _thread_comparar(self, a, b, out):
+    def _thread_comparar(self, a, b, out, filtro: str | None):
         pythoncom.CoInitialize()
         writer = QueueWriter(self._log_queue)
         old_stdout = sys.stdout
@@ -455,11 +606,32 @@ class App(tk.Tk):
             print(f"Extrayendo VBA de: {lb}")
             mods_b = extract_vba(b)
             print(f"  -> {len(mods_b)} módulos encontrados\n")
-            diffs  = vba_compare(mods_a, mods_b)
+
+            # Si los módulos seleccionados tienen distinto nombre, renombramos
+            # temporalmente el de B para que coincida con el de A en el diff
+            if filtro:
+                m2 = getattr(self, "_filtro_m2", filtro)
+                if m2 != filtro and m2 in mods_b:
+                    from compare import VBAModule
+                    mods_b[filtro] = VBAModule(
+                        name=filtro, code=mods_b[m2].code, kind=mods_b[m2].kind)
+                    del mods_b[m2]
+                print(f"Modo filtro: comparando módulo '{filtro}'")
+                if m2 != filtro:
+                    print(f"  ('{filtro}' en Excel 1  vs  '{m2}' en Excel 2)")
+
+            diffs  = vba_compare(mods_a, mods_b, modulo_filtro=filtro)
             render_excel(diffs, la, lb, out)
-            total   = len(diffs)
-            con_dif = sum(1 for d in diffs if d.status != "equal")
-            print(f"Módulos con diferencias: {con_dif} de {total} totales")
+
+            total    = len(diffs)
+            skip     = sum(1 for d in diffs if d.status == "skip")
+            con_dif  = sum(1 for d in diffs if d.status not in ("equal", "skip"))
+            comparados = total - skip
+
+            if filtro:
+                print(f"Módulo comparado: '{filtro}'")
+            else:
+                print(f"Módulos con diferencias: {con_dif} de {comparados} comparados")
         except Exception as e:
             sys.stdout = old_stdout
             self._log_final(f"ERROR: {e}", ok=False)
@@ -470,11 +642,10 @@ class App(tk.Tk):
 
         self._diff_path = out
         self.var_diff.set(out)
-        # Actualizar resultado en el hilo principal
-        self.after(0, lambda: self._mostrar_resultado(total, con_dif, out))
+        self.after(0, lambda: self._mostrar_resultado(comparados, con_dif, out, filtro))
         self._log_final(
             f"Diff guardado: {Path(out).name}  —  pulsa 'Abrir diff'" if con_dif > 0
-            else f"Los ficheros son idénticos. Diff guardado: {Path(out).name}",
+            else f"Sin diferencias. Diff guardado: {Path(out).name}",
             ok=True)
 
     def _accion_aplicar(self, dest_var, dry_run):
