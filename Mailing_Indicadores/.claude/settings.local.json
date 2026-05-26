@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git ls-tree *)",
+      "Bash(git add *)",
+      "Bash(ls *)",
+      "Bash(dir)",
+      "Bash(dir *)"
+    ]
+  },
+  "tools": {
+    "bash": {
+      "enabled": true
+    }
+  }
+}
