@@ -1,0 +1,13 @@
+{
+    // Extensiones recomendadas para este proyecto (VS Code las sugerirá al abrir)
+    "recommendations": [
+        // Resaltado de sintaxis VBA/VB
+        "luggage.vba",
+
+        // Alternativamente, para sintaxis Visual Basic general:
+        // "ms-vscode.powershell"  (ya incluye VB)
+
+        // Útil para ver/editar archivos Excel sin abrirlos:
+        "grapecity.gc-excelviewer"
+    ]
+}

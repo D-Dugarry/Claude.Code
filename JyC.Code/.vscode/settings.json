@@ -1,0 +1,40 @@
+{
+    // =========================================================================
+    // Configuración VS Code para el proyecto JyC 2026
+    // =========================================================================
+
+    // --- Encoding ---
+    // Los archivos .bas/.cls/.frm de VBA están guardados en Windows-1252.
+    // Sin esta configuración VS Code los abriría como UTF-8 y los acentos
+    // aparecerían corruptos (ó → ó, ñ → Ã±, etc.)
+    "files.encoding": "windows1252",
+
+    // --- Asociación de tipos de archivo ---
+    // VS Code no reconoce .bas y .cls como VBA por defecto.
+    // "vb" activa el resaltado de sintaxis de Visual Basic, que es compatible.
+    "files.associations": {
+        "*.bas": "vb",
+        "*.cls": "vb",
+        "*.frm": "vb"
+    },
+
+    // --- Fin de línea ---
+    // VBA en Windows usa CRLF
+    "files.eol": "\r\n",
+
+    // --- Archivos a excluir del explorador ---
+    // .frx son binarios (imágenes de formularios), no hay que editarlos
+    "files.exclude": {
+        "**/*.frx": true
+    },
+
+    // --- Editor ---
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+
+    // --- Buscar: excluir binarios ---
+    "search.exclude": {
+        "**/*.frx": true,
+        "**/*.xlsm": true
+    }
+}
