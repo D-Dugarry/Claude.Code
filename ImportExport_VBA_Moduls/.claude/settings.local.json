@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast, sys; ast.parse\\(open\\('Import_Export_VBA_Moduls.py'\\).read\\(\\)\\); print\\('Sintaxis OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('Import_Export_VBA_Moduls.py', encoding='utf-8'\\).read\\(\\)\\); print\\('Sintaxis OK'\\)\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

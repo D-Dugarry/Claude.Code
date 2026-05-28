@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Lanzar GUI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/gui.py",
+            "console": "integratedTerminal",
+            "env": { "PYTHONIOENCODING": "utf-8" },
+            "justMyCode": true
+        },
+        {
+            "name": "Comparar (consola)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/compare.py",
+            "args": [
+                "F:/__Dugarry UA/Dugarry Proyectos/___Claude.Code/JyG.Code/_JyC 2026.Code.xlsm",
+                "F:/__Dugarry UA/Dugarry Proyectos/_Jornadas y Congresos/Programación JyC/_JyC 2026.xlsm",
+                "-o", "${workspaceFolder}/vba_diff.xlsx"
+            ],
+            "console": "integratedTerminal",
+            "env": { "PYTHONIOENCODING": "utf-8" },
+            "justMyCode": true
+        },
+        {
+            "name": "Simular apply (dry-run)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/apply.py",
+            "args": [
+                "${workspaceFolder}/vba_diff.xlsx",
+                "F:/__Dugarry UA/Dugarry Proyectos/___Claude.Code/JyG.Code/_JyC 2026.Code.xlsm",
+                "--dry-run"
+            ],
+            "console": "integratedTerminal",
+            "env": { "PYTHONIOENCODING": "utf-8" },
+            "justMyCode": true
+        },
+        {
+            "name": "Build EXE",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/4_BUILD_EXE.bat",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

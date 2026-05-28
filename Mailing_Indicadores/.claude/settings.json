@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell([System.IO.File]::ReadAllText\\(\"f:\\\\__Dugarry UA\\\\Dugarry Proyectos\\\\___Claude.Code\\\\Mailing_Indicadores\\\\VBA_Moduls\\\\M_3_Load_Tabla_Adjuntos.bas\", [System.Text.Encoding]::GetEncoding\\(1252\\)\\))"
+    ]
+  }
+}

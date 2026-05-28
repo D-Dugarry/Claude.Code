@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"f:\\\\__Dugarry UA\\\\Dugarry Proyectos\\\\___Claude.Code\\\\Comparador_VBA_v2\" log --oneline -10)"
+    ]
+  }
+}

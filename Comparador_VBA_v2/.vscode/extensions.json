@@ -1,0 +1,21 @@
+{
+    "recommendations": [
+        // Python — imprescindible
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+
+        // VBA — para leer/comparar el código de los módulos
+        "notisdataanalytics.vba-lsp",
+        "skyran.vba",
+
+        // Excel — previsualizar el diff generado sin salir de VS Code
+        "local-smart.excel-live-server",
+
+        // Git — historial visual de ramas y commits
+        "mhutchie.git-graph",
+
+        // Claude Code — integración con IA
+        "anthropic.claude-code"
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Lanza la interfaz gráfica directamente (F5)
+            "name": "Lanzar GUI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\gui.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONIOENCODING": "utf-8"
+            }
+        },
+        {
+            // Ejecuta compare.py desde línea de comandos (útil para pruebas sin GUI)
+            "name": "Comparar (CLI)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\compare.py",
+            "args": [
+                "F:\\__Dugarry UA\\Dugarry Proyectos\\___Claude.Code\\JyG.Code\\_JyC 2026.Code.xlsm",
+                "F:\\__Dugarry UA\\Dugarry Proyectos\\_Jornadas y Congresos\\Programación JyC\\_JyC 2026.xlsm",
+                "-o", "${workspaceFolder}\\vba_diff_test.xlsx",
+                "--solo-excel"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONIOENCODING": "utf-8"
+            }
+        },
+        {
+            // Ejecuta apply.py en modo simulación (dry-run)
+            "name": "Aplicar Simulación (CLI)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\apply.py",
+            "args": [
+                "${workspaceFolder}\\vba_diff_test.xlsx",
+                "F:\\__Dugarry UA\\Dugarry Proyectos\\___Claude.Code\\JyG.Code\\_JyC 2026.Code.xlsm",
+                "--dry-run"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONIOENCODING": "utf-8"
+            }
+        }
+    ]
+}
