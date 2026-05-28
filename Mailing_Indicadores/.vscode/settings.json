@@ -1,0 +1,12 @@
+{
+  "[vba]": {
+    "files.encoding": "windows1252"
+  },
+  "files.associations": {
+    "*.bas": "vba",
+    "*.cls": "vba",
+    "*.frm": "vba"
+  },
+  "cSpell.language": "en,es",
+  "cSpell.ignorePaths": ["**/*.bas", "**/*.cls", "**/*.frm"]
+}
