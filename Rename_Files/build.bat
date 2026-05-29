@@ -15,7 +15,6 @@ python -m PyInstaller ^
     --onefile ^
     --windowed ^
     --name "Rename_Files" ^
-    --collect-all openpyxl ^
     Rename_Files.py
 
 echo.

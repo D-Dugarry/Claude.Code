@@ -1,24 +1,21 @@
 """
-Rename_Files.py  v2
-Renombra (o copia y renombra) ficheros basándose en una tabla Excel de dos columnas.
-Requiere: Python 3.9+, openpyxl, tkinter (stdlib)
+Rename_Files.py  v3
+Renombra (o copia y renombra) ficheros de una carpeta aplicando
+una sustitución de texto en sus nombres.
+Requiere: Python 3.9+, tkinter (stdlib)
 """
 
 import os
+import re
 import shutil
+import sys
 import threading
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, scrolledtext, ttk
 import winreg
 
-try:
-    import openpyxl
-except ImportError:
-    openpyxl = None
-
 _REG_KEY     = r"Software\RenameFiles"
-_REG_XLSX    = "LastExcelFile"
 _REG_CARPETA = "LastCarpetaExcels"
 
 
@@ -49,8 +46,8 @@ FONT_ENTRY = ("Verdana", BASE - 1)
 FONT_LOG   = ("Courier New", BASE)
 
 BG_APP     = "#F2F3F4"
-BG_ARCHIVO = "#2874A6"
 BG_CARPETA = "#1A5276"
+BG_SUSTIT  = "#2874A6"
 BG_TABLA   = "#7D3C98"
 BG_DESTINO = "#1E8449"
 BG_LOG_HDR = "#5D6D7E"
@@ -62,15 +59,200 @@ C_EXPORTAR = "#A9DFBF"
 C_ACCION   = "#F0B27A"
 
 _HINT_DEST    = "(opcional — si vacío, renombra en el origen)"
-_HINT_CARPETA = "(carpeta donde están los ficheros a renombrar)"
+_HINT_CARPETA = "(carpeta con los ficheros a renombrar)"
 
-_COL_IDS     = ("mail", "fichero", "newname", "resultado")
-_COL_FIXED   = ("New Name", "Resultado")
+_COL_IDS   = ("nombre", "newname", "resultado")
+_COL_NAMES = ("Nombre Actual", "New Name", "Resultado")
+
+_FLUJO_MD = """\
+# Rename Files — Flujo del Programa
+
+## Visión general
+
+Herramienta de escritorio (Python/tkinter, compilada a `.exe`) que renombra o copia-y-renombra ficheros de una carpeta aplicando una sustitución de texto simple en sus nombres.
+
+---
+
+## Pantalla principal — secciones
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Carpeta de Ficheros   [ruta/carpeta/origen]  Seleccionar│
+├─────────────────────────────────────────────────────────┤
+│  Sustitución en nombres de fichero                       │
+│    Texto a sustituir:  [_____________________]           │
+│    Texto nuevo:        [_____________________]           │
+├─────────────────────────────────────────────────────────┤
+│  Ficheros en Carpeta          N / Total  Todos  Ninguno  │
+│  ┌───────────────┬────────────────────┬──────────┐       │
+│  │ Nombre Actual │ New Name           │ Resultado│       │
+│  │ fichero_A.xlsx│ fichero_nuevo.xlsx │  -.-     │       │
+│  │ fichero_B.xlsx│ fichero_nuevo.xlsx │  -.-     │       │
+│  └───────────────┴────────────────────┴──────────┘       │
+├─────────────────────────────────────────────────────────┤
+│  Carpeta de Destino    [ruta/destino]  Examinar  Limpiar │
+├─────────────────────────────────────────────────────────┤
+│  Registro              Limpiar   [Renombrar / Copiar...] │
+│  > log de operaciones                                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Flujo paso a paso
+
+### 1 · Seleccionar Carpeta de Ficheros
+
+- El usuario pulsa **Seleccionar** o escribe la ruta directamente en el campo.
+- La ruta se guarda en el registro de Windows (`HKCU\\Software\\RenameFiles\\LastCarpetaExcels`) para recordarla en la próxima sesión.
+- Cambiar la ruta dispara `_on_params_change` → espera 300 ms (debounce) → llama a `_load_files`.
+
+### 2 · Escribir la sustitución
+
+- **Texto a sustituir**: cadena que se buscará en cada nombre de fichero.
+- **Texto nuevo**: cadena por la que se reemplazará.
+- Cada pulsación de tecla dispara `_on_params_change` → debounce 300 ms → `_load_files`.
+- Si "Texto a sustituir" está vacío, `New Name` = `Nombre Actual` (sin cambio).
+
+### 3 · Carga y visualización de ficheros (`_load_files`)
+
+```
+_load_files()
+    │
+    ├─ Lee os.listdir(carpeta) → solo ficheros (no subdirectorios)
+    ├─ Ordena alfabéticamente
+    ├─ Para cada fichero:
+    │       new_name = nombre.replace(sustituir, nuevo)
+    │       fila = (nombre, new_name, "-.-")
+    │
+    └─ _populate_tree(filas)
+            │
+            ├─ Inserta filas en el Treeview con tags even/odd
+            ├─ Selecciona todas las filas por defecto
+            ├─ _on_sel_change()  → aplica colores de selección
+            └─ after(120ms) → _autosize_columns()
+```
+
+### 4 · Ajuste de columnas (`_autosize_columns`)
+
+| Columna        | Anchura                                         | Stretch |
+|----------------|-------------------------------------------------|---------|
+| `Resultado`    | Fija: máx. entre título y valores posibles +15px | No      |
+| `Nombre Actual`| Fija: máx. de todos los nombres de fichero +15px | No      |
+| `New Name`     | Todo el espacio restante de la ventana           | Sí      |
+
+### 5 · Selección de filas
+
+- **Todos** / **Ninguno**: selecciona o deselecciona todas las filas.
+- **Clic individual**: selecciona una fila (deselecciona el resto).
+- **Shift + clic**: selección de rango.
+- **Ctrl + clic**: añade/quita una fila a la selección.
+- Cualquier cambio de selección llama a `_on_sel_change`:
+  - Actualiza el tag de cada fila (even / odd / even_sel / odd_sel).
+  - Actualiza el contador `N / Total` en la cabecera.
+
+### 6 · Carpeta de Destino (opcional)
+
+| Estado del campo | Comportamiento          | Texto del botón      |
+|------------------|-------------------------|----------------------|
+| Vacío            | Renombra en la carpeta origen | `Renombrar`    |
+| Con ruta         | Copia los ficheros con el nuevo nombre a esa carpeta | `Copiar y Renombrar` |
+
+### 7 · Operación: Renombrar / Copiar y Renombrar (`_do_rename`)
+
+**Validaciones previas:**
+- Carpeta de ficheros existe.
+- Al menos una fila seleccionada.
+- Si hay destino y no existe, se crea con `os.makedirs`.
+
+**Hilo de trabajo (`_rename_thread`)** — se ejecuta en un hilo secundario para no bloquear la UI:
+
+```
+Para cada fila seleccionada:
+    │
+    ├─ Construye orig_path = carpeta / Nombre Actual
+    ├─ Verifica que el fichero existe
+    │
+    ├─ [Modo Renombrar]
+    │       os.rename(orig_path, carpeta / New Name)
+    │       → Resultado = "Rename"
+    │
+    └─ [Modo Copiar y Renombrar]
+            shutil.copy2(orig_path, destino / New Name)
+            → Resultado = "CopyRename"
+
+    Si cualquier paso falla:
+        → Resultado = "Falló"
+        → Mensaje en el Registro en rojo
+```
+
+**Actualización de la columna Resultado** (en el hilo principal vía `after(0, ...)`):
+
+| Valor        | Significado                              |
+|--------------|------------------------------------------|
+| `-.-`        | Fila no procesada (no seleccionada o reset) |
+| `Rename`     | Renombrado con éxito en origen           |
+| `CopyRename` | Copiado y renombrado en destino          |
+| `Falló`      | Error — ver detalle en el Registro       |
+
+---
+
+## Colores del Treeview
+
+| Tag         | Fondo     | Texto    | Cuándo                        |
+|-------------|-----------|----------|-------------------------------|
+| `even`      | `#FFFFFF` | `#222222`| Fila par, no seleccionada     |
+| `odd`       | `#E8EDF2` | `#222222`| Fila impar, no seleccionada   |
+| `even_sel`  | `#5B9BD5` | blanco   | Fila par, seleccionada        |
+| `odd_sel`   | `#2E75B6` | blanco   | Fila impar, seleccionada      |
+
+> Los tags anulan el color de selección nativo del tema clam.
+
+---
+
+## Persistencia (Registro de Windows)
+
+| Clave                                          | Valor guardado                   |
+|------------------------------------------------|----------------------------------|
+| `HKCU\\Software\\RenameFiles\\LastCarpetaExcels` | Última carpeta de ficheros usada |
+
+---
+
+## Archivos del proyecto
+
+| Fichero             | Descripción                          |
+|---------------------|--------------------------------------|
+| `Rename_Files.py`   | Código fuente principal              |
+| `Rename_Files.exe`  | Ejecutable compilado (PyInstaller)   |
+| `build.bat`         | Script de recompilación              |
+| `requirements.txt`  | Dependencias Python (`pyinstaller`)  |
+| `paleta_colores.py` | Utilidad auxiliar para elegir colores|
+| `Flujo_APP.md`      | Documentación del flujo              |
+"""
+
+_INLINE_RE = re.compile(r'\*\*(.+?)\*\*|`(.+?)`')
 
 
-def _mail_clean(mail: str) -> str:
-    """Quita los últimos 5 caracteres ("ua.es") del mail."""
-    return mail.removesuffix("ua.es")
+def _insert_inline(txt: "tk.Text", text: str, base_tag: str) -> None:
+    """Inserta texto aplicando bold (**...**) e inline-code (`...`) como tags."""
+    pos = 0
+    for m in _INLINE_RE.finditer(text):
+        if m.start() > pos:
+            txt.insert("end", text[pos:m.start()], base_tag)
+        if m.group(1) is not None:
+            txt.insert("end", m.group(1), (base_tag, "md_bold"))
+        else:
+            txt.insert("end", m.group(2), (base_tag, "md_icode"))
+        pos = m.end()
+    if pos < len(text):
+        txt.insert("end", text[pos:], base_tag)
+
+
+def _base_dir() -> str:
+    """Directorio del exe (compilado) o del script (desarrollo)."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 class _Tooltip:
@@ -85,21 +267,23 @@ class _Tooltip:
     def _show(self, _=None) -> None:
         if self._win:
             return
-        x = self._w.winfo_rootx() + self._w.winfo_width() // 2
-        y = self._w.winfo_rooty() + self._w.winfo_height() + 4
-        _TRANSP = "#f0f0f1"
+        _BG = BG_CARPETA          # mismo color que la cabecera → transparente
         self._win = tk.Toplevel(self._w)
         self._win.wm_overrideredirect(True)
-        self._win.wm_geometry(f"+{x}+{y}")
-        self._win.configure(bg=_TRANSP)
+        self._win.configure(bg=_BG)
         try:
-            self._win.wm_attributes("-transparentcolor", _TRANSP)
+            self._win.wm_attributes("-transparentcolor", _BG)
         except Exception:
             pass
-        tk.Label(self._win, text=self._text,
-                 bg=_TRANSP, fg="#555555",
+        tk.Label(self._win, text=self._text, bg=_BG, fg="#C8A96E",
                  relief="flat", bd=0,
-                 font=("Verdana", BASE - 2, "italic"), padx=3, pady=1).pack()
+                 font=("Mistral", BASE + 4), padx=6, pady=3).pack()
+        self._win.update_idletasks()
+        tip_w = self._win.winfo_reqwidth()
+        tip_h = self._win.winfo_reqheight()
+        x = self._w.winfo_rootx() - tip_w - 6
+        y = self._w.winfo_rooty() + (self._w.winfo_height() - tip_h) // 2
+        self._win.wm_geometry(f"+{x}+{y}")
 
     def _hide(self, _=None) -> None:
         if self._win:
@@ -109,19 +293,20 @@ class _Tooltip:
 
 class App(tk.Tk):
 
-    H = 860
+    H = 820
 
     def __init__(self):
         super().__init__()
         self.title("Rename Files")
         self.resizable(True, True)
-        self.minsize(700, 600)
+        self.minsize(700, 540)
         self.configure(bg=BG_APP)
 
-        self._xlsx_var    = tk.StringVar()
-        self._carpeta_var = tk.StringVar()
-        self._dest_var    = tk.StringVar()
-        self._col_headers: tuple[str, str] = ("Mail", "Fichero")
+        self._carpeta_var  = tk.StringVar()
+        self._sustituir_var = tk.StringVar()
+        self._nuevo_var    = tk.StringVar()
+        self._dest_var     = tk.StringVar()
+        self._after_id     = None   # para debounce del refresco
 
         self._firma_img = tk.PhotoImage(data=_FIRMA_B64)
 
@@ -130,31 +315,24 @@ class App(tk.Tk):
         self.update_idletasks()
         self.state("zoomed")
 
-        self._dest_var.trace_add("write",    self._on_dest_change)
-        self._carpeta_var.trace_add("write", self._on_carpeta_change)
+        self._carpeta_var.trace_add("write",   self._on_params_change)
+        self._sustituir_var.trace_add("write", self._on_params_change)
+        self._nuevo_var.trace_add("write",     self._on_params_change)
+        self._dest_var.trace_add("write",      self._on_dest_change)
 
-        if openpyxl is None:
-            self._log_write(
-                "AVISO: openpyxl no está instalado.\n"
-                "Instala con:  pip install openpyxl\n", "warn")
+        last = _reg_read(_REG_CARPETA)
+        if last and os.path.isdir(last):
+            self._carpeta_var.set(last)
 
-        last_xlsx    = _reg_read(_REG_XLSX)
-        last_carpeta = _reg_read(_REG_CARPETA)
-        if last_carpeta and os.path.isdir(last_carpeta):
-            self._carpeta_var.set(last_carpeta)
-        if last_xlsx and os.path.exists(last_xlsx):
-            self._xlsx_var.set(last_xlsx)
-            self._lbl_xlsx_title.config(text=os.path.basename(last_xlsx))
-            self._load_excel_bg(last_xlsx)
-
-    def _center(self, h: int) -> None:
-        self.update_idletasks()
-        sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
-        self.geometry(f"{sw}x{h}+0+{max(0, (sh - h) // 2)}")
+    # ── Estilos ───────────────────────────────────────────────────────────────
 
     def _build_styles(self) -> None:
         s = ttk.Style(self)
         s.theme_use("clam")
+        self.tk.eval(
+            "ttk::style theme settings clam "
+            "{ ttk::style map Treeview -background {} }"
+        )
         s.configure(".",              font=FONT_UI,  background=BG_APP)
         s.configure("TFrame",         background=BG_APP)
         s.configure("TEntry",         font=FONT_UI, fieldbackground="white")
@@ -169,9 +347,8 @@ class App(tk.Tk):
         s.map("Export.TButton",        background=[("active", "#7DCEA0")])
         s.configure("Accion.TButton",  font=FONT_UI,   background=C_ACCION)
         s.map("Accion.TButton",        background=[("active", "#E59866")])
-        _row_h = int(BASE * 2.4)
 
-        # Separador: imagen 1×1 px del color de la cabecera, anclada al borde sur de cada fila
+        _row_h = int(BASE * 2.4)
         self._sep_px = tk.PhotoImage(width=1, height=1)
         self._sep_px.put(BG_TABLA, to=(0, 0, 1, 1))
         s.element_create("RowSep", "image", self._sep_px, sticky="ew", border=0)
@@ -188,9 +365,9 @@ class App(tk.Tk):
                      font=FONT_UI)
         s.configure("Treeview.Heading",
                      font=FONT_BOLD, background="#DDDDDD", relief="flat")
-        s.map("Treeview",
-              background=[("selected", "#2E86C1")],
-              foreground=[("selected", "white")])
+        s.map("Treeview", foreground=[("selected", "white")])
+
+    # ── UI ────────────────────────────────────────────────────────────────────
 
     def _bloque(self, titulo: str, bg_titulo: str,
                 expand: bool = False) -> tuple[tk.Frame, tk.Frame]:
@@ -198,46 +375,30 @@ class App(tk.Tk):
                          highlightbackground="#AAAAAA", highlightthickness=1)
         outer.pack(fill="both" if expand else "x",
                    expand=expand, padx=10, pady=(6, 0))
-        title_bar = tk.Frame(outer, bg=bg_titulo)
-        title_bar.pack(fill="x")
-        tk.Label(title_bar, text=f"  {titulo}",
+        tb = tk.Frame(outer, bg=bg_titulo)
+        tb.pack(fill="x")
+        tk.Label(tb, text=f"  {titulo}",
                  bg=bg_titulo, fg="white", font=FONT_TITLE, anchor="w", pady=2
                  ).grid(row=0, column=0, sticky="w")
-        content = tk.Frame(outer, bg=BG_APP, padx=12, pady=8)
-        content.pack(fill="both", expand=True)
-        content.columnconfigure(1, weight=1)
-        return title_bar, content
+        c = tk.Frame(outer, bg=BG_APP, padx=12, pady=8)
+        c.pack(fill="both", expand=True)
+        c.columnconfigure(1, weight=1)
+        return tb, c
 
     def _build_ui(self) -> None:
 
-        # ── Archivo Excel ────────────────────────────────────────────────────
-        tb_arc, c_arc = self._bloque("Archivo Excel", BG_ARCHIVO)
-        tb_arc.columnconfigure(1, weight=1)
-        self._lbl_xlsx_title = tk.Label(
-            tb_arc, text="", bg=BG_ARCHIVO, fg="white", font=FONT_UI, anchor="w")
-        self._lbl_xlsx_title.grid(row=0, column=1, sticky="ew", padx=(6, 8))
-        _firma_lbl = tk.Label(tb_arc, image=self._firma_img,
-                              bg=BG_ARCHIVO, bd=0, cursor="hand2")
-        _firma_lbl.grid(row=0, column=2, padx=(0, 8), pady=2)
-        _Tooltip(_firma_lbl, "Dugarry")
-
-        tk.Label(c_arc, text="Archivo Excel:", bg=BG_APP, font=FONT_UI, anchor="w").grid(
-            row=0, column=0, sticky="w", padx=(0, 10), pady=4)
-        tk.Entry(c_arc, textvariable=self._xlsx_var, state="readonly",
-                 font=FONT_ENTRY, bg="white", readonlybackground="#ECECEC",
-                 fg="#222222", relief="sunken", bd=1).grid(
-            row=0, column=1, sticky="ew", pady=4, ipady=4)
-        ttk.Button(c_arc, text="Seleccionar", style="Sel.TButton",
-                   command=self._pick_file).grid(
-            row=0, column=2, padx=(8, 0), pady=4, ipadx=4)
-
         # ── Carpeta Excels ───────────────────────────────────────────────────
-        tb_carp, c_carp = self._bloque("Carpeta Excels", BG_CARPETA)
+        tb_carp, c_carp = self._bloque("Carpeta de Ficheros", BG_CARPETA)
         tb_carp.columnconfigure(1, weight=1)
         self._lbl_carpeta_title = tk.Label(
             tb_carp, text=_HINT_CARPETA,
             bg=BG_CARPETA, fg="white", font=FONT_UI, anchor="w")
         self._lbl_carpeta_title.grid(row=0, column=1, sticky="ew", padx=(6, 8))
+        _firma_lbl = tk.Label(tb_carp, image=self._firma_img,
+                              bg=BG_CARPETA, bd=0, cursor="hand2")
+        _firma_lbl.grid(row=0, column=2, padx=(0, 8), pady=2)
+        _firma_lbl.bind("<Button-1>", lambda _: self._show_flujo())
+        _Tooltip(_firma_lbl, "Dugarry'26")
 
         tk.Label(c_carp, text="Carpeta:", bg=BG_APP, font=FONT_UI, anchor="w").grid(
             row=0, column=0, sticky="w", padx=(0, 10), pady=4)
@@ -249,8 +410,32 @@ class App(tk.Tk):
                    command=self._pick_carpeta).grid(
             row=0, column=2, padx=(8, 0), pady=4, ipadx=4)
 
-        # ── Tabla Correos/Ficheros ───────────────────────────────────────────
-        tb_tab, c_tab = self._bloque("Tabla Correos/Ficheros", BG_TABLA, expand=True)
+        # ── Sustitución ──────────────────────────────────────────────────────
+        tb_sus, c_sus = self._bloque("Sustitución en nombres de fichero", BG_SUSTIT)
+        tb_sus.columnconfigure(1, weight=1)
+        self._lbl_sus_preview = tk.Label(
+            tb_sus, text="", bg=BG_SUSTIT, fg="white", font=FONT_UI, anchor="w")
+        self._lbl_sus_preview.grid(row=0, column=1, sticky="ew", padx=(6, 8))
+
+        tk.Label(c_sus, text="Texto a sustituir:", bg=BG_APP,
+                 font=FONT_UI, anchor="w").grid(
+            row=0, column=0, sticky="w", padx=(0, 10), pady=(4, 2))
+        tk.Entry(c_sus, textvariable=self._sustituir_var,
+                 font=FONT_ENTRY, bg="white", fg="#222222",
+                 relief="sunken", bd=1).grid(
+            row=0, column=1, sticky="ew", pady=(4, 2), ipady=4)
+
+        tk.Label(c_sus, text="Texto nuevo:", bg=BG_APP,
+                 font=FONT_UI, anchor="w").grid(
+            row=1, column=0, sticky="w", padx=(0, 10), pady=(2, 4))
+        tk.Entry(c_sus, textvariable=self._nuevo_var,
+                 font=FONT_ENTRY, bg="white", fg="#222222",
+                 relief="sunken", bd=1).grid(
+            row=1, column=1, sticky="ew", pady=(2, 4), ipady=4)
+
+        # ── Ficheros en Carpeta ──────────────────────────────────────────────
+        tb_tab, c_tab = self._bloque("Ficheros en Carpeta", BG_TABLA, expand=True)
+        self._tab_bloque = tb_tab.master   # referencia al bloque exterior
         tb_tab.columnconfigure(0, weight=1)
         self._lbl_count = tk.Label(
             tb_tab, text="", bg=BG_TABLA, fg="white", font=FONT_UI)
@@ -271,13 +456,12 @@ class App(tk.Tk):
         self._tree = ttk.Treeview(
             tree_frame, columns=_COL_IDS,
             show="headings", selectmode="extended")
-
-        for col_id in _COL_IDS:
+        for col_id, col_name in zip(_COL_IDS, _COL_NAMES):
             anc = "center" if col_id == "resultado" else "w"
-            self._tree.heading(col_id, text=col_id.capitalize(),
-                               anchor=anc,
+            self._tree.heading(col_id, text=col_name, anchor=anc,
                                command=lambda c=col_id: self._sort_col(c))
-            self._tree.column(col_id, width=180, minwidth=60, stretch=True, anchor=anc)
+            self._tree.column(col_id, width=200, minwidth=60,
+                              stretch=True, anchor=anc)
 
         vsb = ttk.Scrollbar(tree_frame, orient="vertical",   command=self._tree.yview)
         hsb = ttk.Scrollbar(tree_frame, orient="horizontal", command=self._tree.xview)
@@ -285,10 +469,15 @@ class App(tk.Tk):
         vsb.grid(row=0, column=1, sticky="ns")
         hsb.grid(row=1, column=0, sticky="ew")
         self._tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
-        self._tree.bind("<<TreeviewSelect>>", self._update_count)
+
+        self._tree.tag_configure("even",     background="#FFFFFF", foreground="#222222")
+        self._tree.tag_configure("odd",      background="#E8EDF2", foreground="#222222")
+        self._tree.tag_configure("even_sel", background="#5B9BD5", foreground="white")
+        self._tree.tag_configure("odd_sel",  background="#2E75B6", foreground="white")
+
+        self._tree.bind("<<TreeviewSelect>>", self._on_sel_change)
         self._tree.bind("<MouseWheel>",
                         lambda e: self._tree.yview_scroll(-1 if e.delta > 0 else 1, "units"))
-
         self._sort_reverse: dict[str, bool] = {c: False for c in _COL_IDS}
 
         # ── Carpeta de Destino ───────────────────────────────────────────────
@@ -325,9 +514,10 @@ class App(tk.Tk):
         self._btn_rename.grid(row=0, column=2, padx=(0, 8), pady=4, ipadx=6)
 
         self._log = scrolledtext.ScrolledText(
-            c_log, height=8, state="disabled", font=FONT_LOG, wrap="word",
+            c_log, height=6, state="disabled", font=FONT_LOG, wrap="word",
             spacing1=5, spacing3=5,
-            bg="#1E1E1E", fg="#D4D4D4", insertbackground="white", relief="flat", bd=0)
+            bg="#1E1E1E", fg="#D4D4D4", insertbackground="white",
+            relief="flat", bd=0)
         self._log.grid(row=0, column=0, columnspan=3, sticky="nsew")
         self._log.tag_configure("ok",    foreground="#4EC94E")
         self._log.tag_configure("error", foreground="#FF6B6B")
@@ -336,28 +526,122 @@ class App(tk.Tk):
 
         tk.Frame(self, bg=BG_APP, height=8).pack()
 
-    # ── Callbacks de selección ────────────────────────────────────────────────
+    # ── Carpeta / destino ─────────────────────────────────────────────────────
 
-    def _pick_file(self) -> None:
-        init = (os.path.dirname(self._xlsx_var.get())
-                if self._xlsx_var.get() else os.path.expanduser("~"))
-        path = filedialog.askopenfilename(
-            parent=self, title="Seleccionar archivo Excel", initialdir=init,
-            filetypes=[("Excel", "*.xlsx *.xlsm *.xls"), ("Todos los archivos", "*.*")])
-        if not path:
+    def _show_flujo(self) -> None:
+        if hasattr(self, "_flujo_panel") and self._flujo_panel.winfo_ismapped():
+            self._hide_flujo()
             return
-        self._xlsx_var.set(path)
-        self._lbl_xlsx_title.config(text=os.path.basename(path))
-        _reg_write(_REG_XLSX, path)
-        if not self._carpeta_var.get():
-            self._carpeta_var.set(os.path.dirname(path))
-        self._load_excel_bg(path)
+
+        # Crear el panel integrado la primera vez
+        if not hasattr(self, "_flujo_panel"):
+            pan = tk.Frame(self._tab_bloque, bg=BG_APP)
+            self._flujo_panel = pan
+
+            hdr = tk.Frame(pan, bg=BG_TABLA)
+            hdr.pack(fill="x")
+            tk.Label(hdr, text="  Flujo de la Aplicación",
+                     bg=BG_TABLA, fg="white", font=FONT_TITLE,
+                     anchor="w", pady=4).pack(side="left", fill="x", expand=True)
+            tk.Button(hdr, text="  ✕  ", command=self._hide_flujo,
+                      bg=BG_TABLA, fg="white",
+                      activebackground="#C0392B", activeforeground="white",
+                      relief="flat", bd=0, font=FONT_BOLD, cursor="hand2",
+                      ).pack(side="right", padx=4)
+
+            self._flujo_txt = scrolledtext.ScrolledText(
+                pan, font=FONT_UI, wrap="word",
+                bg=BG_APP, fg="#222222", relief="flat", bd=0,
+                spacing1=1, spacing3=1, padx=14, pady=6)
+            self._flujo_txt.pack(fill="both", expand=True)
+            self._render_md(self._flujo_txt, _FLUJO_MD)
+
+        self._flujo_panel.place(x=0, y=0, relwidth=1, relheight=1)
+        self._flujo_panel.lift()
+
+    def _hide_flujo(self) -> None:
+        if hasattr(self, "_flujo_panel"):
+            self._flujo_panel.place_forget()
+
+    def _render_md(self, txt: scrolledtext.ScrolledText, content: str) -> None:
+        """Renderiza markdown básico con colores en un widget Text."""
+        txt.tag_configure("h1",      font=("Verdana", BASE + 4, "bold"),
+                          foreground=BG_TABLA,   spacing1=12, spacing3=6)
+        txt.tag_configure("h2",      font=("Verdana", BASE + 2, "bold"),
+                          foreground=BG_CARPETA, spacing1=10, spacing3=4)
+        txt.tag_configure("h3",      font=("Verdana", BASE, "bold"),
+                          foreground=BG_DESTINO, spacing1=8,  spacing3=2)
+        txt.tag_configure("code",    font=("Courier New", BASE - 1),
+                          background="#E8EDF2", foreground="#2C3E50",
+                          lmargin1=20, lmargin2=20, spacing1=1, spacing3=1)
+        txt.tag_configure("table",   font=("Courier New", BASE - 1),
+                          background="#F4F6F7", foreground="#2C3E50",
+                          lmargin1=10, lmargin2=10)
+        txt.tag_configure("tabsep",  font=("Courier New", BASE - 1),
+                          background="#D5D8DC", foreground="#7F8C8D",
+                          lmargin1=10, lmargin2=10)
+        txt.tag_configure("bullet",  font=FONT_UI, foreground="#2C3E50",
+                          lmargin1=24, lmargin2=40)
+        txt.tag_configure("rule",    font=("Verdana", 4),
+                          foreground=BG_TABLA, spacing1=6, spacing3=6)
+        txt.tag_configure("quote",   font=("Verdana", BASE, "italic"),
+                          foreground="#5D6D7E", lmargin1=30, lmargin2=30)
+        txt.tag_configure("normal",  font=FONT_UI, foreground="#222222")
+        txt.tag_configure("md_bold", font=FONT_BOLD)
+        txt.tag_configure("md_icode",font=("Courier New", BASE - 1),
+                          foreground="#C0392B")
+
+        txt.configure(state="normal")
+        txt.delete("1.0", "end")
+
+        in_code = False
+        for line in content.split("\n"):
+            stripped = line.strip()
+
+            if stripped == "```":
+                in_code = not in_code
+                if not in_code:
+                    txt.insert("end", "\n")
+                continue
+
+            if in_code:
+                txt.insert("end", line + "\n", "code")
+                continue
+
+            if stripped in ("---", "***", "___"):
+                txt.insert("end", "─" * 72 + "\n", "rule")
+                continue
+
+            if line.startswith("### "):
+                _insert_inline(txt, line[4:] + "\n", "h3"); continue
+            if line.startswith("## "):
+                _insert_inline(txt, line[3:] + "\n", "h2"); continue
+            if line.startswith("# "):
+                _insert_inline(txt, line[2:] + "\n", "h1"); continue
+
+            if line.startswith("|"):
+                tag = "tabsep" if all(c in "-|: " for c in line) else "table"
+                txt.insert("end", line + "\n", tag)
+                continue
+
+            if line.startswith("> "):
+                _insert_inline(txt, line[2:] + "\n", "quote"); continue
+
+            if re.match(r"^( {0,4})-\s", line):
+                _insert_inline(txt, "  •  " + line.lstrip("- ").lstrip() + "\n",
+                               "bullet"); continue
+
+            if stripped:
+                _insert_inline(txt, line + "\n", "normal")
+            else:
+                txt.insert("end", "\n", "normal")
+
+        txt.configure(state="disabled")
 
     def _pick_carpeta(self) -> None:
         init = (self._carpeta_var.get()
                 if self._carpeta_var.get() and os.path.isdir(self._carpeta_var.get())
-                else (os.path.dirname(self._xlsx_var.get())
-                      if self._xlsx_var.get() else os.path.expanduser("~")))
+                else os.path.expanduser("~"))
         folder = filedialog.askdirectory(
             parent=self, title="Carpeta con los ficheros a renombrar", initialdir=init)
         if folder:
@@ -382,10 +666,15 @@ class App(tk.Tk):
             self._lbl_dest_title.config(text=_HINT_DEST)
             self._btn_rename.config(text="Renombrar")
 
-    def _on_carpeta_change(self, *_) -> None:
+    # ── Parámetros → recarga con debounce ─────────────────────────────────────
+
+    def _on_params_change(self, *_) -> None:
         val = self._carpeta_var.get().strip()
         self._lbl_carpeta_title.config(
             text=(os.path.basename(val) or val) if val else _HINT_CARPETA)
+        if self._after_id is not None:
+            self.after_cancel(self._after_id)
+        self._after_id = self.after(300, self._load_files)
 
     # ── Selección de filas ────────────────────────────────────────────────────
 
@@ -395,12 +684,25 @@ class App(tk.Tk):
     def _sel_none(self) -> None:
         self._tree.selection_remove(self._tree.get_children())
 
-    def _update_count(self, _=None) -> None:
+    def _on_sel_change(self, _=None) -> None:
+        selection = set(self._tree.selection())
+        for iid in self._tree.get_children():
+            even = self._tree.index(iid) % 2 == 0
+            if iid in selection:
+                tag = "even_sel" if even else "odd_sel"
+            else:
+                tag = "even" if even else "odd"
+            self._tree.item(iid, tags=(tag,))
+        sel = len(selection)
+        tot = len(self._tree.get_children())
+        self._lbl_count.config(text=f"{sel} / {tot}" if tot else "")
+
+    def _update_count(self) -> None:
         sel = len(self._tree.selection())
         tot = len(self._tree.get_children())
         self._lbl_count.config(text=f"{sel} / {tot}" if tot else "")
 
-    # ── Ordenación de columnas ────────────────────────────────────────────────
+    # ── Ordenación ────────────────────────────────────────────────────────────
 
     def _sort_col(self, col: str) -> None:
         items = [(self._tree.set(iid, col), iid) for iid in self._tree.get_children()]
@@ -408,12 +710,12 @@ class App(tk.Tk):
         items.sort(key=lambda t: t[0].lower(), reverse=rev)
         for idx, (_, iid) in enumerate(items):
             self._tree.move(iid, "", idx)
-            self._tree.item(iid, tags=("even" if idx % 2 == 0 else "odd",))
         self._sort_reverse[col] = not rev
         arrow = " ▲" if not rev else " ▼"
         for c in _COL_IDS:
             raw = self._tree.heading(c, "text").rstrip(" ▲▼")
             self._tree.heading(c, text=raw + (arrow if c == col else ""))
+        self._on_sel_change()
 
     # ── Log ───────────────────────────────────────────────────────────────────
 
@@ -428,161 +730,120 @@ class App(tk.Tk):
         self._log.delete("1.0", "end")
         self._log.configure(state="disabled")
 
-    # ── Carga del Excel ───────────────────────────────────────────────────────
+    # ── Carga de ficheros ─────────────────────────────────────────────────────
 
-    def _load_excel_bg(self, path: str) -> None:
-        self._log_write(f"\nLeyendo tabla de:  {os.path.basename(path)}\n", "info")
-        self._btn_rename.config(state="disabled")
+    def _load_files(self) -> None:
+        self._after_id = None
+        carpeta   = self._carpeta_var.get().strip()
+        sustituir = self._sustituir_var.get()
+        nuevo     = self._nuevo_var.get()
+
         self._clear_tree()
-        threading.Thread(target=self._load_thread, args=(path,), daemon=True).start()
+        if not carpeta or not os.path.isdir(carpeta):
+            return
 
-    def _load_thread(self, path: str) -> None:
         try:
-            if openpyxl is None:
-                raise ImportError("openpyxl no está instalado.\nInstala con:  pip install openpyxl")
-            wb = openpyxl.load_workbook(path, data_only=True, read_only=True)
-            ws = wb.active
-            rows = list(ws.iter_rows(values_only=True))
-            wb.close()
-            if not rows or len(rows[0]) < 2:
-                raise ValueError("La tabla debe tener al menos dos columnas.")
-            h0 = str(rows[0][0] or "Mail").strip()
-            h1 = str(rows[0][1] or "Fichero").strip()
-            data = []
-            for r in rows[1:]:
-                if not r[0] and not r[1]:
-                    continue
-                mail    = str(r[0] or "").strip()
-                fichero = str(r[1] or "").strip()
-                clean   = _mail_clean(mail)
-                repl    = f"({clean})" if clean else "()"
-                newname = fichero.replace("Indicadores", repl)
-                data.append((mail, fichero, newname, "-.-"))
-            self.after(0, self._populate_tree, (h0, h1), data)
-        except Exception as exc:
-            self.after(0, self._on_load_error, str(exc))
+            files = sorted(
+                f for f in os.listdir(carpeta)
+                if os.path.isfile(os.path.join(carpeta, f)))
+        except PermissionError as exc:
+            self._log_write(f"\n  ERROR: {exc}\n", "error")
+            return
 
-    def _populate_tree(self, headers: tuple, data: list) -> None:
+        rows = []
+        for f in files:
+            new_name = f.replace(sustituir, nuevo) if sustituir else f
+            rows.append((f, new_name, "-.-"))
+
+        self._populate_tree(rows)
+        self._log_write(
+            f"\n{len(rows)} fichero(s) en  {carpeta}\n", "info")
+
+    def _populate_tree(self, rows: list) -> None:
         self._clear_tree()
-        h0, h1 = headers
-        self._col_headers = headers
-        labels = (h0, h1) + _COL_FIXED
-        for col_id, label in zip(_COL_IDS, labels):
-            self._tree.heading(col_id, text=label,
+        self._sort_reverse = {c: False for c in _COL_IDS}
+        for col_id, col_name in zip(_COL_IDS, _COL_NAMES):
+            self._tree.heading(col_id, text=col_name,
                                command=lambda c=col_id: self._sort_col(c))
 
-        self._sort_reverse = {c: False for c in _COL_IDS}
-        for i, row in enumerate(data):
+        for i, row in enumerate(rows):
             tag = "even" if i % 2 == 0 else "odd"
             self._tree.insert("", "end", iid=str(i), values=row, tags=(tag,))
-        self._tree.tag_configure("odd",  background="#FFFFFF")
-        self._tree.tag_configure("even", background="#F4F6F7")
 
         self._tree.selection_set(self._tree.get_children())
-        self._update_count()
-        self.after(120, self._autosize_columns, labels)
-        self._log_write(f"  -> {len(data)} fila(s) cargada(s)\n", "ok")
-        self._btn_rename.config(state="normal")
+        self._on_sel_change()
+        self.after(120, self._autosize_columns)
 
-    def _autosize_columns(self, labels: tuple) -> None:
+    def _autosize_columns(self) -> None:
         self.update_idletasks()
         font_n = tkfont.Font(family=FONT_UI[0],   size=FONT_UI[1])
         font_b = tkfont.Font(family=FONT_BOLD[0], size=FONT_BOLD[1], weight="bold")
 
-        # Col 4 (Resultado): máximo entre el título y los valores posibles, sin stretch
-        resultado_vals = ["-.-", "Rename", "CopyRename", "Falló"]
-        col4_w = max(font_b.measure(labels[3]),
-                     *[font_n.measure(v) for v in resultado_vals]) + 15
-        self._tree.column("resultado", width=col4_w, minwidth=col4_w,
+        # Resultado: fijo al máximo de sus valores posibles
+        res_vals = ["-.-", "Rename", "CopyRename", "Falló"]
+        col_res  = max(font_b.measure("Resultado"),
+                       *[font_n.measure(v) for v in res_vals]) + 15
+        self._tree.column("resultado", width=col_res, minwidth=col_res,
                           stretch=False, anchor="center")
 
-        # Col 1 (mail): máximo de todos los valores de la columna + 15px
-        col1_w = font_b.measure(labels[0])
+        # Nombre Actual: ajuste al contenido más ancho
+        col_nom = font_b.measure("Nombre Actual")
         for iid in self._tree.get_children():
-            w = font_n.measure(str(self._tree.set(iid, "mail")))
-            if w > col1_w:
-                col1_w = w
-        col1_w += 15
-        self._tree.column("mail", width=col1_w, minwidth=col1_w,
+            w = font_n.measure(str(self._tree.set(iid, "nombre")))
+            if w > col_nom:
+                col_nom = w
+        col_nom += 15
+        self._tree.column("nombre", width=col_nom, minwidth=80,
                           stretch=False, anchor="w")
 
-        # Cols 2 y 3: reparten el espacio restante del treeview a partes iguales
-        tree_w = self._tree.winfo_width()
+        # New Name: ocupa el espacio restante
+        tree_w    = self._tree.winfo_width()
         if tree_w <= 1:
             tree_w = self.winfo_screenwidth() - 30
-        vsb_w     = 18
-        remaining = max(200, tree_w - col1_w - col4_w - vsb_w)
-        col23_w   = remaining // 2
-        self._tree.column("fichero", width=col23_w, minwidth=80,
+        remaining = max(150, tree_w - col_nom - col_res - 18)
+        self._tree.column("newname", width=remaining, minwidth=80,
                           stretch=True, anchor="w")
-        self._tree.column("newname", width=col23_w, minwidth=80,
-                          stretch=True, anchor="w")
-
-    def _on_load_error(self, msg: str) -> None:
-        self._btn_rename.config(state="normal")
-        self._log_write(f"\n  ERROR: {msg}\n", "error")
-        messagebox.showerror("Error al leer Excel", msg, parent=self)
 
     def _clear_tree(self) -> None:
         for iid in self._tree.get_children():
             self._tree.delete(iid)
         self._lbl_count.config(text="")
 
-    # ── Acción de renombrar / copiar y renombrar ──────────────────────────────
+    # ── Renombrar / Copiar y Renombrar ────────────────────────────────────────
 
     def _do_rename(self) -> None:
-        xlsx_path = self._xlsx_var.get()
-        carpeta   = self._carpeta_var.get().strip()
-        dest      = self._dest_var.get().strip()
-        copy_mode = bool(dest)
+        carpeta = self._carpeta_var.get().strip()
+        dest    = self._dest_var.get().strip()
 
-        if not xlsx_path or not os.path.exists(xlsx_path):
-            messagebox.showerror("Error", "Selecciona un archivo Excel válido.", parent=self)
-            return
         if not carpeta or not os.path.isdir(carpeta):
             messagebox.showerror(
-                "Error",
-                "Selecciona la carpeta donde están los ficheros a renombrar (Carpeta Excels).",
-                parent=self)
+                "Error", "Selecciona la carpeta con los ficheros.", parent=self)
             return
 
         selected = self._tree.selection()
         if not selected:
-            messagebox.showwarning("Sin selección",
-                                   "Selecciona al menos una fila de la tabla.", parent=self)
+            messagebox.showwarning(
+                "Sin selección", "Selecciona al menos un fichero.", parent=self)
             return
 
+        copy_mode = bool(dest)
         if copy_mode and not os.path.exists(dest):
             try:
                 os.makedirs(dest, exist_ok=True)
             except OSError as exc:
-                messagebox.showerror("Error",
-                                     f"No se pudo crear la carpeta de destino:\n{exc}",
-                                     parent=self)
+                messagebox.showerror(
+                    "Error", f"No se pudo crear la carpeta de destino:\n{exc}",
+                    parent=self)
                 return
 
-        action_lbl = "Copiando y renombrando" if copy_mode else "Renombrando"
-        self._log_write(f"\n{action_lbl} {len(selected)} fichero(s)...\n", "info")
+        action = "Copiando y renombrando" if copy_mode else "Renombrando"
+        self._log_write(f"\n{action} {len(selected)} fichero(s)...\n", "info")
         self._btn_rename.config(state="disabled")
 
         threading.Thread(
             target=self._rename_thread,
             args=(selected, carpeta, dest, copy_mode),
             daemon=True).start()
-
-    @staticmethod
-    def _add_correo_sheet(file_path: str, mail: str) -> None:
-        """Abre el Excel, crea/reemplaza la hoja 'Correo' con el mail en A1, veryHidden."""
-        ext      = os.path.splitext(file_path)[1].lower()
-        keep_vba = ext in (".xlsm", ".xlam", ".xltm")
-        wb = openpyxl.load_workbook(file_path, keep_vba=keep_vba)
-        if "Correo" in wb.sheetnames:
-            del wb["Correo"]
-        ws = wb.create_sheet("Correo")
-        ws["A1"] = mail
-        ws.sheet_state = "veryHidden"
-        wb.save(file_path)
-        wb.close()
 
     def _rename_thread(self, selected: tuple, carpeta: str,
                        dest: str, copy_mode: bool) -> None:
@@ -592,34 +853,31 @@ class App(tk.Tk):
         ok = 0; errors = 0
         for iid in selected:
             vals     = self._tree.item(iid, "values")
-            mail     = str(vals[0]).strip()  # col 1: mail
-            fichero  = str(vals[1]).strip()  # col 2: nombre original
-            new_name = str(vals[2]).strip()  # col 3: New Name
-            if not fichero or not new_name:
+            nombre   = str(vals[0]).strip()
+            new_name = str(vals[1]).strip()
+            if not nombre or not new_name:
                 self.after(0, self._log_write, "  ⚠  Fila vacía ignorada\n", "warn")
                 continue
-            orig_path = os.path.join(carpeta, fichero)
+            orig_path = os.path.join(carpeta, nombre)
             try:
                 if not os.path.exists(orig_path):
-                    raise FileNotFoundError(f"No encontrado: {fichero}")
+                    raise FileNotFoundError(f"No encontrado: {nombre}")
                 if copy_mode:
                     new_path = os.path.join(dest, new_name)
                     shutil.copy2(orig_path, new_path)
-                    self._add_correo_sheet(new_path, mail)
                     result = "CopyRename"
                 else:
-                    self._add_correo_sheet(orig_path, mail)
                     new_path = os.path.join(carpeta, new_name)
                     os.rename(orig_path, new_path)
                     result = "Rename"
                 self.after(0, self._tree.set, iid, "resultado", result)
                 self.after(0, self._log_write,
-                           f"  ✔  {fichero}  →  {new_name}\n", "ok")
+                           f"  ✔  {nombre}  →  {new_name}\n", "ok")
                 ok += 1
             except Exception as exc:
                 self.after(0, self._tree.set, iid, "resultado", "Falló")
                 self.after(0, self._log_write,
-                           f"  ✖  {fichero}: {exc}\n", "error")
+                           f"  ✖  {nombre}: {exc}\n", "error")
                 errors += 1
         self.after(0, self._rename_done, ok, errors, copy_mode)
 
