@@ -8,3 +8,7 @@ Norma43/*.xlsx
 # Build de PyInstaller
 Norma43/build/
 Norma43/dist/
+Rename_Files/build/
+Rename_Files/dist/
+Rename_Files/*.exe
+Rename_Files/*.spec
