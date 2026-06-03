@@ -102,4 +102,4 @@ git add .gitignore && git commit -m "Ignorar <proyecto>: migrado a repo independ
 | Norma43 (desde Norma43.Code) | `Norma43` | ✅ migrado |
 | Certificados_de_Pago | `Certificados_de_Pago` | ✅ migrado |
 | Rename_Files - Special | `Rename_Files-Special` | ✅ migrado |
-| Rename_Files | — | ⏸️ aplazado (falta `Rename_Files.py`) |
+| Rename_Files | `Rename_Files` | ✅ migrado (Rename_Files.py recuperado) |
