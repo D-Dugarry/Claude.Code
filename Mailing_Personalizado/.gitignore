@@ -1,0 +1,15 @@
+# ── Artefactos de compilación (PyInstaller) ──
+__pycache__/
+*.pyc
+build/
+dist/
+
+# ── Ejecutables (binarios grandes, no se versionan) ──
+*.exe
+
+# ── Datos de trabajo (no forman parte del código) ──
+Tablas_Indicadores/
+Indicadores*/
+Adjuntos Comunes/
+*.xlsx
+*.xlsm
