@@ -104,3 +104,4 @@ git add .gitignore && git commit -m "Ignorar <proyecto>: migrado a repo independ
 | Rename_Files - Special | `Rename_Files-Special` | ✅ migrado |
 | Rename_Files | `Rename_Files` | ✅ migrado (Rename_Files.py recuperado) |
 | PowerBI_PPUA | `PowerBI_PPUA` | ✅ migrado (2026-06-20, proyecto nuevo en main) |
+| PPUA_VBA | `PPUA_VBA` | ✅ migrado (2026-06-21, proyecto nuevo en main; .xlsm fuera de git) |
