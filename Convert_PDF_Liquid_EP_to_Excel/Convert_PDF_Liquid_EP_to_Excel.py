@@ -131,14 +131,14 @@ def _cfg_write(key: str, value: str) -> None:
 # (esa fila deja vacías Referencia/Fecha/Importe/Plazo/Forma Pago).
 COL_DETALLE_IDS = ("exped", "dni", "nombre", "referencia", "fecha",
                     "importe", "plazo", "forma_pago", "imp_adm")
-COL_DETALLE_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Referencia",
-                      "Fecha Cobro", "Importe", "Plazo", "Forma Pago",
+COL_DETALLE_NAMES = ("Exp.", "DNI", "Apellidos y Nombre", "Referencia",
+                      "F. Cobro", "Imp.Acad.", "Rec.", "F. Pag.",
                       "Imp.Adm.")
 
 COL_RESUMEN_IDS = ("exped", "dni", "nombre", "importe", "administrativo",
                     "neto")
 COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Importe",
-                      "Administrativo", "Importe Neto")
+                      "Imp.Adm.", "Imp.Acad.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -326,16 +326,6 @@ class App(tk.Tk):
             on_select=lambda s, t, lbl=self._lbl_count1:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_detalle.pack(fill="both", expand=True)
-        # Columnas cortas (numéricas / fecha / código) a ancho fijo, para
-        # dejar el espacio sobrante a "Apellidos y Nombre".
-        self._tree_detalle.set_fixed_width("exped", 60)
-        self._tree_detalle.set_fixed_width("dni", 90)
-        self._tree_detalle.set_fixed_width("referencia", 110)
-        self._tree_detalle.set_fixed_width("fecha", 90)
-        self._tree_detalle.set_fixed_width("importe", 90)
-        self._tree_detalle.set_fixed_width("plazo", 55)
-        self._tree_detalle.set_fixed_width("forma_pago", 55)
-        self._tree_detalle.set_fixed_width("imp_adm", 90)
         self._tree_detalle.set_anchor("importe", "e")
         self._tree_detalle.set_anchor("imp_adm", "e")
 
@@ -355,11 +345,6 @@ class App(tk.Tk):
             on_select=lambda s, t, lbl=self._lbl_count2:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_resumen.pack(fill="both", expand=True)
-        self._tree_resumen.set_fixed_width("exped", 60)
-        self._tree_resumen.set_fixed_width("dni", 90)
-        self._tree_resumen.set_fixed_width("importe", 100)
-        self._tree_resumen.set_fixed_width("administrativo", 100)
-        self._tree_resumen.set_fixed_width("neto", 100)
         self._tree_resumen.set_anchor("importe", "e")
         self._tree_resumen.set_anchor("administrativo", "e")
         self._tree_resumen.set_anchor("neto", "e")
