@@ -336,6 +336,8 @@ class App(tk.Tk):
         self._tree_detalle.set_fixed_width("plazo", 55)
         self._tree_detalle.set_fixed_width("forma_pago", 55)
         self._tree_detalle.set_fixed_width("imp_adm", 90)
+        self._tree_detalle.set_anchor("importe", "e")
+        self._tree_detalle.set_anchor("imp_adm", "e")
 
         # ── Tabla 2: vista previa (Resumen) ────────────────────────────────
         tb2, c2 = self._bloque("Vista previa (Resumen)", BG_TAB2,
@@ -358,6 +360,9 @@ class App(tk.Tk):
         self._tree_resumen.set_fixed_width("importe", 100)
         self._tree_resumen.set_fixed_width("administrativo", 100)
         self._tree_resumen.set_fixed_width("neto", 100)
+        self._tree_resumen.set_anchor("importe", "e")
+        self._tree_resumen.set_anchor("administrativo", "e")
+        self._tree_resumen.set_anchor("neto", "e")
 
     # ── BLOQUE 3: Informe ─────────────────────────────────────────────────────
 

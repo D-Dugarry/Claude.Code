@@ -171,9 +171,16 @@ class DataTable(tk.Frame):
         self._on_sel_change()
         self.after(120, self.autosize)
 
+    def set_anchor(self, col_id: str, anchor: str) -> None:
+        """Alinea una columna concreta distinto del resto de la tabla (p. ej.
+        'e' para columnas de importe). Afecta a cabecera y a los valores."""
+        self.tree.heading(col_id, anchor=anchor)
+        self.tree.column(col_id, anchor=anchor)
+
     def set_fixed_width(self, col_id: str, width: int) -> None:
-        """Fija a mano el ancho de una columna (fechas, tamaños…) en vez de
-        medirlo por contenido. Aplica en la siguiente autosize()."""
+        """Fija un ancho MÍNIMO para una columna (fechas, tamaños…): si la
+        cabecera o el contenido medido necesitan más, prevalece la medida
+        real (nunca trunca). Aplica en la siguiente autosize()."""
         self._fixed[col_id] = width
 
     # ── Selección ────────────────────────────────────────────────────────────
@@ -220,15 +227,15 @@ class DataTable(tk.Frame):
 
         base_widths = []
         for cid, cname in zip(self.col_ids, self.col_names):
-            if cid in self._fixed:
-                base_widths.append(self._fixed[cid])
-                continue
             width = font_b.measure(cname)
             for iid in self.tree.get_children():
                 w = font_n.measure(str(self.tree.set(iid, cid)))
                 if w > width:
                     width = w
-            base_widths.append(width + PAD)
+            width += PAD
+            if cid in self._fixed:
+                width = max(width, self._fixed[cid])
+            base_widths.append(width)
 
         leftover = self.tree.winfo_width() - sum(base_widths)
         extra = min(PAD, leftover / len(base_widths)) if leftover > 0 else 0
