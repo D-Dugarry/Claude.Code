@@ -33,11 +33,11 @@ import fitz  # PyMuPDF
 # ── Patrones de línea ────────────────────────────────────────────────────
 
 _REF_RE = re.compile(
-    r'^(\d{13})\s+(\d{2}/\d{2}/\d{4})\s+([\d.,]+)\s+(\d+)\s+(\d+)\s*$')
+    r'^(\d{13})\s+(\d{2}/\d{2}/\d{4})\s+(-?[\d.,]+)\s+(\d+)\s+(\d+)\s*$')
 _STUDENT_RE = re.compile(r'^(\d{1,6})\s+(\S+)\s+(.+?)\s*$')
 _IMPORTE_RE = re.compile(r'^Importe:\s+([\d.,]+)\s*$')
 _ADMIN_RE = re.compile(r'^Administrativo:\s*-?\s*([\d.,]+)\s*$')
-_TOTAL_RE = re.compile(r'^Importe Total\s*:\s*([\d.,]*)\s*.?\s*$')
+_TOTAL_RE = re.compile(r'^Importe Total\s*:\s*(-?[\d.,]*)\s*.?\s*$')
 
 _NOISE_MARKERS = (
     "Curso Acad", "Listado de Liquidaci", "UNIVERSIDAD PERMANENTE",
