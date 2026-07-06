@@ -25,6 +25,7 @@ del propio PDF.
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
 
 import fitz  # PyMuPDF
@@ -89,6 +90,17 @@ class Registro:
     administrativo: float = 0.0      # gastos administrativos
     importe_total_pdf: float | None = None  # "Importe Total" según el PDF
 
+    # ── Corrección de errores de alineación DNI/Apellido ──────────────────
+    # Cuando el PDF origen desalinea la fila del alumno, el campo DNI se
+    # "come" el inicio del apellido (p. ej. dni="DEUL5Z83KFMARTIN",
+    # nombre=", KRODEL"). corregir_alineacion() detecta el caso, guarda el
+    # valor crudo aquí y aplica una separación heurística; revisar=True hasta
+    # que el usuario la valide en la UI. Ver corregir_alineacion().
+    revisar: bool = False            # fila con posible desalineación pendiente
+    dni_raw: str = ""                # DNI+apellido pegados, tal cual el PDF
+    nombre_raw: str = ""             # nombre original (suele empezar por ",")
+    split_idx: int | None = None     # corte aplicado dentro de dni_raw
+
     @property
     def importe_neto(self) -> float:
         """Importe neto de matrícula. Se calcula siempre como importe -
@@ -98,6 +110,123 @@ class Registro:
         trae el valor, coincide exactamente con este cálculo en el 100%
         de los casos."""
         return round(self.importe - self.administrativo, 2)
+
+    def aplicar_split(self, idx: int) -> None:
+        """Separa dni_raw en DNI (primeros `idx` caracteres) + fragmento de
+        apellido (el resto) y reconstruye el nombre completo. Idempotente:
+        siempre parte de dni_raw/nombre_raw, no del valor ya corregido."""
+        frag = self.dni_raw[idx:]
+        self.dni = self.dni_raw[:idx]
+        base = self.nombre_raw
+        if base.lstrip().startswith(","):
+            self.nombre = frag + base           # "MARTIN" + ", KRODEL"
+        elif frag:
+            self.nombre = f"{frag} {base}"
+        else:
+            self.nombre = base
+        self.split_idx = idx
+
+
+# ── Detección y corrección de desalineación DNI/Apellido ───────────────────
+
+def _norm_apellido(s: str) -> str:
+    """Normaliza la parte de apellidos (antes de la primera coma) para poder
+    compararla alfabéticamente: mayúsculas, sin acentos, conservando el
+    carácter de reemplazo U+FFFD como comodín (los nombres del PDF traen
+    glyphs corruptos que no se pueden recuperar)."""
+    s = s.split(",")[0]
+    out = []
+    for ch in unicodedata.normalize("NFKD", s):
+        if unicodedata.combining(ch):
+            continue
+        if ch == "�":
+            out.append("�")
+        elif ch.isalpha():
+            out.append(ch.upper())
+        elif ch == " ":
+            out.append(" ")
+    return "".join(out)
+
+
+def _es_sospechosa(r: Registro) -> bool:
+    """Señales de desalineación: DNI anormalmente largo (>10; los válidos
+    miden 8-9) o el nombre empieza por coma (el apellido se lo comió el DNI)."""
+    return len(r.dni) > 10 or r.nombre.lstrip().startswith(",")
+
+
+def _vecino_apellido(records: list[Registro], i: int, paso: int) -> str:
+    """Apellido normalizado del primer vecino NO sospechoso en la dirección
+    `paso` (-1 anterior, +1 siguiente). El PDF va ordenado por 'Apellidos y
+    Nombre', así que estos vecinos acotan alfabéticamente el apellido real."""
+    j = i + paso
+    while 0 <= j < len(records):
+        if not records[j].revisar:
+            return _norm_apellido(records[j].nombre)
+        j += paso
+    return ""
+
+
+def _prefijo_comodin(a: str, b: str) -> int:
+    """Longitud del prefijo común de a y b, tratando U+FFFD como comodín."""
+    n = 0
+    for x, y in zip(a, b):
+        if x == y or x == "�" or y == "�":
+            n += 1
+        else:
+            break
+    return n
+
+
+def _sugerir_split(records: list[Registro], i: int) -> int | None:
+    """Devuelve el índice de corte más probable dentro de dni_raw (longitud
+    del DNI), o None si la heurística no encuentra un candidato fiable.
+
+    Idea: el fragmento de apellido es un sufijo alfabético del texto pegado.
+    Se prueba cada corte y se acepta aquel cuyo fragmento encaja como prefijo
+    completo del apellido de un vecino (o viceversa), aprovechando que el PDF
+    está ordenado alfabéticamente. No es fiable al 100% (por eso la fila queda
+    marcada para revisión), pero acierta en los casos observados."""
+    merged = records[i].dni_raw
+    vecinos = [_vecino_apellido(records, i, +1),
+               _vecino_apellido(records, i, -1)]
+    mejor: tuple[int, int] | None = None            # (score, idx)
+    for idx in range(4, len(merged)):
+        frag = merged[idx:]
+        if not frag or not all(c.isalpha() or c == "�" for c in frag):
+            continue
+        fnorm = _norm_apellido(frag)
+        if not fnorm:
+            continue
+        for vecino in vecinos:
+            if not vecino:
+                continue
+            m = _prefijo_comodin(fnorm, vecino)
+            comun = min(len(fnorm), len(vecino))
+            if m == comun and comun >= 3:           # el más corto es prefijo
+                if mejor is None or m > mejor[0]:
+                    mejor = (m, idx)
+    return mejor[1] if mejor else None
+
+
+def corregir_alineacion(records: list[Registro]) -> int:
+    """Detecta filas con posible desalineación DNI/Apellido y aplica una
+    separación heurística basada en el orden alfabético de los vecinos. Marca
+    cada fila afectada con revisar=True (para validación manual en la UI) y
+    guarda el valor crudo en dni_raw/nombre_raw. No toca importes, así que no
+    afecta al checksum de 'IMPORTE TOTAL POR TASAS'. Devuelve el nº de filas
+    marcadas. Se llama tras parse_pdf (no dentro, para no alterar el test de
+    parseo)."""
+    sospechosas = [i for i, r in enumerate(records) if _es_sospechosa(r)]
+    for i in sospechosas:                           # 1ª pasada: marcar todas
+        r = records[i]
+        r.dni_raw = r.dni
+        r.nombre_raw = r.nombre
+        r.revisar = True
+    for i in sospechosas:                           # 2ª pasada: separar
+        idx = _sugerir_split(records, i)
+        if idx is not None:
+            records[i].aplicar_split(idx)
+    return len(sospechosas)
 
 
 # ── Parseo de un PDF ───────────────────────────────────────────────────────

@@ -26,7 +26,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, filedialog, messagebox
 
-from pdf_parser import parse_pdf, Registro
+from pdf_parser import parse_pdf, corregir_alineacion, Registro
 from excel_export import export_to_excel
 
 # Tooltips + caracolillo: help_tooltips.py vive junto a este archivo.
@@ -74,6 +74,8 @@ FONT_BOLD = ("Verdana", BASE, "bold")
 FONT_TITLE = ("Verdana", BASE + 1, "bold")
 FONT_ENTRY = ("Verdana", BASE - 1)
 FONT_LOG = ("Courier New", BASE)
+FONT_TABLA = ("Verdana", BASE - 1)
+FONT_TABLA_BOLD = ("Verdana", BASE - 1, "bold")
 
 SNAIL_IMG_PX = int(BASE * 2.8)
 
@@ -90,6 +92,11 @@ C_NINGUNO = "#F5B7B1"
 C_ACCION = "#F0B27A"
 C_EXPORTAR = "#A9DFBF"
 C_CONFIG = "#AAB7B8"
+
+# Filas con posible desalineación DNI/Apellido pendientes de revisar (ámbar)
+C_ROW_REVISAR = "#FDEBD0"      # fondo de fila marcada
+C_ROW_REVISAR_SEL = "#F5CBA7"  # fondo de fila marcada seleccionada
+C_AVISO = "#F39C12"            # ámbar del texto/botón de aviso
 
 
 # ── Registro Windows (persistencia de configuración) ──────────────────────────
@@ -130,15 +137,14 @@ def _cfg_write(key: str, value: str) -> None:
 # por línea de cobro más una fila por alumno con el importe administrativo
 # (esa fila deja vacías Referencia/Fecha/Importe/Plazo/Forma Pago).
 COL_DETALLE_IDS = ("exped", "dni", "nombre", "referencia", "fecha",
-                    "importe", "plazo", "forma_pago", "imp_adm")
+                    "importe", "imp_adm", "plazo", "forma_pago")
 COL_DETALLE_NAMES = ("Exp.", "DNI", "Apellidos y Nombre", "Referencia",
-                      "F. Cobro", "Imp.Acad.", "Rec.", "F. Pag.",
-                      "Imp.Adm.")
+                      "F. Cobro", "I.Acad.", "I.Adm.", "Rec.", "F. Pag.")
 
-COL_RESUMEN_IDS = ("exped", "dni", "nombre", "importe", "administrativo",
-                    "neto")
+COL_RESUMEN_IDS = ("exped", "dni", "nombre", "importe", "neto",
+                    "administrativo")
 COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Importe",
-                      "Imp.Adm.", "Imp.Acad.")
+                      "I.Acad.", "I.Adm.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -161,6 +167,11 @@ class App(tk.Tk):
         self._pdf_path: str | None = None
         self._ultimo_excel: str | None = None
         self._procesando = False
+
+        # Revisión de filas desalineadas DNI/Apellido
+        self._registros: list[Registro] = []
+        self._iid2reg_res: dict[str, Registro] = {}   # iid Resumen -> Registro
+        self._iid_revisar: set[str] = set()           # iids pendientes de revisar
 
         self._snail_img = None
         if _HAS_PIL:
@@ -205,7 +216,8 @@ class App(tk.Tk):
         s.configure("Config.TButton", font=FONT_UI, background=C_CONFIG, padding=(8, 1))
         s.map("Config.TButton", background=[("active", "#808B96")])
 
-        install_treeview_style(self, sep_color=BG_TAB1)
+        install_treeview_style(self, sep_color=BG_TAB1,
+                                font_ui=FONT_TABLA, font_bold=FONT_TABLA_BOLD)
 
     # ── Helper: bloque con cabecera coloreada ─────────────────────────────────
 
@@ -323,11 +335,14 @@ class App(tk.Tk):
         c1.columnconfigure(0, weight=1)
         self._tree_detalle = DataTable(
             c1, COL_DETALLE_IDS, COL_DETALLE_NAMES,
+            font_ui=FONT_TABLA, font_bold=FONT_TABLA_BOLD,
             on_select=lambda s, t, lbl=self._lbl_count1:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_detalle.pack(fill="both", expand=True)
         self._tree_detalle.set_anchor("importe", "e")
         self._tree_detalle.set_anchor("imp_adm", "e")
+        self._tree_detalle.set_anchor("plazo", "center")
+        self._tree_detalle.set_anchor("forma_pago", "center")
 
         # ── Tabla 2: vista previa (Resumen) ────────────────────────────────
         tb2, c2 = self._bloque("Vista previa (Resumen)", BG_TAB2,
@@ -335,19 +350,43 @@ class App(tk.Tk):
                                 header_h=self._header_h)
         tb2.columnconfigure(0, weight=1)
 
+        # Controles de revisión de desalineación DNI/Apellido (aviso en la
+        # barra de título del bloque). Ocultos mientras no haya filas marcadas.
+        self._frm_revisar = tk.Frame(tb2, bg=BG_TAB2)
+        self._frm_revisar.grid(row=0, column=1, padx=(0, 10))
+        self._lbl_revisar = tk.Label(
+            self._frm_revisar, text="", bg=C_AVISO, fg="#1B2631",
+            font=FONT_TABLA_BOLD, padx=8, pady=1)
+        self._lbl_revisar.pack(side="left", padx=(0, 6))
+        _bopts = dict(bg=C_AVISO, fg="#1B2631", activebackground="#E67E22",
+                      relief="raised", bd=1, font=FONT_TABLA_BOLD, cursor="hand2")
+        tk.Button(self._frm_revisar, text="◀", width=2,
+                  command=lambda: self._nav_revisar(-1), **_bopts
+                  ).pack(side="left", padx=1)
+        tk.Button(self._frm_revisar, text="Revisar…",
+                  command=self._abrir_revision, **_bopts
+                  ).pack(side="left", padx=1)
+        tk.Button(self._frm_revisar, text="▶", width=2,
+                  command=lambda: self._nav_revisar(+1), **_bopts
+                  ).pack(side="left", padx=1)
+        self._frm_revisar.grid_remove()
+
         self._lbl_count2 = tk.Label(tb2, text="", bg=BG_TAB2, fg="white", font=FONT_UI)
-        self._lbl_count2.grid(row=0, column=1, padx=(0, 6))
+        self._lbl_count2.grid(row=0, column=2, padx=(0, 6))
 
         c2.rowconfigure(0, weight=1)
         c2.columnconfigure(0, weight=1)
         self._tree_resumen = DataTable(
             c2, COL_RESUMEN_IDS, COL_RESUMEN_NAMES,
+            font_ui=FONT_TABLA, font_bold=FONT_TABLA_BOLD,
             on_select=lambda s, t, lbl=self._lbl_count2:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_resumen.pack(fill="both", expand=True)
         self._tree_resumen.set_anchor("importe", "e")
         self._tree_resumen.set_anchor("administrativo", "e")
         self._tree_resumen.set_anchor("neto", "e")
+        self._tree_resumen.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
+        self._tree_detalle.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
 
     # ── BLOQUE 3: Informe ─────────────────────────────────────────────────────
 
@@ -363,10 +402,10 @@ class App(tk.Tk):
         Tooltip(self._btn_accion,
                 "Parsea el PDF seleccionado y genera el Excel de una vez")
 
-        self._btn_abrir = ttk.Button(tb, text="📂 Abrir destino", style="Sel.TButton",
-                                     command=self._abrir_carpeta_destino)
+        self._btn_abrir = ttk.Button(tb, text="📂 Abrir Excel", style="Sel.TButton",
+                                     command=self._abrir_excel_generado)
         self._btn_abrir.grid(row=0, column=2, padx=(0, 4), pady=2, ipadx=6)
-        Tooltip(self._btn_abrir, "Abre en el explorador la carpeta destino del Excel")
+        Tooltip(self._btn_abrir, "Abre el último Excel generado en esta sesión")
 
         tk.Label(tb, text="", bg=BG_LOG).grid(row=0, column=3, sticky="ew")
 
@@ -516,6 +555,7 @@ class App(tk.Tk):
         self._pdf_path = path
         self._fuente1_var.set(path)
         self._log_write(f"PDF seleccionado: {path}", "info")
+        self._ejecutar()
 
     def _pick_carpeta_destino(self) -> None:
         path = filedialog.askdirectory(title="Seleccionar carpeta destino del Excel")
@@ -527,22 +567,228 @@ class App(tk.Tk):
     # ── Carga de tablas ───────────────────────────────────────────────────────
 
     def _load_tabla_detalle(self, registros: list[Registro]) -> None:
-        rows = []
+        rows, tags = [], []
+        i = 0
+
+        def _tag(marcada: bool, pos: int) -> str:
+            return "revisar" if marcada else ("row_a" if pos % 2 == 0 else "row_b")
+
         for r in registros:
             for ref in r.referencias:
                 rows.append((r.exped, r.dni, r.nombre, ref.referencia,
-                             ref.fecha, f"{ref.importe:.2f}",
-                             ref.plazo, ref.forma_pago, ""))
+                             ref.fecha, f"{ref.importe:.2f}", "",
+                             ref.plazo, ref.forma_pago))
+                tags.append(_tag(r.revisar, i))
+                i += 1
             # Fila con el importe administrativo: sin datos de cobro.
-            rows.append((r.exped, r.dni, r.nombre, "", "", "", "", "",
-                        f"{r.administrativo:.2f}"))
-        self._tree_detalle.load(rows)
+            rows.append((r.exped, r.dni, r.nombre, "", "", "",
+                        f"{r.administrativo:.2f}", "", ""))
+            tags.append(_tag(r.revisar, i))
+            i += 1
+        self._tree_detalle.load(rows, tags=tags)
 
     def _load_tabla_resumen(self, registros: list[Registro]) -> None:
-        rows = [(r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
-                 f"{r.administrativo:.2f}", f"{r.importe_neto:.2f}")
-                for r in registros]
-        self._tree_resumen.load(rows)
+        rows, tags = [], []
+        for i, r in enumerate(registros):
+            rows.append((r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
+                         f"{r.importe_neto:.2f}", f"{r.administrativo:.2f}"))
+            tags.append("revisar" if r.revisar
+                        else ("row_a" if i % 2 == 0 else "row_b"))
+        iids = self._tree_resumen.load(rows, tags=tags)
+        self._iid2reg_res = dict(zip(iids, registros))
+        self._iid_revisar = {iid for iid, r in zip(iids, registros) if r.revisar}
+
+    def _resumen_row(self, r: Registro) -> tuple:
+        """Fila de la tabla Resumen para un Registro (mismo orden de columnas)."""
+        return (r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
+                f"{r.importe_neto:.2f}", f"{r.administrativo:.2f}")
+
+    # ── Revisión de desalineación DNI/Apellido ─────────────────────────────────
+
+    def _post_correccion(self, n_rev: int) -> None:
+        """Tras parsear+corregir: refresca el contador de filas a revisar y
+        muestra u oculta los controles de revisión en la barra de título."""
+        self._actualizar_contador_revisar()
+        if n_rev:
+            self._log_write(
+                f"⚠ {n_rev} fila(s) con posible desalineación DNI/Apellido: "
+                "separadas por heurística, revísalas con los botones ◀ Revisar ▶ "
+                "de la Vista Resumen.", "warn")
+
+    def _actualizar_contador_revisar(self) -> None:
+        pendientes = sum(1 for r in self._registros if r.revisar)
+        if pendientes:
+            self._lbl_revisar.configure(text=f"⚠ Filas a revisar: {pendientes}")
+            self._frm_revisar.grid()
+        else:
+            self._frm_revisar.grid_remove()
+
+    def _marcadas_visual(self) -> list[str]:
+        """iids de las filas marcadas (pendientes), en el orden visual actual."""
+        return [iid for iid in self._tree_resumen.tree.get_children()
+                if iid in self._iid_revisar]
+
+    def _nav_revisar(self, paso: int) -> None:
+        """Desplaza el foco a la siguiente/anterior fila marcada, centrándola."""
+        marc = self._marcadas_visual()
+        if not marc:
+            return
+        foco = self._tree_resumen.tree.focus()
+        if foco in marc:
+            pos = (marc.index(foco) + paso) % len(marc)
+        else:
+            pos = 0 if paso >= 0 else len(marc) - 1
+        iid = marc[pos]
+        self._tree_resumen.tree.selection_set(iid)
+        self._tree_resumen.tree.focus(iid)
+        self._tree_resumen.scroll_to(iid, center=True)
+
+    def _abrir_revision(self) -> None:
+        """Abre el diálogo de revisión sobre la fila marcada con foco (o la
+        primera marcada si no hay ninguna con foco)."""
+        marc = self._marcadas_visual()
+        if not marc:
+            return
+        foco = self._tree_resumen.tree.focus()
+        iid = foco if foco in marc else marc[0]
+        self._tree_resumen.scroll_to(iid, center=True)
+        self._dialog_revision(iid, self._iid2reg_res[iid])
+
+    def _dialog_revision(self, iid: str, reg: Registro) -> None:
+        """Diálogo modal para validar/ajustar el corte DNI|Apellido de una
+        fila. Muestra el texto crudo pegado con el corte propuesto; al hacer
+        clic en un carácter se marca dónde empieza el apellido, con vista
+        previa en vivo. Al aceptar, aplica el corte, desmarca la fila,
+        reordena la tabla, actualiza el contador y regenera el Excel."""
+        raw = reg.dni_raw
+        # Corte inicial: el sugerido por la heurística o, si no hay, el inicio
+        # de la última racha de letras (punto de partida razonable a ajustar).
+        if reg.split_idx is not None:
+            idx0 = reg.split_idx
+        else:
+            idx0 = len(raw)
+            while idx0 > 0 and (raw[idx0 - 1].isalpha() or raw[idx0 - 1] == "�"):
+                idx0 -= 1
+        sel = tk.IntVar(value=idx0)
+
+        # Vecinos (contexto alfabético) según el orden visual de la tabla.
+        prev_iid = self._tree_resumen.tree.prev(iid)
+        next_iid = self._tree_resumen.tree.next(iid)
+        prev_txt = self._tree_resumen.tree.set(prev_iid, "nombre") if prev_iid else "—"
+        next_txt = self._tree_resumen.tree.set(next_iid, "nombre") if next_iid else "—"
+
+        dlg = tk.Toplevel(self)
+        dlg.title("Revisar separación DNI / Apellido")
+        dlg.configure(bg=BG_APP)
+        dlg.transient(self)
+        dlg.resizable(False, False)
+
+        tk.Frame(dlg, bg=C_AVISO, height=6).pack(fill="x")
+        cont = tk.Frame(dlg, bg=BG_APP, padx=18, pady=14)
+        cont.pack(fill="both", expand=True)
+
+        tk.Label(cont, text="Revisar separación DNI / Apellido", bg=BG_APP,
+                 fg="#1B2631", font=FONT_BOLD, anchor="w").pack(fill="x")
+        tk.Label(cont, text="Haz clic en el carácter donde empieza el APELLIDO.",
+                 bg=BG_APP, fg="#555555", font=FONT_ENTRY, anchor="w"
+                 ).pack(fill="x", pady=(2, 10))
+
+        # Fila de caracteres clicables
+        chars = tk.Frame(cont, bg="white", bd=1, relief="sunken", padx=6, pady=6)
+        chars.pack(fill="x")
+        char_lbls: list[tk.Label] = []
+        for k, ch in enumerate(raw):
+            lb = tk.Label(chars, text=ch, font=("Consolas", BASE + 2),
+                          padx=2, pady=2, cursor="hand2")
+            lb.pack(side="left")
+            lb.bind("<Button-1>", lambda e, k=k: sel.set(k))
+            char_lbls.append(lb)
+
+        prev_row = tk.Label(cont, bg=BG_APP, fg="#555555", font=FONT_ENTRY,
+                            anchor="w", justify="left")
+        prev_row.pack(fill="x", pady=(12, 0))
+        lbl_dni = tk.Label(cont, bg=BG_APP, fg="#1B2631", font=FONT_UI, anchor="w")
+        lbl_dni.pack(fill="x", pady=(8, 0))
+        lbl_nom = tk.Label(cont, bg=BG_APP, fg="#1B2631", font=FONT_UI, anchor="w")
+        lbl_nom.pack(fill="x", pady=(2, 0))
+
+        def _reconstruir(idx: int) -> tuple[str, str]:
+            frag = raw[idx:]
+            base = reg.nombre_raw
+            if base.lstrip().startswith(","):
+                nombre = frag + base
+            elif frag:
+                nombre = f"{frag} {base}"
+            else:
+                nombre = base
+            return raw[:idx], nombre
+
+        def _redibujar(*_a) -> None:
+            idx = sel.get()
+            for k, lb in enumerate(char_lbls):
+                if k < idx:
+                    lb.configure(bg="#D6EAF8", fg="#1B4F72")   # DNI (azul)
+                else:
+                    lb.configure(bg="#D5F5E3", fg="#1E6B3A")   # apellido (verde)
+            dni, nombre = _reconstruir(idx)
+            lbl_dni.configure(text=f"DNI:                        {dni}")
+            lbl_nom.configure(text=f"Apellidos y Nombre:  {nombre}")
+            prev_row.configure(
+                text=f"Contexto (orden alfabético):\n   anterior:  {prev_txt}\n"
+                     f"   siguiente: {next_txt}")
+
+        sel.trace_add("write", _redibujar)
+        _redibujar()
+
+        btns = tk.Frame(cont, bg=BG_APP)
+        btns.pack(fill="x", pady=(16, 0))
+
+        def _aceptar() -> None:
+            idx = sel.get()
+            antes = (reg.dni, reg.nombre)
+            reg.aplicar_split(idx)
+            reg.revisar = False
+            dlg.destroy()
+            self._aplicar_revision(iid, reg, cambiado=(antes != (reg.dni, reg.nombre)))
+
+        ttk.Button(btns, text="Aceptar", style="Export.TButton",
+                   command=_aceptar).pack(side="right")
+        ttk.Button(btns, text="Cancelar", style="Config.TButton",
+                   command=dlg.destroy).pack(side="right", padx=(0, 8))
+
+        dlg.update_idletasks()
+        x = self.winfo_rootx() + (self.winfo_width() - dlg.winfo_width()) // 2
+        y = self.winfo_rooty() + (self.winfo_height() - dlg.winfo_height()) // 3
+        dlg.geometry(f"+{max(0, x)}+{max(0, y)}")
+        dlg.grab_set()
+        dlg.wait_window()
+
+    def _aplicar_revision(self, iid: str, reg: Registro, cambiado: bool) -> None:
+        """Aplica el resultado de una revisión: actualiza la fila en las dos
+        tablas, la desmarca, reordena Resumen alfabéticamente, refresca el
+        contador y (si cambió el dato) regenera el Excel."""
+        self._iid_revisar.discard(iid)
+        self._tree_resumen.set_values(iid, self._resumen_row(reg))
+        self._tree_resumen.unmark(iid)
+        self._tree_resumen.sort("nombre")                 # reordena tras revisar
+        self._load_tabla_detalle(self._registros)         # refresca marcas/valores
+        self._actualizar_contador_revisar()
+
+        if cambiado and self._ultimo_excel:
+            try:
+                export_to_excel(self._registros, self._ultimo_excel)
+                self._log_write(
+                    f"Fila revisada (Exped {reg.exped}): {reg.dni} | "
+                    f"{reg.nombre}. Excel actualizado.", "ok")
+            except Exception as exc:
+                self._log_write(f"No se pudo regenerar el Excel: {exc}", "error")
+        else:
+            self._log_write(
+                f"Fila revisada (Exped {reg.exped}): sin cambios.", "info")
+
+        # Deja el foco en la siguiente fila pendiente, si queda alguna.
+        if self._iid_revisar:
+            self._nav_revisar(+1)
 
     # ── Acción principal ──────────────────────────────────────────────────────
 
@@ -587,16 +833,21 @@ class App(tk.Tk):
                           "No se ha extraído ningún registro.", "warn")
                 return
 
+            # Detección + separación heurística de filas desalineadas
+            # (DNI que se comió el inicio del apellido). No afecta importes.
+            n_rev = corregir_alineacion(registros)
+
             export_to_excel(registros, output_path)
             self._ultimo_excel = output_path
+            self._registros = registros
             self.after(0, self._load_tabla_detalle, registros)
             self.after(0, self._load_tabla_resumen, registros)
             self.after(0, self._log_write,
                       f"Excel generado: {output_path}", "ok")
-
-            if getattr(self, "_var_abrir_carpeta", None) is None or \
-               self._var_abrir_carpeta.get():
-                self.after(0, self._abrir_carpeta_destino)
+            self.after(0, self._post_correccion, n_rev)
+            # Confirmación modal de fin de grabación (nombre + carpeta); al
+            # cerrarla abre la carpeta destino si la opción está activada.
+            self.after(0, self._confirmar_grabacion, output_path)
         finally:
             self.after(0, self._fin_ejecutar)
 
@@ -610,6 +861,31 @@ class App(tk.Tk):
             os.startfile(destino)  # noqa: S606 (app de escritorio Windows)
         else:
             self._log_write("No hay carpeta destino seleccionada.", "warn")
+
+    def _abrir_excel_generado(self) -> None:
+        """Abre el último Excel generado (el botón '📂 Abrir Excel'). Antes
+        abría la carpeta destino, cosa que ya hace el auto-abrir configurable
+        al terminar; ahora abre directamente el fichero, que es lo útil."""
+        if self._ultimo_excel and os.path.isfile(self._ultimo_excel):
+            os.startfile(self._ultimo_excel)  # noqa: S606 (app de escritorio)
+        else:
+            self._log_write(
+                "Todavía no se ha generado ningún Excel en esta sesión.", "warn")
+
+    def _confirmar_grabacion(self, output_path: str) -> None:
+        """Aviso modal de fin de grabación del Excel: confirma el nombre de
+        archivo y la carpeta. Tras cerrarlo, abre la carpeta destino si la
+        opción de configuración está activada."""
+        nombre = os.path.basename(output_path)
+        carpeta = os.path.dirname(output_path)
+        messagebox.showinfo(
+            "Excel generado",
+            f"Se ha grabado correctamente el Excel:\n\n{nombre}\n\n"
+            f"en la carpeta:\n{carpeta}",
+            parent=self)
+        if getattr(self, "_var_abrir_carpeta", None) is None or \
+           self._var_abrir_carpeta.get():
+            self._abrir_carpeta_destino()
 
     # ── Log ───────────────────────────────────────────────────────────────────
 

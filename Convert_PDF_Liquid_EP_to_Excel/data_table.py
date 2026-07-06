@@ -115,6 +115,7 @@ class DataTable(tk.Frame):
         self._font_bold = font_bold
         self._pad       = pad
         self._fixed: dict[str, int] = {}             # col_id -> ancho fijo
+        self._sticky: dict[str, str] = {}            # iid -> tag fijo (no franja)
         self._sort_rev = {c: False for c in self.col_ids}
 
         self.rowconfigure(0, weight=1)
@@ -154,11 +155,16 @@ class DataTable(tk.Frame):
                                 background=selected_background, foreground=foreground)
 
     # ── Carga de datos ───────────────────────────────────────────────────────
-    def load(self, rows, tags=None) -> None:
+    def load(self, rows, tags=None) -> list:
         """Vacía y rellena la tabla. rows: iterable de tuplas (alineadas con
         col_ids). tags: lista paralela con el tag base de cada fila; si es None
-        y stripe=True, se asignan franjas alternas por posición."""
+        y stripe=True, se asignan franjas alternas por posición. Los tags que
+        no son de franja (row_a/row_b) se consideran "sticky": sobreviven a la
+        ordenación por cabecera (ver _restripe). Devuelve la lista de iids
+        insertados, en orden de carga."""
         self.tree.delete(*self.tree.get_children())
+        self._sticky.clear()
+        iids = []
         for i, values in enumerate(rows):
             if tags is not None:
                 tag = tags[i]
@@ -166,10 +172,51 @@ class DataTable(tk.Frame):
                 tag = "row_a" if i % 2 == 0 else "row_b"
             else:
                 tag = ""
-            self.tree.insert("", "end", values=values,
-                             tags=(tag,) if tag else ())
+            iid = self.tree.insert("", "end", values=values,
+                                   tags=(tag,) if tag else ())
+            if tag and tag not in ("row_a", "row_b"):
+                self._sticky[iid] = tag
+            iids.append(iid)
         self._on_sel_change()
         self.after(120, self.autosize)
+        return iids
+
+    def scroll_to(self, iid: str, center: bool = True) -> None:
+        """Desplaza la vista para dejar visible `iid`; con center=True lo sitúa
+        aproximadamente en el centro vertical de la tabla."""
+        self.tree.see(iid)
+        if not center:
+            return
+        hijos = self.tree.get_children()
+        total = len(hijos)
+        if total == 0 or iid not in hijos:
+            return
+        self.update_idletasks()
+        try:
+            visibles = max(1, self.tree.winfo_height() //
+                           max(1, self.tree.bbox(hijos[0])[3] if self.tree.bbox(hijos[0]) else 20))
+        except Exception:
+            visibles = 10
+        pos = hijos.index(iid)
+        top = max(0, pos - visibles // 2)
+        self.tree.yview_moveto(top / total)
+
+    def sort(self, col_id: str, reverse: bool = False) -> None:
+        """Ordena por una columna de forma determinista (no alterna sentido
+        como el clic en la cabecera). Reasigna franjas y conserva sticky."""
+        # _sort_by ordena con el sentido actual y luego lo togglea; dejamos el
+        # sentido actual = reverse para que ordene como se pide.
+        self._sort_rev[col_id] = reverse
+        self._sort_by(col_id)
+
+    def set_values(self, iid: str, values) -> None:
+        """Sustituye los valores de una fila ya existente (sin recrearla)."""
+        self.tree.item(iid, values=values)
+
+    def unmark(self, iid: str) -> None:
+        """Quita el tag sticky de una fila: vuelve a ser una franja normal en
+        el siguiente restripe (p. ej. tras aprobar una fila de revisión)."""
+        self._sticky.pop(iid, None)
 
     def set_anchor(self, col_id: str, anchor: str) -> None:
         """Alinea una columna concreta distinto del resto de la tabla (p. ej.
@@ -217,15 +264,13 @@ class DataTable(tk.Frame):
     # ── Autoajuste de columnas ───────────────────────────────────────────────
     def autosize(self) -> None:
         """Ajusta cada columna al ancho real de su contenido (cabecera en
-        negrita vs. filas). El hueco sobrante a la derecha se reparte como aire
-        extra entre columnas (hasta doblar el padding), no se deja en blanco."""
+        negrita vs. filas), sin repartir hueco sobrante como aire extra."""
         self.update_idletasks()
         font_n = tkfont.Font(family=self._font_ui[0],   size=self._font_ui[1])
         font_b = tkfont.Font(family=self._font_bold[0], size=self._font_bold[1],
                              weight="bold")
         PAD = self._pad
 
-        base_widths = []
         for cid, cname in zip(self.col_ids, self.col_names):
             width = font_b.measure(cname)
             for iid in self.tree.get_children():
@@ -235,15 +280,8 @@ class DataTable(tk.Frame):
             width += PAD
             if cid in self._fixed:
                 width = max(width, self._fixed[cid])
-            base_widths.append(width)
-
-        leftover = self.tree.winfo_width() - sum(base_widths)
-        extra = min(PAD, leftover / len(base_widths)) if leftover > 0 else 0
-
-        for cid, base in zip(self.col_ids, base_widths):
-            add = 0 if cid in self._fixed else extra
-            self.tree.column(cid, width=int(base + add),
-                             minwidth=min(base, 80), stretch=False)
+            self.tree.column(cid, width=int(width),
+                             minwidth=min(width, 80), stretch=False)
 
     # ── Ordenación por cabecera ──────────────────────────────────────────────
     def _sort_by(self, col: str) -> None:
@@ -258,9 +296,13 @@ class DataTable(tk.Frame):
         self._on_sel_change()
 
     def _restripe(self) -> None:
-        """Reasigna row_a/row_b según el orden visual actual (tras ordenar)."""
+        """Reasigna row_a/row_b según el orden visual actual (tras ordenar),
+        conservando los tags sticky (p. ej. filas marcadas para revisión), que
+        no deben perder su color al reordenar."""
         for pos, iid in enumerate(self.tree.get_children()):
-            self.tree.item(iid, tags=("row_a" if pos % 2 == 0 else "row_b",))
+            sticky = self._sticky.get(iid)
+            tag = sticky if sticky else ("row_a" if pos % 2 == 0 else "row_b")
+            self.tree.item(iid, tags=(tag,))
 
     @staticmethod
     def _sort_key(v):
