@@ -15,3 +15,9 @@ Pagos_TPV_Usuario/
 PowerBI_PPUA/
 PPUA_VBA/
 Corrector_Orientacion_PDF/
+Apuntes/
+
+# Ficheros locales sueltos (no versionar: sensibles/accesos directos/capturas)
+Contrase*.txt
+*.lnk
+SnailSystem.png
