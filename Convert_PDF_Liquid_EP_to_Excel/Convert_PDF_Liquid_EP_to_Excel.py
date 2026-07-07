@@ -16,13 +16,20 @@ Basado en la plantilla del skill tkinter-app-design (layout de 3 bloques +
 panel de configuración). Vendorizado junto a este archivo: data_table.py,
 help_tooltips.py, SnailSystem.png.
 
-Incluye además un panel de COMPARACIÓN (overlay a pantalla completa, mismo
-patrón que el de configuración): selecciona dos PDF (A = anterior, B = nuevo),
-los parsea con pdf_parser y muestra en una única tabla de diff los alumnos
-cuyo importe cambió entre ambos (motor en pdf_compare.py).
+Incluye además dos paneles de COMPARACIÓN (overlays a pantalla completa,
+mismo patrón que el de configuración), cada uno con su botón en Selección:
+  - "Comparar Resumen": selecciona dos PDF (A = anterior, B = nuevo), los
+    parsea con pdf_parser y muestra en una única tabla de diff los alumnos
+    cuyo importe cambió entre ambos (motor en pdf_compare.py).
+  - "Comparar Detalle": muestra las tablas de Detalle de ambos PDF lado a
+    lado (A izquierda, B derecha), con el mismo formato, anclajes y
+    auto-ajuste que la vista previa (Detalle) de la ventana principal,
+    pero sin las columnas Rec. y F. Pag. La selección se sincroniza entre
+    A y B por Exped, y un checkbox permite ocultar en B los alumnos nuevos
+    y colorear en ambas tablas los alumnos cuyo importe cambió.
 """
 
-# Última actualización: 2026-07-07 19:25
+# Última actualización: 2026-07-08 00:45
 
 import os
 import sys
@@ -34,7 +41,7 @@ import tkinter.font as tkfont
 from tkinter import ttk, filedialog, messagebox
 
 from pdf_parser import parse_pdf, corregir_alineacion, Registro
-from pdf_compare import comparar, Comparacion
+from pdf_compare import comparar, Comparacion, _norm_texto
 from excel_export import export_to_excel
 
 # Tooltips + caracolillo: help_tooltips.py vive junto a este archivo.
@@ -178,6 +185,11 @@ COL_RESUMEN_IDS = ("exped", "dni", "nombre", "num_ref", "importe", "neto",
 COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec.", "Importe",
                       "I.Acad.", "I.Adm.")
 
+# Panel Comparar Detalle: mismas columnas que la vista Detalle pero sin las
+# dos últimas, Rec. (plazo) y F. Pag. (forma de pago).
+COL_COMPDET_IDS = COL_DETALLE_IDS[:7]
+COL_COMPDET_NAMES = COL_DETALLE_NAMES[:7]
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Clase App
@@ -217,6 +229,23 @@ class App(tk.Tk):
         # un cambio sistemático de -0,60 € en casi todos los alumnos que
         # taparía los cambios reales de cobros).
         self._var_comp_solo_acad = tk.BooleanVar(value=False)
+        # Filtros por Estado (columna final del diff): qué categorías mostrar.
+        self._var_est_altas = tk.BooleanVar(value=True)
+        self._var_est_bajas = tk.BooleanVar(value=True)
+        self._var_est_cambios = tk.BooleanVar(value=True)
+        self._var_est_sin = tk.BooleanVar(value=True)
+
+        # Comparación de Detalle (segundo panel: dos tablas lado a lado)
+        self._compdet_a_var = tk.StringVar()   # ruta del PDF A (anterior)
+        self._compdet_b_var = tk.StringVar()   # ruta del PDF B (nuevo)
+        self._comparando_det = False
+        # Checkbox "Quitar nuevos de PDF B y marcar cambios A-B", últimos
+        # datos parseados (para re-filtrar sin re-parsear) y mapas
+        # Exped -> iids para sincronizar la selección entre las tablas A y B.
+        self._var_compdet_filtro = tk.BooleanVar(value=False)
+        self._compdet_datos: tuple | None = None
+        self._exped2iid_det_a: dict[str, list[str]] = {}
+        self._exped2iid_det_b: dict[str, list[str]] = {}
 
         # Revisión de filas desalineadas DNI/Apellido
         self._registros: list[Registro] = []
@@ -360,13 +389,20 @@ class App(tk.Tk):
         _btn2.grid(row=1, column=2, padx=(8, 0), pady=(2, 4), ipadx=4)
         Tooltip(_btn2, "Selecciona la carpeta donde se guardará el Excel generado")
 
-        # ── Comparar dos PDF (abre el panel de comparación) ────────────────
-        _btn3 = ttk.Button(c, text="⚖ Comparar…", style="Todos.TButton",
+        # ── Comparar dos PDF (abren los paneles de comparación) ─────────────
+        _btn3 = ttk.Button(c, text="⚖ Comparar Resumen", style="Todos.TButton",
                            command=self._show_comparar)
-        _btn3.grid(row=0, column=3, rowspan=2, padx=(16, 0), pady=(4, 4),
-                   ipadx=4, sticky="ns")
+        _btn3.grid(row=0, column=3, padx=(16, 0), pady=(4, 2),
+                   ipadx=4, sticky="ew")
         Tooltip(_btn3, "Compara dos PDF de liquidación (anterior y nuevo) y "
                        "muestra los alumnos cuyo importe cambió")
+        _btn4 = ttk.Button(c, text="⚖ Comparar Detalle", style="Todos.TButton",
+                           command=self._show_comparar_det)
+        _btn4.grid(row=1, column=3, padx=(16, 0), pady=(2, 4),
+                   ipadx=4, sticky="ew")
+        Tooltip(_btn4, "Compara dos PDF de liquidación mostrando la tabla de "
+                       "Detalle de cada uno lado a lado (A = anterior a la "
+                       "izquierda, B = nuevo a la derecha)")
 
         return tb
 
@@ -405,10 +441,7 @@ class App(tk.Tk):
             on_select=lambda s, t, lbl=self._lbl_count1:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_detalle.pack(fill="both", expand=True)
-        self._tree_detalle.set_anchor("importe", "e")
-        self._tree_detalle.set_anchor("imp_adm", "e")
-        self._tree_detalle.set_anchor("plazo", "center")
-        self._tree_detalle.set_anchor("forma_pago", "center")
+        self._config_tabla_detalle(self._tree_detalle)
 
         # ── Tabla 2: vista previa (Resumen) ────────────────────────────────
         tb2, c2 = self._bloque("Vista previa (Resumen)", BG_TAB2,
@@ -453,7 +486,6 @@ class App(tk.Tk):
         self._tree_resumen.set_anchor("administrativo", "e")
         self._tree_resumen.set_anchor("neto", "e")
         self._tree_resumen.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
-        self._tree_detalle.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
 
         # Sincronización de selección por DNI: al seleccionar una fila en una
         # tabla, se selecciona (y se hace visible) la fila / filas con el
@@ -463,6 +495,16 @@ class App(tk.Tk):
             "<<TreeviewSelect>>", self._on_sel_detalle, add="+")
         self._tree_resumen.tree.bind(
             "<<TreeviewSelect>>", self._on_sel_resumen, add="+")
+
+    def _config_tabla_detalle(self, tabla: DataTable) -> None:
+        """Anclajes y tag de revisión comunes a toda tabla con columnas de la
+        vista Detalle (la principal y las dos del panel Comparar Detalle, que
+        no llevan Rec./F. Pag.): aplica solo los de columnas presentes."""
+        for cid, anc in (("importe", "e"), ("imp_adm", "e"),
+                         ("plazo", "center"), ("forma_pago", "center")):
+            if cid in tabla.col_ids:
+                tabla.set_anchor(cid, anc)
+        tabla.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
 
     # ── BLOQUE 3: Informe ─────────────────────────────────────────────────────
 
@@ -650,11 +692,12 @@ class App(tk.Tk):
 
     # ── Panel de comparación de dos PDF (overlay a pantalla completa) ──────────
 
-    COL_DIFF_IDS = ("exped", "dni", "nombre", "imp_a", "imp_b", "d_imp",
-                    "adm_a", "adm_b", "d_adm", "d_neto")
-    COL_DIFF_NAMES = ("Exped", "DNI", "Apellidos y Nombre",
+    COL_DIFF_IDS = ("exped", "dni", "nombre", "rec_a", "rec_b",
+                    "imp_a", "imp_b", "d_imp",
+                    "adm_a", "adm_b", "d_adm", "d_neto", "estado")
+    COL_DIFF_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec. A", "Rec. B",
                       "I.Acad. A", "I.Acad. B", "Δ Acad.",
-                      "I.Adm. A", "I.Adm. B", "Δ Adm.", "Δ Neto")
+                      "I.Adm. A", "I.Adm. B", "Δ Adm.", "Δ Neto", "Estado")
 
     def _show_comparar(self) -> None:
         """Muestra el panel de comparación (mismo patrón que Configuración,
@@ -715,6 +758,20 @@ class App(tk.Tk):
                                           anchor="w")
         self._lbl_comp_resumen.pack(fill="x", padx=12, pady=(0, 4))
 
+        # Filtros por Estado (qué categorías de fila se muestran en la tabla)
+        fil = tk.Frame(p, bg=BG_APP)
+        fil.pack(fill="x", padx=12, pady=(0, 4))
+        tk.Label(fil, text="Mostrar:", bg=BG_APP, fg="#1B2631",
+                 font=FONT_ENTRY).pack(side="left")
+        for texto, var in (("Altas", self._var_est_altas),
+                           ("Bajas", self._var_est_bajas),
+                           ("Con cambios", self._var_est_cambios),
+                           ("Sin cambios", self._var_est_sin)):
+            tk.Checkbutton(fil, text=texto, variable=var, bg=BG_APP,
+                           fg="#1B2631", activebackground=BG_APP,
+                           font=FONT_ENTRY, command=self._refiltrar_diff
+                           ).pack(side="left", padx=(10, 0))
+
         # Tabla única de diff
         cont = tk.Frame(p, bg=BG_APP, padx=12)
         cont.pack(fill="both", expand=True, pady=(0, 10))
@@ -725,6 +782,9 @@ class App(tk.Tk):
         for cid in ("imp_a", "imp_b", "d_imp", "adm_a", "adm_b",
                     "d_adm", "d_neto"):
             self._tree_diff.set_anchor(cid, "e")
+        self._tree_diff.set_anchor("rec_a", "center")
+        self._tree_diff.set_anchor("rec_b", "center")
+        self._tree_diff.set_anchor("estado", "center")
         self._tree_diff.set_tag("sube", C_ROW_SUBE, C_ROW_SUBE_SEL)
         self._tree_diff.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
         self._tree_diff.set_tag("aviso", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
@@ -814,35 +874,85 @@ class App(tk.Tk):
         if self._comp_actual is not None:
             self._load_tabla_diff(self._comp_actual)
 
-    def _load_tabla_diff(self, comp: Comparacion) -> None:
-        """Rellena la tabla de diff y el resumen con una Comparacion."""
-        self._comp_actual = comp
-        visibles = comp.modificados
-        if self._var_comp_solo_acad.get():
-            visibles = [f for f in visibles if f.delta_importe != 0]
-        rows, tags = [], []
-        for f in visibles:
-            rows.append((f.exped, f.dni, f.nombre,
-                         f"{f.importe_a:.2f}", f"{f.importe_b:.2f}",
-                         f"{f.delta_importe:+.2f}",
-                         f"{f.administrativo_a:.2f}",
-                         f"{f.administrativo_b:.2f}",
-                         f"{f.delta_administrativo:+.2f}",
-                         f"{f.delta_neto:+.2f}"))
-            if f.dni_distinto:
-                tags.append("aviso")
-            else:
-                delta = f.delta_neto or f.delta_importe
-                tags.append("sube" if delta > 0 else "baja")
-        self._tree_diff.load(rows, tags=tags)
+    @staticmethod
+    def _fmt_delta(delta: float) -> str:
+        """Celda de una columna Δ: vacía si no hay cambio; si lo hay, el
+        valor con signo y una flecha ↑/↓ a la derecha."""
+        if not delta:
+            return ""
+        return f"{delta:+.2f} {'↑' if delta > 0 else '↓'}"
 
-        filtro = (f" (mostrados: {len(visibles)})"
-                  if len(visibles) != len(comp.modificados) else "")
+    def _fila_diff(self, f, estado: str) -> tuple:
+        """Valores de una fila del diff para un alumno presente en A y B
+        (FilaDiff), con la columna Estado al final."""
+        delta_rec = f.num_refs_b - f.num_refs_a
+        rec_b = str(f.num_refs_b)
+        if delta_rec:
+            rec_b += f" {'↑' if delta_rec > 0 else '↓'}"
+        return (f.exped, f.dni, f.nombre, f.num_refs_a, rec_b,
+                f"{f.importe_a:.2f}", f"{f.importe_b:.2f}",
+                self._fmt_delta(f.delta_importe),
+                f"{f.administrativo_a:.2f}", f"{f.administrativo_b:.2f}",
+                self._fmt_delta(f.delta_administrativo),
+                self._fmt_delta(f.delta_neto), estado)
+
+    def _fila_solo(self, r: Registro, alta: bool) -> tuple:
+        """Valores de una fila del diff para un alumno presente solo en un
+        listado (Alta = solo en B, Baja = solo en A): las columnas del lado
+        ausente van vacías y los Δ reflejan su aportación al total."""
+        signo = 1 if alta else -1
+        rec = len(r.referencias)
+        imp, adm = f"{r.importe:.2f}", f"{r.administrativo:.2f}"
+        d_imp = self._fmt_delta(round(signo * r.importe, 2))
+        d_adm = self._fmt_delta(round(signo * r.administrativo, 2))
+        d_neto = self._fmt_delta(round(signo * r.importe_neto, 2))
+        if alta:
+            return (r.exped, r.dni, r.nombre, "", rec, "", imp, d_imp,
+                    "", adm, d_adm, d_neto, "Alta")
+        return (r.exped, r.dni, r.nombre, rec, "", imp, "", d_imp,
+                adm, "", d_adm, d_neto, "Baja")
+
+    def _load_tabla_diff(self, comp: Comparacion) -> None:
+        """Rellena la tabla de diff y el resumen con una Comparacion,
+        aplicando los filtros por Estado y el de 'solo cambia I.Adm.'."""
+        self._comp_actual = comp
+        filas: list[tuple[str, tuple, str]] = []   # (clave orden, valores, tag)
+        if self._var_est_cambios.get():
+            vis = comp.modificados
+            if self._var_comp_solo_acad.get():
+                vis = [f for f in vis if f.delta_importe != 0]
+            for f in vis:
+                delta = f.delta_neto or f.delta_importe
+                tag = ("aviso" if f.dni_distinto
+                       else "sube" if delta > 0 else "baja")
+                filas.append((_norm_texto(f.nombre),
+                              self._fila_diff(f, "Con cambios"), tag))
+        if self._var_est_sin.get():
+            for f in comp.iguales:
+                filas.append((_norm_texto(f.nombre),
+                              self._fila_diff(f, "Sin cambios"),
+                              "aviso" if f.dni_distinto else ""))
+        if self._var_est_bajas.get():
+            for r in comp.solo_a:
+                filas.append((_norm_texto(r.nombre), self._fila_solo(r, False),
+                              "sube" if r.importe_neto < 0 else "baja"))
+        if self._var_est_altas.get():
+            for r in comp.solo_b:
+                filas.append((_norm_texto(r.nombre), self._fila_solo(r, True),
+                              "baja" if r.importe_neto < 0 else "sube"))
+        filas.sort(key=lambda t: t[0])
+        self._tree_diff.load([t[1] for t in filas],
+                             tags=[t[2] for t in filas])
+
+        total = (len(comp.modificados) + len(comp.iguales)
+                 + len(comp.solo_a) + len(comp.solo_b))
+        filtro = (f" · Mostrados: {len(filas)} de {total}"
+                  if len(filas) != total else "")
         self._lbl_comp_resumen.configure(
-            text=f"Modificados: {len(comp.modificados)}{filtro} · "
+            text=f"Modificados: {len(comp.modificados)} · "
                  f"Solo en A (bajas): {len(comp.solo_a)} · "
                  f"Solo en B (altas): {len(comp.solo_b)} · "
-                 f"Sin cambios: {comp.iguales}   |   "
+                 f"Sin cambios: {len(comp.iguales)}{filtro}   |   "
                  f"Neto A: {comp.total_neto_a:,.2f} € → "
                  f"B: {comp.total_neto_b:,.2f} € "
                  f"(Δ {comp.delta_total:+,.2f} €)",
@@ -850,8 +960,326 @@ class App(tk.Tk):
         self._log_write(
             f"Comparación: {len(comp.modificados)} modificados, "
             f"{len(comp.solo_a)} solo en A, {len(comp.solo_b)} solo en B, "
-            f"{comp.iguales} sin cambios. Δ total {comp.delta_total:+.2f} €.",
+            f"{len(comp.iguales)} sin cambios. Δ total {comp.delta_total:+.2f} €.",
             "ok")
+
+    # ── Panel de comparación de Detalle (dos tablas lado a lado) ──────────────
+
+    def _show_comparar_det(self) -> None:
+        """Muestra el panel Comparar Detalle (mismo overlay a pantalla
+        completa que el de Comparar Resumen)."""
+        if not hasattr(self, "_compdet_panel"):
+            self._build_comparar_det_panel()
+        self._compdet_panel.place(relx=0.5, rely=0.5, anchor="center",
+                                  relwidth=0.99, relheight=0.98)
+        self._compdet_panel.lift()
+
+    def _hide_comparar_det(self) -> None:
+        if hasattr(self, "_compdet_panel"):
+            self._compdet_panel.place_forget()
+            # Las tablas comparten el estilo ttk "Treeview": al cerrar el
+            # panel, devuelve a las tablas principales su tamaño óptimo.
+            if self._tree_detalle.tree.get_children():
+                self._autofit_tablas()
+
+    def _build_comparar_det_panel(self) -> None:
+        p = tk.Frame(self, bg=BG_APP, bd=2, relief="ridge",
+                     highlightbackground="#AAAAAA", highlightthickness=1)
+        self._compdet_panel = p
+
+        # Cabecera del panel
+        hdr = tk.Frame(p, bg=BG_COMP)
+        hdr.pack(fill="x")
+        tk.Label(hdr, text="  ⚖  Comparar Detalle de dos liquidaciones "
+                           "(A = anterior, B = nuevo)",
+                 bg=BG_COMP, fg="white", font=FONT_TITLE, anchor="w"
+                 ).pack(side="left", pady=4)
+        ttk.Button(hdr, text="✕ Cerrar", style="Config.TButton",
+                   command=self._hide_comparar_det).pack(side="right", padx=8)
+
+        # Selección de los dos PDF
+        sel = tk.Frame(p, bg=BG_APP, padx=12, pady=8)
+        sel.pack(fill="x")
+        sel.columnconfigure(1, weight=1)
+        for fila, (texto, var, cmd) in enumerate((
+                ("PDF A (anterior):", self._compdet_a_var,
+                 lambda: self._pick_pdf_comparar_det("A")),
+                ("PDF B (nuevo):", self._compdet_b_var,
+                 lambda: self._pick_pdf_comparar_det("B")))):
+            tk.Label(sel, text=texto, bg=BG_APP, font=FONT_UI, anchor="w"
+                     ).grid(row=fila, column=0, sticky="w", padx=(0, 10), pady=2)
+            tk.Entry(sel, textvariable=var, font=FONT_ENTRY, bg="white",
+                     fg="#222222", relief="sunken", bd=1, state="readonly"
+                     ).grid(row=fila, column=1, sticky="ew", pady=2, ipady=4)
+            ttk.Button(sel, text="Seleccionar", style="Sel.TButton", command=cmd
+                       ).grid(row=fila, column=2, padx=(8, 0), pady=2, ipadx=4)
+
+        self._btn_compdet = ttk.Button(sel, text="⚖  Comparar",
+                                       style="Accion.TButton",
+                                       command=self._comparar_det_ejecutar)
+        self._btn_compdet.grid(row=0, column=3, rowspan=2, padx=(16, 0),
+                               ipadx=6, sticky="ns")
+        Tooltip(self._btn_compdet,
+                "Parsea los dos PDF y muestra sus tablas de Detalle lado a lado")
+
+        # Resumen de la comparación (páginas/registros/neto de cada PDF)
+        self._lbl_compdet_resumen = tk.Label(p, text="", bg=BG_APP,
+                                             fg="#1B2631", font=FONT_BOLD,
+                                             anchor="w")
+        self._lbl_compdet_resumen.pack(fill="x", padx=12, pady=(0, 4))
+
+        # Dos tablas de Detalle lado a lado (mismos bloques con cabecera
+        # coloreada y contador que la vista previa de la ventana principal).
+        grid = tk.Frame(p, bg=BG_APP)
+        grid.pack(fill="both", expand=True)
+        grid.columnconfigure(0, weight=1)
+        grid.columnconfigure(1, weight=1)
+        grid.rowconfigure(0, weight=1)
+        col_a = tk.Frame(grid, bg=BG_APP)
+        col_a.grid(row=0, column=0, sticky="nsew", padx=(0, 4))
+        col_b = tk.Frame(grid, bg=BG_APP)
+        col_b.grid(row=0, column=1, sticky="nsew", padx=(4, 0))
+
+        self._tree_det_a = self._bloque_tabla_detalle(
+            col_a, "Detalle — PDF A (anterior)")
+        self._tree_det_b = self._bloque_tabla_detalle(
+            col_b, "Detalle — PDF B (nuevo)")
+
+        # Sincronización de selección A <-> B por Exped (misma mecánica que
+        # la sincronización por DNI entre Detalle y Resumen; add="+" para no
+        # pisar el binding interno de DataTable).
+        self._tree_det_a.tree.bind(
+            "<<TreeviewSelect>>", self._on_sel_det_a, add="+")
+        self._tree_det_b.tree.bind(
+            "<<TreeviewSelect>>", self._on_sel_det_b, add="+")
+
+        # Filtro + leyenda de colores (bajo las tablas, mismo patrón que el
+        # checkbox de filtro del panel Comparar Resumen)
+        fil = tk.Frame(p, bg=BG_APP)
+        fil.pack(fill="x", padx=12, pady=(4, 8))
+        _chk = tk.Checkbutton(
+            fil, text="Quitar nuevos de PDF B y marcar cambios A-B",
+            variable=self._var_compdet_filtro, bg=BG_APP, fg="#1B2631",
+            activebackground=BG_APP, font=FONT_ENTRY,
+            command=self._refiltrar_compdet)
+        _chk.pack(side="right")
+        Tooltip(_chk, "Oculta en la tabla B los alumnos que no están en A "
+                      "(nuevos) y colorea en ambas tablas las filas de los "
+                      "alumnos cuyo importe cambió entre A y B")
+        for color, texto in ((C_ROW_SUBE, "el importe neto sube en B"),
+                             (C_ROW_BAJA, "el importe neto baja en B"),
+                             (C_ROW_REVISAR, "posible desalineación "
+                                             "DNI/Apellido")):
+            tk.Label(fil, text="   ", bg=color, relief="solid", bd=1
+                     ).pack(side="left", padx=(0, 4))
+            tk.Label(fil, text=texto, bg=BG_APP, fg="#555555", font=FONT_ENTRY
+                     ).pack(side="left", padx=(0, 18))
+
+    def _bloque_tabla_detalle(self, parent: tk.Widget, titulo: str) -> DataTable:
+        """Bloque con cabecera coloreada + contador + DataTable idéntico al de
+        la vista previa (Detalle) de la ventana principal."""
+        tb, c = self._bloque(titulo, BG_TAB1, expand=True, parent=parent,
+                             header_h=self._header_h)
+        tb.columnconfigure(0, weight=1)
+        lbl_count = tk.Label(tb, text="", bg=BG_TAB1, fg="white", font=FONT_UI)
+        lbl_count.grid(row=0, column=1, padx=(0, 6))
+        c.rowconfigure(0, weight=1)
+        c.columnconfigure(0, weight=1)
+        tabla = DataTable(
+            c, COL_COMPDET_IDS, COL_COMPDET_NAMES,
+            font_ui=FONT_TABLA, font_bold=FONT_TABLA_BOLD,
+            on_select=lambda s, t, lbl=lbl_count:
+                lbl.configure(text=f"{s}/{t}" if t else ""))
+        tabla.pack(fill="both", expand=True)
+        self._config_tabla_detalle(tabla)
+        # Colores de "marcar cambios A-B" (mismos que la tabla de diff)
+        tabla.set_tag("sube", C_ROW_SUBE, C_ROW_SUBE_SEL)
+        tabla.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
+        return tabla
+
+    def _pick_pdf_comparar_det(self, cual: str) -> None:
+        """Selecciona el PDF A o B del panel Comparar Detalle. Cuando ya
+        están los dos, lanza la comparación automáticamente."""
+        path = filedialog.askopenfilename(
+            title=f"Seleccionar PDF {cual} "
+                  f"({'anterior' if cual == 'A' else 'nuevo'})",
+            filetypes=[("PDF", "*.pdf")])
+        if not path:
+            return
+        (self._compdet_a_var if cual == "A" else self._compdet_b_var).set(path)
+        if self._compdet_a_var.get() and self._compdet_b_var.get():
+            self._comparar_det_ejecutar()
+
+    def _comparar_det_ejecutar(self) -> None:
+        if self._comparando_det:
+            self._log_write("Ya hay una comparación en marcha.", "warn")
+            return
+        pa = self._compdet_a_var.get().strip()
+        pb = self._compdet_b_var.get().strip()
+        if not pa or not pb:
+            self._lbl_compdet_resumen.configure(
+                text="Selecciona los dos PDF a comparar.", fg=C_AVISO)
+            return
+        self._comparando_det = True
+        self._btn_compdet.state(["disabled"])
+        self._lbl_compdet_resumen.configure(text="Comparando…", fg="#555555")
+        self._log_write(
+            f"Comparando Detalle {os.path.basename(pa)} ↔ "
+            f"{os.path.basename(pb)}…", "info")
+        threading.Thread(target=self._comparar_det_worker, args=(pa, pb),
+                         daemon=True).start()
+
+    def _comparar_det_worker(self, path_a: str, path_b: str) -> None:
+        try:
+            try:
+                regs_a, pag_a = parse_pdf(path_a)
+                regs_b, pag_b = parse_pdf(path_b)
+            except Exception as exc:
+                self.after(0, self._log_write,
+                           f"Error al leer los PDF: {exc}", "error")
+                self.after(0, self._lbl_compdet_resumen.configure,
+                           {"text": f"Error al leer los PDF: {exc}",
+                            "fg": "#C0392B"})
+                return
+            # Igual que en Comparar Resumen: separa DNI/Apellido desalineados
+            # antes de mostrar (no toca importes).
+            corregir_alineacion(regs_a)
+            corregir_alineacion(regs_b)
+            # Comparación (motor de pdf_compare, no modifica los Registro):
+            # aporta los alumnos nuevos en B y los cambios de importe para
+            # el filtro/marcado del checkbox.
+            comp = comparar(regs_a, regs_b)
+            self.after(0, self._log_write,
+                       f"A: {pag_a} pág., {len(regs_a)} reg. · "
+                       f"B: {pag_b} pág., {len(regs_b)} reg.", "ok")
+            self.after(0, self._load_tablas_compdet,
+                       regs_a, regs_b, pag_a, pag_b, comp)
+        finally:
+            self.after(0, self._fin_comparar_det)
+
+    def _fin_comparar_det(self) -> None:
+        self._comparando_det = False
+        self._btn_compdet.state(["!disabled"])
+
+    def _load_tablas_compdet(self, regs_a: list[Registro],
+                             regs_b: list[Registro],
+                             pag_a: int, pag_b: int,
+                             comp: Comparacion) -> None:
+        """Guarda los datos parseados y pinta las dos tablas + el resumen.
+        El re-filtrado del checkbox reusa estos datos sin re-parsear."""
+        self._compdet_datos = (regs_a, regs_b, pag_a, pag_b, comp)
+        self._render_tablas_compdet()
+        self._log_write(
+            f"Comparación Detalle cargada. Δ neto {comp.delta_total:+.2f} €.",
+            "ok")
+        # Con las dos tablas rellenas, ajusta letra/columnas a sus recuadros.
+        self.after(0, self._autofit_compdet)
+
+    def _refiltrar_compdet(self) -> None:
+        """Reaplica el filtro del checkbox sobre los últimos datos parseados
+        (sin re-parsear los PDF)."""
+        if self._compdet_datos is not None:
+            self._render_tablas_compdet()
+            self.after(0, self._autofit_compdet)
+
+    def _render_tablas_compdet(self) -> None:
+        """Rellena las dos tablas de Detalle (A izquierda, B derecha) con las
+        mismas filas que la vista previa principal. Si el checkbox está
+        activo, oculta en B los alumnos que no están en A (nuevos) y colorea
+        en AMBAS tablas los alumnos cuyo importe cambió (verde sube / rojo
+        baja, la misma regla que la tabla de diff de Comparar Resumen; el
+        marcado tiene prioridad sobre el ámbar de revisión)."""
+        if self._compdet_datos is None:
+            return
+        regs_a, regs_b, pag_a, pag_b, comp = self._compdet_datos
+        filtro = self._var_compdet_filtro.get()
+
+        marca: dict[str, str] = {}
+        regs_b_vis = regs_b
+        if filtro:
+            for f in comp.modificados:
+                delta = f.delta_neto or f.delta_importe
+                marca[f.exped] = "sube" if delta > 0 else "baja"
+            # Quita de B los Registro presentes solo en B (por identidad, no
+            # por Exped: exacto incluso si un Exped viniera repetido).
+            solo_b = {id(r) for r in comp.solo_b}
+            regs_b_vis = [r for r in regs_b if id(r) not in solo_b]
+
+        for tabla, regs, es_a in ((self._tree_det_a, regs_a, True),
+                                  (self._tree_det_b, regs_b_vis, False)):
+            rows, tags, _dnis = self._filas_detalle(regs)
+            # Estas tablas no llevan Rec./F. Pag.: recorta cada fila a las
+            # columnas del panel (las 7 primeras de la vista Detalle).
+            fin_rows = [row[:len(COL_COMPDET_IDS)] for row in rows]
+            fin_tags = [marca.get(row[0], tag)
+                        for row, tag in zip(rows, tags)]
+            iids = tabla.load(fin_rows, tags=fin_tags)
+            # Mapa Exped -> iids para la sincronización de selección A <-> B.
+            mapa: dict[str, list[str]] = {}
+            for iid, row in zip(iids, fin_rows):
+                mapa.setdefault(row[0], []).append(iid)
+            if es_a:
+                self._exped2iid_det_a = mapa
+            else:
+                self._exped2iid_det_b = mapa
+
+        texto = (f"A: {pag_a} pág. · {len(regs_a)} alumnos · "
+                 f"neto {comp.total_neto_a:,.2f} €   |   "
+                 f"B: {pag_b} pág. · {len(regs_b)} alumnos · "
+                 f"neto {comp.total_neto_b:,.2f} € "
+                 f"(Δ {comp.delta_total:+,.2f} €)")
+        if filtro:
+            texto += (f"   |   Filtro: {len(comp.solo_b)} nuevos ocultos "
+                      f"en B · {len(comp.modificados)} con cambios")
+        self._lbl_compdet_resumen.configure(text=texto, fg="#1B2631")
+
+    # Sincronización de selección A <-> B por Exped (clave estable entre
+    # versiones del mismo curso, la misma que usa el motor de comparación).
+
+    def _on_sel_det_a(self, _event=None) -> None:
+        if self._sync_guard:
+            return
+        iid = self._fila_activa(self._tree_det_a)
+        if iid is None:
+            return
+        exped = self._tree_det_a.tree.set(iid, "exped")
+        objetivos = self._exped2iid_det_b.get(exped)
+        if objetivos:
+            self._sync_select(self._tree_det_b, objetivos)
+
+    def _on_sel_det_b(self, _event=None) -> None:
+        if self._sync_guard:
+            return
+        iid = self._fila_activa(self._tree_det_b)
+        if iid is None:
+            return
+        exped = self._tree_det_b.tree.set(iid, "exped")
+        objetivos = self._exped2iid_det_a.get(exped)
+        if objetivos:
+            self._sync_select(self._tree_det_a, objetivos)
+
+    def _autofit_compdet(self, _try: int = 0) -> None:
+        """Auto-ajuste del tamaño de letra para las dos tablas del panel
+        Comparar Detalle (mismo criterio que _autofit_tablas: el mayor tamaño
+        de la banda con el que ambas quepan a lo ancho de su recuadro)."""
+        if not hasattr(self, "_tree_det_a"):
+            return
+        smin, smax = self._banda_font()
+        self.update_idletasks()
+        w1 = self._tree_det_a.tree.winfo_width()
+        w2 = self._tree_det_b.tree.winfo_width()
+        if (w1 < 50 or w2 < 50):        # todavía sin geometría real: reintenta
+            if _try < 20:
+                self.after(150, lambda: self._autofit_compdet(_try + 1))
+            return
+        best = smax
+        for tabla, ancho in ((self._tree_det_a, w1), (self._tree_det_b, w2)):
+            if tabla.tree.get_children():
+                best = min(best, tabla.fit_font_size(smin, smax, ancho - 2))
+        self._apply_table_font(best)
+        self._log_write(
+            f"Auto-ajuste de tablas (Comparar Detalle): letra {best} pt "
+            f"(rango {smin}–{smax}).", "info")
 
     # ── Panel de ayuda ──────────────────────────────────────────────────────
 
@@ -892,7 +1320,13 @@ class App(tk.Tk):
 
     # ── Carga de tablas ───────────────────────────────────────────────────────
 
-    def _load_tabla_detalle(self, registros: list[Registro]) -> None:
+    @staticmethod
+    def _filas_detalle(registros: list[Registro]
+                       ) -> tuple[list[tuple], list[str], list[str]]:
+        """Filas de una tabla con las columnas de la vista Detalle: una fila
+        por línea de cobro más una fila por alumno con el importe
+        administrativo. Devuelve (filas, tags franja/revisar, dni por fila).
+        La usan la vista previa principal y el panel Comparar Detalle."""
         rows, tags, dnis = [], [], []
         i = 0
 
@@ -913,6 +1347,10 @@ class App(tk.Tk):
             tags.append(_tag(r.revisar, i))
             dnis.append(r.dni)
             i += 1
+        return rows, tags, dnis
+
+    def _load_tabla_detalle(self, registros: list[Registro]) -> None:
+        rows, tags, dnis = self._filas_detalle(registros)
         iids = self._tree_detalle.load(rows, tags=tags)
         self._dni2iid_detalle = {}
         for iid, dni in zip(iids, dnis):
@@ -1010,7 +1448,10 @@ class App(tk.Tk):
         st = ttk.Style(self)
         st.configure("Treeview", font=font_n, rowheight=rowh)
         st.configure("Treeview.Heading", font=font_b)
-        for tabla in (self._tree_detalle, self._tree_resumen):
+        tablas = [self._tree_detalle, self._tree_resumen]
+        if hasattr(self, "_tree_det_a"):     # tablas del panel Comparar Detalle
+            tablas += [self._tree_det_a, self._tree_det_b]
+        for tabla in tablas:
             tabla.set_measure_fonts(font_n, font_b)
             tabla.autosize()
         self._font_tabla_actual = size
@@ -1032,7 +1473,13 @@ class App(tk.Tk):
 
     def _autofit_on_resize(self) -> None:
         self._resize_job = None
-        if (hasattr(self, "_tree_detalle")
+        # Si el panel Comparar Detalle está visible con datos, se re-ajusta
+        # ese (es lo que se ve); si no, las tablas principales.
+        if (hasattr(self, "_compdet_panel")
+                and self._compdet_panel.winfo_ismapped()
+                and self._tree_det_a.tree.get_children()):
+            self._autofit_compdet()
+        elif (hasattr(self, "_tree_detalle")
                 and self._tree_detalle.tree.get_children()):
             self._autofit_tablas()
 

@@ -19,7 +19,7 @@ Este módulo no conoce nada de tkinter ni de Excel: recibe dos list[Registro]
 y devuelve una Comparacion. No modifica los Registro que recibe.
 """
 
-# Última actualización: 2026-07-07 11:36
+# Última actualización: 2026-07-07 22:52
 
 from __future__ import annotations
 
@@ -59,6 +59,8 @@ class FilaDiff:
     importe_b: float
     administrativo_a: float  # gastos administrativos en A
     administrativo_b: float
+    num_refs_a: int = 0       # nº de recibos/líneas de cobro en A
+    num_refs_b: int = 0
     dni_distinto: bool = False   # mismo Exped con DNI distinto en A y B
 
     @property
@@ -81,7 +83,9 @@ class Comparacion:
     modificados: list[FilaDiff] = field(default_factory=list)
     solo_a: list[Registro] = field(default_factory=list)   # bajas
     solo_b: list[Registro] = field(default_factory=list)   # altas
-    iguales: int = 0
+    # Alumnos en ambos listados SIN cambio de importe (FilaDiff con deltas 0,
+    # para poder listarlos en la UI igual que los modificados).
+    iguales: list[FilaDiff] = field(default_factory=list)
     total_neto_a: float = 0.0    # Σ importe_neto del fichero A completo
     total_neto_b: float = 0.0
 
@@ -151,16 +155,16 @@ def comparar(records_a: list[Registro],
         for ra, rb in pares:
             cambio = (round(ra.importe, 2) != round(rb.importe, 2)
                       or round(ra.administrativo, 2) != round(rb.administrativo, 2))
-            if cambio:
-                res.modificados.append(FilaDiff(
-                    exped=exped, dni=rb.dni, nombre=rb.nombre,
-                    importe_a=ra.importe, importe_b=rb.importe,
-                    administrativo_a=ra.administrativo,
-                    administrativo_b=rb.administrativo,
-                    dni_distinto=not _iguales_comodin(
-                        _norm_texto(ra.dni), _norm_texto(rb.dni))))
-            else:
-                res.iguales += 1
+            fila = FilaDiff(
+                exped=exped, dni=rb.dni, nombre=rb.nombre,
+                importe_a=ra.importe, importe_b=rb.importe,
+                administrativo_a=ra.administrativo,
+                administrativo_b=rb.administrativo,
+                num_refs_a=len(ra.referencias),
+                num_refs_b=len(rb.referencias),
+                dni_distinto=not _iguales_comodin(
+                    _norm_texto(ra.dni), _norm_texto(rb.dni)))
+            (res.modificados if cambio else res.iguales).append(fila)
 
     for exped in idx_b:
         if exped not in idx_a:
@@ -168,4 +172,5 @@ def comparar(records_a: list[Registro],
 
     # Orden alfabético por nombre (mismo criterio visual que las tablas).
     res.modificados.sort(key=lambda f: _norm_texto(f.nombre))
+    res.iguales.sort(key=lambda f: _norm_texto(f.nombre))
     return res
