@@ -6,11 +6,11 @@ UPUA, Universidad de Alicante) a un fichero Excel con dos hojas: Resumen
 cobro + 1 fila por importe administrativo, para conciliar pago a pago).
 
 Flujo:
-  1) Seleccionar el PDF de origen.
-  2) Seleccionar la carpeta destino del Excel.
-  3) Pulsar "Ejecutar": parsea el PDF (pdf_parser.py), muestra la vista
-     previa en las tablas Detalle y Resumen, y genera el .xlsx
-     (excel_export.py) en un único paso.
+  1) Seleccionar el PDF de origen: se parsea automáticamente
+     (pdf_parser.py) y se muestra la vista previa en las tablas Detalle
+     y Resumen. La carpeta destino se autorrellena con la del propio PDF.
+  2) Pulsar "Guardar Excel" para generar el .xlsx (excel_export.py) con
+     los datos ya parseados; solo entonces se puede "Abrir Excel".
 
 Basado en la plantilla del skill tkinter-app-design (layout de 3 bloques +
 panel de configuración). Vendorizado junto a este archivo: data_table.py,
@@ -22,7 +22,7 @@ los parsea con pdf_parser y muestra en una única tabla de diff los alumnos
 cuyo importe cambió entre ambos (motor en pdf_compare.py).
 """
 
-# Última actualización: 2026-07-07 11:36
+# Última actualización: 2026-07-07 19:25
 
 import os
 import sys
@@ -173,9 +173,9 @@ COL_DETALLE_IDS = ("exped", "dni", "nombre", "referencia", "fecha",
 COL_DETALLE_NAMES = ("Exp.", "DNI", "Apellidos y Nombre", "Referencia",
                       "F. Cobro", "I.Acad.", "I.Adm.", "Rec.", "F. Pag.")
 
-COL_RESUMEN_IDS = ("exped", "dni", "nombre", "importe", "neto",
+COL_RESUMEN_IDS = ("exped", "dni", "nombre", "num_ref", "importe", "neto",
                     "administrativo")
-COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Importe",
+COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec.", "Importe",
                       "I.Acad.", "I.Adm.")
 
 
@@ -206,6 +206,7 @@ class App(tk.Tk):
         self._pdf_path: str | None = None
         self._ultimo_excel: str | None = None
         self._procesando = False
+        self._guardando = False
 
         # Comparación de dos PDF (panel overlay a pantalla completa)
         self._comp_a_var = tk.StringVar()    # ruta del PDF A (anterior)
@@ -221,6 +222,11 @@ class App(tk.Tk):
         self._registros: list[Registro] = []
         self._iid2reg_res: dict[str, Registro] = {}   # iid Resumen -> Registro
         self._iid_revisar: set[str] = set()           # iids pendientes de revisar
+
+        # Sincronización de selección por DNI entre Detalle y Resumen
+        self._dni2iid_detalle: dict[str, list[str]] = {}   # dni -> iids Detalle
+        self._dni2iid_resumen: dict[str, str] = {}         # dni -> iid Resumen
+        self._sync_guard = False   # evita eco al reflejar la selección cruzada
 
         self._snail_img = None
         if _HAS_PIL:
@@ -243,10 +249,6 @@ class App(tk.Tk):
         self._last_win_w = 0
         self._resize_job = None
         self.bind("<Configure>", self._on_resize)
-
-        last_dest = _reg_read("LastCarpetaDestino")
-        if last_dest and os.path.isdir(last_dest):
-            self._fuente2_var.set(last_dest)
 
         set_tooltips_enabled(True)
 
@@ -446,11 +448,21 @@ class App(tk.Tk):
             on_select=lambda s, t, lbl=self._lbl_count2:
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         self._tree_resumen.pack(fill="both", expand=True)
+        self._tree_resumen.set_anchor("num_ref", "center")
         self._tree_resumen.set_anchor("importe", "e")
         self._tree_resumen.set_anchor("administrativo", "e")
         self._tree_resumen.set_anchor("neto", "e")
         self._tree_resumen.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
         self._tree_detalle.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
+
+        # Sincronización de selección por DNI: al seleccionar una fila en una
+        # tabla, se selecciona (y se hace visible) la fila / filas con el
+        # mismo DNI en la otra. add="+" para no pisar el binding interno de
+        # DataTable (franjas/tags de selección + contador).
+        self._tree_detalle.tree.bind(
+            "<<TreeviewSelect>>", self._on_sel_detalle, add="+")
+        self._tree_resumen.tree.bind(
+            "<<TreeviewSelect>>", self._on_sel_resumen, add="+")
 
     # ── BLOQUE 3: Informe ─────────────────────────────────────────────────────
 
@@ -460,16 +472,18 @@ class App(tk.Tk):
         tb.columnconfigure(0, weight=1)
         tb.columnconfigure(3, weight=1)
 
-        self._btn_accion = ttk.Button(tb, text="▶  Ejecutar", style="Export.TButton",
-                                      command=self._ejecutar)
-        self._btn_accion.grid(row=0, column=1, padx=(0, 100), pady=2, ipadx=6)
-        Tooltip(self._btn_accion,
-                "Parsea el PDF seleccionado y genera el Excel de una vez")
+        self._btn_guardar = ttk.Button(tb, text="💾 Guardar Excel", style="Export.TButton",
+                                       command=self._guardar_excel)
+        self._btn_guardar.grid(row=0, column=1, padx=(0, 100), pady=2, ipadx=6)
+        Tooltip(self._btn_guardar,
+                "Exporta a Excel los datos ya parseados del PDF actual; abre "
+                "un diálogo para elegir carpeta y nombre antes de guardar")
 
         self._btn_abrir = ttk.Button(tb, text="📂 Abrir Excel", style="Sel.TButton",
                                      command=self._abrir_excel_generado)
         self._btn_abrir.grid(row=0, column=2, padx=(0, 4), pady=2, ipadx=6)
         Tooltip(self._btn_abrir, "Abre el último Excel generado en esta sesión")
+        self._btn_abrir.grid_remove()   # visible solo tras guardar un Excel
 
         tk.Label(tb, text="", bg=BG_LOG).grid(row=0, column=3, sticky="ew")
 
@@ -844,9 +858,10 @@ class App(tk.Tk):
     def _show_ayuda(self) -> None:
         messagebox.showinfo(
             "Ayuda",
-            "1) Selecciona el PDF de liquidación de tasas.\n"
-            "2) Selecciona la carpeta donde quieres guardar el Excel.\n"
-            "3) Pulsa Ejecutar.\n\n"
+            "1) Selecciona el PDF de liquidación de tasas: se parsea solo "
+            "y aparece la vista previa (la carpeta destino se rellena con "
+            "la del propio PDF; puedes cambiarla).\n"
+            "2) Pulsa 'Guardar Excel' para generarlo.\n\n"
             "Se genera un único Excel con dos hojas: 'Resumen' (una fila "
             "por alumno, con importes agregados) y 'Detalle' (una fila "
             "por línea de cobro más una fila con el importe "
@@ -862,20 +877,23 @@ class App(tk.Tk):
             return
         self._pdf_path = path
         self._fuente1_var.set(path)
+        # Autorrelleno: por defecto el Excel se guarda en la misma carpeta
+        # que el PDF de origen (el usuario puede cambiarla después con
+        # "Seleccionar" antes de pulsar "Guardar Excel").
+        self._fuente2_var.set(os.path.dirname(path))
         self._log_write(f"PDF seleccionado: {path}", "info")
-        self._ejecutar()
+        self._parsear()
 
     def _pick_carpeta_destino(self) -> None:
         path = filedialog.askdirectory(title="Seleccionar carpeta destino del Excel")
         if path:
             self._fuente2_var.set(path)
-            _reg_write("LastCarpetaDestino", path)
             self._log_write(f"Carpeta destino: {path}", "info")
 
     # ── Carga de tablas ───────────────────────────────────────────────────────
 
     def _load_tabla_detalle(self, registros: list[Registro]) -> None:
-        rows, tags = [], []
+        rows, tags, dnis = [], [], []
         i = 0
 
         def _tag(marcada: bool, pos: int) -> str:
@@ -887,29 +905,80 @@ class App(tk.Tk):
                              ref.fecha, f"{ref.importe:.2f}", "",
                              ref.plazo, ref.forma_pago))
                 tags.append(_tag(r.revisar, i))
+                dnis.append(r.dni)
                 i += 1
             # Fila con el importe administrativo: sin datos de cobro.
             rows.append((r.exped, r.dni, r.nombre, "", "", "",
                         f"{r.administrativo:.2f}", "", ""))
             tags.append(_tag(r.revisar, i))
+            dnis.append(r.dni)
             i += 1
-        self._tree_detalle.load(rows, tags=tags)
+        iids = self._tree_detalle.load(rows, tags=tags)
+        self._dni2iid_detalle = {}
+        for iid, dni in zip(iids, dnis):
+            self._dni2iid_detalle.setdefault(dni, []).append(iid)
 
     def _load_tabla_resumen(self, registros: list[Registro]) -> None:
         rows, tags = [], []
         for i, r in enumerate(registros):
-            rows.append((r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
-                         f"{r.importe_neto:.2f}", f"{r.administrativo:.2f}"))
+            rows.append((r.exped, r.dni, r.nombre, len(r.referencias),
+                         f"{r.importe:.2f}", f"{r.importe_neto:.2f}",
+                         f"{r.administrativo:.2f}"))
             tags.append("revisar" if r.revisar
                         else ("row_a" if i % 2 == 0 else "row_b"))
         iids = self._tree_resumen.load(rows, tags=tags)
         self._iid2reg_res = dict(zip(iids, registros))
         self._iid_revisar = {iid for iid, r in zip(iids, registros) if r.revisar}
+        self._dni2iid_resumen = {r.dni: iid for iid, r in zip(iids, registros)}
+
+    # ── Sincronización de selección por DNI entre Detalle y Resumen ─────────
+
+    @staticmethod
+    def _fila_activa(tabla: DataTable) -> str | None:
+        """iid de la fila con foco si sigue seleccionada, si no la primera
+        fila seleccionada; None si no hay selección."""
+        sel = tabla.tree.selection()
+        if not sel:
+            return None
+        foco = tabla.tree.focus()
+        return foco if foco in sel else sel[0]
+
+    def _sync_select(self, tabla: DataTable, iids: list[str]) -> None:
+        self._sync_guard = True
+        try:
+            tabla.tree.selection_set(iids)
+            tabla.tree.focus(iids[0])
+            tabla.scroll_to(iids[0], center=True)
+        finally:
+            self.after_idle(lambda: setattr(self, "_sync_guard", False))
+
+    def _on_sel_detalle(self, _event=None) -> None:
+        if self._sync_guard:
+            return
+        iid = self._fila_activa(self._tree_detalle)
+        if iid is None:
+            return
+        dni = self._tree_detalle.tree.set(iid, "dni")
+        objetivo = self._dni2iid_resumen.get(dni)
+        if objetivo:
+            self._sync_select(self._tree_resumen, [objetivo])
+
+    def _on_sel_resumen(self, _event=None) -> None:
+        if self._sync_guard:
+            return
+        iid = self._fila_activa(self._tree_resumen)
+        if iid is None:
+            return
+        dni = self._tree_resumen.tree.set(iid, "dni")
+        objetivos = self._dni2iid_detalle.get(dni)
+        if objetivos:
+            self._sync_select(self._tree_detalle, objetivos)
 
     def _resumen_row(self, r: Registro) -> tuple:
         """Fila de la tabla Resumen para un Registro (mismo orden de columnas)."""
-        return (r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
-                f"{r.importe_neto:.2f}", f"{r.administrativo:.2f}")
+        return (r.exped, r.dni, r.nombre, len(r.referencias),
+                f"{r.importe:.2f}", f"{r.importe_neto:.2f}",
+                f"{r.administrativo:.2f}")
 
     # ── Tamaño de letra de las tablas (control manual + auto-ajuste) ────────────
 
@@ -1162,6 +1231,9 @@ class App(tk.Tk):
         self._tree_resumen.unmark(iid)
         self._tree_resumen.sort("nombre")                 # reordena tras revisar
         self._load_tabla_detalle(self._registros)         # refresca marcas/valores
+        # El DNI de esta fila pudo cambiar (separación DNI/Apellido): el mapa
+        # de sincronización Resumen -> Detalle quedaría con la clave vieja.
+        self._dni2iid_resumen = {r.dni: i for i, r in self._iid2reg_res.items()}
         self._actualizar_contador_revisar()
 
         if cambiado and self._ultimo_excel:
@@ -1180,33 +1252,25 @@ class App(tk.Tk):
         if self._iid_revisar:
             self._nav_revisar(+1)
 
-    # ── Acción principal ──────────────────────────────────────────────────────
+    # ── Parseo automático (al seleccionar el PDF) ─────────────────────────────
 
-    def _ejecutar(self) -> None:
+    def _parsear(self) -> None:
         if self._procesando:
             self._log_write("Ya hay un proceso en marcha, espera a que termine.", "warn")
             return
         if not self._pdf_path:
             self._log_write("Selecciona un PDF.", "warn")
             return
-        destino = self._fuente2_var.get().strip()
-        if not destino or not os.path.isdir(destino):
-            self._log_write("Selecciona una carpeta destino válida.", "warn")
-            return
 
-        nombre_base = (getattr(self, "_var_nombre_fichero", None).get().strip()
-                       if hasattr(self, "_var_nombre_fichero") else "") \
-            or _cfg_read("nombre_fichero") or "Liquidacion_Tasas"
-        marca = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = os.path.join(destino, f"{nombre_base}_{marca}.xlsx")
-
+        self._registros = []
+        self._ultimo_excel = None
+        self._btn_abrir.grid_remove()   # el Excel del PDF anterior ya no vale
         self._procesando = True
-        self._btn_accion.state(["disabled"])
         self._log_write(f"Procesando {os.path.basename(self._pdf_path)}…", "info")
-        threading.Thread(target=self._ejecutar_worker,
-                         args=(self._pdf_path, output_path), daemon=True).start()
+        threading.Thread(target=self._parsear_worker,
+                         args=(self._pdf_path,), daemon=True).start()
 
-    def _ejecutar_worker(self, pdf_path: str, output_path: str) -> None:
+    def _parsear_worker(self, pdf_path: str) -> None:
         try:
             try:
                 registros, paginas = parse_pdf(pdf_path)
@@ -1227,26 +1291,79 @@ class App(tk.Tk):
             # (DNI que se comió el inicio del apellido). No afecta importes.
             n_rev = corregir_alineacion(registros)
 
-            export_to_excel(registros, output_path)
-            self._ultimo_excel = output_path
             self._registros = registros
             self.after(0, self._load_tabla_detalle, registros)
             self.after(0, self._load_tabla_resumen, registros)
             # Con las dos tablas ya rellenas, ajusta letra y ancho para que
             # entren enteras en sus recuadros (dentro de la banda configurada).
             self.after(0, self._autofit_tablas)
-            self.after(0, self._log_write,
-                      f"Excel generado: {output_path}", "ok")
             self.after(0, self._post_correccion, n_rev)
+        finally:
+            self.after(0, self._fin_parsear)
+
+    def _fin_parsear(self) -> None:
+        self._procesando = False
+
+    # ── Guardar Excel (acción explícita del usuario) ──────────────────────────
+
+    def _guardar_excel(self) -> None:
+        if self._guardando:
+            self._log_write("Ya se está guardando el Excel.", "warn")
+            return
+        if not self._registros:
+            self._log_write(
+                "Todavía no hay datos que exportar: selecciona un PDF.", "warn")
+            return
+
+        destino = self._fuente2_var.get().strip()
+        if not destino or not os.path.isdir(destino):
+            destino = os.path.expanduser("~")
+        nombre_base = (getattr(self, "_var_nombre_fichero", None).get().strip()
+                       if hasattr(self, "_var_nombre_fichero") else "") \
+            or _cfg_read("nombre_fichero") or "Liquidacion_Tasas"
+        marca = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        nombre_propuesto = f"{nombre_base}_{marca}.xlsx"
+
+        # El propio diálogo "Guardar como" propone carpeta y nombre, pero deja
+        # que el usuario los cambie antes de confirmar.
+        output_path = filedialog.asksaveasfilename(
+            title="Guardar Excel de liquidación de tasas",
+            initialdir=destino, initialfile=nombre_propuesto,
+            defaultextension=".xlsx",
+            filetypes=[("Libro de Excel", "*.xlsx")])
+        if not output_path:
+            self._log_write("Guardado cancelado.", "info")
+            return
+        self._fuente2_var.set(os.path.dirname(output_path))
+
+        self._guardando = True
+        self._btn_guardar.state(["disabled"])
+        self._log_write(f"Guardando Excel en {output_path}…", "info")
+        threading.Thread(target=self._guardar_excel_worker,
+                         args=(list(self._registros), output_path),
+                         daemon=True).start()
+
+    def _guardar_excel_worker(self, registros: list[Registro],
+                              output_path: str) -> None:
+        try:
+            try:
+                export_to_excel(registros, output_path)
+            except Exception as exc:
+                self.after(0, self._log_write,
+                          f"No se pudo generar el Excel: {exc}", "error")
+                return
+            self._ultimo_excel = output_path
+            self.after(0, self._log_write, f"Excel generado: {output_path}", "ok")
+            self.after(0, self._btn_abrir.grid)
             # Confirmación modal de fin de grabación (nombre + carpeta); al
             # cerrarla abre la carpeta destino si la opción está activada.
             self.after(0, self._confirmar_grabacion, output_path)
         finally:
-            self.after(0, self._fin_ejecutar)
+            self.after(0, self._fin_guardar)
 
-    def _fin_ejecutar(self) -> None:
-        self._procesando = False
-        self._btn_accion.state(["!disabled"])
+    def _fin_guardar(self) -> None:
+        self._guardando = False
+        self._btn_guardar.state(["!disabled"])
 
     def _abrir_carpeta_destino(self) -> None:
         destino = self._fuente2_var.get().strip()

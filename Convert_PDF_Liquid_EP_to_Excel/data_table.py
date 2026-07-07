@@ -29,6 +29,8 @@ Tabla por ESTADO (colores por fila en vez de franjas):
     t.load(rows, tags=["ok", "error", ...])
 """
 
+# Última actualización: 2026-07-07 19:25
+
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
