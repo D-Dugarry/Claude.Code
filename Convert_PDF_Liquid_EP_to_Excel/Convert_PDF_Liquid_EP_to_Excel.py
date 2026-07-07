@@ -695,25 +695,11 @@ class App(tk.Tk):
         Tooltip(self._btn_comparar,
                 "Parsea los dos PDF y muestra los alumnos cuyo importe cambió")
 
-        # Resumen de la comparación (contadores + delta del total) + filtro
-        fila_res = tk.Frame(p, bg=BG_APP)
-        fila_res.pack(fill="x", padx=12, pady=(0, 4))
-        # El checkbox se empaqueta ANTES que el label: pack da el espacio
-        # sobrante a los últimos, y así el filtro nunca queda fuera de la
-        # vista aunque el texto del resumen sea muy largo.
-        _chk = tk.Checkbutton(
-            fila_res, text="Ocultar filas donde solo cambia I.Adm.",
-            variable=self._var_comp_solo_acad, bg=BG_APP, fg="#1B2631",
-            activebackground=BG_APP, font=FONT_ENTRY, anchor="e",
-            command=self._refiltrar_diff)
-        _chk.pack(side="right")
-        self._lbl_comp_resumen = tk.Label(fila_res, text="", bg=BG_APP,
+        # Resumen de la comparación (contadores + delta del total)
+        self._lbl_comp_resumen = tk.Label(p, text="", bg=BG_APP,
                                           fg="#1B2631", font=FONT_BOLD,
                                           anchor="w")
-        self._lbl_comp_resumen.pack(side="left", fill="x", expand=True)
-        Tooltip(_chk, "Quita del diff los alumnos cuyo único cambio es el "
-                      "importe administrativo (p. ej. un ajuste sistemático "
-                      "aplicado a todos), dejando solo los cambios de cobros")
+        self._lbl_comp_resumen.pack(fill="x", padx=12, pady=(0, 4))
 
         # Tabla única de diff
         cont = tk.Frame(p, bg=BG_APP, padx=12)
@@ -729,9 +715,18 @@ class App(tk.Tk):
         self._tree_diff.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
         self._tree_diff.set_tag("aviso", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
 
-        # Leyenda de colores
+        # Leyenda de colores + filtro (misma fila, bajo la tabla)
         ley = tk.Frame(p, bg=BG_APP)
         ley.pack(fill="x", padx=12, pady=(0, 8))
+        _chk = tk.Checkbutton(
+            ley, text="Ocultar filas donde solo cambia I.Adm.",
+            variable=self._var_comp_solo_acad, bg=BG_APP, fg="#1B2631",
+            activebackground=BG_APP, font=FONT_ENTRY,
+            command=self._refiltrar_diff)
+        _chk.pack(side="right")
+        Tooltip(_chk, "Quita del diff los alumnos cuyo único cambio es el "
+                      "importe administrativo (p. ej. un ajuste sistemático "
+                      "aplicado a todos), dejando solo los cambios de cobros")
         for color, texto in ((C_ROW_SUBE, "el importe neto sube en B"),
                              (C_ROW_BAJA, "el importe neto baja en B"),
                              (C_ROW_REVISAR, "mismo Exped con DNI distinto "
@@ -830,12 +825,12 @@ class App(tk.Tk):
         filtro = (f" (mostrados: {len(visibles)})"
                   if len(visibles) != len(comp.modificados) else "")
         self._lbl_comp_resumen.configure(
-            text=f"Modificados: {len(comp.modificados)}{filtro}   ·   "
-                 f"Solo en A (bajas): {len(comp.solo_a)}   ·   "
-                 f"Solo en B (altas): {len(comp.solo_b)}   ·   "
-                 f"Sin cambios: {comp.iguales}      |      "
-                 f"Total neto A: {comp.total_neto_a:,.2f} €   →   "
-                 f"B: {comp.total_neto_b:,.2f} €   "
+            text=f"Modificados: {len(comp.modificados)}{filtro} · "
+                 f"Solo en A (bajas): {len(comp.solo_a)} · "
+                 f"Solo en B (altas): {len(comp.solo_b)} · "
+                 f"Sin cambios: {comp.iguales}   |   "
+                 f"Neto A: {comp.total_neto_a:,.2f} € → "
+                 f"B: {comp.total_neto_b:,.2f} € "
                  f"(Δ {comp.delta_total:+,.2f} €)",
             fg="#1B2631")
         self._log_write(
