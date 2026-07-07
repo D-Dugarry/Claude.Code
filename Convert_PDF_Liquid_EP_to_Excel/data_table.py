@@ -283,6 +283,57 @@ class DataTable(tk.Frame):
             self.tree.column(cid, width=int(width),
                              minwidth=min(width, 80), stretch=False)
 
+    def set_measure_fonts(self, font_ui, font_bold) -> None:
+        """Actualiza las fuentes que autosize() usa para MEDIR el ancho de las
+        columnas. El tamaño RENDERIZADO de la tabla lo fija el estilo ttk
+        'Treeview' a nivel de app; esto solo mantiene la medición en sintonía
+        con ese tamaño para que el autoajuste de columnas siga cuadrando."""
+        self._font_ui = font_ui
+        self._font_bold = font_bold
+
+    def fit_font_size(self, smin: int, smax: int, avail_px: int) -> int:
+        """Mayor tamaño de fuente del rango [smin, smax] con el que TODAS las
+        columnas (medidas a ese tamaño) caben en `avail_px` píxeles de ancho,
+        es decir, la tabla entra entera sin scroll horizontal. Si ni siquiera
+        `smin` cabe, devuelve `smin`. Solo calcula: NO aplica nada.
+
+        Optimización: el argmax de ancho por columna (la celda más ancha) es
+        estable al cambiar de tamaño, así que se localiza una sola vez —con una
+        única pasada por las filas y midiendo solo las cadenas más largas por
+        nº de caracteres— y luego el barrido de tamaños mide únicamente esa
+        celda representativa por columna (cols × tamaños medidas, no filas)."""
+        smin, smax = int(smin), int(smax)
+        if smax < smin:
+            smin, smax = smax, smin
+        children = self.tree.get_children()
+        if not children:
+            return smax
+        self.update_idletasks()
+        fam   = self._font_ui[0]
+        fam_b = self._font_bold[0]
+        uniq = {cid: set() for cid in self.col_ids}
+        for iid in children:
+            for cid, v in zip(self.col_ids, self.tree.item(iid, "values")):
+                uniq[cid].add(str(v))
+        ref = tkfont.Font(family=fam, size=smax)
+        widest: dict[str, str] = {}
+        for cid in self.col_ids:
+            bs, bw = "", 0
+            for v in sorted(uniq[cid], key=len, reverse=True)[:8]:
+                w = ref.measure(v)
+                if w > bw:
+                    bw, bs = w, v
+            widest[cid] = bs
+        for size in range(smax, smin - 1, -1):
+            fn = tkfont.Font(family=fam,   size=size)
+            fb = tkfont.Font(family=fam_b, size=size, weight="bold")
+            total = 0
+            for cid, cname in zip(self.col_ids, self.col_names):
+                total += max(fb.measure(cname), fn.measure(widest[cid])) + self._pad
+            if total <= avail_px:
+                return size
+        return smin
+
     # ── Ordenación por cabecera ──────────────────────────────────────────────
     def _sort_by(self, col: str) -> None:
         rows = [(self.tree.set(iid, col), iid) for iid in self.tree.get_children()]

@@ -15,7 +15,14 @@ Flujo:
 Basado en la plantilla del skill tkinter-app-design (layout de 3 bloques +
 panel de configuración). Vendorizado junto a este archivo: data_table.py,
 help_tooltips.py, SnailSystem.png.
+
+Incluye además un panel de COMPARACIÓN (overlay a pantalla completa, mismo
+patrón que el de configuración): selecciona dos PDF (A = anterior, B = nuevo),
+los parsea con pdf_parser y muestra en una única tabla de diff los alumnos
+cuyo importe cambió entre ambos (motor en pdf_compare.py).
 """
+
+# Última actualización: 2026-07-07 11:36
 
 import os
 import sys
@@ -27,6 +34,7 @@ import tkinter.font as tkfont
 from tkinter import ttk, filedialog, messagebox
 
 from pdf_parser import parse_pdf, corregir_alineacion, Registro
+from pdf_compare import comparar, Comparacion
 from excel_export import export_to_excel
 
 # Tooltips + caracolillo: help_tooltips.py vive junto a este archivo.
@@ -77,6 +85,12 @@ FONT_LOG = ("Courier New", BASE)
 FONT_TABLA = ("Verdana", BASE - 1)
 FONT_TABLA_BOLD = ("Verdana", BASE - 1, "bold")
 
+# Banda por defecto del tamaño de letra de las dos tablas. El auto-ajuste elige,
+# dentro de este rango, el mayor tamaño con el que AMBAS tablas quepan enteras a
+# lo ancho de su recuadro (ver App._autofit_tablas). Configurable en el panel.
+FONT_TABLA_MIN_DEF = 8
+FONT_TABLA_MAX_DEF = BASE      # = FONT_UI, para que no supere la letra de la UI
+
 SNAIL_IMG_PX = int(BASE * 2.8)
 
 BG_APP = "#F2F3F4"
@@ -98,6 +112,13 @@ C_ROW_REVISAR = "#FDEBD0"      # fondo de fila marcada
 C_ROW_REVISAR_SEL = "#F5CBA7"  # fondo de fila marcada seleccionada
 C_AVISO = "#F39C12"            # ámbar del texto/botón de aviso
 
+# Panel de comparación de dos PDF: colores de fila del diff
+BG_COMP = "#154360"            # cabecera del panel (azul más oscuro que Selección)
+C_ROW_SUBE = "#D5F5E3"         # el importe neto sube en B (verde claro)
+C_ROW_SUBE_SEL = "#A9DFBF"
+C_ROW_BAJA = "#FADBD8"         # el importe neto baja en B (rojo claro)
+C_ROW_BAJA_SEL = "#F1948A"
+
 
 # ── Registro Windows (persistencia de configuración) ──────────────────────────
 
@@ -106,6 +127,8 @@ REG_KEY = r"Software\Dugarry\Convert_PDF_Liquid_EP_to_Excel"
 _CFG_KEYS: dict[str, str] = {
     "nombre_fichero": "CfgNombreFichero",
     "abrir_carpeta": "CfgAbrirCarpeta",
+    "font_min": "CfgFontMin",
+    "font_max": "CfgFontMax",
 }
 
 
@@ -129,6 +152,15 @@ def _cfg_read(key: str) -> str:
 
 def _cfg_write(key: str, value: str) -> None:
     _reg_write(_CFG_KEYS.get(key, key), value)
+
+
+def _cfg_int(key: str, default: int) -> int:
+    """Lee una clave de configuración como entero; si no existe o no es un
+    entero válido, devuelve `default`."""
+    try:
+        return int(_cfg_read(key))
+    except (TypeError, ValueError):
+        return default
 
 
 # ── Columnas de los Treeview ────────────────────────────────────────────────
@@ -164,9 +196,26 @@ class App(tk.Tk):
         self._fuente2_var = tk.StringVar()   # carpeta destino del Excel
         self._config_dirty = False
 
+        # Banda de tamaño de letra de las tablas (auto-ajuste dentro de ella).
+        self._var_font_min = tk.IntVar(
+            value=_cfg_int("font_min", FONT_TABLA_MIN_DEF))
+        self._var_font_max = tk.IntVar(
+            value=_cfg_int("font_max", FONT_TABLA_MAX_DEF))
+        self._font_tabla_actual = FONT_TABLA[1]   # tamaño aplicado ahora mismo
+
         self._pdf_path: str | None = None
         self._ultimo_excel: str | None = None
         self._procesando = False
+
+        # Comparación de dos PDF (panel overlay a pantalla completa)
+        self._comp_a_var = tk.StringVar()    # ruta del PDF A (anterior)
+        self._comp_b_var = tk.StringVar()    # ruta del PDF B (nuevo)
+        self._comparando = False
+        self._comp_actual: Comparacion | None = None   # última comparación
+        # Filtro: ocultar filas donde solo varía I.Adm. (en las muestras hay
+        # un cambio sistemático de -0,60 € en casi todos los alumnos que
+        # taparía los cambios reales de cobros).
+        self._var_comp_solo_acad = tk.BooleanVar(value=False)
 
         # Revisión de filas desalineadas DNI/Apellido
         self._registros: list[Registro] = []
@@ -187,6 +236,13 @@ class App(tk.Tk):
         self.update_idletasks()
         self.state("zoomed")
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+        # Re-auto-ajusta las tablas cuando cambia el ANCHO de la ventana (al
+        # acabar de maximizarse tras el arranque, o si el usuario la redimensiona
+        # luego). Con debounce para no recalcular en cada píxel del arrastre.
+        self._last_win_w = 0
+        self._resize_job = None
+        self.bind("<Configure>", self._on_resize)
 
         last_dest = _reg_read("LastCarpetaDestino")
         if last_dest and os.path.isdir(last_dest):
@@ -301,6 +357,14 @@ class App(tk.Tk):
                            command=self._pick_carpeta_destino)
         _btn2.grid(row=1, column=2, padx=(8, 0), pady=(2, 4), ipadx=4)
         Tooltip(_btn2, "Selecciona la carpeta donde se guardará el Excel generado")
+
+        # ── Comparar dos PDF (abre el panel de comparación) ────────────────
+        _btn3 = ttk.Button(c, text="⚖ Comparar…", style="Todos.TButton",
+                           command=self._show_comparar)
+        _btn3.grid(row=0, column=3, rowspan=2, padx=(16, 0), pady=(4, 4),
+                   ipadx=4, sticky="ns")
+        Tooltip(_btn3, "Compara dos PDF de liquidación (anterior y nuevo) y "
+                       "muestra los alumnos cuyo importe cambió")
 
         return tb
 
@@ -509,6 +573,32 @@ class App(tk.Tk):
                        activeforeground=_FG, font=FONT_UI, anchor="w"
                        ).pack(fill="x", padx=14, pady=(6, 2))
 
+        tk.Frame(p, bg="#4A5568", height=1).pack(fill="x", padx=10, pady=(6, 6))
+
+        tk.Label(inner, text="Tamaño de letra de las tablas:",
+                 bg=BG_CFG, fg=_FG, font=FONT_UI, anchor="w"
+                 ).pack(fill="x", **_PAD)
+        _fila = tk.Frame(inner, bg=BG_CFG)
+        _fila.pack(fill="x", padx=14, pady=(0, 2))
+        tk.Label(_fila, text="Mín.", bg=BG_CFG, fg=_FG, font=FONT_UI
+                 ).pack(side="left")
+        ttk.Spinbox(_fila, from_=6, to=24, width=4, font=FONT_ENTRY,
+                    textvariable=self._var_font_min,
+                    command=self._on_font_cfg_change
+                    ).pack(side="left", padx=(4, 14))
+        tk.Label(_fila, text="Máx.", bg=BG_CFG, fg=_FG, font=FONT_UI
+                 ).pack(side="left")
+        ttk.Spinbox(_fila, from_=6, to=24, width=4, font=FONT_ENTRY,
+                    textvariable=self._var_font_max,
+                    command=self._on_font_cfg_change
+                    ).pack(side="left", padx=(4, 0))
+        tk.Label(inner,
+                 text="La letra se ajusta sola dentro de este rango para que "
+                      "cada tabla quepa entera en su recuadro.",
+                 bg=BG_CFG, fg="#AEB6BF", font=FONT_ENTRY, anchor="w",
+                 justify="left", wraplength=360
+                 ).pack(fill="x", padx=14, pady=(0, 4))
+
         btns = tk.Frame(inner, bg=BG_CFG)
         btns.pack(fill="x", padx=14, pady=12)
         _b_save = ttk.Button(btns, text="¡Guardar!", style="Export.TButton",
@@ -520,16 +610,239 @@ class App(tk.Tk):
         _b_rev.pack(side="left", padx=(8, 0), ipadx=6)
         Tooltip(_b_rev, "Descarta los cambios y restaura los valores guardados")
 
+    def _on_font_cfg_change(self) -> None:
+        """El usuario tocó un Spinbox del tamaño de letra: marca dirty (el
+        cambio se aplica al pulsar «¡Guardar!», que re-ejecuta el auto-ajuste)."""
+        self._config_dirty = True
+
     def _save_config(self) -> None:
         _cfg_write("nombre_fichero", self._var_nombre_fichero.get().strip())
         _cfg_write("abrir_carpeta", "1" if self._var_abrir_carpeta.get() else "0")
+        smin, smax = self._banda_font()
+        _cfg_write("font_min", str(smin))
+        _cfg_write("font_max", str(smax))
         self._config_dirty = False
         self._log_write("Configuración guardada.", "ok")
+        # Reaplica el nuevo rango de tamaño a las tablas ya cargadas.
+        if self._tree_detalle.tree.get_children():
+            self._autofit_tablas()
 
     def _revert_config(self) -> None:
         self._var_nombre_fichero.set(_cfg_read("nombre_fichero") or "Liquidacion_Tasas")
         self._var_abrir_carpeta.set(_cfg_read("abrir_carpeta") != "0")
+        self._var_font_min.set(_cfg_int("font_min", FONT_TABLA_MIN_DEF))
+        self._var_font_max.set(_cfg_int("font_max", FONT_TABLA_MAX_DEF))
         self._config_dirty = False
+
+    # ── Panel de comparación de dos PDF (overlay a pantalla completa) ──────────
+
+    COL_DIFF_IDS = ("exped", "dni", "nombre", "imp_a", "imp_b", "d_imp",
+                    "adm_a", "adm_b", "d_adm", "d_neto")
+    COL_DIFF_NAMES = ("Exped", "DNI", "Apellidos y Nombre",
+                      "I.Acad. A", "I.Acad. B", "Δ Acad.",
+                      "I.Adm. A", "I.Adm. B", "Δ Adm.", "Δ Neto")
+
+    def _show_comparar(self) -> None:
+        """Muestra el panel de comparación (mismo patrón que Configuración,
+        pero ocupando toda la ventana)."""
+        if not hasattr(self, "_comp_panel"):
+            self._build_comparar_panel()
+        self._comp_panel.place(relx=0.5, rely=0.5, anchor="center",
+                               relwidth=0.99, relheight=0.98)
+        self._comp_panel.lift()
+
+    def _hide_comparar(self) -> None:
+        if hasattr(self, "_comp_panel"):
+            self._comp_panel.place_forget()
+
+    def _build_comparar_panel(self) -> None:
+        p = tk.Frame(self, bg=BG_APP, bd=2, relief="ridge",
+                     highlightbackground="#AAAAAA", highlightthickness=1)
+        self._comp_panel = p
+
+        # Cabecera del panel
+        hdr = tk.Frame(p, bg=BG_COMP)
+        hdr.pack(fill="x")
+        tk.Label(hdr, text="  ⚖  Comparar dos liquidaciones (A = anterior, "
+                           "B = nuevo)",
+                 bg=BG_COMP, fg="white", font=FONT_TITLE, anchor="w"
+                 ).pack(side="left", pady=4)
+        ttk.Button(hdr, text="✕ Cerrar", style="Config.TButton",
+                   command=self._hide_comparar).pack(side="right", padx=8)
+
+        # Selección de los dos PDF
+        sel = tk.Frame(p, bg=BG_APP, padx=12, pady=8)
+        sel.pack(fill="x")
+        sel.columnconfigure(1, weight=1)
+        for fila, (texto, var, cmd) in enumerate((
+                ("PDF A (anterior):", self._comp_a_var,
+                 lambda: self._pick_pdf_comparar("A")),
+                ("PDF B (nuevo):", self._comp_b_var,
+                 lambda: self._pick_pdf_comparar("B")))):
+            tk.Label(sel, text=texto, bg=BG_APP, font=FONT_UI, anchor="w"
+                     ).grid(row=fila, column=0, sticky="w", padx=(0, 10), pady=2)
+            tk.Entry(sel, textvariable=var, font=FONT_ENTRY, bg="white",
+                     fg="#222222", relief="sunken", bd=1, state="readonly"
+                     ).grid(row=fila, column=1, sticky="ew", pady=2, ipady=4)
+            ttk.Button(sel, text="Seleccionar", style="Sel.TButton", command=cmd
+                       ).grid(row=fila, column=2, padx=(8, 0), pady=2, ipadx=4)
+
+        self._btn_comparar = ttk.Button(sel, text="⚖  Comparar",
+                                        style="Accion.TButton",
+                                        command=self._comparar_ejecutar)
+        self._btn_comparar.grid(row=0, column=3, rowspan=2, padx=(16, 0),
+                                ipadx=6, sticky="ns")
+        Tooltip(self._btn_comparar,
+                "Parsea los dos PDF y muestra los alumnos cuyo importe cambió")
+
+        # Resumen de la comparación (contadores + delta del total) + filtro
+        fila_res = tk.Frame(p, bg=BG_APP)
+        fila_res.pack(fill="x", padx=12, pady=(0, 4))
+        # El checkbox se empaqueta ANTES que el label: pack da el espacio
+        # sobrante a los últimos, y así el filtro nunca queda fuera de la
+        # vista aunque el texto del resumen sea muy largo.
+        _chk = tk.Checkbutton(
+            fila_res, text="Ocultar filas donde solo cambia I.Adm.",
+            variable=self._var_comp_solo_acad, bg=BG_APP, fg="#1B2631",
+            activebackground=BG_APP, font=FONT_ENTRY, anchor="e",
+            command=self._refiltrar_diff)
+        _chk.pack(side="right")
+        self._lbl_comp_resumen = tk.Label(fila_res, text="", bg=BG_APP,
+                                          fg="#1B2631", font=FONT_BOLD,
+                                          anchor="w")
+        self._lbl_comp_resumen.pack(side="left", fill="x", expand=True)
+        Tooltip(_chk, "Quita del diff los alumnos cuyo único cambio es el "
+                      "importe administrativo (p. ej. un ajuste sistemático "
+                      "aplicado a todos), dejando solo los cambios de cobros")
+
+        # Tabla única de diff
+        cont = tk.Frame(p, bg=BG_APP, padx=12)
+        cont.pack(fill="both", expand=True, pady=(0, 10))
+        self._tree_diff = DataTable(
+            cont, self.COL_DIFF_IDS, self.COL_DIFF_NAMES,
+            font_ui=FONT_TABLA, font_bold=FONT_TABLA_BOLD)
+        self._tree_diff.pack(fill="both", expand=True)
+        for cid in ("imp_a", "imp_b", "d_imp", "adm_a", "adm_b",
+                    "d_adm", "d_neto"):
+            self._tree_diff.set_anchor(cid, "e")
+        self._tree_diff.set_tag("sube", C_ROW_SUBE, C_ROW_SUBE_SEL)
+        self._tree_diff.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
+        self._tree_diff.set_tag("aviso", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
+
+        # Leyenda de colores
+        ley = tk.Frame(p, bg=BG_APP)
+        ley.pack(fill="x", padx=12, pady=(0, 8))
+        for color, texto in ((C_ROW_SUBE, "el importe neto sube en B"),
+                             (C_ROW_BAJA, "el importe neto baja en B"),
+                             (C_ROW_REVISAR, "mismo Exped con DNI distinto "
+                                             "en A y B (revisar)")):
+            tk.Label(ley, text="   ", bg=color, relief="solid", bd=1
+                     ).pack(side="left", padx=(0, 4))
+            tk.Label(ley, text=texto, bg=BG_APP, fg="#555555", font=FONT_ENTRY
+                     ).pack(side="left", padx=(0, 18))
+
+    def _pick_pdf_comparar(self, cual: str) -> None:
+        """Selecciona el PDF A o B. Cuando ya están los dos, lanza la
+        comparación automáticamente (mismo criterio que _pick_pdf)."""
+        path = filedialog.askopenfilename(
+            title=f"Seleccionar PDF {cual} "
+                  f"({'anterior' if cual == 'A' else 'nuevo'})",
+            filetypes=[("PDF", "*.pdf")])
+        if not path:
+            return
+        (self._comp_a_var if cual == "A" else self._comp_b_var).set(path)
+        if self._comp_a_var.get() and self._comp_b_var.get():
+            self._comparar_ejecutar()
+
+    def _comparar_ejecutar(self) -> None:
+        if self._comparando:
+            self._log_write("Ya hay una comparación en marcha.", "warn")
+            return
+        pa, pb = self._comp_a_var.get().strip(), self._comp_b_var.get().strip()
+        if not pa or not pb:
+            self._lbl_comp_resumen.configure(
+                text="Selecciona los dos PDF a comparar.", fg=C_AVISO)
+            return
+        self._comparando = True
+        self._btn_comparar.state(["disabled"])
+        self._lbl_comp_resumen.configure(text="Comparando…", fg="#555555")
+        self._log_write(
+            f"Comparando {os.path.basename(pa)} ↔ {os.path.basename(pb)}…",
+            "info")
+        threading.Thread(target=self._comparar_worker, args=(pa, pb),
+                         daemon=True).start()
+
+    def _comparar_worker(self, path_a: str, path_b: str) -> None:
+        try:
+            try:
+                regs_a, pag_a = parse_pdf(path_a)
+                regs_b, pag_b = parse_pdf(path_b)
+            except Exception as exc:
+                self.after(0, self._log_write,
+                           f"Error al leer los PDF: {exc}", "error")
+                self.after(0, self._lbl_comp_resumen.configure,
+                           {"text": f"Error al leer los PDF: {exc}",
+                            "fg": "#C0392B"})
+                return
+            # Corrige la desalineación DNI/Apellido antes de comparar (no
+            # toca importes; mejora el casado por DNI y los nombres del diff).
+            corregir_alineacion(regs_a)
+            corregir_alineacion(regs_b)
+            comp = comparar(regs_a, regs_b)
+            self.after(0, self._log_write,
+                       f"A: {pag_a} pág., {len(regs_a)} reg. · "
+                       f"B: {pag_b} pág., {len(regs_b)} reg.", "ok")
+            self.after(0, self._load_tabla_diff, comp)
+        finally:
+            self.after(0, self._fin_comparar)
+
+    def _fin_comparar(self) -> None:
+        self._comparando = False
+        self._btn_comparar.state(["!disabled"])
+
+    def _refiltrar_diff(self) -> None:
+        """Reaplica el filtro sobre la última comparación (sin re-parsear)."""
+        if self._comp_actual is not None:
+            self._load_tabla_diff(self._comp_actual)
+
+    def _load_tabla_diff(self, comp: Comparacion) -> None:
+        """Rellena la tabla de diff y el resumen con una Comparacion."""
+        self._comp_actual = comp
+        visibles = comp.modificados
+        if self._var_comp_solo_acad.get():
+            visibles = [f for f in visibles if f.delta_importe != 0]
+        rows, tags = [], []
+        for f in visibles:
+            rows.append((f.exped, f.dni, f.nombre,
+                         f"{f.importe_a:.2f}", f"{f.importe_b:.2f}",
+                         f"{f.delta_importe:+.2f}",
+                         f"{f.administrativo_a:.2f}",
+                         f"{f.administrativo_b:.2f}",
+                         f"{f.delta_administrativo:+.2f}",
+                         f"{f.delta_neto:+.2f}"))
+            if f.dni_distinto:
+                tags.append("aviso")
+            else:
+                delta = f.delta_neto or f.delta_importe
+                tags.append("sube" if delta > 0 else "baja")
+        self._tree_diff.load(rows, tags=tags)
+
+        filtro = (f" (mostrados: {len(visibles)})"
+                  if len(visibles) != len(comp.modificados) else "")
+        self._lbl_comp_resumen.configure(
+            text=f"Modificados: {len(comp.modificados)}{filtro}   ·   "
+                 f"Solo en A (bajas): {len(comp.solo_a)}   ·   "
+                 f"Solo en B (altas): {len(comp.solo_b)}   ·   "
+                 f"Sin cambios: {comp.iguales}      |      "
+                 f"Total neto A: {comp.total_neto_a:,.2f} €   →   "
+                 f"B: {comp.total_neto_b:,.2f} €   "
+                 f"(Δ {comp.delta_total:+,.2f} €)",
+            fg="#1B2631")
+        self._log_write(
+            f"Comparación: {len(comp.modificados)} modificados, "
+            f"{len(comp.solo_a)} solo en A, {len(comp.solo_b)} solo en B, "
+            f"{comp.iguales} sin cambios. Δ total {comp.delta_total:+.2f} €.",
+            "ok")
 
     # ── Panel de ayuda ──────────────────────────────────────────────────────
 
@@ -602,6 +915,88 @@ class App(tk.Tk):
         """Fila de la tabla Resumen para un Registro (mismo orden de columnas)."""
         return (r.exped, r.dni, r.nombre, f"{r.importe:.2f}",
                 f"{r.importe_neto:.2f}", f"{r.administrativo:.2f}")
+
+    # ── Tamaño de letra de las tablas (control manual + auto-ajuste) ────────────
+
+    def _banda_font(self) -> tuple[int, int]:
+        """Rango [mín, máx] configurado, saneado: enteros en 6–24 y mín ≤ máx.
+        (El Spinbox puede quedar vacío o con texto no numérico; se tolera.)"""
+        try:
+            smin = int(self._var_font_min.get())
+        except (tk.TclError, ValueError):
+            smin = FONT_TABLA_MIN_DEF
+        try:
+            smax = int(self._var_font_max.get())
+        except (tk.TclError, ValueError):
+            smax = FONT_TABLA_MAX_DEF
+        smin = max(6, min(24, smin))
+        smax = max(6, min(24, smax))
+        if smin > smax:
+            smin, smax = smax, smin
+        return smin, smax
+
+    def _apply_table_font(self, size: int) -> None:
+        """Fija el tamaño de letra RENDERIZADO de las dos tablas (comparten el
+        estilo ttk 'Treeview'), escala la altura de fila y re-mide las columnas
+        para que su ancho vuelva a cuadrar con el nuevo tamaño."""
+        fam = FONT_TABLA[0]
+        font_n = (fam, size)
+        font_b = (fam, size, "bold")
+        rowh = int(size * 2.4) + 1
+        st = ttk.Style(self)
+        st.configure("Treeview", font=font_n, rowheight=rowh)
+        st.configure("Treeview.Heading", font=font_b)
+        for tabla in (self._tree_detalle, self._tree_resumen):
+            tabla.set_measure_fonts(font_n, font_b)
+            tabla.autosize()
+        self._font_tabla_actual = size
+
+    def _on_resize(self, event) -> None:
+        """Debounce del redimensionado de la ventana: solo reacciona a cambios
+        de ANCHO del propio toplevel (no de sus hijos ni a cambios de alto, que
+        no afectan a si una tabla cabe a lo ancho). Reprograma el auto-ajuste
+        200 ms después del último evento."""
+        if event.widget is not self:
+            return
+        w = self.winfo_width()
+        if w == self._last_win_w:
+            return
+        self._last_win_w = w
+        if self._resize_job is not None:
+            self.after_cancel(self._resize_job)
+        self._resize_job = self.after(200, self._autofit_on_resize)
+
+    def _autofit_on_resize(self) -> None:
+        self._resize_job = None
+        if (hasattr(self, "_tree_detalle")
+                and self._tree_detalle.tree.get_children()):
+            self._autofit_tablas()
+
+    def _autofit_tablas(self, _try: int = 0) -> None:
+        """Tras rellenar las tablas, elige el mayor tamaño de letra de la banda
+        configurada con el que AMBAS quepan enteras a lo ancho de su recuadro
+        (sin scroll horizontal) y lo aplica a las dos. Es un único tamaño
+        compartido: manda la tabla más ancha (Detalle). Si una tabla es estrecha
+        y sobra hueco, el tamaño sube hasta el máximo o hasta que la otra tabla
+        deje de caber, lo que ocurra antes."""
+        if not hasattr(self, "_tree_detalle"):
+            return
+        smin, smax = self._banda_font()
+        self.update_idletasks()
+        w1 = self._tree_detalle.tree.winfo_width()
+        w2 = self._tree_resumen.tree.winfo_width()
+        if (w1 < 50 or w2 < 50):        # todavía sin geometría real: reintenta
+            if _try < 20:
+                self.after(150, lambda: self._autofit_tablas(_try + 1))
+            return
+        best = smax
+        for tabla, ancho in ((self._tree_detalle, w1), (self._tree_resumen, w2)):
+            if tabla.tree.get_children():
+                best = min(best, tabla.fit_font_size(smin, smax, ancho - 2))
+        self._apply_table_font(best)
+        self._log_write(
+            f"Auto-ajuste de tablas: letra {best} pt (rango {smin}–{smax}).",
+            "info")
 
     # ── Revisión de desalineación DNI/Apellido ─────────────────────────────────
 
@@ -842,6 +1237,9 @@ class App(tk.Tk):
             self._registros = registros
             self.after(0, self._load_tabla_detalle, registros)
             self.after(0, self._load_tabla_resumen, registros)
+            # Con las dos tablas ya rellenas, ajusta letra y ancho para que
+            # entren enteras en sus recuadros (dentro de la banda configurada).
+            self.after(0, self._autofit_tablas)
             self.after(0, self._log_write,
                       f"Excel generado: {output_path}", "ok")
             self.after(0, self._post_correccion, n_rev)
