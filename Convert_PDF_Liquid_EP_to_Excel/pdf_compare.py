@@ -19,7 +19,7 @@ Este módulo no conoce nada de tkinter ni de Excel: recibe dos list[Registro]
 y devuelve una Comparacion. No modifica los Registro que recibe.
 """
 
-# Última actualización: 2026-07-07 22:52
+# Última actualización: 2026-07-08 08:37
 
 from __future__ import annotations
 
@@ -86,6 +86,12 @@ class Comparacion:
     # Alumnos en ambos listados SIN cambio de importe (FilaDiff con deltas 0,
     # para poder listarlos en la UI igual que los modificados).
     iguales: list[FilaDiff] = field(default_factory=list)
+    # Registro emparejados (A, B) para TODOS los alumnos presentes en ambos
+    # listados (modificados + iguales). Permite a quien consuma Comparacion
+    # comparar a nivel de Referencia (p. ej. detectar recibos nuevos en B
+    # para un alumno que ya existía en A) sin reimplementar el emparejamiento
+    # por Exped/DNI de este módulo.
+    pares: list[tuple[Registro, Registro]] = field(default_factory=list)
     total_neto_a: float = 0.0    # Σ importe_neto del fichero A completo
     total_neto_b: float = 0.0
 
@@ -165,6 +171,7 @@ def comparar(records_a: list[Registro],
                 dni_distinto=not _iguales_comodin(
                     _norm_texto(ra.dni), _norm_texto(rb.dni)))
             (res.modificados if cambio else res.iguales).append(fila)
+            res.pares.append((ra, rb))
 
     for exped in idx_b:
         if exped not in idx_a:

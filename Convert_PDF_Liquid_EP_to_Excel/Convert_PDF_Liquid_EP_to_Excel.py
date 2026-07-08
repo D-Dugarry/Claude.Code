@@ -29,7 +29,7 @@ mismo patrón que el de configuración), cada uno con su botón en Selección:
     y colorear en ambas tablas los alumnos cuyo importe cambió.
 """
 
-# Última actualización: 2026-07-08 00:45
+# Última actualización: 2026-07-08 13:27
 
 import os
 import sys
@@ -42,7 +42,8 @@ from tkinter import ttk, filedialog, messagebox
 
 from pdf_parser import parse_pdf, corregir_alineacion, Registro
 from pdf_compare import comparar, Comparacion, _norm_texto
-from excel_export import export_to_excel
+from excel_export import (export_to_excel, export_rows_to_excel,
+                          export_multi_sheet_to_excel)
 
 # Tooltips + caracolillo: help_tooltips.py vive junto a este archivo.
 try:
@@ -75,6 +76,24 @@ def _resource_path(filename: str) -> str:
     """Ruta a un recurso, compatible con PyInstaller (_MEIPASS) y desarrollo."""
     base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, filename)
+
+
+def _col_indices(ids: tuple[str, ...], *names: str) -> tuple[int, ...]:
+    """Índices (0-based) de `names` dentro de `ids`, en ese orden. Función
+    aparte (y no una generator expression suelta en el cuerpo de la clase
+    App) porque una comprensión/generator dentro de un cuerpo de clase NO ve
+    las variables de esa clase salvo en el iterable más externo (gotcha de
+    scoping de Python 3) — como llamada de función normal, sí las ve."""
+    return tuple(ids.index(n) for n in names)
+
+
+def _exe_dir() -> str:
+    """Carpeta donde vive el ejecutable (PyInstaller, sys.executable) o el
+    script (modo desarrollo); se usa como carpeta propuesta por defecto en
+    diálogos de guardado que no dependen de una carpeta destino ya elegida."""
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 # ── Constantes de UI ──────────────────────────────────────────────────────────
@@ -125,6 +144,14 @@ C_ROW_SUBE = "#D5F5E3"         # el importe neto sube en B (verde claro)
 C_ROW_SUBE_SEL = "#A9DFBF"
 C_ROW_BAJA = "#FADBD8"         # el importe neto baja en B (rojo claro)
 C_ROW_BAJA_SEL = "#F1948A"
+
+# Panel Comparar Detalle: marcado fila a fila (Referencia/Imp.Adm.), no por
+# alumno. "nueva" = fila presente solo en B (amarillo), "del" = fila presente
+# solo en A, ya no está en B (azul). sube/baja reusan los colores de arriba.
+C_ROW_NUEVA = "#FCF3CF"        # recibo/Imp.Adm. nuevo en B (amarillo claro)
+C_ROW_NUEVA_SEL = "#F7DC6F"
+C_ROW_DEL = "#D6EAF8"          # recibo/Imp.Adm. de A que ya no está en B (azul claro)
+C_ROW_DEL_SEL = "#AED6F1"
 
 
 # ── Registro Windows (persistencia de configuración) ──────────────────────────
@@ -185,10 +212,39 @@ COL_RESUMEN_IDS = ("exped", "dni", "nombre", "num_ref", "importe", "neto",
 COL_RESUMEN_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec.", "Importe",
                       "I.Acad.", "I.Adm.")
 
-# Panel Comparar Detalle: mismas columnas que la vista Detalle pero sin las
-# dos últimas, Rec. (plazo) y F. Pag. (forma de pago).
-COL_COMPDET_IDS = COL_DETALLE_IDS[:7]
-COL_COMPDET_NAMES = COL_DETALLE_NAMES[:7]
+# Panel Comparar Detalle: mismas columnas centrales que la vista Detalle
+# (sin Plazo ni F. Pag., que ahí se llaman "Rec."/"F. Pag."), más dos propias
+# del panel: "Rec." (aquí: nº de recibo del Exped, 1/2/3... o "Adm." en la
+# fila de Imp.Adm. — concepto distinto del "Rec." de la vista Detalle) antes
+# de Referencia, y "Estado" al final (↑/↓ si cambió el importe de esa fila,
+# "New"/"Del" si la fila solo existe en un lado).
+COL_COMPDET_IDS = ("exped", "dni", "nombre", "rec") + COL_DETALLE_IDS[3:7] + ("estado",)
+COL_COMPDET_NAMES = (("Exp.", "DNI", "Apellidos y Nombre", "Rec.")
+                     + COL_DETALLE_NAMES[3:7] + ("Estado",))
+# Índices (0-based) de columnas de importe/DNI, para exportar Comparar
+# Detalle como Excel Table (formato numérico + fila de totales, igual
+# criterio que COL_DIFF_MONEY_COLS/COL_DIFF_DNI_COL de Comparar Resumen).
+COL_COMPDET_MONEY_COLS = _col_indices(COL_COMPDET_IDS, "importe", "imp_adm")
+COL_COMPDET_DNI_COL = COL_COMPDET_IDS.index("dni")
+
+# Hoja "Detalle A+B" (solo en la exportación, no hay tabla en pantalla):
+# une A y B lado a lado en una única fila por recibo (o Imp.Adm.). Bloque de
+# identificación + Rec. (compartido, un recibo de A y su pareja en B son la
+# misma fila), bloque A (Referencia/F.Cobro/I.Acad./I.Adm./Estado, sufijo A),
+# bloque B (ídem, sufijo B) y una columna Estado final compartida.
+COL_COMPDET_UNI_IDS = (
+    "exped", "dni", "nombre", "rec",
+    "referencia_a", "fecha_a", "importe_a", "imp_adm_a", "estado_a",
+    "referencia_b", "fecha_b", "importe_b", "imp_adm_b", "estado_b",
+    "estado")
+COL_COMPDET_UNI_NAMES = (
+    "Exp.", "DNI", "Apellidos y Nombre", "Rec.",
+    "Referencia A", "F. Cobro A", "I.Acad. A", "I.Adm. A", "Estado A",
+    "Referencia B", "F. Cobro B", "I.Acad. B", "I.Adm. B", "Estado B",
+    "Estado")
+COL_COMPDET_UNI_MONEY_COLS = _col_indices(
+    COL_COMPDET_UNI_IDS, "importe_a", "imp_adm_a", "importe_b", "imp_adm_b")
+COL_COMPDET_UNI_DNI_COL = COL_COMPDET_UNI_IDS.index("dni")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -224,6 +280,7 @@ class App(tk.Tk):
         self._comp_a_var = tk.StringVar()    # ruta del PDF A (anterior)
         self._comp_b_var = tk.StringVar()    # ruta del PDF B (nuevo)
         self._comparando = False
+        self._exportando_diff = False
         self._comp_actual: Comparacion | None = None   # última comparación
         # Filtro: ocultar filas donde solo varía I.Adm. (en las muestras hay
         # un cambio sistemático de -0,60 € en casi todos los alumnos que
@@ -239,10 +296,15 @@ class App(tk.Tk):
         self._compdet_a_var = tk.StringVar()   # ruta del PDF A (anterior)
         self._compdet_b_var = tk.StringVar()   # ruta del PDF B (nuevo)
         self._comparando_det = False
-        # Checkbox "Quitar nuevos de PDF B y marcar cambios A-B", últimos
-        # datos parseados (para re-filtrar sin re-parsear) y mapas
+        self._exportando_det = False
+        # Filtros por color/Estado (fila a fila: qué categorías mostrar),
+        # últimos datos parseados (para re-filtrar sin re-parsear) y mapas
         # Exped -> iids para sincronizar la selección entre las tablas A y B.
-        self._var_compdet_filtro = tk.BooleanVar(value=False)
+        self._var_cd_sube = tk.BooleanVar(value=True)
+        self._var_cd_baja = tk.BooleanVar(value=True)
+        self._var_cd_nueva = tk.BooleanVar(value=True)
+        self._var_cd_del = tk.BooleanVar(value=True)
+        self._var_cd_sin = tk.BooleanVar(value=True)
         self._compdet_datos: tuple | None = None
         self._exped2iid_det_a: dict[str, list[str]] = {}
         self._exped2iid_det_b: dict[str, list[str]] = {}
@@ -501,7 +563,8 @@ class App(tk.Tk):
         vista Detalle (la principal y las dos del panel Comparar Detalle, que
         no llevan Rec./F. Pag.): aplica solo los de columnas presentes."""
         for cid, anc in (("importe", "e"), ("imp_adm", "e"),
-                         ("plazo", "center"), ("forma_pago", "center")):
+                         ("plazo", "center"), ("forma_pago", "center"),
+                         ("rec", "center"), ("estado", "center")):
             if cid in tabla.col_ids:
                 tabla.set_anchor(cid, anc)
         tabla.set_tag("revisar", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
@@ -692,12 +755,42 @@ class App(tk.Tk):
 
     # ── Panel de comparación de dos PDF (overlay a pantalla completa) ──────────
 
-    COL_DIFF_IDS = ("exped", "dni", "nombre", "rec_a", "rec_b",
-                    "imp_a", "imp_b", "d_imp",
-                    "adm_a", "adm_b", "d_adm", "d_neto", "estado")
-    COL_DIFF_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec. A", "Rec. B",
-                      "I.Acad. A", "I.Acad. B", "Δ Acad.",
-                      "I.Adm. A", "I.Adm. B", "Δ Adm.", "Δ Neto", "Estado")
+    # Columnas "_fl" (flecha): estrechas, contienen solo ↑/↓ del cambio de la
+    # columna numérica que las precede — separadas del número para no romper
+    # su alineación a la derecha (ver _fmt_delta_num/_fmt_delta_arrow).
+    COL_DIFF_IDS = ("exped", "dni", "nombre", "rec_a", "rec_b", "rec_b_fl",
+                    "imp_a", "imp_b", "d_imp", "d_imp_fl",
+                    "adm_a", "adm_b", "d_adm", "d_adm_fl",
+                    "d_neto", "d_neto_fl", "estado")
+    COL_DIFF_NAMES = ("Exped", "DNI", "Apellidos y Nombre", "Rec. A", "Rec. B", "",
+                      "I.Acad. A", "I.Acad. B", "Δ Acad.", "",
+                      "I.Adm. A", "I.Adm. B", "Δ Adm.", "",
+                      "Δ Neto", "", "Estado")
+    # Índices (0-based) de columnas de importe/recuento del diff, para la
+    # exportación a Excel (Table real con formato numérico + fila de
+    # totales: suma en las de importe, recuento de alumnos en DNI).
+    COL_DIFF_MONEY_COLS = _col_indices(
+        COL_DIFF_IDS, "imp_a", "imp_b", "d_imp", "adm_a", "adm_b",
+        "d_adm", "d_neto")
+    COL_DIFF_INT_COLS = _col_indices(COL_DIFF_IDS, "rec_a", "rec_b")
+    COL_DIFF_DNI_COL = COL_DIFF_IDS.index("dni")
+
+    def _nombres_export_diff(self) -> tuple[str, ...]:
+        """Cabeceras de exportación del diff: igual que COL_DIFF_NAMES pero
+        sin huecos. Las columnas "_fl" (flecha) llevan cabecera vacía en
+        pantalla a propósito, para que DataTable.autosize() las deje
+        estrechas (ver COL_DIFF_IDS); pero una Excel Table exige cabeceras
+        no vacías y únicas, así que aquí se llaman "F_<columna anterior>"
+        (p. ej. la flecha de "Δ Acad." pasa a "F_Δ Acad.")."""
+        out: list[str] = []
+        prev = ""
+        for n in self.COL_DIFF_NAMES:
+            if n:
+                out.append(n)
+                prev = n
+            else:
+                out.append(f"F_{prev}")
+        return tuple(out)
 
     def _show_comparar(self) -> None:
         """Muestra el panel de comparación (mismo patrón que Configuración,
@@ -720,12 +813,19 @@ class App(tk.Tk):
         # Cabecera del panel
         hdr = tk.Frame(p, bg=BG_COMP)
         hdr.pack(fill="x")
-        tk.Label(hdr, text="  ⚖  Comparar dos liquidaciones (A = anterior, "
-                           "B = nuevo)",
+        tk.Label(hdr, text="  ⚖  Comparar Resumen de dos liquidaciones "
+                           "(A = anterior, B = nuevo)",
                  bg=BG_COMP, fg="white", font=FONT_TITLE, anchor="w"
                  ).pack(side="left", pady=4)
         ttk.Button(hdr, text="✕ Cerrar", style="Config.TButton",
                    command=self._hide_comparar).pack(side="right", padx=8)
+        self._btn_exportar_diff = ttk.Button(
+            hdr, text="💾 Exportar Excel", style="Export.TButton",
+            command=self._exportar_diff)
+        self._btn_exportar_diff.pack(side="right", padx=8)
+        Tooltip(self._btn_exportar_diff,
+                "Exporta a Excel las filas mostradas en la tabla, con los "
+                "filtros de Estado actualmente activos")
 
         # Selección de los dos PDF
         sel = tk.Frame(p, bg=BG_APP, padx=12, pady=8)
@@ -743,14 +843,6 @@ class App(tk.Tk):
                      ).grid(row=fila, column=1, sticky="ew", pady=2, ipady=4)
             ttk.Button(sel, text="Seleccionar", style="Sel.TButton", command=cmd
                        ).grid(row=fila, column=2, padx=(8, 0), pady=2, ipadx=4)
-
-        self._btn_comparar = ttk.Button(sel, text="⚖  Comparar",
-                                        style="Accion.TButton",
-                                        command=self._comparar_ejecutar)
-        self._btn_comparar.grid(row=0, column=3, rowspan=2, padx=(16, 0),
-                                ipadx=6, sticky="ns")
-        Tooltip(self._btn_comparar,
-                "Parsea los dos PDF y muestra los alumnos cuyo importe cambió")
 
         # Resumen de la comparación (contadores + delta del total)
         self._lbl_comp_resumen = tk.Label(p, text="", bg=BG_APP,
@@ -782,9 +874,9 @@ class App(tk.Tk):
         for cid in ("imp_a", "imp_b", "d_imp", "adm_a", "adm_b",
                     "d_adm", "d_neto"):
             self._tree_diff.set_anchor(cid, "e")
-        self._tree_diff.set_anchor("rec_a", "center")
-        self._tree_diff.set_anchor("rec_b", "center")
-        self._tree_diff.set_anchor("estado", "center")
+        for cid in ("rec_a", "rec_b", "rec_b_fl", "d_imp_fl", "d_adm_fl",
+                    "d_neto_fl", "estado"):
+            self._tree_diff.set_anchor(cid, "center")
         self._tree_diff.set_tag("sube", C_ROW_SUBE, C_ROW_SUBE_SEL)
         self._tree_diff.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
         self._tree_diff.set_tag("aviso", C_ROW_REVISAR, C_ROW_REVISAR_SEL)
@@ -833,7 +925,6 @@ class App(tk.Tk):
                 text="Selecciona los dos PDF a comparar.", fg=C_AVISO)
             return
         self._comparando = True
-        self._btn_comparar.state(["disabled"])
         self._lbl_comp_resumen.configure(text="Comparando…", fg="#555555")
         self._log_write(
             f"Comparando {os.path.basename(pa)} ↔ {os.path.basename(pb)}…",
@@ -867,55 +958,155 @@ class App(tk.Tk):
 
     def _fin_comparar(self) -> None:
         self._comparando = False
-        self._btn_comparar.state(["!disabled"])
 
     def _refiltrar_diff(self) -> None:
         """Reaplica el filtro sobre la última comparación (sin re-parsear)."""
         if self._comp_actual is not None:
             self._load_tabla_diff(self._comp_actual)
 
+    def _exportar_diff(self) -> None:
+        """Exporta a Excel las filas actualmente mostradas en la tabla de
+        diff (según los filtros de Estado y el de 'solo cambia I.Adm.'
+        activos). Propone como carpeta la del propio .exe/script y como
+        nombre 'Diff_Resumen_<fecha_hora>', pero deja decidir al usuario en
+        el diálogo 'Guardar como' (igual que 'Guardar Excel')."""
+        if self._exportando_diff:
+            self._log_write("Ya se está exportando el Excel.", "warn")
+            return
+        if self._comp_actual is None:
+            self._log_write(
+                "Todavía no hay una comparación que exportar.", "warn")
+            return
+
+        marca = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = filedialog.asksaveasfilename(
+            title="Exportar diff de Comparar Resumen",
+            initialdir=_exe_dir(), initialfile=f"Diff_Resumen_{marca}.xlsx",
+            defaultextension=".xlsx",
+            filetypes=[("Libro de Excel", "*.xlsx")])
+        if not output_path:
+            self._log_write("Exportación a Excel cancelada.", "info")
+            return
+
+        filas = [t[1] for t in self._filas_diff_visibles(self._comp_actual)]
+        self._exportando_diff = True
+        self._btn_exportar_diff.state(["disabled"])
+        self._log_write(f"Exportando diff a {output_path}…", "info")
+        threading.Thread(target=self._exportar_diff_worker,
+                         args=(filas, output_path), daemon=True).start()
+
+    def _exportar_diff_worker(self, filas: list[tuple], output_path: str
+                              ) -> None:
+        try:
+            try:
+                export_rows_to_excel(
+                    self._nombres_export_diff(), filas, output_path,
+                    sheet_name="Diff Resumen", table_name="Diff_Resumen",
+                    money_cols=self.COL_DIFF_MONEY_COLS,
+                    int_cols=self.COL_DIFF_INT_COLS,
+                    count_col=self.COL_DIFF_DNI_COL)
+            except Exception as exc:
+                self.after(0, self._log_write,
+                          f"No se pudo exportar el Excel: {exc}", "error")
+                return
+            self.after(0, self._log_write,
+                       f"Excel exportado: {output_path}", "ok")
+        finally:
+            self.after(0, self._fin_exportar_diff)
+
+    def _fin_exportar_diff(self) -> None:
+        self._exportando_diff = False
+        self._btn_exportar_diff.state(["!disabled"])
+
     @staticmethod
     def _fmt_delta(delta: float) -> str:
         """Celda de una columna Δ: vacía si no hay cambio; si lo hay, el
-        valor con signo y una flecha ↑/↓ a la derecha."""
+        valor con signo y una flecha ↑/↓ a la derecha. Usado por el panel
+        Comparar Detalle (columna Estado, texto suelto sin problema de
+        alineación); la tabla de diff de Comparar Resumen usa en su lugar
+        _fmt_delta_num/_fmt_delta_arrow, con la flecha en su propia columna
+        estrecha para no romper la alineación a la derecha de los números."""
         if not delta:
             return ""
         return f"{delta:+.2f} {'↑' if delta > 0 else '↓'}"
 
+    @staticmethod
+    def _fmt_delta_num(delta: float) -> str:
+        """Valor con signo de una columna Δ de la tabla de diff, sin flecha."""
+        return f"{delta:+.2f}" if delta else ""
+
+    @staticmethod
+    def _fmt_delta_arrow(delta: float) -> str:
+        """Flecha ↑/↓ de una columna Δ, para la columna estrecha contigua."""
+        return ("↑" if delta > 0 else "↓") if delta else ""
+
+    @staticmethod
+    def _estado_cambios(f) -> str:
+        """Texto de la columna Estado para un alumno con importe cambiado
+        (FilaDiff en comp.modificados): qué importe cambió (I.Acad. y/o
+        I.Adm., puede ser uno de los dos o ambos) y en qué sentido, en vez
+        del genérico "Con cambios" anterior."""
+        partes = []
+        if f.delta_importe:
+            partes.append(f"Acad. {'↑' if f.delta_importe > 0 else '↓'}")
+        if f.delta_administrativo:
+            partes.append(f"Adm. {'↑' if f.delta_administrativo > 0 else '↓'}")
+        return " / ".join(partes)
+
     def _fila_diff(self, f, estado: str) -> tuple:
         """Valores de una fila del diff para un alumno presente en A y B
-        (FilaDiff), con la columna Estado al final."""
+        (FilaDiff), con la columna Estado al final. Cada Δ (y el cambio de
+        nº de recibos) va seguido de su columna "_fl" con solo la flecha."""
         delta_rec = f.num_refs_b - f.num_refs_a
-        rec_b = str(f.num_refs_b)
-        if delta_rec:
-            rec_b += f" {'↑' if delta_rec > 0 else '↓'}"
-        return (f.exped, f.dni, f.nombre, f.num_refs_a, rec_b,
+        rec_b_fl = ("↑" if delta_rec > 0 else "↓") if delta_rec else ""
+        return (f.exped, f.dni, f.nombre, f.num_refs_a, f.num_refs_b, rec_b_fl,
                 f"{f.importe_a:.2f}", f"{f.importe_b:.2f}",
-                self._fmt_delta(f.delta_importe),
+                self._fmt_delta_num(f.delta_importe),
+                self._fmt_delta_arrow(f.delta_importe),
                 f"{f.administrativo_a:.2f}", f"{f.administrativo_b:.2f}",
-                self._fmt_delta(f.delta_administrativo),
-                self._fmt_delta(f.delta_neto), estado)
+                self._fmt_delta_num(f.delta_administrativo),
+                self._fmt_delta_arrow(f.delta_administrativo),
+                self._fmt_delta_num(f.delta_neto),
+                self._fmt_delta_arrow(f.delta_neto), estado)
 
     def _fila_solo(self, r: Registro, alta: bool) -> tuple:
         """Valores de una fila del diff para un alumno presente solo en un
         listado (Alta = solo en B, Baja = solo en A): las columnas del lado
-        ausente van vacías y los Δ reflejan su aportación al total."""
+        ausente van vacías y los Δ reflejan su aportación al total. En una
+        Alta, Rec. B pasa de "nada" (el alumno no estaba en A) a `rec`
+        recibos: es un incremento, así que lleva su flecha ↑ igual que un
+        cambio de recibos entre A y B (en una Baja, Rec. B queda vacío —sin
+        valor que anotar—, así que no lleva flecha)."""
         signo = 1 if alta else -1
         rec = len(r.referencias)
         imp, adm = f"{r.importe:.2f}", f"{r.administrativo:.2f}"
-        d_imp = self._fmt_delta(round(signo * r.importe, 2))
-        d_adm = self._fmt_delta(round(signo * r.administrativo, 2))
-        d_neto = self._fmt_delta(round(signo * r.importe_neto, 2))
+        d_imp = round(signo * r.importe, 2)
+        d_adm = round(signo * r.administrativo, 2)
+        d_neto = round(signo * r.importe_neto, 2)
         if alta:
-            return (r.exped, r.dni, r.nombre, "", rec, "", imp, d_imp,
-                    "", adm, d_adm, d_neto, "Alta")
-        return (r.exped, r.dni, r.nombre, rec, "", imp, "", d_imp,
-                adm, "", d_adm, d_neto, "Baja")
+            rec_b_fl = "↑" if rec else ""
+            return (r.exped, r.dni, r.nombre, "", rec, rec_b_fl,
+                    "", imp, self._fmt_delta_num(d_imp),
+                    self._fmt_delta_arrow(d_imp),
+                    "", adm, self._fmt_delta_num(d_adm),
+                    self._fmt_delta_arrow(d_adm),
+                    self._fmt_delta_num(d_neto), self._fmt_delta_arrow(d_neto),
+                    "Alta")
+        return (r.exped, r.dni, r.nombre, rec, "", "",
+                imp, "", self._fmt_delta_num(d_imp),
+                self._fmt_delta_arrow(d_imp),
+                adm, "", self._fmt_delta_num(d_adm),
+                self._fmt_delta_arrow(d_adm),
+                self._fmt_delta_num(d_neto), self._fmt_delta_arrow(d_neto),
+                "Baja")
 
-    def _load_tabla_diff(self, comp: Comparacion) -> None:
-        """Rellena la tabla de diff y el resumen con una Comparacion,
-        aplicando los filtros por Estado y el de 'solo cambia I.Adm.'."""
-        self._comp_actual = comp
+    def _filas_diff_visibles(self, comp: Comparacion
+                             ) -> list[tuple[str, tuple, str]]:
+        """Filas del diff que corresponden a los filtros por Estado y el de
+        'solo cambia I.Adm.' actualmente activos, ordenadas alfabéticamente
+        por nombre. Devuelve (clave de orden, valores de fila, tag de color);
+        la usan tanto _load_tabla_diff (tabla en pantalla) como _exportar_diff
+        (Excel), para que exportar refleje exactamente lo que se ve."""
         filas: list[tuple[str, tuple, str]] = []   # (clave orden, valores, tag)
         if self._var_est_cambios.get():
             vis = comp.modificados
@@ -926,7 +1117,8 @@ class App(tk.Tk):
                 tag = ("aviso" if f.dni_distinto
                        else "sube" if delta > 0 else "baja")
                 filas.append((_norm_texto(f.nombre),
-                              self._fila_diff(f, "Con cambios"), tag))
+                              self._fila_diff(f, self._estado_cambios(f)),
+                              tag))
         if self._var_est_sin.get():
             for f in comp.iguales:
                 filas.append((_norm_texto(f.nombre),
@@ -941,6 +1133,13 @@ class App(tk.Tk):
                 filas.append((_norm_texto(r.nombre), self._fila_solo(r, True),
                               "baja" if r.importe_neto < 0 else "sube"))
         filas.sort(key=lambda t: t[0])
+        return filas
+
+    def _load_tabla_diff(self, comp: Comparacion) -> None:
+        """Rellena la tabla de diff y el resumen con una Comparacion,
+        aplicando los filtros por Estado y el de 'solo cambia I.Adm.'."""
+        self._comp_actual = comp
+        filas = self._filas_diff_visibles(comp)
         self._tree_diff.load([t[1] for t in filas],
                              tags=[t[2] for t in filas])
 
@@ -952,10 +1151,7 @@ class App(tk.Tk):
             text=f"Modificados: {len(comp.modificados)} · "
                  f"Solo en A (bajas): {len(comp.solo_a)} · "
                  f"Solo en B (altas): {len(comp.solo_b)} · "
-                 f"Sin cambios: {len(comp.iguales)}{filtro}   |   "
-                 f"Neto A: {comp.total_neto_a:,.2f} € → "
-                 f"B: {comp.total_neto_b:,.2f} € "
-                 f"(Δ {comp.delta_total:+,.2f} €)",
+                 f"Sin cambios: {len(comp.iguales)}{filtro}",
             fg="#1B2631")
         self._log_write(
             f"Comparación: {len(comp.modificados)} modificados, "
@@ -996,6 +1192,13 @@ class App(tk.Tk):
                  ).pack(side="left", pady=4)
         ttk.Button(hdr, text="✕ Cerrar", style="Config.TButton",
                    command=self._hide_comparar_det).pack(side="right", padx=8)
+        self._btn_exportar_det = ttk.Button(
+            hdr, text="💾 Exportar Excel", style="Export.TButton",
+            command=self._exportar_compdet)
+        self._btn_exportar_det.pack(side="right", padx=8)
+        Tooltip(self._btn_exportar_det,
+                "Exporta a Excel las tablas A y B actualmente mostradas "
+                "(con los filtros 'Mostrar:' activos), una por hoja")
 
         # Selección de los dos PDF
         sel = tk.Frame(p, bg=BG_APP, padx=12, pady=8)
@@ -1014,19 +1217,27 @@ class App(tk.Tk):
             ttk.Button(sel, text="Seleccionar", style="Sel.TButton", command=cmd
                        ).grid(row=fila, column=2, padx=(8, 0), pady=2, ipadx=4)
 
-        self._btn_compdet = ttk.Button(sel, text="⚖  Comparar",
-                                       style="Accion.TButton",
-                                       command=self._comparar_det_ejecutar)
-        self._btn_compdet.grid(row=0, column=3, rowspan=2, padx=(16, 0),
-                               ipadx=6, sticky="ns")
-        Tooltip(self._btn_compdet,
-                "Parsea los dos PDF y muestra sus tablas de Detalle lado a lado")
-
         # Resumen de la comparación (páginas/registros/neto de cada PDF)
         self._lbl_compdet_resumen = tk.Label(p, text="", bg=BG_APP,
                                              fg="#1B2631", font=FONT_BOLD,
                                              anchor="w")
         self._lbl_compdet_resumen.pack(fill="x", padx=12, pady=(0, 4))
+
+        # Filtros por color/Estado (qué categorías de fila se muestran en
+        # AMBAS tablas; mismo patrón "Mostrar:" que el panel Comparar Resumen).
+        fil_est = tk.Frame(p, bg=BG_APP)
+        fil_est.pack(fill="x", padx=12, pady=(0, 4))
+        tk.Label(fil_est, text="Mostrar:", bg=BG_APP, fg="#1B2631",
+                 font=FONT_ENTRY).pack(side="left")
+        for texto, var in (("Suben", self._var_cd_sube),
+                           ("Bajan", self._var_cd_baja),
+                           ("Nuevos", self._var_cd_nueva),
+                           ("Eliminados", self._var_cd_del),
+                           ("Sin cambios", self._var_cd_sin)):
+            tk.Checkbutton(fil_est, text=texto, variable=var, bg=BG_APP,
+                           fg="#1B2631", activebackground=BG_APP,
+                           font=FONT_ENTRY, command=self._refiltrar_compdet
+                           ).pack(side="left", padx=(10, 0))
 
         # Dos tablas de Detalle lado a lado (mismos bloques con cabecera
         # coloreada y contador que la vista previa de la ventana principal).
@@ -1040,9 +1251,9 @@ class App(tk.Tk):
         col_b = tk.Frame(grid, bg=BG_APP)
         col_b.grid(row=0, column=1, sticky="nsew", padx=(4, 0))
 
-        self._tree_det_a = self._bloque_tabla_detalle(
+        self._tree_det_a, self._lbl_fecha_det_a = self._bloque_tabla_detalle(
             col_a, "Detalle — PDF A (anterior)")
-        self._tree_det_b = self._bloque_tabla_detalle(
+        self._tree_det_b, self._lbl_fecha_det_b = self._bloque_tabla_detalle(
             col_b, "Detalle — PDF B (nuevo)")
 
         # Sincronización de selección A <-> B por Exped (misma mecánica que
@@ -1053,36 +1264,32 @@ class App(tk.Tk):
         self._tree_det_b.tree.bind(
             "<<TreeviewSelect>>", self._on_sel_det_b, add="+")
 
-        # Filtro + leyenda de colores (bajo las tablas, mismo patrón que el
-        # checkbox de filtro del panel Comparar Resumen)
+        # Leyenda de colores (bajo las tablas)
         fil = tk.Frame(p, bg=BG_APP)
         fil.pack(fill="x", padx=12, pady=(4, 8))
-        _chk = tk.Checkbutton(
-            fil, text="Quitar nuevos de PDF B y marcar cambios A-B",
-            variable=self._var_compdet_filtro, bg=BG_APP, fg="#1B2631",
-            activebackground=BG_APP, font=FONT_ENTRY,
-            command=self._refiltrar_compdet)
-        _chk.pack(side="right")
-        Tooltip(_chk, "Oculta en la tabla B los alumnos que no están en A "
-                      "(nuevos) y colorea en ambas tablas las filas de los "
-                      "alumnos cuyo importe cambió entre A y B")
-        for color, texto in ((C_ROW_SUBE, "el importe neto sube en B"),
-                             (C_ROW_BAJA, "el importe neto baja en B"),
-                             (C_ROW_REVISAR, "posible desalineación "
-                                             "DNI/Apellido")):
+        for color, texto in ((C_ROW_SUBE, "sube (↑)"),
+                             (C_ROW_BAJA, "baja (↓)"),
+                             (C_ROW_NUEVA, "nuevo en B"),
+                             (C_ROW_DEL, "eliminado en B"),
+                             (C_ROW_REVISAR, "desalineación DNI/Apellido")):
             tk.Label(fil, text="   ", bg=color, relief="solid", bd=1
                      ).pack(side="left", padx=(0, 4))
             tk.Label(fil, text=texto, bg=BG_APP, fg="#555555", font=FONT_ENTRY
                      ).pack(side="left", padx=(0, 18))
 
-    def _bloque_tabla_detalle(self, parent: tk.Widget, titulo: str) -> DataTable:
-        """Bloque con cabecera coloreada + contador + DataTable idéntico al de
-        la vista previa (Detalle) de la ventana principal."""
+    def _bloque_tabla_detalle(self, parent: tk.Widget, titulo: str
+                              ) -> tuple[DataTable, tk.Label]:
+        """Bloque con cabecera coloreada + fecha de último cobro + contador +
+        DataTable idéntico al de la vista previa (Detalle) de la ventana
+        principal. Devuelve (tabla, etiqueta de última fecha de cobro)."""
         tb, c = self._bloque(titulo, BG_TAB1, expand=True, parent=parent,
                              header_h=self._header_h)
         tb.columnconfigure(0, weight=1)
+        lbl_fecha = tk.Label(tb, text="", bg=BG_TAB1, fg="white",
+                             font=FONT_ENTRY)
+        lbl_fecha.grid(row=0, column=1, padx=(0, 16))
         lbl_count = tk.Label(tb, text="", bg=BG_TAB1, fg="white", font=FONT_UI)
-        lbl_count.grid(row=0, column=1, padx=(0, 6))
+        lbl_count.grid(row=0, column=2, padx=(0, 6))
         c.rowconfigure(0, weight=1)
         c.columnconfigure(0, weight=1)
         tabla = DataTable(
@@ -1092,10 +1299,12 @@ class App(tk.Tk):
                 lbl.configure(text=f"{s}/{t}" if t else ""))
         tabla.pack(fill="both", expand=True)
         self._config_tabla_detalle(tabla)
-        # Colores de "marcar cambios A-B" (mismos que la tabla de diff)
+        # Colores del marcado fila a fila A-B (ver _estados_detalle)
         tabla.set_tag("sube", C_ROW_SUBE, C_ROW_SUBE_SEL)
         tabla.set_tag("baja", C_ROW_BAJA, C_ROW_BAJA_SEL)
-        return tabla
+        tabla.set_tag("nueva", C_ROW_NUEVA, C_ROW_NUEVA_SEL)
+        tabla.set_tag("del", C_ROW_DEL, C_ROW_DEL_SEL)
+        return tabla, lbl_fecha
 
     def _pick_pdf_comparar_det(self, cual: str) -> None:
         """Selecciona el PDF A o B del panel Comparar Detalle. Cuando ya
@@ -1121,7 +1330,6 @@ class App(tk.Tk):
                 text="Selecciona los dos PDF a comparar.", fg=C_AVISO)
             return
         self._comparando_det = True
-        self._btn_compdet.state(["disabled"])
         self._lbl_compdet_resumen.configure(text="Comparando…", fg="#555555")
         self._log_write(
             f"Comparando Detalle {os.path.basename(pa)} ↔ "
@@ -1159,7 +1367,6 @@ class App(tk.Tk):
 
     def _fin_comparar_det(self) -> None:
         self._comparando_det = False
-        self._btn_compdet.state(["!disabled"])
 
     def _load_tablas_compdet(self, regs_a: list[Registro],
                              regs_b: list[Registro],
@@ -1176,47 +1383,313 @@ class App(tk.Tk):
         self.after(0, self._autofit_compdet)
 
     def _refiltrar_compdet(self) -> None:
-        """Reaplica el filtro del checkbox sobre los últimos datos parseados
+        """Reaplica los filtros 'Mostrar:' sobre los últimos datos parseados
         (sin re-parsear los PDF)."""
         if self._compdet_datos is not None:
             self._render_tablas_compdet()
             self.after(0, self._autofit_compdet)
 
+    def _compdet_mostrar_filtros(self) -> dict[str, bool]:
+        """Estado actual de los checkboxes 'Mostrar:' del panel Comparar
+        Detalle, como dict color -> se_muestra (clave '' = sin cambios)."""
+        return {
+            "sube": self._var_cd_sube.get(),
+            "baja": self._var_cd_baja.get(),
+            "nueva": self._var_cd_nueva.get(),
+            "del": self._var_cd_del.get(),
+            "": self._var_cd_sin.get(),
+        }
+
+    def _exportar_compdet(self) -> None:
+        """Exporta a Excel las dos tablas de Detalle actualmente mostradas
+        (A y B, con los filtros 'Mostrar:' activos), una en cada hoja del
+        mismo libro, más una tercera hoja 'Detalle A+B' que las une lado a
+        lado (ver `_filas_detalle_unificado`). Propone como carpeta la del
+        propio .exe/script y como nombre 'Comparar_Detalle_<fecha_hora>',
+        pero deja decidir al usuario en el diálogo 'Guardar como' (igual que
+        'Guardar Excel')."""
+        if self._exportando_det:
+            self._log_write("Ya se está exportando el Excel.", "warn")
+            return
+        if self._compdet_datos is None:
+            self._log_write(
+                "Todavía no hay una comparación de Detalle que exportar.",
+                "warn")
+            return
+
+        marca = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = filedialog.asksaveasfilename(
+            title="Exportar Comparar Detalle",
+            initialdir=_exe_dir(),
+            initialfile=f"Comparar_Detalle_{marca}.xlsx",
+            defaultextension=".xlsx",
+            filetypes=[("Libro de Excel", "*.xlsx")])
+        if not output_path:
+            self._log_write("Exportación a Excel cancelada.", "info")
+            return
+
+        regs_a, regs_b, _pag_a, _pag_b, comp = self._compdet_datos
+        mostrar = self._compdet_mostrar_filtros()
+        pareja_de_a = {id(ra): rb for ra, rb in comp.pares}
+        pareja_de_b = {id(rb): ra for ra, rb in comp.pares}
+        rows_a, _tags_a, _dnis_a, _tot_a = self._filas_detalle_estado(
+            regs_a, pareja_de_a, True, mostrar)
+        rows_b, _tags_b, _dnis_b, _tot_b = self._filas_detalle_estado(
+            regs_b, pareja_de_b, False, mostrar)
+        rows_uni = self._filas_detalle_unificado(mostrar)
+        sheets = [
+            ("Detalle A", COL_COMPDET_NAMES, rows_a,
+             COL_COMPDET_MONEY_COLS, (), COL_COMPDET_DNI_COL),
+            ("Detalle B", COL_COMPDET_NAMES, rows_b,
+             COL_COMPDET_MONEY_COLS, (), COL_COMPDET_DNI_COL),
+            ("Detalle A+B", COL_COMPDET_UNI_NAMES, rows_uni,
+             COL_COMPDET_UNI_MONEY_COLS, (), COL_COMPDET_UNI_DNI_COL),
+        ]
+
+        self._exportando_det = True
+        self._btn_exportar_det.state(["disabled"])
+        self._log_write(f"Exportando Comparar Detalle a {output_path}…",
+                        "info")
+        threading.Thread(target=self._exportar_compdet_worker,
+                         args=(sheets, output_path), daemon=True).start()
+
+    def _exportar_compdet_worker(
+            self, sheets: list[tuple[str, tuple, list[tuple],
+                              tuple[int, ...], tuple[int, ...], int | None]],
+            output_path: str) -> None:
+        try:
+            try:
+                export_multi_sheet_to_excel(sheets, output_path)
+            except Exception as exc:
+                self.after(0, self._log_write,
+                          f"No se pudo exportar el Excel: {exc}", "error")
+                return
+            self.after(0, self._log_write,
+                       f"Excel exportado: {output_path}", "ok")
+        finally:
+            self.after(0, self._fin_exportar_compdet)
+
+    def _fin_exportar_compdet(self) -> None:
+        self._exportando_det = False
+        self._btn_exportar_det.state(["!disabled"])
+
+    @staticmethod
+    def _ultima_fecha_cobro(registros: list[Registro]) -> str:
+        """Fecha de cobro (F. Cobro) más reciente entre todas las Referencia
+        de los registros dados, en formato dd/mm/aaaa. Cadena vacía si no hay
+        ninguna referencia con fecha reconocible."""
+        mejor_d = None
+        mejor_txt = ""
+        for r in registros:
+            for ref in r.referencias:
+                try:
+                    d = datetime.datetime.strptime(ref.fecha, "%d/%m/%Y")
+                except ValueError:
+                    continue
+                if mejor_d is None or d > mejor_d:
+                    mejor_d, mejor_txt = d, ref.fecha
+        return mejor_txt
+
+    def _cmp_importe(self, va: float, vb: float) -> tuple[str, str]:
+        """Compara dos importes (A, B) de una misma fila: tag de color +
+        texto de la columna Estado (el delta B-A con signo, misma cifra que
+        `_fmt_delta` en la tabla de diff de Comparar Resumen, seguido de la
+        flecha ↑/↓). Sin cambio: sin tag ni texto."""
+        diff = round(vb - va, 2)
+        if diff > 0:
+            return "sube", self._fmt_delta(diff)
+        if diff < 0:
+            return "baja", self._fmt_delta(diff)
+        return "", ""
+
+    def _filas_detalle_estado(
+            self, registros: list[Registro], parejas: dict[int, Registro],
+            es_a: bool, mostrar: dict[str, bool]
+            ) -> tuple[list[tuple], list[str], list[str], int]:
+        """Filas del panel Comparar Detalle para `registros` (de A o de B),
+        una por Referencia más la de Imp.Adm. por alumno, con el marcado
+        fila a fila del otro lado: `parejas` mapea id(Registro) -> Registro
+        emparejado del otro listado (ausente si el alumno no existe allí).
+        La columna Rec. numera los recibos de cada Exped por orden (1, 2...,
+        el mismo de `r.referencias`, independiente de qué filtro esté
+        activo) y pone "Adm." en la fila del importe administrativo. Cada
+        fila se compara con su equivalente en la pareja (misma Referencia, o
+        el Imp.Adm.): sube (verde) / baja (rojo) si el importe cambió, nueva
+        (amarillo, solo en B) / del (azul, solo en A) si la fila no tiene
+        equivalente, o sin cambio (sin tag). `mostrar` mapea cada categoría
+        ("sube"/"baja"/"nueva"/"del"/"") a si se debe generar esa fila; el
+        marcado tiene prioridad sobre el ámbar de revisión. Devuelve (filas,
+        tags, dnis, total de filas SIN aplicar `mostrar`, para poder
+        informar cuántas quedan ocultas por los filtros)."""
+        rows, tags, dnis = [], [], []
+        i = 0
+        total = 0
+
+        def _tag(color: str) -> str:
+            nonlocal i
+            final = color or ("revisar" if r.revisar else
+                              ("row_a" if i % 2 == 0 else "row_b"))
+            i += 1
+            return final
+
+        for r in registros:
+            pareja = parejas.get(id(r))
+            refs_otro = ({ref.referencia: ref for ref in pareja.referencias}
+                         if pareja is not None else {})
+
+            for rec_i, ref in enumerate(r.referencias, start=1):
+                otro = refs_otro.get(ref.referencia)
+                if otro is None:
+                    color, estado = ("del", "Del") if es_a else ("nueva", "New")
+                else:
+                    va, vb = (ref.importe, otro.importe) if es_a \
+                        else (otro.importe, ref.importe)
+                    color, estado = self._cmp_importe(va, vb)
+                total += 1
+                if not mostrar.get(color, True):
+                    continue
+                rows.append((r.exped, r.dni, r.nombre, str(rec_i),
+                            ref.referencia, ref.fecha,
+                            f"{ref.importe:.2f}", "", estado))
+                tags.append(_tag(color))
+                dnis.append(r.dni)
+
+            if pareja is None:
+                color, estado = ("del", "Del") if es_a else ("nueva", "New")
+            else:
+                va, vb = (r.administrativo, pareja.administrativo) if es_a \
+                    else (pareja.administrativo, r.administrativo)
+                color, estado = self._cmp_importe(va, vb)
+            total += 1
+            if not mostrar.get(color, True):
+                continue
+            rows.append((r.exped, r.dni, r.nombre, "Adm.", "", "",
+                        "", f"{r.administrativo:.2f}", estado))
+            tags.append(_tag(color))
+            dnis.append(r.dni)
+
+        return rows, tags, dnis, total
+
+    def _filas_detalle_unificado(self, mostrar: dict[str, bool]
+                                 ) -> list[tuple]:
+        """Filas de la hoja de exportación 'Detalle A+B': une A y B lado a
+        lado en una única fila por recibo (o Imp.Adm.), en vez de una tabla
+        por PDF (esta hoja no tiene tabla en pantalla, solo existe al
+        exportar). Reutiliza `_compdet_datos`/`comp.pares` igual que
+        `_filas_detalle_estado`, pero en vez de una fila por lado por
+        Referencia, junta ambos lados de la MISMA Referencia en una fila.
+        Si el recibo no existe en B, el bloque B queda en blanco (Estado
+        final 'Del'); si es nuevo en B, el bloque A queda en blanco (Estado
+        final 'New'). El Rec. es compartido (mismo recibo en ambos bloques)
+        y sigue el orden de A primero, recibos nuevos de B después, y por
+        último los alumnos enteramente nuevos en B (altas)."""
+        regs_a, _regs_b, _pag_a, _pag_b, comp = self._compdet_datos
+        pareja_de_a = {id(ra): rb for ra, rb in comp.pares}
+        BLANCO = ("", "", "", "", "")
+
+        def _bloque_ref(ref, estado: str) -> tuple:
+            return (ref.referencia, ref.fecha, f"{ref.importe:.2f}", "",
+                    estado)
+
+        def _bloque_adm(r: Registro, estado: str) -> tuple:
+            return ("", "", "", f"{r.administrativo:.2f}", estado)
+
+        rows: list[tuple] = []
+
+        def _emitir(exped, dni, nombre, rec, bloque_a, bloque_b,
+                    color, estado) -> None:
+            if mostrar.get(color, True):
+                rows.append((exped, dni, nombre, rec,
+                            *bloque_a, *bloque_b, estado))
+
+        for ra in regs_a:
+            rb = pareja_de_a.get(id(ra))
+            refs_b = ({ref.referencia: ref for ref in rb.referencias}
+                     if rb is not None else {})
+            refs_a_ids = {ref.referencia for ref in ra.referencias}
+            rec_i = 0
+
+            for ref in ra.referencias:
+                rec_i += 1
+                otro = refs_b.get(ref.referencia)
+                if otro is None:
+                    color, estado = "del", "Del"
+                    bloque_a, bloque_b = _bloque_ref(ref, estado), BLANCO
+                else:
+                    color, estado = self._cmp_importe(ref.importe,
+                                                      otro.importe)
+                    bloque_a = _bloque_ref(ref, estado)
+                    bloque_b = _bloque_ref(otro, estado)
+                _emitir(ra.exped, ra.dni, ra.nombre, str(rec_i),
+                       bloque_a, bloque_b, color, estado)
+
+            if rb is not None:
+                for ref in rb.referencias:
+                    if ref.referencia in refs_a_ids:
+                        continue    # ya emparejado arriba
+                    rec_i += 1
+                    color, estado = "nueva", "New"
+                    _emitir(ra.exped, ra.dni, ra.nombre, str(rec_i),
+                           BLANCO, _bloque_ref(ref, estado), color, estado)
+
+            if rb is None:
+                color, estado = "del", "Del"
+                bloque_a, bloque_b = _bloque_adm(ra, estado), BLANCO
+            else:
+                color, estado = self._cmp_importe(ra.administrativo,
+                                                  rb.administrativo)
+                bloque_a = _bloque_adm(ra, estado)
+                bloque_b = _bloque_adm(rb, estado)
+            _emitir(ra.exped, ra.dni, ra.nombre, "Adm.",
+                   bloque_a, bloque_b, color, estado)
+
+        # Alumnos enteramente nuevos en B (altas de comp.solo_b): todo su
+        # bloque A vacío, Estado final "New".
+        for rb in comp.solo_b:
+            rec_i = 0
+            for ref in rb.referencias:
+                rec_i += 1
+                _emitir(rb.exped, rb.dni, rb.nombre, str(rec_i),
+                       BLANCO, _bloque_ref(ref, "New"), "nueva", "New")
+            _emitir(rb.exped, rb.dni, rb.nombre, "Adm.",
+                   BLANCO, _bloque_adm(rb, "New"), "nueva", "New")
+
+        return rows
+
     def _render_tablas_compdet(self) -> None:
-        """Rellena las dos tablas de Detalle (A izquierda, B derecha) con las
-        mismas filas que la vista previa principal. Si el checkbox está
-        activo, oculta en B los alumnos que no están en A (nuevos) y colorea
-        en AMBAS tablas los alumnos cuyo importe cambió (verde sube / rojo
-        baja, la misma regla que la tabla de diff de Comparar Resumen; el
-        marcado tiene prioridad sobre el ámbar de revisión)."""
+        """Rellena las dos tablas de Detalle (A izquierda, B derecha) con el
+        marcado fila a fila (Referencia/Imp.Adm.) contra el listado
+        emparejado del otro lado, vía `_filas_detalle_estado`. Los filtros
+        "Mostrar:" (uno por categoría de color) deciden qué filas se generan
+        en cada tabla; ambas tablas usan los mismos filtros."""
         if self._compdet_datos is None:
             return
         regs_a, regs_b, pag_a, pag_b, comp = self._compdet_datos
-        filtro = self._var_compdet_filtro.get()
+        mostrar = self._compdet_mostrar_filtros()
 
-        marca: dict[str, str] = {}
-        regs_b_vis = regs_b
-        if filtro:
-            for f in comp.modificados:
-                delta = f.delta_neto or f.delta_importe
-                marca[f.exped] = "sube" if delta > 0 else "baja"
-            # Quita de B los Registro presentes solo en B (por identidad, no
-            # por Exped: exacto incluso si un Exped viniera repetido).
-            solo_b = {id(r) for r in comp.solo_b}
-            regs_b_vis = [r for r in regs_b if id(r) not in solo_b]
+        self._lbl_fecha_det_a.configure(
+            text=f"Última fecha de cobro: "
+                 f"{self._ultima_fecha_cobro(regs_a) or '—'}")
+        self._lbl_fecha_det_b.configure(
+            text=f"Última fecha de cobro: "
+                 f"{self._ultima_fecha_cobro(regs_b) or '—'}")
 
-        for tabla, regs, es_a in ((self._tree_det_a, regs_a, True),
-                                  (self._tree_det_b, regs_b_vis, False)):
-            rows, tags, _dnis = self._filas_detalle(regs)
-            # Estas tablas no llevan Rec./F. Pag.: recorta cada fila a las
-            # columnas del panel (las 7 primeras de la vista Detalle).
-            fin_rows = [row[:len(COL_COMPDET_IDS)] for row in rows]
-            fin_tags = [marca.get(row[0], tag)
-                        for row, tag in zip(rows, tags)]
-            iids = tabla.load(fin_rows, tags=fin_tags)
+        # Emparejamiento (por Exped/DNI, ya resuelto por pdf_compare.comparar)
+        # en ambos sentidos, por identidad de Registro.
+        pareja_de_a = {id(ra): rb for ra, rb in comp.pares}
+        pareja_de_b = {id(rb): ra for ra, rb in comp.pares}
+
+        mostradas: dict[str, tuple[int, int]] = {}
+        for tabla, regs, parejas, es_a in (
+                (self._tree_det_a, regs_a, pareja_de_a, True),
+                (self._tree_det_b, regs_b, pareja_de_b, False)):
+            rows, tags, _dnis, total = self._filas_detalle_estado(
+                regs, parejas, es_a, mostrar)
+            mostradas["A" if es_a else "B"] = (len(rows), total)
+            iids = tabla.load(rows, tags=tags)
             # Mapa Exped -> iids para la sincronización de selección A <-> B.
             mapa: dict[str, list[str]] = {}
-            for iid, row in zip(iids, fin_rows):
+            for iid, row in zip(iids, rows):
                 mapa.setdefault(row[0], []).append(iid)
             if es_a:
                 self._exped2iid_det_a = mapa
@@ -1228,9 +1701,10 @@ class App(tk.Tk):
                  f"B: {pag_b} pág. · {len(regs_b)} alumnos · "
                  f"neto {comp.total_neto_b:,.2f} € "
                  f"(Δ {comp.delta_total:+,.2f} €)")
-        if filtro:
-            texto += (f"   |   Filtro: {len(comp.solo_b)} nuevos ocultos "
-                      f"en B · {len(comp.modificados)} con cambios")
+        extra = [f"{lado}: {n}/{total}"
+                for lado, (n, total) in mostradas.items() if n != total]
+        if extra:
+            texto += "   |   Filas mostradas " + " · ".join(extra)
         self._lbl_compdet_resumen.configure(text=texto, fg="#1B2631")
 
     # Sincronización de selección A <-> B por Exped (clave estable entre
