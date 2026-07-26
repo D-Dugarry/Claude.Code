@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PPub — Informe de Mejoras de Eficiencia</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --text:#1b1e23; --muted:#5f6672; --border:#e3e5ea;
+  --code-bg:#f6f7f9; --code-text:#1b1e23;
+  --before-bg:#fdf1f1; --before-border:#dc2626; --before-lab:#b91c1c;
+  --after-bg:#f0faf3; --after-border:#16a34a; --after-lab:#0f7a33;
+  --accent:#0d7a5f; --chip-bg:#eaf6f1;
+  --hi:#dc2626; --med:#ea580c; --lo:#2554c7;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+    --code-bg:#0f1114; --code-text:#dcdfe4;
+    --before-bg:#2c1417; --before-border:#e5484d; --before-lab:#ff8a8f;
+    --after-bg:#0f2318; --after-border:#3dd68c; --after-lab:#7ce8b3;
+    --accent:#3ddcaa; --chip-bg:#122a22;
+    --shadow: 0 1px 3px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+  --code-bg:#0f1114; --code-text:#dcdfe4;
+  --before-bg:#2c1417; --before-border:#e5484d; --before-lab:#ff8a8f;
+  --after-bg:#0f2318; --after-border:#3dd68c; --after-lab:#7ce8b3;
+  --accent:#3ddcaa; --chip-bg:#122a22;
+}
+:root[data-theme="light"]{
+  --bg:#f5f6f8; --panel:#ffffff; --text:#1b1e23; --muted:#5f6672; --border:#e3e5ea;
+  --code-bg:#f6f7f9; --code-text:#1b1e23;
+  --before-bg:#fdf1f1; --before-border:#dc2626; --before-lab:#b91c1c;
+  --after-bg:#f0faf3; --after-border:#16a34a; --after-lab:#0f7a33;
+  --accent:#0d7a5f; --chip-bg:#eaf6f1;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+header.top{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;box-shadow:var(--shadow);margin-bottom:22px;}
+header.top h1{margin:0 0 6px;font-size:1.7rem;}
+header.top p.sub{margin:0;color:var(--muted);font-size:.95rem;}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;}
+.stat{flex:1;min-width:120px;background:var(--chip-bg);border-radius:10px;padding:12px 16px;text-align:center;}
+.stat .n{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.stat .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+nav.toc{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 26px;margin-bottom:26px;box-shadow:var(--shadow);}
+nav.toc h2{margin-top:0;font-size:1.05rem;}
+nav.toc ul{columns:2;gap:24px;margin:0;padding-left:20px;}
+nav.toc li{margin-bottom:6px;font-size:.9rem;}
+nav.toc a{color:var(--text);text-decoration:none;}
+nav.toc a:hover{color:var(--accent);text-decoration:underline;}
+h2.block-title{font-size:1.3rem;border-bottom:2px solid var(--border);padding-bottom:8px;margin:36px 0 18px;}
+article.finding{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin-bottom:18px;box-shadow:var(--shadow);scroll-margin-top:16px;}
+.finding-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff;}
+.badge.hi{background:var(--hi);} .badge.med{background:var(--med);} .badge.lo{background:var(--lo);}
+.finding h3{margin:0;font-size:1.08rem;flex:1;min-width:200px;}
+.filepath{display:block;font-family:Consolas,Menlo,monospace;font-size:.82rem;color:var(--muted);margin-bottom:12px;word-break:break-all;}
+.desc{margin:10px 0;}
+.codediff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+@media (max-width:820px){.codediff{grid-template-columns:1fr;}}
+.codebox{border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.codebox .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;}
+.codebox.before .label{background:var(--before-bg);color:var(--before-lab);border-bottom:2px solid var(--before-border);}
+.codebox.after .label{background:var(--after-bg);color:var(--after-lab);border-bottom:2px solid var(--after-border);}
+.codebox pre{margin:0;padding:12px 14px;overflow-x:auto;background:var(--code-bg);color:var(--code-text);font-family:Consolas,Menlo,monospace;font-size:.8rem;line-height:1.45;max-height:420px;}
+.impact{background:var(--chip-bg);border-radius:8px;padding:10px 14px;font-size:.9rem;margin-top:10px;}
+.impact strong{color:var(--accent);}
+.redesign{background:var(--chip-bg);border:1px solid var(--border);border-radius:14px;padding:26px 30px;margin:26px 0;}
+.redesign h3{margin-top:0;color:var(--accent);}
+.redesign pre{background:var(--code-bg);border-radius:8px;padding:14px;overflow-x:auto;font-family:Consolas,Menlo,monospace;font-size:.8rem;}
+footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:50px;}
+a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+<h1>Informe de Mejoras de Eficiencia y Velocidad — PPub_BDatos_2026.xlsm</h1>
+<p class="sub">Precios Públicos · Universidad de Alicante — oportunidades de rendimiento y mantenibilidad en el código VBA (excluye RibbonX, informe aparte). Generado el 25/07/2026.</p>
+<div class="stats">
+  <div class="stat"><div class="n">19</div><div class="l">Mejoras puntuales</div></div>
+  <div class="stat"><div class="n">3</div><div class="l">Bloques analizados</div></div>
+  <div class="stat"><div class="n">4</div><div class="l">Propuestas de reprogramación</div></div>
+</div>
+</header>
+
+<nav class="toc">
+<h2>Índice</h2>
+<ul>
+<li><a href="#bloqueA">Bloque A — Arranque y LSGES04</a></li>
+<li><a href="#ae1">AE1 · Bloque de 6 diccionarios repetido, sin factorizar</a></li>
+<li><a href="#ae2">AE2 · Mismo Sort ejecutado dos veces seguidas</a></li>
+<li><a href="#ae3">AE3 · Redondeo celda a celda en vez de vectorizado</a></li>
+<li><a href="#ae4">AE4 · Algoritmo de duplicados copiado entre dos módulos</a></li>
+<li><a href="#ae5">AE5 · Bucle de mostrar columnas sin agrupar la escritura</a></li>
+<li><a href="#ae6">AE6 · Controls.Count reevaluado en cada iteración</a></li>
+<li><a href="#ae7">AE7 · Múltiples CountIfs sobre la misma columna</a></li>
+<li><a href="#bloqueB">Bloque B — LSace06/AE4/JI's/Cierre</a></li>
+<li><a href="#be1">BE1 · El cuello de botella más grave: miles de escaneos de 176.000 filas</a></li>
+<li><a href="#be2">BE2 · Acumuladores por Range en cada iteración</a></li>
+<li><a href="#be3">BE3 · Mismo patrón de SumIfs repetidos, menor escala</a></li>
+<li><a href="#be4">BE4 · Código duplicado entre M_3xx y M_4xx</a></li>
+<li><a href="#be5">BE5 · Orden por columna que no se usa en el filtro</a></li>
+<li><a href="#bloqueC">Bloque C — Librería transversal</a></li>
+<li><a href="#ce1">CE1 · ~170 líneas duplicadas entre las dos importaciones</a></li>
+<li><a href="#ce2">CE2 · Exportación XLSX/XLSM duplicada, variante muerta</a></li>
+<li><a href="#ce3">CE3 · Hipervínculos: recorrido de todo UsedRange</a></li>
+<li><a href="#ce4">CE4 · Conteo de fórmulas celda a celda</a></li>
+<li><a href="#ce5">CE5 · Búsqueda de duplicados celda a celda</a></li>
+<li><a href="#ce6">CE6 · Versiones OLD/VeryOLD muertas conviviendo con la buena</a></li>
+<li><a href="#ce7">CE7 · Patrón "filtrar+ordenar+contar" repetido 3 veces</a></li>
+<li><a href="#reprogramar">Propuestas de reprogramación de módulos completos</a></li>
+</ul>
+</nav>
+
+<section id="bloqueA">
+<h2 class="block-title">Bloque A — Arranque y pipeline LSGES04</h2>
+
+<article class="finding" id="ae1">
+<div class="finding-head"><span class="badge hi">Alto impacto</span><h3>AE1 · Bloque de 6 diccionarios idéntico repetido literalmente (~110 líneas → ~20)</h3></div>
+<span class="filepath">VBA_Moduls/M_132_Añadir_Núm_JIs_al_Inf.bas — líneas 86-198</span>
+<p class="desc">El mismo bloque de creación de <code>Scripting.Dictionary</code> y volcado se repite 6 veces (una por columna JI), cambiando solo el nombre de columna origen/destino.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes (x6, con pequeñas variaciones)</div><pre>Set RngJIs = Lo_BD.ListColumns(BD_JI_Emi_Adm).DataBodyRange.SpecialCells(xlCellTypeVisible)
+Set DiccJIs = CreateObject("Scripting.Dictionary")
+For Each Celda In RngJIs.Cells
+    If Not IsEmpty(Celda.Value) Then DiccJIs(Celda.Value) = True
+Next Celda
+If DiccJIs.Count &gt; 0 Then
+    RwJI.Range(InfRec_JI_Emi_Adm).Value = Join(DiccJIs.Keys, ", ")
+Else
+    RwJI.Range(InfRec_JI_Emi_Adm).Value = "¿-?"
+End If
+Set DiccJIs = Nothing: Set RngJIs = Nothing
+'- ... repetido idéntico x6 con otras columnas ...</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim ColsOrigen As Variant: ColsOrigen = Array(BD_JI_Emi_Adm, BD_JI_Emi_Acad, BD_AD_Emi_Adm, BD_AD_Emi_Acad, BD_JI_443_Adm, BD_JI_443_Acad)
+Dim ColsDestino As Variant: ColsDestino = Array(InfRec_JI_Emi_Adm, InfRec_JI_Emi_Acad, InfRec_AD_Emi_Adm, InfRec_AD_Emi_Acad, InfRec_JI_443_Adm, InfRec_JI_443_Acad)
+Dim DiccJIs As Object: Set DiccJIs = CreateObject("Scripting.Dictionary")   '- 1 sola vez, fuera del bucle
+Dim k As Integer
+For k = 0 To UBound(ColsOrigen)
+    DiccJIs.RemoveAll
+    Set RngJIs = Lo_BD.ListColumns(ColsOrigen(k)).DataBodyRange.SpecialCells(xlCellTypeVisible)
+    For Each Celda In RngJIs.Cells
+        If Not IsEmpty(Celda.Value) Then DiccJIs(Celda.Value) = True
+    Next Celda
+    RwJI.Range(ColsDestino(k)).Value = IIf(DiccJIs.Count &gt; 0, Join(DiccJIs.Keys, ", "), "¿-?")
+Next k</pre></div>
+</div>
+<p class="impact"><strong>Impacto:</strong> reduce ~110 líneas a ~20 y evita crear el objeto COM <code>Scripting.Dictionary</code> repetidamente dentro de un bucle que ya está anidado dentro de otro (<code>For F_Inf</code>) — el late-binding COM tiene coste no despreciable si se repite miles de veces.</p>
+</article>
+
+<article class="finding" id="ae2">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>AE2 · Mismo Sort ejecutado dos veces seguidas sobre la misma tabla</h3></div>
+<span class="filepath">VBA_Moduls/M_113_Assign_Concept_Eco.bas — líneas 267-277</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)
+Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False)
+Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, False)
+With Lo_Data
+    .DataBodyRange.Columns(BD_Concepto).ClearContents
+    .DataBodyRange.Columns(BD_TIO_EP).ClearContents
+Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)     '&lt;- repetido, mismo resultado
+Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False)   '&lt;- repetido</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)
+Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False)
+Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, False)
+With Lo_Data
+    .DataBodyRange.Columns(BD_Concepto).ClearContents
+    .DataBodyRange.Columns(BD_TIO_EP).ClearContents
+'- (eliminadas las 2 líneas de Sort redundantes: nada cambia entre medias)</pre></div>
+</div>
+<p class="impact">Ordenar una tabla de decenas de miles de filas por 2-3 columnas es caro; hacerlo dos veces sin que nada cambie duplica ese coste sin ningún beneficio.</p>
+</article>
+
+<article class="finding" id="ae3">
+<div class="finding-head"><span class="badge hi">Alto impacto</span><h3>AE3 · Redondeo celda a celda en vez de vectorizado con array</h3></div>
+<span class="filepath">VBA_Moduls/M_130_Gen_Inf_Recibos.bas — líneas 388-400</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Col = InfRec_Tot_Emi To InfRec_Acad_Pdte
+    If Col = InfRec_Cta_Adm Or Col = InfRec_ConcptEco Then GoTo SiguienteColumna
+    Set RngCol = Lo_Inf.ListColumns(Col).DataBodyRange
+    For Each Celda In RngCol
+        If IsNumeric(Celda.Value) Then Celda.Value = Round(Celda.Value, 2)
+    Next Celda
+SiguienteColumna:
+Next Col</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim Datos As Variant, r As Long
+For Col = InfRec_Tot_Emi To InfRec_Acad_Pdte
+    If Col = InfRec_Cta_Adm Or Col = InfRec_ConcptEco Then GoTo SiguienteColumna
+    Set RngCol = Lo_Inf.ListColumns(Col).DataBodyRange
+    Datos = RngCol.Value                              ' 1 sola lectura de bloque
+    For r = 1 To UBound(Datos, 1)
+        If IsNumeric(Datos(r, 1)) Then Datos(r, 1) = Round(Datos(r, 1), 2)
+    Next r
+    RngCol.Value = Datos                              ' 1 sola escritura de bloque
+SiguienteColumna:
+Next Col</pre></div>
+</div>
+<p class="impact">Pasa de O(filas) operaciones COM de lectura+escritura por columna a 2 operaciones de bloque por columna — mejora habitual de un orden de magnitud en tablas medianas/grandes.</p>
+</article>
+
+<article class="finding" id="ae4">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>AE4 · Algoritmo de detección de duplicados copiado entre dos módulos</h3></div>
+<span class="filepath">M_112_Manage_Duplicates.bas vs M_212_Mng_Duplicates_CAcadAnt.bas</span>
+<p class="desc">Ambas rutinas recorren la tabla ordenada por referencia y marcan repeticiones con el mismo algoritmo, cambiando solo el nombre de columna de incidencia y qué se hace con los duplicados después.</p>
+<div class="impact"><strong>Propuesta:</strong> extraer la fase de "identificación y marcado" a una función común <code>Rut_Lo_Marcar_Duplicados(Lo_Data, ColRef, ColIncidencia) As Long</code> reutilizada por ambos módulos, dejando en cada uno solo el tratamiento posterior específico. Evita que una corrección de bug en el criterio de comparación se aplique en un módulo y se olvide en el otro.</p>
+</article>
+
+<article class="finding" id="ae5">
+<div class="finding-head"><span class="badge lo">Impacto bajo</span><h3>AE5 · Bucle de mostrar/ocultar columnas escribiendo propiedad celda a celda</h3></div>
+<span class="filepath">VBA_Moduls/M_90_Rutinas_X.bas — Rut_Columnas_Mostrar</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Cont_Col = 1 To LastCol_Tb_Solicitudes
+    If Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) &lt;&gt; "Ocultar" Then Columns(Cont_Col).Hidden = False
+Next Cont_Col</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim RngVisible As Range
+For Cont_Col = 1 To LastCol_Tb_Solicitudes
+    If Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) &lt;&gt; "Ocultar" Then
+        If RngVisible Is Nothing Then Set RngVisible = Columns(Cont_Col) Else Set RngVisible = Union(RngVisible, Columns(Cont_Col))
+    End If
+Next Cont_Col
+If Not RngVisible Is Nothing Then RngVisible.Hidden = False</pre></div>
+</div>
+</article>
+
+<article class="finding" id="ae6">
+<div class="finding-head"><span class="badge lo">Impacto bajo</span><h3>AE6 · Controls.Count reevaluado como llamada COM en cada iteración</h3></div>
+<span class="filepath">VBA_Moduls/M_000_Ini_APP.bas — Rut_Context_Buttons_Hide</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Count = 1 To Application.CommandBars(Item_Bar).Controls.Count</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim NCtrls As Integer: NCtrls = Application.CommandBars(Item_Bar).Controls.Count
+For Count = 1 To NCtrls</pre></div>
+</div>
+</article>
+
+<article class="finding" id="ae7">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>AE7 · Múltiples CountIfs recorriendo la misma columna en llamadas separadas</h3></div>
+<span class="filepath">VBA_Moduls/M_114_Clasif_Recibos.bas</span>
+<p class="desc">8 llamadas a <code>Application.CountIfs</code> sobre <code>BD_Tipo_Rec</code>, cada una una pasada completa por la columna, cuando los valores posibles son un conjunto cerrado conocido.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=Emitido")
+...
+rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=EjeAnt")
+...  ' (x8 en total)</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim DiccCont As Object: Set DiccCont = CreateObject("Scripting.Dictionary")
+Dim Celda As Range
+For Each Celda In Lo_BD.ListColumns(BD_Tipo_Rec).DataBodyRange.Cells
+    If Len(Celda.Value) &gt; 0 Then
+        If DiccCont.Exists(Celda.Value) Then DiccCont(Celda.Value) = DiccCont(Celda.Value) + 1 Else DiccCont(Celda.Value) = 1
+    End If
+Next Celda
+'- DiccCont("Emitido"), DiccCont("EjeAnt")... sustituyen a los 8 CountIfs</pre></div>
+</div>
+<p class="impact">En una tabla como <code>Sht__BD</code> (decenas de miles de filas), consolida 8 pasadas redundantes en 1 sola.</p>
+</article>
+</section>
+
+<section id="bloqueB">
+<h2 class="block-title">Bloque B — LSace06 / AE4 / JI's / Cierre contable</h2>
+
+<article class="finding" id="be1">
+<div class="finding-head"><span class="badge hi">El más grave del proyecto</span><h3>BE1 · Miles de escaneos completos de una tabla de ~176.000 filas</h3></div>
+<span class="filepath">VBA_Moduls/M_600_Informe_EP_RSm.bas — líneas 95-170</span>
+<p class="desc">Por cada combinación única de (Plan, C_Acad, AñoEmi) se itera 5 veces (tipos de recibo) y por cada una se ejecutan 6 <code>SumIfs</code>/<code>CountIfs</code>, cada uno recorriendo toda la tabla. Con cientos de combinaciones distintas, son miles de escaneos completos de la tabla más grande del libro — el cuello de botella más costoso de todo el proyecto auditado.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes (patrón repetido ~30 veces por combinación)</div><pre>T_Emi_Tot = Application.SumIfs(Lo_EPs.ListColumns(BD_ImpRec).DataBodyRange, _
+                                Lo_EPs.ListColumns(BD_Plan).DataBodyRange, Cod_Plan, _
+                                Lo_EPs.ListColumns(BD_C_Acad).DataBodyRange, CAcad, _
+                                Lo_EPs.ListColumns(BD_ACont_Emi).DataBodyRange, AñoEmi, ...)
+' ... 5 más por cada combinación (Plan, C_Acad, AñoEmi, TipoRec) ...</pre></div>
+<div class="codebox after"><div class="label">Después — un único pase con Dictionary</div><pre>Dim Arr As Variant: Arr = Lo_EPs.DataBodyRange.Value2    ' 1 sola lectura de bloque
+Dim Dic As Object: Set Dic = CreateObject("Scripting.Dictionary")
+Dim Clave As String, F As Long, V As Variant
+
+For F = 1 To UBound(Arr, 1)
+    If Arr(F, BD_ImpRec) &gt; 0 Then
+        Clave = Arr(F, BD_Plan) &amp; "|" &amp; Arr(F, BD_C_Acad) &amp; "|" &amp; Arr(F, BD_ACont_Emi) &amp; "|" &amp; _
+                Arr(F, BD_Tipo_Rec) &amp; "|" &amp; Arr(F, BD_TIO_EP)
+        If Not Dic.Exists(Clave) Then Dic.Add Clave, Array(0#, 0#, 0#, 0#, 0#, 0)
+        V = Dic(Clave)
+        V(0) = V(0) + Arr(F, BD_ImpRec)                                        ' T_Emi_Tot
+        V(1) = V(1) + Arr(F, BD_ImpCob)                                        ' T_Cob_Tot
+        V(2) = V(2) + Arr(F, BD_Rec_Imp_Adm)                                   ' T_Emi_Adm
+        If Arr(F, BD_ImpCob) &gt; 0 Then V(3) = V(3) + Arr(F, BD_Rec_Imp_Adm)    ' T_Cob_Adm
+        If Arr(F, BD_RDT) &lt;&gt; "" Then V(4) = V(4) + Arr(F, BD_ImpCob)          ' T_RDT_Tot
+        V(5) = V(5) + 1
+        Dic(Clave) = V
+    End If
+Next F
+' Recorrer el Dictionary (1 entrada por combinación real) para generar las filas de Lo_InfRSm</pre></div>
+</div>
+<p class="impact"><strong>Impacto:</strong> pasa de "miles de escaneos de 176.000 filas" a un único recorrido de 176.000 filas más un recorrido del Dictionary — mejora esperada de varios órdenes de magnitud en tiempo de ejecución de este informe.</p>
+</article>
+
+<article class="finding" id="be2">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>BE2 · Acumuladores implementados como Range en cada iteración, en vez de variables en memoria</h3></div>
+<span class="filepath">VBA_Moduls/M_520_Calcular_JIs_PPub_1303.bas — líneas 72-140</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>RngTEmi = RngTEmi + ImpEmi          ' cada línea = lectura + escritura de celda
+RngTEmiCob = RngTEmiCob + ImpCob</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim dEmi As Currency, dEmiCob As Currency  ' variables en memoria, no Range
+...
+dEmi = dEmi + ImpEmi: dEmiCob = dEmiCob + ImpCob
+...
+' Una sola escritura final a las celdas, tras el bucle:
+RngTEmi = dEmi: RngTEmiCob = dEmiCob</pre></div>
+</div>
+</article>
+
+<article class="finding" id="be3">
+<div class="finding-head"><span class="badge lo">Impacto bajo-medio</span><h3>BE3 · Mismo patrón de SumIfs repetidos que BE1, en menor escala</h3></div>
+<span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — líneas 370-497 y 685-779</span>
+<p class="desc">Por cada Plan se ejecutan entre 10 y 14 <code>SumIfs</code>/<code>CountIfs</code> sobre el buffer ya filtrado (más pequeño que la BD completa, por lo que el impacto hoy es menor que BE1) — aplicaría la misma recomendación de Dictionary si el volumen de recibos por curso/tipo crece significativamente.</p>
+</article>
+
+<article class="finding" id="be4">
+<div class="finding-head"><span class="badge med">Mantenibilidad</span><h3>BE4 · Código duplicado entre M_310-315 y M_410-415</h3></div>
+<span class="filepath">M_311/M_411 (import), M_314/M_413 (asignación)</span>
+<p class="desc"><code>Rut_Lo_Import_LoData_LoDefCol_LSace06</code> y <code>Rut_Lo_Import_LoData_LoDefCol_AE4x1</code> comparten ~70% de la estructura (seleccionar fichero → abrir → comprobar cabecera → proceso específico → copiar → cerrar). <code>RuT_Find_Rec_INSS_C_Acad</code> y el primer bloque de <code>Rut_Assign_Imp_AdmAcad_AE4x1</code> implementan el mismo patrón "ordenar y marcar la primera aparición de cada grupo".</p>
+<p class="impact"><strong>Propuesta:</strong> una única rutina genérica parametrizada por prefijo de fichero, LoDefCol y reglas de filtrado específicas; y una <code>Rut_Lo_Mark_First_Of_Group(Lo, ColsOrden(), ColClave, Accion)</code> común. Esto centralizaría también el bug del <code>Exit For</code> (ver Informe de Bugs, B6) en un único sitio.</p>
+</article>
+
+<article class="finding" id="be5">
+<div class="finding-head"><span class="badge lo">Impacto bajo</span><h3>BE5 · Ordenación por una columna que luego no se usa en el filtro inmediato</h3></div>
+<span class="filepath">VBA_Moduls/M_413_Assign_ImpAdm_AE4x1.bas — línea 108</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_Rec_Imp_Adm, xlAscending, True)
+' ... y a continuación se filtra por BD_ImpAdm, no por BD_Rec_Imp_Adm ...</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_ImpAdm, xlAscending, True)   ' ordenar por la columna que sí se filtra</pre></div>
+</div>
+</article>
+</section>
+
+<section id="bloqueC">
+<h2 class="block-title">Bloque C — Librería transversal Rut_* / Prog_* / Sht__*</h2>
+
+<article class="finding" id="ce1">
+<div class="finding-head"><span class="badge hi">Alto impacto (mantenibilidad)</span><h3>CE1 · ~170 líneas duplicadas al 95% entre las dos rutinas de importación</h3></div>
+<span class="filepath">VBA_Moduls/Rut_Lo_Import.bas — líneas 8-174 y 185-347</span>
+<p class="desc"><code>Rut_Lo_Import_WorkSheet</code> y <code>Rut_Lo_Import_LoData_LoDefCol</code> son prácticamente idénticas; ya han demostrado que mantener dos copias hace que una corrección (el manejo de errores del Informe de Bugs, C4) se quede sin aplicar en una de las dos.</p>
+<div class="codediff">
+<div class="codebox after" style="grid-column:1/-1;"><div class="label">Propuesta — núcleo común compartido</div><pre>Sub Rut_Lo_Import_WorkSheet(WrkSht As Worksheet, Arch_New_Name As String, Optional SheetNom As String = "")
+    Call Rut_Lo_Import_Core(WrkSht.ListObjects(1), Arch_New_Name, SheetNom, Nothing, 0)
+End Sub
+
+Sub Rut_Lo_Import_LoData_LoDefCol(Lo_Data As ListObject, LoDefCol As ListObject, Col_Header As Integer, _
+                                   Arch_New_Name As String, Optional SheetNom As String = "")
+    Call Rut_Lo_Import_Core(Lo_Data, Arch_New_Name, SheetNom, LoDefCol, Col_Header)
+End Sub
+
+Private Sub Rut_Lo_Import_Core(Lo_Data As ListObject, Arch_New_Name As String, SheetNom As String, _
+                                LoDefCol As ListObject, Col_Header As Integer)
+    '- ... todo el cuerpo común, una sola vez (incluye el manejo de errores de Workbooks.Open) ...
+    Dim HeaderOK As Boolean
+    If LoDefCol Is Nothing Then
+        HeaderOK = Func_LstObj_HeaderRow_Check_2Lo_OK(Lo_Data, Lo_ClsBk)
+    Else
+        HeaderOK = Func_LstObj_ListColumns_DefCol_Check_OK(Lo_ClsBk, LoDefCol, Col_Header)
+    End If
+End Sub</pre></div>
+</div>
+<p class="impact">Esto habría evitado de raíz dos de los bugs del informe de Bugs (C4 y C5): una sola implementación, una sola vez que corregir.</p>
+</article>
+
+<article class="finding" id="ce2">
+<div class="finding-head"><span class="badge med">Mantenibilidad</span><h3>CE2 · Exportación a XLSX/XLSM duplicada, con la variante correcta muerta</h3></div>
+<span class="filepath">Rut_Ws_Export.bas vs Rut_Ws_Export_XLSM.bas</span>
+<p class="desc">Mismo esqueleto (ruta, <code>WrkSht.Copy</code>, borrar shapes opcional, <code>SaveAs</code>, preguntar borrado) con la única diferencia real del <code>FileFormat</code>. La versión <code>.xlsm</code> —la que curiosamente sí tiene el borrado correcto (ver Informe de Bugs, C3)— no se usa desde ningún sitio.</p>
+<p class="impact"><strong>Propuesta:</strong> fusionar en una única <code>Rut_Lo_Export_WS(WrkSht, SheetNom, Formato As Integer = 51, Sw_DelShapes, AskDelRegs)</code> reutilizable para ambos formatos.</p>
+</article>
+
+<article class="finding" id="ce3">
+<div class="finding-head"><span class="badge hi">Alto impacto</span><h3>CE3 · Búsqueda de hipervínculos recorriendo cada celda usada de cada hoja</h3></div>
+<span class="filepath">VBA_Moduls/Rut_Hipervinculos.bas — Rut_ListarHipervinculos</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Each Ws In ThisWorkbook.Worksheets
+    For Each Celda In Ws.UsedRange
+        If Celda.Hyperlinks.Count &gt; 0 Then
+            hojaResultado.Cells(NewLine, 1).Value = Ws.Name
+            hojaResultado.Cells(NewLine, 2).Value = Celda.Address
+            hojaResultado.Cells(NewLine, 3).Value = Celda.Hyperlinks(1).Address
+            hojaResultado.Cells(NewLine, 4).Value = Celda.Value
+            NewLine = NewLine + 1
+        End If
+    Next Celda
+Next Ws</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim Hv As Hyperlink
+For Each Ws In ThisWorkbook.Worksheets
+    For Each Hv In Ws.Hyperlinks               ' colección nativa: solo los que existen
+        hojaResultado.Cells(NewLine, 1).Value = Ws.Name
+        hojaResultado.Cells(NewLine, 2).Value = Hv.Range.Address
+        hojaResultado.Cells(NewLine, 3).Value = Hv.Address
+        hojaResultado.Cells(NewLine, 4).Value = Hv.Range.Value
+        NewLine = NewLine + 1
+    Next Hv
+Next Ws</pre></div>
+</div>
+<p class="impact">Pasa de O(nº celdas usadas de todo el libro) a O(nº hipervínculos reales) — en hojas del tamaño de <code>Sht__BD</code>, de minutos a milisegundos.</p>
+</article>
+
+<article class="finding" id="ce4">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>CE4 · Conteo de fórmulas celda a celda en vez de SpecialCells</h3></div>
+<span class="filepath">Rut_Ws_Count_Formulas_y_Cells.bas / Rut_Ws_Count_Cells.bas</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Each Celda In Ws.UsedRange
+    If Celda.HasFormula Then
+        tieneFormula = True
+        numFormulas = numFormulas + 1
+    End If
+Next Celda</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim RngFormulas As Range
+On Error Resume Next
+Set RngFormulas = Ws.UsedRange.SpecialCells(xlCellTypeFormulas)
+On Error GoTo 0
+numFormulas = IIf(RngFormulas Is Nothing, 0, RngFormulas.Cells.Count)
+tieneFormula = (numFormulas &gt; 0)</pre></div>
+</div>
+</article>
+
+<article class="finding" id="ce5">
+<div class="finding-head"><span class="badge med">Impacto medio</span><h3>CE5 · Búsqueda de duplicados comparando celda a celda</h3></div>
+<span class="filepath">VBA_Moduls/Rut_Lo.bas — Rut_Lo_Buscar_Duplicados, líneas 9-46</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>For Lin = 2 To CantReg
+    If .Cells(Lin, ColBusc) = Ref_Ant Then
+        ...
+        .Cells(Lin, ColBusc).Interior.ColorIndex = 34
+    Else
+        Ref_Ant = .Cells(Lin, ColBusc)
+    End If
+Next Lin</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Dim Valores As Variant: Valores = .Columns(ColBusc).Value2   ' 1 sola lectura a memoria
+Ref_Ant = Valores(1, 1)
+For Lin = 2 To CantReg
+    If Valores(Lin, 1) = Ref_Ant Then
+        ContDupl = ContDupl + 1
+        .Cells(Lin, ColBusc).Interior.ColorIndex = 34          ' el pintado sí toca la celda real,
+        .Cells(Lin - 1, ColBusc).Interior.ColorIndex = 35       ' pero solo para las filas duplicadas
+    Else
+        Ref_Ant = Valores(Lin, 1)
+    End If
+Next Lin</pre></div>
+</div>
+</article>
+
+<article class="finding" id="ce6">
+<div class="finding-head"><span class="badge lo">Limpieza</span><h3>CE6 · Dos versiones muertas (_OLD/_VeryOLD) conviviendo con la versión buena</h3></div>
+<span class="filepath">VBA_Moduls/Rut_Lo.bas — líneas 96-147</span>
+<p class="desc"><code>Rut_Lo_Columns_Show_Hide_OLD</code> y <code>_VeryOLD</code> leen celda a celda, mientras que la versión vigente (única invocada desde el Ribbon) ya lee el rango completo con <code>.Value2</code> en un array — el propio proyecto demuestra internamente el patrón correcto. Recomiendo borrar directamente las dos versiones obsoletas: no se llaman desde ningún sitio y solo añaden ruido.</p>
+</article>
+
+<article class="finding" id="ce7">
+<div class="finding-head"><span class="badge lo">Mantenibilidad</span><h3>CE7 · Patrón "ordenar + filtrar + contar visibles" repetido en 3 rutinas</h3></div>
+<span class="filepath">Rut_Lo_DataBodyRange_Filter_Copy_Del, Rut_Lo_DataBodyRange_Filter_y_DEL, Rut_Lo_DataBodyRange_Filter_x2Crit_Copy_ColSource_to_ColTarget</span>
+<p class="impact"><strong>Propuesta:</strong> extraer una función común <code>Fnc_Lo_Filtrar_y_ContarVisibles(Lo, Col1, Crit1, Col2, Crit2) As Long</code> reduciría el código a la mitad en estas tres subs y evitaría triplicar futuras correcciones.</p>
+</article>
+</section>
+
+<section id="reprogramar">
+<h2 class="block-title">Propuestas de reprogramación de módulos completos</h2>
+<p>El diseño de fondo del proyecto —tabla de datos gobernada por una tabla de metadatos hermana (<code>LoDefCol</code>), rutinas genéricas <code>Rut_Lo_*</code> reutilizadas por todos los pipelines, patrón <code>Call_Rut_...</code>/<code>Rut_...</code>— es sólido y coherente con VBA de Excel. <strong>No recomiendo reescribir el framework desde cero.</strong> Sí hay 4 casos concretos donde una reprogramación específica está justificada:</p>
+
+<div class="redesign">
+<h3>1. M_193_Importar_Datos_Wb_mes_Ant.bas — reescritura completa</h3>
+<p>No es un caso de "parchear": mezcla al menos dos generaciones de intento (bloque nuevo con <code>Dictionary</code>/funciones inexistentes + bloque viejo comentado estilo M_118/M_215) y no compila (ver Informe de Bugs, A2). Propuesta: reescribirlo reutilizando el patrón merge-join ya probado en M_118/M_215 (ordenar por <code>BD_Ref</code> y recorrer en paralelo), con nombres de hoja/columna parametrizados —no hardcodeados como <code>"Hoja_BD"</code>— y gestión de errores que cierre siempre el libro origen abierto.</p>
+</div>
+
+<div class="redesign">
+<h3>2. Extraer una función de merge-join genérica para M_118 / M_195 / M_215</h3>
+<p>Es exactamente el mismo algoritmo copiado 3 veces con nombres de variable ligeramente distintos — y es precisamente donde apareció el bug más grave del informe de Bugs (A1, el límite <code>1000</code> hardcodeado). Propuesta:</p>
+<pre>Function Rut_Lo_MergeJoin_PorRef(Lo_Origen As ListObject, Lo_Destino As ListObject, _
+                                   ColRef As Integer, ColsOrigen() As Variant, ColsDestino() As Variant) As Long
+    '- Recibe los arrays de columnas a copiar y devuelve el nº de "Found",
+    '- centralizando el bucle en un solo sitio testeado.
+End Function</pre>
+<p class="impact">Esto habría hecho imposible que el bug del <code>1000</code> hardcodeado se colara sin que los otros dos procesos lo detectaran igual; y si aparece otro bug similar, se corrige una vez para los tres procesos en vez de tres.</p>
+</div>
+
+<div class="redesign">
+<h3>3. Unificar M_310-315 (LSace06/INSS) y M_410-415 (AE4) en un único framework de importación parametrizado</h3>
+<p>Son dos implementaciones paralelas del mismo concepto ("importar un Excel externo, limpiarlo, verterlo en BDatos") con soluciones <strong>distintas e inconsistentes</strong>: M_315 reconstruye el Imp. INSS con un emparejamiento fila-a-fila por Referencia (lento, y con el bug del <code>Exit For</code>, Informe de Bugs B6), mientras M_415 simplemente borra los recibos AE4 del curso y vuelca la tabla entera de nuevo — más simple, rápido y sin ese tipo de bug.</p>
+<p class="impact"><strong>Propuesta:</strong> adoptar el patrón de M_415 también para M_310-315: tratar el Imp. INSS igual que el Imp. AE4 (borrar-y-reinsertar por curso académico), evitando el merge-join completo y su clase de bugs.</p>
+</div>
+
+<div class="redesign">
+<h3>4. Reescribir M_602_Cierre_Contable_PLANES.bas como una única rutina parametrizada por "ciclos"</h3>
+<p>Los 4 bloques <code>GoTo Ciclo_N</code> casi idénticos ya han demostrado ser fuente directa de bugs críticos: el fallthrough (B3), el filtro de Anulados que hay que recordar poner en 4 sitios en vez de 1 (B2), la hoja de protección equivocada (B4).</p>
+<pre>Type CierreConfig
+    TipoCurso   As String       ' "EFP" / "CFCyAFC"
+    Concepto    As String       ' "1311" / "1311,03"
+    CursoAcad   As String       ' CursoAcadAnt / CursoAcad
+    EsAnt       As Boolean      ' True -&gt; llamar a _CAcad_Ant, False -&gt; _CAcad_Pos
+End Type
+
+Dim Ciclos(1 To 4) As CierreConfig
+Ciclos(1) = ... ("EFP", "1311", CursoAcadAnt, True)
+Ciclos(2) = ... ("EFP", "1311", CursoAcad,    False)
+Ciclos(3) = ... ("CFCyAFC", "1311,03", CursoAcadAnt, True)
+Ciclos(4) = ... ("CFCyAFC", "1311,03", CursoAcad,    False)
+
+' Una única rutina "Rut_Preparar_y_Ejecutar_Ciclo(Ciclos(opcion))" que:
+'   - aplica los 4 filtros (incluido BD_Anul, una sola vez, imposible de olvidar)
+'   - copia al buffer, llama a Ant o Pos según EsAnt
+'   - SIEMPRE termina en el mismo punto de salida (elimina el riesgo de fallthrough)</pre>
+<p class="impact">Reduce de forma significativa la superficie de mantenimiento y hace estructuralmente imposibles los bugs B2 y B3 (no "menos probables": imposibles, porque solo hay una implementación del filtro correcto).</p>
+</div>
+
+<div class="redesign">
+<h3>Refactor disciplinado (no reescritura) para Rut_Lo* / Rut_Lo_Import* — 4 pasos</h3>
+<p>El framework de tablas está bien pensado, pero tiene deuda técnica concentrada y con patrón repetido. Se corrige con una pasada de refactor, no con un rediseño:</p>
+<ol>
+<li>Fusionar las parejas duplicadas (CE1, CE2) — habría evitado los bugs C3 y C5 del Informe de Bugs.</li>
+<li>Añadir manejo de errores centralizado (<code>On Error GoTo GestError</code> + limpieza garantizada) en las rutinas que abren libros externos o tocan disco — el patrón ya existe correctamente en <code>Rut_Lo_Export_XlsX.bas</code> y <code>Rut_Wb_CopSegTimed_USB_HD.bas</code>; falta aplicarlo también en <code>Rut_Lo_Import.bas</code>.</li>
+<li>Borrar el código muerto/roto: subs <code>_ByHand</code> rotas, <code>_OLD</code>/<code>_VeryOLD</code>, <code>ImportMultipleFiles</code>, <code>RuT_WrkBook_Sheets_Select_Inport</code>, <code>Rut_Filtro_Avanzado_VBA.bas</code> completo.</li>
+<li>Sustituir los bucles celda-a-celda identificados (CE3, CE4, CE5) por lectura a array o colecciones nativas.</li>
+</ol>
+<p class="impact">Estimable en días, no semanas — deja el framework <code>Rut_Lo*</code> en un estado sólido sin tocar su diseño.</p>
+</div>
+</section>
+
+<p style="text-align:center;"><a class="backtop" href="#">↑ Volver arriba</a></p>
+<footer>Ver <em>Informe_Bugs.html</em> para el detalle de errores funcionales, e <em>Informe_RibbonX.html</em> para el análisis específico del Ribbon personalizado (con su propia propuesta de refactor en capas).</footer>
+</div>
+</body>
+</html>

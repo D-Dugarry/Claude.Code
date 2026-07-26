@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>PPub — Informe RibbonX</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --text:#1b1e23; --muted:#5f6672; --border:#e3e5ea;
+  --code-bg:#f6f7f9; --code-text:#1b1e23;
+  --before-bg:#fdf1f1; --before-border:#dc2626; --before-lab:#b91c1c;
+  --after-bg:#f0faf3; --after-border:#16a34a; --after-lab:#0f7a33;
+  --accent:#9a3ec9; --chip-bg:#f4ecf9;
+  --crit:#dc2626; --alto:#ea580c; --medio:#b58900; --bajo:#2554c7;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+    --code-bg:#0f1114; --code-text:#dcdfe4;
+    --before-bg:#2c1417; --before-border:#e5484d; --before-lab:#ff8a8f;
+    --after-bg:#0f2318; --after-border:#3dd68c; --after-lab:#7ce8b3;
+    --accent:#d29bf0; --chip-bg:#241b2b;
+    --shadow: 0 1px 3px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+  --code-bg:#0f1114; --code-text:#dcdfe4;
+  --before-bg:#2c1417; --before-border:#e5484d; --before-lab:#ff8a8f;
+  --after-bg:#0f2318; --after-border:#3dd68c; --after-lab:#7ce8b3;
+  --accent:#d29bf0; --chip-bg:#241b2b;
+}
+:root[data-theme="light"]{
+  --bg:#f5f6f8; --panel:#ffffff; --text:#1b1e23; --muted:#5f6672; --border:#e3e5ea;
+  --code-bg:#f6f7f9; --code-text:#1b1e23;
+  --before-bg:#fdf1f1; --before-border:#dc2626; --before-lab:#b91c1c;
+  --after-bg:#f0faf3; --after-border:#16a34a; --after-lab:#0f7a33;
+  --accent:#9a3ec9; --chip-bg:#f4ecf9;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+header.top{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;box-shadow:var(--shadow);margin-bottom:22px;}
+header.top h1{margin:0 0 6px;font-size:1.7rem;}
+header.top p.sub{margin:0;color:var(--muted);font-size:.95rem;}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;}
+.stat{flex:1;min-width:120px;background:var(--chip-bg);border-radius:10px;padding:12px 16px;text-align:center;}
+.stat .n{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.stat .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.notebox{background:var(--chip-bg);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:22px;font-size:.92rem;}
+.notebox strong{color:var(--accent);}
+nav.toc{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 26px;margin-bottom:26px;box-shadow:var(--shadow);}
+nav.toc h2{margin-top:0;font-size:1.05rem;}
+nav.toc ul{columns:2;gap:24px;margin:0;padding-left:20px;}
+nav.toc li{margin-bottom:6px;font-size:.9rem;}
+nav.toc a{color:var(--text);text-decoration:none;}
+nav.toc a:hover{color:var(--accent);text-decoration:underline;}
+h2.block-title{font-size:1.3rem;border-bottom:2px solid var(--border);padding-bottom:8px;margin:36px 0 18px;}
+article.finding{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:22px 26px;margin-bottom:18px;box-shadow:var(--shadow);scroll-margin-top:16px;}
+.finding-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#fff;}
+.badge.crit{background:var(--crit);} .badge.alto{background:var(--alto);} .badge.medio{background:var(--medio);color:#1b1e23;} .badge.bajo{background:var(--bajo);}
+.finding h3{margin:0;font-size:1.08rem;flex:1;min-width:200px;}
+.filepath{display:block;font-family:Consolas,Menlo,monospace;font-size:.82rem;color:var(--muted);margin-bottom:12px;word-break:break-all;}
+.desc{margin:10px 0;}
+.codediff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+@media (max-width:820px){.codediff{grid-template-columns:1fr;}}
+.codebox{border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.codebox .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;}
+.codebox.before .label{background:var(--before-bg);color:var(--before-lab);border-bottom:2px solid var(--before-border);}
+.codebox.after .label{background:var(--after-bg);color:var(--after-lab);border-bottom:2px solid var(--after-border);}
+.codebox pre{margin:0;padding:12px 14px;overflow-x:auto;background:var(--code-bg);color:var(--code-text);font-family:Consolas,Menlo,monospace;font-size:.8rem;line-height:1.45;max-height:420px;}
+.impact{background:var(--chip-bg);border-radius:8px;padding:10px 14px;font-size:.9rem;margin-top:10px;}
+.impact strong{color:var(--accent);}
+.redesign{background:var(--chip-bg);border:1px solid var(--border);border-radius:14px;padding:26px 30px;margin:26px 0;}
+.redesign h3{margin-top:0;color:var(--accent);}
+.redesign pre{background:var(--code-bg);border-radius:8px;padding:14px;overflow-x:auto;font-family:Consolas,Menlo,monospace;font-size:.78rem;}
+.tree{background:var(--code-bg);border-radius:8px;padding:14px;font-family:Consolas,Menlo,monospace;font-size:.8rem;white-space:pre;overflow-x:auto;}
+footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:50px;}
+a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+<h1>Informe RibbonX — PPub_BDatos_2026.xlsm</h1>
+<p class="sub">Precios Públicos · Universidad de Alicante — Bugs y mejoras específicos del Ribbon personalizado (<code>M___RibbonUI.bas</code>) y sus módulos de soporte directo. Generado el 25/07/2026.</p>
+<div class="stats">
+  <div class="stat"><div class="n">10</div><div class="l">Bugs</div></div>
+  <div class="stat"><div class="n">10</div><div class="l">Mejoras</div></div>
+  <div class="stat"><div class="n">6</div><div class="l">Pasos de refactor propuesto</div></div>
+</div>
+</header>
+
+<div class="notebox">
+<strong>Metodología reforzada:</strong> además de leer <code>M___RibbonUI.bas</code> y sus módulos de soporte, el análisis abrió <code>PPub_BDatos_2026.xlsm</code> como ZIP (solo lectura) para extraer el <strong>XML real del Ribbon</strong> (<code>customUI/customUI14.xml</code>) y la tabla <code>Tb_Tareas</code> de la hoja oculta <code>_Menú_Aux</code>, cruzándolos contra el código VBA. Esto es justo el tipo de "verdad real" que hace falta para diagnosticar bugs de RibbonX con certeza en vez de suponerlos a partir del código VBA en solitario — el propio proceso descartó 3 falsos positivos de un primer parseo defectuoso antes de confirmar los hallazgos siguientes con un parser XML correcto.
+</div>
+
+<nav class="toc">
+<h2>Índice</h2>
+<ul>
+<li><a href="#r1">R1 · InvalidateControl con ID inexistente al cambiar de usuario</a></li>
+<li><a href="#r2">R2 · InvalidateControl con ID inexistente al recalcular tablas</a></li>
+<li><a href="#r3">R3 · onAction inexistente en menú contextual "Cambiar Usuario"</a></li>
+<li><a href="#r4">R4 · onAction inexistente en menú contextual "Save Copy Timed USB"</a></li>
+<li><a href="#r5">R5 · getLabel inexistente en menú contextual "Prueba ON/OFF"</a></li>
+<li><a href="#r6">R6 · Variable no declarada usada sin comillas (riesgo de compilación)</a></li>
+<li><a href="#r7">R7 · InvalidateControl comentado "porque da error y no sé por qué"</a></li>
+<li><a href="#r8">R8 · Etiquetas de última importación nunca se refrescan</a></li>
+<li><a href="#r9">R9 · Ausencia sistemática de On Error en los callbacks</a></li>
+<li><a href="#r10">R10 · Hoja de informe sin el "gancho" de refresco del Ribbon</a></li>
+<li><a href="#mejoras">Mejoras de eficiencia y mantenibilidad (M1–M10)</a></li>
+<li><a href="#reprogramar">¿Reprogramar M___RibbonUI.bas desde cero?</a></li>
+</ul>
+</nav>
+
+<h2 class="block-title">Bugs</h2>
+
+<article class="finding" id="r1">
+<div class="finding-head"><span class="badge alto">Alto</span><h3>R1 · InvalidateControl con un ID de grupo que no existe en el Ribbon real</h3></div>
+<span class="filepath">VBA_Moduls/M_90_Rutinas_Menú_Aux.bas — Rut_Chg_Usuario, líneas 61-67</span>
+<p class="desc">El XML real del Ribbon define el grupo como <code>ChangeUser_Group</code>, pero el código pide invalidar <code>"GroupChangeUser"</code> — ID que no existe en ningún control cargado. <code>IRibbonUI.InvalidateControl</code> lanza un error runtime si el ID no existe, y ninguna capa intermedia (<code>Rut_Chg_Usuario</code>, <code>RuT_Ejecutar_Rut</code>, <code>OnAct_ChangeUser</code>) tiene <code>On Error</code>.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Chg_Usuario()
+Debug.Print "Rut_Chg_Usuario"
+    Form_Usuario.Show
+    Call RuT_Load_Task_Data("Rut_Chg_Usuario")
+    MyRibbon.InvalidateControl "Btn_ChangeUser"
+    MyRibbon.InvalidateControl "GroupChangeUser"    '- ID inexistente en el XML real
+End Sub</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Sub Rut_Chg_Usuario()
+Debug.Print "Rut_Chg_Usuario"
+    On Error GoTo ErrHandler
+    Form_Usuario.Show
+    Call RuT_Load_Task_Data("Rut_Chg_Usuario")
+    Call Rut_Filtrar_Tareas                          '- recalcula qué botones ve el NUEVO usuario
+    If Not MyRibbon Is Nothing Then
+        MyRibbon.InvalidateControl "Btn_ChangeUser"
+        MyRibbon.InvalidateControl "ChangeUser_Group"    '- *** ID correcto, según customUI14.xml ***
+    End If
+    Exit Sub
+ErrHandler:
+    Debug.Print "Rut_Chg_Usuario - ERROR " &amp; Err.Number &amp; ": " &amp; Err.Description
+    Call RefreshRibbon    '- red de seguridad
+End Sub</pre></div>
+</div>
+<p class="impact"><strong>Impacto:</strong> al cambiar de usuario (acción muy frecuente en un libro compartido), Excel muestra un runtime error justo saliendo del login. El error corta la ejecución antes de que <code>OnAct_ChangeUser</code> pueda llamar a <code>RefreshRibbon</code>, así que la etiqueta de usuario, la pestaña "Boss" y la visibilidad de botones se quedan mostrando el usuario anterior hasta que otra acción cualquiera fuerce un refresco completo.</p>
+</article>
+
+<article class="finding" id="r2">
+<div class="finding-head"><span class="badge alto">Alto</span><h3>R2 · InvalidateControl con ID inexistente al recalcular JI's/informes</h3></div>
+<span class="filepath">VBA_Moduls/M___RibbonUI.bas — líneas 589-593</span>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Sub OnAct_ReCalculate_ListObj_Sht(control As IRibbonControl)
+Debug.Print "OnAct_ReCalculate_ListObj_Sht"
+    Application.Run "Rut_Recalcular_Tabla_" &amp; ActiveSheet.Name
+    MyRibbon.InvalidateControl "BtnCalculate_JIs"    '- ID inexistente en el XML
+End Sub</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Sub OnAct_ReCalculate_ListObj_Sht(control As IRibbonControl)
+Debug.Print "OnAct_ReCalculate_ListObj_Sht"
+    On Error GoTo ErrHandler
+    Application.Run "Rut_Recalcular_Tabla_" &amp; ActiveSheet.Name
+    MyRibbon.InvalidateControl "BtnReCalculate_ListObj_Sht"    '- *** ID real, según customUI14.xml ***
+    Exit Sub
+ErrHandler:
+    MsgBox "No se ha podido recalcular la tabla de '" &amp; ActiveSheet.Name &amp; "': " &amp; Err.Description, vbExclamation
+End Sub</pre></div>
+</div>
+<p class="impact">Este botón regenera Inf_Recibos/Inf_RSm/JIs — parte central del pipeline. El cálculo en sí se hace bien, pero cada clic produce un runtime error justo después, y la fecha de "último cálculo" no se refresca.</p>
+</article>
+
+<article class="finding" id="r3">
+<div class="finding-head"><span class="badge medio">Medio</span><h3>R3 · onAction inexistente en el menú contextual "Cambiar Usuario"</h3></div>
+<span class="filepath">customUI/customUI14.xml (embebido en el .xlsm) — controles LCtxt_Change_Usuario / CCtxt_Change_Usuario</span>
+<p class="desc">El Sub real en VBA se llama <code>OnAct_ChangeUser</code>. El XML del menú contextual (clic derecho) apunta a <code>OnAct_Change_Usuario</code>, que no existe en ningún fichero de <code>VBA_Moduls</code>. El botón del Ribbon principal sí funciona; solo falla la variante de clic derecho.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes (XML)</div><pre>&lt;button id="LCtxt_Change_Usuario" tag="Change_Usuario" insertBeforeMso="Cut"
+        getLabel="GetLbl_CCtxtUser" image="Usuario-Two"
+        getVisible="GetVsbl_CtrlTab"
+        onAction="OnAct_Change_Usuario"/&gt;   '- no existe en VBA</pre></div>
+<div class="codebox after"><div class="label">Después (XML)</div><pre>&lt;button id="LCtxt_Change_Usuario" tag="Change_Usuario" insertBeforeMso="Cut"
+        getLabel="GetLbl_CCtxtUser" image="Usuario-Two"
+        getVisible="GetVsbl_CtrlTab"
+        onAction="OnAct_ChangeUser"/&gt;    '- Sub real que sí existe en M___RibbonUI.bas</pre></div>
+</div>
+<p class="impact">Este cambio se hace con un editor de RibbonX (tipo "Office RibbonX Editor"), no editando <code>VBA_Moduls\</code> — el XML vive dentro del paquete OOXML del <code>.xlsm</code>, no está exportado como texto.</p>
+</article>
+
+<article class="finding" id="r4">
+<div class="finding-head"><span class="badge medio">Medio</span><h3>R4 · onAction inexistente en el menú contextual "Save Copy Timed USB" (Boss)</h3></div>
+<span class="filepath">customUI14.xml — LCtxt_SaveTimer_USB / CCtxt_SaveTimer_USB</span>
+<p class="desc">El XML apunta a <code>OnAct_GroupSaveTimer_USB</code>, que no existe. Sí existen dos Subs independientes (<code>OnAct_SaveData_Timer_USB</code>, <code>OnAct_SaveVBA_Timer_USB</code>) pensadas para botones separados, no para esta entrada combinada del menú contextual.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>'- No existe ningún Sub "OnAct_GroupSaveTimer_USB" en M___RibbonUI.bas</pre></div>
+<div class="codebox after"><div class="label">Después — añadir el Sub que falta</div><pre>Sub OnAct_GroupSaveTimer_USB(control As IRibbonControl)
+Debug.Print "OnAct_GroupSaveTimer_USB"
+    On Error GoTo ErrHandler
+    Call Rut_WrkBook_CopSegTimed_USB("_Data")
+    Call Rut_WrkBook_CopSegTimed_USB("_VBA")
+    SaveUSB = Format(Now(), "dd-mmm-yy hh:mm")
+    Call RefreshRibbon
+    Exit Sub
+ErrHandler:
+    MsgBox "No se ha podido completar la copia en USB: " &amp; Err.Description, vbExclamation
+End Sub</pre></div>
+</div>
+</article>
+
+<article class="finding" id="r5">
+<div class="finding-head"><span class="badge bajo">Bajo-Medio</span><h3>R5 · getLabel inexistente en el menú contextual "Prueba ON/OFF" (Boss)</h3></div>
+<span class="filepath">customUI14.xml — LCtxt_PruebaONOFF / CCtxt_PruebaONOFF</span>
+<p class="desc">El <code>onAction</code> sí es válido (el botón funciona), pero <code>getLabel="GetLbl_CCtxtBtnSW_PruebaONOFF"</code> no existe — se queda sin etiqueta, a diferencia del resto de callbacks <code>GetLbl_CCtxt...</code> que sí existen.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>'- Sub inexistente: GetLbl_CCtxtBtnSW_PruebaONOFF</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Sub GetLbl_CCtxtBtnSW_PruebaONOFF(control As IRibbonControl, ByRef LabelVal)
+Debug.Print "GetLbl_CCtxtBtnSW_PruebaONOFF"
+    If Prog__APP.Range("SW_Test") Then
+        LabelVal = "Modo Prueba ACTIVADO, pulsa para Desactivar"
+    Else
+        LabelVal = "Modo Prueba Desactivado, pulsa para Activar"
+    End If
+End Sub</pre></div>
+</div>
+</article>
+
+<article class="finding" id="r6">
+<div class="finding-head"><span class="badge alto">Alto — riesgo de compilación</span><h3>R6 · Variable no declarada usada como identificador (sin comillas) dentro de Range(...)</h3></div>
+<span class="filepath">VBA_Moduls/M___RibbonUI.bas — Sub OnAction_Dynamic_Task, líneas 1474-1490</span>
+<p class="desc"><code>APP_Task_Index</code> se usa 3 veces sin comillas (como identificador VBA) dentro de <code>Prog__APP.Range(...)</code>. No está declarado en ningún sitio del proyecto (verificado por grep en los 120 ficheros). Con <code>Option Explicit</code> activo esto debería ser un error de compilación — en todas las demás llamadas del proyecto se escribe siempre <code>Prog__APP.Range("APP_Task_Index")</code>, entre comillas.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Prog__APP.Range(APP_Task_Index) = Val(Right(control.Tag, 2))
+Rutinas_Name = Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range(APP_Task_Index), 3)
+...
+Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range(APP_Task_Index), 5) = Prog__APP.Range("APP_Task_Inf")</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Prog__APP.Range("APP_Task_Index") = Val(Right(control.Tag, 2))
+Rutinas_Name = Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 3)
+...
+Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf")</pre></div>
+</div>
+<p class="impact"><strong>Impacto:</strong> que el libro funcione hoy probablemente se deba a que VBA no recompila el proyecto completo cada sesión (p-code preexistente). Basta con abrir el editor VBA y pulsar Debug → Compilar VBAProject (o editar cualquier línea de este módulo) para que salte — bloqueando potencialmente todas las macros del libro. Recomiendo verificarlo cuanto antes con ese mismo comando.</p>
+</article>
+
+<article class="finding" id="r7">
+<div class="finding-head"><span class="badge medio">Medio</span><h3>R7 · InvalidateControl con ID equivocado, ya desactivado por el propio desarrollador</h3></div>
+<span class="filepath">VBA_Moduls/M___RibbonUI.bas — Sub OnAct_Goto_Sheet_Sht, línea 559</span>
+<p class="desc">El propio comentario del desarrollador confirma el mismo patrón de fallo que R1/R2: un <code>InvalidateControl</code> con ID equivocado lanza error, y en vez de arreglar el ID se comentó la línea. <code>"Dynamic_Sheets_Group"</code> es el grupo de <code>TabProgMenu</code>; esta rutina pertenece a <code>TabUserMenu</code>, cuyo grupo real es <code>Dynamic_SheetList_GoTo_Group</code>.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Case Else
+    If control.Tag &lt;&gt; NomActivSheet Then
+        Sheets(control.Tag).Visible = xlSheetVisible
+        Sheets(control.Tag).Select
+''''        MyRibbon.InvalidateControl "Dynamic_Sheets_Group"    '- LO QUITO PORQUE DA ERROR Y NO SÉ PORQUÉ !!!!
+    End If
+End Select
+Application.ScreenUpdating = True</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Case Else
+    If control.Tag &lt;&gt; NomActivSheet Then
+        Sheets(control.Tag).Visible = xlSheetVisible
+        Sheets(control.Tag).Select
+    End If
+End Select
+Application.ScreenUpdating = True
+Call RefreshRibbon    '- Refresco COMPLETO: cambiar de hoja afecta a muchas etiquetas/visibilidades
+                      '  distintas que dependen de ActiveSheet.Name, no solo a un grupo concreto</pre></div>
+</div>
+<p class="impact">Al navegar entre hojas, ningún botón/etiqueta que dependa de <code>ActiveSheet.Name</code> se actualiza hasta que otra acción cualquiera fuerce un refresco completo.</p>
+</article>
+
+<article class="finding" id="r8">
+<div class="finding-head"><span class="badge medio">Medio</span><h3>R8 · Las etiquetas de "última importación" nunca se refrescan tras usar el botón</h3></div>
+<span class="filepath">VBA_Moduls/M___RibbonUI.bas — líneas 412-472</span>
+<p class="desc">Los 4 botones de importación (LSGES04 actual/anterior, LSace06, AE4) tienen su <code>InvalidateControl</code> comentado; el primero además con el ID mal escrito incluso antes de comentarlo (le falta el prefijo <code>Btn</code>).</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Sub OnAct_Import_G04_ACont(control As IRibbonControl)
+Debug.Print "OnAct_Import_G04_ACont"
+    Call Call_RuT_Update_LSGES04_ACont
+'    MyRibbon.InvalidateControl "Import_G04_ACont"    '- comentado, y sin el prefijo "Btn"
+End Sub</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Sub OnAct_Import_G04_ACont(control As IRibbonControl)
+Debug.Print "OnAct_Import_G04_ACont"
+    Call Call_RuT_Update_LSGES04_ACont
+    MyRibbon.InvalidateControl "BtnImport_G04_ACont"    '- ID correcto, y ya sin comentar
+End Sub
+'- Aplicar el mismo descomentado (los otros 3 ya tenían el ID correcto) a:
+'  OnAct_Import_G04_CAcadAnt -&gt; "BtnImport_G04_CAcadAnt"
+'  OnAct_Import_LSace06      -&gt; "BtnImport_LSace06"
+'  OnAct_Import_AE4          -&gt; "BtnImport_AE4"</pre></div>
+</div>
+<p class="impact">Ninguna de las 4 rutinas de negocio subyacentes llama a <code>RefreshRibbon</code>/<code>InvalidateControl</code> en ningún otro punto, así que la fecha de "último import" (que lee <code>APP_Last_Import</code>) queda desactualizada hasta que otra acción no relacionada provoque un refresco completo.</p>
+</article>
+
+<article class="finding" id="r9">
+<div class="finding-head"><span class="badge alto">Alto — transversal</span><h3>R9 · Ausencia sistemática de On Error en ~34 de los ~40 callbacks del Ribbon</h3></div>
+<span class="filepath">VBA_Moduls/M___RibbonUI.bas — todo el módulo</span>
+<p class="desc">Solo 6 callbacks tienen <code>On Error</code>, y limitado al error COM de "Office ocupado" al mostrar <code>Form_Running_Rut</code> — no como protección genérica. El resto (<code>OnAct_ChangeUser</code>, <code>OnAct_Reset</code>, <code>OnAct_Import_*</code>, <code>OnAct_ReCalculate_ListObj_Sht</code>, <code>OnAction_Dynamic_Task</code>...) no tiene ninguna. Un error runtime dentro de un callback del Ribbon es una causa documentada de que la cinta deje de responder a los clics hasta reiniciar Excel.</p>
+<div class="codediff">
+<div class="codebox before" style="grid-column:1/-1;"><div class="label">Patrón actual (repetido en ~34 callbacks)</div><pre>Sub OnAct_ChangeUser(control As IRibbonControl)
+Debug.Print "OnAct_ChangeUser"
+    Call RuT_Ejecutar_Rut("Rut_Chg_Usuario")
+    Call RefreshRibbon
+End Sub    '- sin ninguna protección frente a errores runtime</pre></div>
+</div>
+<div class="codediff">
+<div class="codebox after" style="grid-column:1/-1;"><div class="label">Patrón propuesto a aplicar sistemáticamente</div><pre>Sub OnAct_ChangeUser(control As IRibbonControl)
+Debug.Print "OnAct_ChangeUser"
+    On Error GoTo ErrHandler
+    Call RuT_Ejecutar_Rut("Rut_Chg_Usuario")
+    Call RefreshRibbon
+    Exit Sub
+ErrHandler:
+    Debug.Print "OnAct_ChangeUser - ERROR " &amp; Err.Number &amp; ": " &amp; Err.Description
+    MsgBox "No se ha podido cambiar de usuario:" &amp; vbCrLf &amp; Err.Description, vbExclamation, "RibbonX"
+    On Error Resume Next
+    Call RefreshRibbon        '- intenta dejar el Ribbon en un estado consistente aun tras el error
+    On Error GoTo 0
+End Sub</pre></div>
+</div>
+</article>
+
+<article class="finding" id="r10">
+<div class="finding-head"><span class="badge bajo">Bajo</span><h3>R10 · Una hoja de informe se queda sin el "gancho" de refresco del Ribbon que sí tienen sus hermanas</h3></div>
+<span class="filepath">VBA_Moduls/Sht__Inf_RecMov.cls</span>
+<p class="desc">Las 16 clases <code>Sht__*</code>/<code>Prog_*</code> relevantes tienen <code>Worksheet_Activate</code>/<code>Deactivate</code> llamando a <code>Rut_Filtrar_Tareas</code> + <code>RefreshRibbon</code> + <code>Rut_Context_Buttons_Hide/Restore</code> — excepto esta, que está completamente vacía (solo boilerplate).</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes (completo)</div><pre>Attribute VB_Name = "Sht__Inf_RecMov"
+...
+Option Explicit
+'- (sin Worksheet_Activate/Deactivate)</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Private Sub Worksheet_Activate()
+Debug.Print "Worksheet_Activate - " &amp; ActiveSheet.Name
+    Call Rut_Filtrar_Tareas
+    Call Rut_Context_Buttons_Hide
+    Call RefreshRibbon
+End Sub
+
+Private Sub Worksheet_Deactivate()
+Debug.Print "Worksheet_Deactivate - " &amp; ActiveSheet.Name
+    Call Rut_Context_Buttons_Restore
+End Sub</pre></div>
+</div>
+<p class="impact">Recordatorio: este fichero es CP1252/CRLF — aplicar el cambio con el flujo habitual del proyecto, no con el Editor/Write tool directo. Al activar esta hoja concreta, el Ribbon se queda hoy con la visibilidad/etiquetas de la hoja anterior.</p>
+</article>
+
+<h2 class="block-title" id="mejoras">Mejoras de eficiencia y mantenibilidad</h2>
+
+<article class="finding">
+<div class="finding-head"><span class="badge bajo">M1-M2 · Código muerto</span><h3>Dos callbacks que nunca se disparan desde ningún control real</h3></div>
+<p class="desc"><strong>M1:</strong> <code>GetVsbl_TabProgMenu</code> (líneas 850-853) es un duplicado exacto de <code>GetVsbl_ProgButtons</code>, pero ningún control del XML usa <code>getVisible="GetVsbl_TabProgMenu"</code> — la pestaña Boss usa realmente <code>GetVsbl_ProgButtons</code>. <strong>M2:</strong> <code>OnAct_RibbonVisible</code> (líneas 817-828) compara contra IDs (<code>"CellCtxtRibbonXVisibilityNone/Min/Max"</code>) que no existen en el XML, y es el único sitio que compara por <code>control.ID</code> en vez de <code>control.Tag</code>.</p>
+<p class="impact">Recomiendo eliminar ambos, o dejar un comentario explícito de "no usado" para que nadie confíe en ellos pensando que protegen algo.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge bajo">M3 · Limpieza</span><h3>Más de 100 líneas de código comentado que deberían vivir solo en el control de versiones</h3></div>
+<p class="desc">Líneas ~750-830 y ~1388-1444: Subs completos comentados (<code>GetLbl_GroupMails</code>, <code>OnAct_MailRDT_Plan</code>, <code>OnAct_Mails</code>, versiones antiguas de <code>Func_TagVisible</code>/<code>GetVisible</code>...). Ya hay git para recuperar historial; se pueden borrar sin perder nada.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge medio">M4 · Mantenibilidad</span><h3>Lógica de visibilidad duplicada en vez de aprovechar la tabla Tb_Tareas</h3></div>
+<p class="desc">El módulo ya demuestra dos estilos en paralelo: el "genérico" (vía <code>Func_CtrlTab_View</code>, que lee <code>Tb_Tareas</code>) usado por ~15 controles, y el "hardcodeado" (<code>Select Case</code>/<code>If</code> inline) usado por <code>GetVsbl_RibbView</code>, <code>GetVsbl_SheetProtect</code>, <code>GetVsbl_SW_PruebaONOFF</code>, etc. Cambiar cualquier matiz de visibilidad de estos últimos obliga a tocar VBA y volver a exportar/compilar, mientras que los "genéricos" solo requieren editar una fila de <code>Tb_Tareas</code>.</p>
+<p class="impact"><strong>Propuesta:</strong> extender la tabla (añadiendo columnas si hace falta, p. ej. una de "Enabled" o de "IDs a invalidar tras ejecutar") para migrar también los casos hardcodeados al mecanismo genérico.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge medio">M5 · Fallo en silencio</span><h3>Func_CtrlTab_View no avisa cuando un Tag no se encuentra en la tabla</h3></div>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Function Func_CtrlTab_View(Ctrl As String)
+    Dim Cont_Row As Integer
+    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+        For Cont_Row = 1 To .Rows.Count
+            ...
+            If Ctrl Like MyTag Then
+                Func_CtrlTab_View = SW_Tag_Visible
+                Exit Function
+            End If
+        Next Cont_Row
+    End With
+    '- si no encuentra ninguna fila: devuelve Empty en silencio, botón invisible sin rastro</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Function Func_CtrlTab_View(Ctrl As String) As Boolean
+    Dim Cont_Row As Integer
+    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+        For Cont_Row = 1 To .Rows.Count
+            ...
+            If Ctrl Like MyTag Or Ctrl Like MyTag &amp; "_Separ" Then
+                Func_CtrlTab_View = SW_Tag_Visible
+                Exit Function
+            End If
+        Next Cont_Row
+    End With
+    Debug.Print "Func_CtrlTab_View - AVISO: Tag '" &amp; Ctrl &amp; "' no encontrado en Tb_Tareas, se oculta por defecto"
+    Func_CtrlTab_View = False
+End Function</pre></div>
+</div>
+<p class="impact">Su hermana <code>Func_STip_CtrlTab_Value</code> sí avisa ("¡ Control.Tag, NO encontrado !"). Si una fila de <code>Tb_Tareas</code> pierde su Tag por edición manual, el botón desaparece hoy sin ningún rastro.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge medio">M6 · Rendimiento</span><h3>Func_CtrlTab_View recorre la tabla fila a fila en vez de usar Match</h3></div>
+<p class="desc">Sus hermanas <code>Func_STip_CtrlTab_Value</code>/<code>Func_Rut_CtrlTab_Value</code> ya usan <code>Application.Match</code>, pero esta —que se ejecuta muchas más veces, porque <code>getVisible</code> se llama por cada control cada vez que se invalida el Ribbon— hace un bucle manual con <code>Like</code> fila a fila. Con 65 filas y ~15 controles con este callback, cada <code>RefreshRibbon</code> completo supone varios cientos de comparaciones evitables.</p>
+<p class="impact"><strong>Propuesta:</strong> sustituir por <code>Application.Match</code>, manteniendo aparte el caso especial del sufijo <code>_Separ</code> (dos <code>Match</code>, o comprobar primero sin sufijo).</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge medio">M7 · Rendimiento</span><h3>Invalidate (refresco completo) usado donde bastaría InvalidateControl de un botón</h3></div>
+<p class="desc"><code>RefreshRibbon</code> (que hace <code>MyRibbon.Invalidate</code>, invalidando toda la cinta) se llama tras casi cualquier cambio puntual: <code>OnAct_RibbView</code>, <code>OnChange_EditBoxACont</code>, <code>OnAct_SW_PruebaONOFF</code>... Cada invocación obliga a Excel a re-ejecutar todos los callbacks <code>getVisible</code>/<code>getLabel</code>/<code>getEnabled</code> de ambas pestañas y los dos menús contextuales.</p>
+<div class="codediff">
+<div class="codebox before"><div class="label">Antes</div><pre>Sub OnAct_SW_PruebaONOFF(control As IRibbonControl)
+Debug.Print "OnAct_SW_PruebaONOFF"
+    Prog__APP.Range("SW_Test") = Not Prog__APP.Range("SW_Test")
+    Call RefreshRibbon    '- invalida TODA la cinta por un cambio de 2 botones</pre></div>
+<div class="codebox after"><div class="label">Después</div><pre>Sub OnAct_SW_PruebaONOFF(control As IRibbonControl)
+Debug.Print "OnAct_SW_PruebaONOFF"
+    Prog__APP.Range("SW_Test") = Not Prog__APP.Range("SW_Test")
+    MyRibbon.InvalidateControl "BtnSW_PruebaON"
+    MyRibbon.InvalidateControl "BtnSW_PruebaOFF"</pre></div>
+</div>
+<p class="impact">La excepción legítima es <code>OnAct_Goto_Sheet_Sht</code> (bug R7): ahí sí conviene refresco completo, porque cambiar de hoja activa afecta a múltiples grupos distintos.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge bajo">M8 · Rendimiento menor</span><h3>Rut_Filtrar_Tareas reordena la tabla de 65 filas en cada activación de hoja</h3></div>
+<p class="desc">Se invoca desde 16 <code>Worksheet_Activate</code> distintos más <code>OnLoad_MyRibbon</code>, y siempre empieza reordenando <code>Prog__Menú_Aux.ListObjects(1)</code> — aunque el filtrado de visibilidad no depende de ese orden (solo lo usa el listado humano de <code>Form_Menu</code>).</p>
+<p class="impact"><strong>Propuesta:</strong> separar el reordenado para que ocurra solo al abrir <code>Form_Menu</code> o tras un <code>RibbonRefresh</code> explícito, no en cada cambio de hoja.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge bajo">M9 · Higiene</span><h3>Casing inconsistente entre el XML y el nombre real del Sub</h3></div>
+<p class="desc"><code>customUI14.xml</code> usa <code>onAction="OnAct_MenuAUX"</code> mientras el Sub real se llama <code>OnAct_MenuAux</code>. Funciona porque VBA no distingue mayúsculas/minúsculas al resolver nombres, pero confunde al buscar por texto exacto (incluso llevó a un falso positivo en el propio análisis antes de re-verificar). Recomiendo unificar el casing en ambos sitios.</p>
+</article>
+
+<article class="finding">
+<div class="finding-head"><span class="badge bajo">M10 · Límite silencioso</span><h3>El menú dinámico "Short Rut." falla en silencio si Tb_Tareas supera 99 filas</h3></div>
+<p class="desc"><code>Func_xmlGen</code> genera tags con formato de 2 dígitos fijos (<code>Format(Cont_Row, "00")</code>), y <code>OnAction_Dynamic_Task</code> extrae la fila con <code>Val(Right(control.Tag, 2))</code>. Con las 65 filas actuales no hay problema; con más de 99 filas, solo se leerían los 2 últimos dígitos, apuntando a una fila equivocada sin aviso.</p>
+<p class="impact">Bajo riesgo hoy, pero merece un comentario o pasar a <code>Format(Cont_Row, "000")</code> con margen antes de que la tabla crezca.</p>
+</article>
+
+<section id="reprogramar">
+<h2 class="block-title">¿Reprogramar M___RibbonUI.bas desde cero?</h2>
+<div class="redesign">
+<p><strong>No lo recomiendo.</strong> El fichero es grande (~1500 líneas) pero no está mal estructurado de fondo: ya separa claramente <code>TabUserMenu</code>/<code>TabProgMenu</code>, y ya tiene un mecanismo genérico basado en tabla (<code>Tb_Tareas</code> vía <code>Func_CtrlTab_View</code>) que demuestra que la idea correcta ya estaba ahí. Reescribir desde cero un componente que hoy funciona en producción (salvo las excepciones puntuales de este informe) es el escenario de mayor riesgo/beneficio peor: regresiones sutiles en decenas de rutas de negocio a cambio de limpieza estética.</p>
+<p>Recomiendo en su lugar un <strong>refactor dirigido, en capas, sin tocar el diseño general</strong>:</p>
+<ol>
+<li>Corregir primero los 10 bugs de este informe — son quirúrgicos, de 1 a 10 líneas cada uno.</li>
+<li>Extender el patrón "tabla de configuración" (M4) a los casos hoy hardcodeados, añadiendo una columna <code>InvalidateIDs</code> con los IDs a refrescar tras cada tarea, eliminando los literales sueltos que causaron R1/R2/R7.</li>
+<li>Centralizar los IDs válidos del Ribbon en constantes públicas generadas una vez a partir del XML real (<code>Public Const ID_ChangeUser_Group = "ChangeUser_Group"</code>...), para que un cambio de ID rompa la compilación en un solo sitio en vez de fallar en tiempo de ejecución dentro de un callback.</li>
+<li>Envolver <code>InvalidateControl</code> en un wrapper seguro (ver más abajo) y sustituir todas las llamadas directas — esto por sí solo habría neutralizado R1, R2 y R7.</li>
+<li>Aplicar <code>On Error</code> (R9) de forma sistemática a los ~34 callbacks que hoy no lo tienen — mecánico, Sub a Sub.</li>
+<li>Mover el refresco Ribbon-en-<code>Worksheet_Activate</code> (hoy repetido en 16 <code>.cls</code>, ver R10) a un único <code>Workbook_SheetActivate</code>/<code>SheetDeactivate</code> en <code>ThisWorkbook.cls</code>.</li>
+</ol>
+<pre>Sub Rut_Ribbon_InvalidateSafe(ByVal ControlID As String)
+    If MyRibbon Is Nothing Then Exit Sub
+    On Error Resume Next
+    MyRibbon.InvalidateControl ControlID
+    If Err.Number &lt;&gt; 0 Then
+        Debug.Print "Rut_Ribbon_InvalidateSafe - AVISO: ID '" &amp; ControlID &amp; "' no válido (" &amp; Err.Description &amp; ")"
+        Err.Clear
+    End If
+    On Error GoTo 0
+End Sub</pre>
+<p><strong>Estructura resultante</strong> (mismas secciones que hoy, mismo "Select Case" donde es genuinamente necesario — la generación de XML dinámico — pero con 3 refuerzos transversales que habrían evitado el 70% de los bugs de este informe sin rediseñar nada):</p>
+<div class="tree">M___RibbonUI.bas
+├── Sección 0: Declaraciones + Rut_Ribbon_InvalidateSafe (nuevo)
+├── Sección 1: OnLoad_MyRibbon / RefreshRibbon (igual, sin tocar mecánica)
+├── Sección 2: Motor genérico de Tag → Tabla
+│     Func_CtrlTab_View        (con Application.Match + rama "no encontrado", M5+M6)
+│     Func_STip_CtrlTab_Value  (igual que hoy)
+│     Func_Rut_CtrlTab_Value   (igual que hoy)
+├── Sección 3: TabUserMenu — callbacks de negocio (ExportBDatos, ImportBDatos,
+│     Import_G04_ACont/CAcadAnt, Import_LSace06, Import_AE4, ReCalculate,
+│     ExportWorkSheet, ShowHide_Lo_Cols, Filter_ShowAlData, Dynamic Sheets)
+│     — cada uno con On Error + Rut_Ribbon_InvalidateSafe con constantes de ID
+├── Sección 4: TabProgMenu — callbacks de Boss (MenuAux, ModeProg,
+│     ResetExcelConfig, RibbonRefresh, SearchVinculos, SW_WB_Deactivate,
+│     SheetProtect, SW_Prueba, ExcelTabsVisible, RunRutPrueba, SaveTimer_USB...)
+├── Sección 5: Menús dinámicos (Func_xmlGen*, OnAction_Dynamic_Task) — con el fix de R6
+└── Sección 6 (nueva): Constantes de IDs válidos del Ribbon</div>
+</div>
+</section>
+
+<p style="text-align:center;"><a class="backtop" href="#">↑ Volver arriba</a></p>
+<footer>Ver <em>Informe_Bugs.html</em> e <em>Informe_Mejoras_Eficiencia.html</em> para el resto del proyecto. Los cambios de XML (R3, R4, R5) requieren un editor de RibbonX externo; los de VBA siguen el flujo habitual CP1252/CRLF ya documentado para este proyecto.</footer>
+</div>
+</body>
+</html>

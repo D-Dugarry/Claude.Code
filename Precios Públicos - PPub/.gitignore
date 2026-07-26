@@ -1,0 +1,5 @@
+# El .xlsm es el binario real (datos + VBA compilado) — no se versiona, solo el código exportado en VBA_Moduls/
+*.xlsm
+
+# Copias de seguridad con marca de tiempo (backups locales, no versionar)
+PPub_BDatos_2026_BACKUP_*/
