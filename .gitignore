@@ -17,6 +17,9 @@ PPUA_VBA/
 Corrector_Orientacion_PDF/
 Apuntes/
 
+# Libros Excel con datos reales (no versionar: binarios grandes + datos personales)
+Enseñanzas_Propias/
+
 # Ficheros locales sueltos (no versionar: sensibles/accesos directos/capturas)
 Contrase*.txt
 *.lnk
