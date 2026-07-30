@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuración técnica — Ordenador de CASA (FX706)</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --ink:#1c2530; --muted:#5b6875;
+    --line:#dde3ea; --accent:#1f6feb; --accent-soft:#e8f0fe;
+    --warn:#b45309; --warn-soft:#fef3c7; --ok:#15803d; --ok-soft:#dcfce7;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f141a; --card:#171e26; --ink:#e6edf3; --muted:#9aa7b4;
+      --line:#2a3441; --accent:#58a6ff; --accent-soft:#152337;
+      --warn:#fbbf24; --warn-soft:#3a2c0c; --ok:#4ade80; --ok-soft:#0f2e1c;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 20px 64px;background:var(--bg);color:var(--ink);
+       font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55;}
+  .wrap{max-width:1000px;margin:0 auto}
+  header{border-left:6px solid var(--accent);padding:4px 0 4px 18px;margin-bottom:8px}
+  h1{margin:0 0 4px;font-size:1.75rem;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:.92rem}
+  .tags{margin:14px 0 28px;display:flex;flex-wrap:wrap;gap:8px}
+  .tag{background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);
+       border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600}
+  section{background:var(--card);border:1px solid var(--line);border-radius:10px;
+          padding:20px 22px;margin-bottom:20px}
+  h2{margin:0 0 14px;font-size:1.08rem;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:8px}
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  .scroll{overflow-x:auto}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+  tbody tr:last-child td{border-bottom:none}
+  td.k{color:var(--muted);width:32%;white-space:nowrap}
+  code,.mono{font-family:var(--mono);font-size:.86em;background:var(--accent-soft);
+             padding:1px 5px;border-radius:4px;word-break:break-all}
+  .note{border-left:4px solid var(--warn);background:var(--warn-soft);color:var(--ink);
+        border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:.9rem}
+  .note strong{color:var(--warn)}
+  .ok{border-left-color:var(--ok);background:var(--ok-soft)}
+  .ok strong{color:var(--ok)}
+  ul{margin:8px 0 0;padding-left:20px}
+  li{margin-bottom:6px}
+  footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:32px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Configuración técnica — Ordenador de <em>CASA</em></h1>
+  <div class="sub">Perfil de Windows <code>FX706</code> · ASUS TUF Gaming F17 · Documento generado el 30 de julio de 2026</div>
+</header>
+
+<div class="tags">
+  <span class="tag">Windows 11 Pro</span>
+  <span class="tag">Intel i7-11800H</span>
+  <span class="tag">32 GB RAM</span>
+  <span class="tag">RTX 3060 Laptop</span>
+  <span class="tag">Python 3.14.4</span>
+  <span class="tag">Office 2021 x64</span>
+</div>
+
+<section>
+  <h2>Identificación de la máquina</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Rol</td><td><strong>Ordenador de casa</strong> (el otro es el del trabajo, UA, perfil <code>21465378F</code>)</td></tr>
+    <tr><td class="k">Perfil de Windows</td><td><code>C:\Users\FX706</code> — <code>$env:USERPROFILE</code></td></tr>
+    <tr><td class="k">Nombre del equipo</td><td><code>ASUS-TUF-GAMING</code></td></tr>
+    <tr><td class="k">Usuario del SO</td><td><code>FX706</code> (aquí sí coincide con el nombre del perfil)</td></tr>
+    <tr><td class="k">Dominio / grupo</td><td><code>WORKGROUP</code> (equipo no unido a dominio)</td></tr>
+    <tr><td class="k">Fabricante / modelo</td><td>ASUSTeK COMPUTER INC. — ASUS TUF Gaming F17 <code>FX706HM</code></td></tr>
+  </tbody></table></div>
+  <div class="note"><strong>Ojo al identificar la máquina:</strong> hay que fiarse de <code>USERPROFILE</code> / de las rutas de perfil, nunca de <code>USERNAME</code> ni <code>whoami</code>. Aquí en casa coinciden, pero en el trabajo <code>USERNAME</code> devuelve <code>dugarry</code> / <code>campus\dugarry</code> y <code>COMPUTERNAME</code> es <code>0028PB040-V53</code>, que no se parecen al perfil <code>21465378F</code>.</div>
+</section>
+
+<section>
+  <h2>Hardware</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Procesador</td><td>11th Gen Intel® Core™ i7-11800H @ 2,30 GHz — 8 núcleos / 16 hilos</td></tr>
+    <tr><td class="k">Arquitectura</td><td>x64 (<code>AMD64</code>)</td></tr>
+    <tr><td class="k">Memoria RAM</td><td>31,7 GB (32 GB)</td></tr>
+    <tr><td class="k">GPU dedicada</td><td>NVIDIA GeForce RTX 3060 Laptop GPU — 6 GB — driver <code>566.07</code> (CUDA 12.7)</td></tr>
+    <tr><td class="k">GPU integrada</td><td>Intel® UHD Graphics — driver <code>31.0.101.5333</code></td></tr>
+  </tbody></table></div>
+</section>
+
+<section>
+  <h2>Monitores</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Dispositivo</th><th>Resolución</th><th>Principal</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">\\.\DISPLAY2</td><td>2560 × 1440</td><td>Sí</td></tr>
+      <tr><td class="mono">\\.\DISPLAY5</td><td>2560 × 1440</td><td>No</td></tr>
+      <tr><td class="mono">\\.\DISPLAY1</td><td>1920 × 1080</td><td>No (pantalla del portátil)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">Puesto de <strong>tres pantallas con resoluciones mixtas</strong>. Es el motivo de que las apps tkinter propias tengan que probarse en modo <em>DPI-aware</em> y de que el centrado de los diálogos VBA/tkinter se calcule en píxeles reales y multi-monitor, no con el centro de la pantalla principal.</div>
+</section>
+
+<section>
+  <h2>Sistema operativo</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Versión</td><td>Microsoft Windows 11 Pro</td></tr>
+    <tr><td class="k">Build</td><td><code>10.0.26200</code></td></tr>
+    <tr><td class="k">Instalado el</td><td>22 de noviembre de 2024</td></tr>
+    <tr><td class="k">Shell por defecto</td><td>PowerShell 7.6.3 (<code>pwsh</code>) — también Git Bash disponible</td></tr>
+  </tbody></table></div>
+  <div class="note"><strong>PowerShell 5.1 vs 7:</strong> un <code>.cmd</code> que llame a <code>powershell</code> (no <code>pwsh</code>) usa la 5.1, donde <code>Set-Content -Encoding utf8NoBOM</code> <em>no existe</em> y falla en silencio si va con <code>-ErrorAction Continue</code>.</div>
+</section>
+
+<section>
+  <h2>Almacenamiento</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Unidad</th><th>Etiqueta</th><th>Sistema de archivos</th><th>Capacidad</th><th>Libre</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">C:</td><td>OS</td><td>NTFS</td><td>822,1 GB</td><td>348,0 GB</td></tr>
+      <tr><td class="mono">F:</td><td>Dugarry SSD</td><td><strong>exFAT</strong></td><td>931,5 GB</td><td>319,6 GB</td></tr>
+      <tr><td class="mono">P:</td><td>ProtonDrive</td><td>NTFS</td><td>39,1 GB</td><td>4,1 GB</td></tr>
+      <tr><td class="mono">D:</td><td>SanDisk Unlocker</td><td>UDF</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Disco físico</th><th>Tipo</th><th>Bus</th><th>Tamaño</th><th>Salud</th></tr></thead>
+    <tbody>
+      <tr><td>NVMe SAMSUNG MZVLQ1T0HBLB-00BTW</td><td>SSD</td><td>NVMe</td><td>954 GB</td><td>Healthy</td></tr>
+      <tr><td>SanDisk Extreme 55DD</td><td>SSD</td><td>USB</td><td>932 GB</td><td>Healthy</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="margin-top:12px">La unidad <code>F:</code> es el <strong>SSD externo SanDisk Extreme</strong> que viaja físicamente entre casa y trabajo. Contiene los proyectos (<code>F:\__Dugarry UA\Dugarry Proyectos\___Claude.Code</code>) y la configuración de Claude Code (<code>F:\.claude</code>). La letra <code>F:</code> es estable porque es el mismo disco, no una ruta fija de esta máquina.</p>
+  <div class="note ok"><strong>Estado actual del SSD (30-jul-2026):</strong> <code>fsutil dirty query F:</code> → «El volumen F: no contiene errores». ✔</div>
+  <div class="note"><strong>Historial de corrupciones del SSD externo (van dos):</strong> <code>FOUND.000</code> del 5-jun-2026 y <code>FOUND.001</code> del 15-jul-2026 (NTFS marcado <em>dirty</em>; se reparó con <code>chkdsk</code>). Síntomas a reconocer: git aborta con <em>«Out of diskspace»</em> siendo falso, y contadores de espacio contradictorios entre <code>Get-PSDrive</code> y <code>fsutil volume diskfree</code>. Ante cualquier fallo raro de escritura en <code>F:</code>, comprobar <code>fsutil dirty query F:</code> <em>antes</em> de buscar el bug en el código. El <code>chkdsk</code> exige consola de Administrador (Claude Code no puede lanzarlo).</div>
+  <div class="note"><strong>Gotcha de exFAT:</strong> al vaciar carpetas en <code>F:</code>, la entrada de directorio puede quedar en un estado en el que Windows responde <em>Acceso denegado (error 5)</em> a todo — leer atributos, renombrar, borrar y crear dentro. No es un handle abierto (eso daría error 32) ni corrupción detectable. Solo lo limpia <code>chkdsk F: /f</code> con desmontaje, y a razón de una capa de profundidad por pasada. Consecuencia práctica: <strong>compilar los <code>.exe</code> con <code>--workpath</code> y <code>--distpath</code> fuera del SSD</strong> (en <code>C:</code>) y no usar <code>pyinstaller --clean</code> sobre <code>build\</code> en este disco.</div>
+</section>
+
+<section>
+  <h2>Entorno de desarrollo</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Python (PATH)</td><td><strong>3.14.4</strong> — <code>C:\Users\FX706\AppData\Local\Programs\Python\Python314\python.exe</code> (instalador oficial, admite <code>pip</code>)</td></tr>
+    <tr><td class="k">Otros Python en el sistema</td><td><code>...\WindowsApps\python.exe</code> (alias de la Store) y <code>...\AppData\Local\Python\pythoncore-3.14-64\python.exe</code> (el que marca <code>py -0p</code> por defecto)</td></tr>
+    <tr><td class="k">Git</td><td>2.54.0.windows.1 — <code>C:\Program Files\Git\cmd\git.exe</code></td></tr>
+    <tr><td class="k">Identidad git global</td><td>Dugarry &lt;d.dugarry@gmail.com&gt; — <code>core.autocrlf</code> sin configurar</td></tr>
+    <tr><td class="k">Node.js / npm</td><td>v22.22.2 / 10.9.7</td></tr>
+    <tr><td class="k">VS Code</td><td>v24.18.0 (<code>code</code> disponible en el PATH)</td></tr>
+    <tr><td class="k">PowerShell</td><td>7.6.3</td></tr>
+  </tbody></table></div>
+
+  <h2 style="margin-top:24px">Paquetes Python relevantes (instalación global de 3.14)</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Paquete</th><th>Versión</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td>pywin32</td><td>311</td><td>COM con Excel/Outlook, <code>win32gui</code>, <code>pythoncom</code></td></tr>
+      <tr><td>pyinstaller</td><td>6.19.0</td><td>Compilar los <code>.exe</code> de las apps tkinter</td></tr>
+      <tr><td>pillow</td><td>12.2.0</td><td>Imágenes, overlays, GIF</td></tr>
+      <tr><td>openpyxl</td><td>3.1.5</td><td>Lectura/escritura de <code>.xlsx</code></td></tr>
+      <tr><td>pandas / numpy</td><td>3.0.1 / 2.4.3</td><td>Tratamiento de datos</td></tr>
+      <tr><td>reportlab</td><td>4.5.1</td><td>Generación de PDF</td></tr>
+      <tr><td>deep-translator</td><td>1.11.4</td><td>Traducción (Mailing Personalizado)</td></tr>
+      <tr><td>pywin32-ctypes</td><td>0.2.3</td><td>Dependencia de PyInstaller</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><strong>Los <code>.venv</code> del SSD NO son portables entre las dos máquinas.</strong> <code>pyvenv.cfg</code> guarda la ruta absoluta del Python que lo creó, así que un venv creado en el trabajo muere en casa con <em>«did not find executable»</em>. La carpeta viaja en el SSD aunque esté en <code>.gitignore</code>. Atajo fiable en esta máquina: usar directamente <code>C:\Users\FX706\AppData\Local\Programs\Python\Python314\python.exe</code>, que ya tiene todas las dependencias a nivel global.</div>
+  <div class="note"><strong>Diferencia con el ordenador del trabajo:</strong> allí los venv se crean con <code>uv venv --python 3.13</code> (el 3.14 de uv está <em>externally managed</em>, PEP 668) y <code>pip install --user</code> deja los ejecutables en una ruta de <code>WindowsApps\...LocalCache</code> que no está en el PATH. En casa no hay uv ni Python 3.13: solo el 3.14 del instalador oficial, con pip normal.</div>
+</section>
+
+<section>
+  <h2>Ofimática</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Producto</td><td>Office Professional Plus 2021 (Volume) — <code>ProPlus2021Volume</code></td></tr>
+    <tr><td class="k">Plataforma</td><td><strong>x64</strong> (64 bits)</td></tr>
+    <tr><td class="k">Versión</td><td><code>16.0.14334.20806</code> (Excel 16.0, build 14334)</td></tr>
+    <tr><td class="k">Instalación</td><td>Click-to-Run</td></tr>
+  </tbody></table></div>
+  <p class="sub" style="margin-top:12px">Office de 64 bits importa para el VBA de los proyectos: las declaraciones <code>Declare PtrSafe</code> de API de Windows y los tipos <code>LongPtr</code> deben ser compatibles con esta plataforma.</p>
+</section>
+
+<section>
+  <h2>Configuración de Claude Code</h2>
+  <div class="scroll"><table><tbody>
+    <tr><td class="k">Carpeta de configuración</td><td><code>C:\Users\FX706\.claude</code> es un <strong>enlace simbólico</strong> a <code>F:\.claude</code> (ruta canónica). Es la misma carpeta por dos rutas — no hay duplicación.</td></tr>
+    <tr><td class="k">Qué contiene</td><td><code>CLAUDE.md</code> global, <code>settings.json</code>, <code>keybindings.json</code>, <code>skills/</code> y las memorias de cada proyecto (<code>projects/*/memory/</code>).</td></tr>
+    <tr><td class="k">Backup</td><td>Repo <strong>privado</strong> <code>github.com/D-Dugarry/claude-config-backup</code>, con allowlist estricto. Nunca debe incluir <code>.credentials.json</code>, transcripts <code>*.jsonl</code>, <code>settings.local.json</code> ni cachés.</td></tr>
+    <tr><td class="k">Detección de cambio de PC</td><td>Hook <code>SessionStart</code> que compara con <code>F:\.claude\.last_machine</code> y deja el flag persistente <code>F:\.claude\.machine_change_pending</code> hasta que se ejecuta «Abre Sesión» / «Guarda Sesión». Segunda capa: la memoria <code>reference_ultimo_ordenador</code>.</td></tr>
+    <tr><td class="k">Directorio de proyectos</td><td><code>F:\__Dugarry UA\Dugarry Proyectos\___Claude.Code</code></td></tr>
+  </tbody></table></div>
+  <div class="note"><strong>Lo que NO viaja con el SSD</strong> y por tanto es específico de esta máquina: las extensiones de VS Code (p. ej. la extensión <code>vba-lsp</code> que registra el lenguaje <code>vba</code> y hace que se apliquen las reglas de codificación Windows-1252), las claves del Registro de Windows donde las apps propias guardan su configuración, los intérpretes Python, las impresoras y la instalación de Office.</div>
+</section>
+
+<section>
+  <h2>Comparativa rápida casa / trabajo</h2>
+  <div class="scroll"><table>
+    <thead><tr><th></th><th>Casa (este equipo)</th><th>Trabajo (UA)</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Perfil de Windows</td><td><code>FX706</code></td><td><code>21465378F</code></td></tr>
+      <tr><td class="k"><code>USERNAME</code> / <code>whoami</code></td><td><code>FX706</code> (coincide)</td><td><code>dugarry</code> / <code>campus\dugarry</code> (<em>no</em> coincide)</td></tr>
+      <tr><td class="k">Nombre del equipo</td><td><code>ASUS-TUF-GAMING</code></td><td><code>0028PB040-V53</code></td></tr>
+      <tr><td class="k">Red</td><td><code>WORKGROUP</code></td><td>Dominio Campus UA</td></tr>
+      <tr><td class="k">Python</td><td>3.14.4 oficial, con pip</td><td>3.13 vía <code>uv</code>; pip <code>--user</code> fuera del PATH</td></tr>
+      <tr><td class="k">Disco F:</td><td colspan="2" style="text-align:center">El mismo SSD externo SanDisk Extreme, exFAT, 931,5 GB</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>
+  Documento generado por Claude Code el 30 de julio de 2026 a partir de las memorias del entorno y de una lectura en vivo del sistema.<br>
+  Los datos de hardware, software y espacio en disco son los del momento de la generación.
+</footer>
+
+</div>
+</body>
+</html>
