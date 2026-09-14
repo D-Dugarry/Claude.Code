@@ -22,8 +22,8 @@ TrainFit Entrenador Personal/
 # Repo propio: D-Dugarry/Robot_PPub_Fusion
 Robot_PPub_Fusión/
 
-# Libros Excel con datos reales (no versionar: binarios grandes + datos personales)
-Enseñanzas_Propias/
+# Enseñanzas_Propias/: el .xlsm (datos reales) se excluye con su propio
+# .gitignore local, igual que "Precios Públicos - PPub/"; solo VBA_Moduls/ se versiona.
 
 # Ficheros locales sueltos (no versionar: sensibles/accesos directos/capturas)
 Contrase*.txt

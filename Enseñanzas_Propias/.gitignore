@@ -1,0 +1,7 @@
+# El .xlsm es el binario real (datos + VBA compilado) — no se versiona, solo el código exportado en VBA_Moduls/
+*.xlsm
+~$*.xlsm
+
+# Copias de seguridad con marca de tiempo y carpetas de trabajo locales (no versionar)
+CopiaSeguridad/
+Arch Datos Pruebas/
