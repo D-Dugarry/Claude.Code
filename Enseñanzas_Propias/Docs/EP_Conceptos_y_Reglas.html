@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EP - Conceptos y Reglas</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>EP - Conceptos y Reglas</h1>
+<p>Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante (<code>EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm</code>). Este documento recoge, a partir de una lectura completa del código VBA exportado en <code>VBA_Moduls/</code>, los conceptos de negocio y las reglas que el código realmente aplica — no es un manual de usuario, es una referencia para quien vaya a tocar el código.</p>
+<h2>Ámbito</h2>
+<p>EFP (Enseñanzas de Formación Permanente) y CFC/AFC (Cursos y Actividades de Formación Complementaria) comparten el mismo libro y el mismo código; se distinguen por el switch <code>APP_EFP_o_CFC</code> y por el Plan de estudios activo. El libro se reutiliza cada año: <code>M79</code> genera, a partir de esta plantilla, una copia real por combinación Tipo×Curso Académico (ver <em>M79 — copia anual del libro</em>).</p>
+<h2>Glosario</h2>
+<div class="tw"><table><thead><tr><th>Término</th><th>Significado</th></tr></thead><tbody><tr><td><strong>LSGES04</strong></td><td>Exportación de recibos del sistema contable de la UA; es la fuente de datos que se importa periódicamente a <code>Prog_BD</code>.</td></tr><tr><td><strong>EFP</strong></td><td>Enseñanzas de Formación Permanente.</td></tr><tr><td><strong>CFC / AFC</strong></td><td>Cursos de Formación Continua / Actividades de Formación Complementaria — se tratan como un mismo grupo (<code>CFCyAFC</code>) a efectos de fichero/copia anual.</td></tr><tr><td><strong>Plan</strong></td><td>Código del plan de estudios (título propio) al que pertenece un recibo.</td></tr><tr><td><strong>Curso Académico (Ant/Pos)</strong></td><td>Cada copia anual del libro trabaja con dos ediciones: la del curso académico "Anterior" y la "Posterior" al año contable en curso.</td></tr><tr><td><strong>Año Contable (<code>APP_AñoCont</code>)</strong></td><td>Ejercicio contable activo; distinto del Curso Académico (un recibo puede cobrarse en un año contable distinto al de su curso).</td></tr><tr><td><strong>ImpRec / ImpCob / ImpAdm / ImpAcad</strong></td><td>Importe del Recibo (emitido), Importe Cobrado, Importe Administrativo (tasa de gestión, concepto 1303) e Importe Académico (docencia, conceptos 1310/1311). <code>Acad</code> se obtiene siempre por resta (<code>Total − Adm</code>), nunca con un <code>SumIfs</code> directo.</td></tr><tr><td><strong>Coef_VRI</strong></td><td>Porcentaje de retención que aplica el Vicerrectorado de Investigación sobre el importe académico neto de un Plan.</td></tr><tr><td><strong>JI</strong></td><td>Justificante de Ingreso. Hay tres pares de columnas en <code>Prog_BD</code> (<code>_Adm</code>/<code>_Acad</code>): <code>JI_Emi</code>, <code>AD_0010</code>, <code>JI_443</code>.</td></tr><tr><td><strong>ExpAdm</strong></td><td>Expediente Administrativo al que se imputa la operación.</td></tr><tr><td><strong>RDT</strong></td><td>En este proyecto, campo de control/consolidación asociado a la Liquidación (no confundir con el "RDT = Redistribución de Crédito" de otros proyectos hermanos de la UA).</td></tr><tr><td><strong>Orgánica</strong></td><td>Unidad orgánica a la que se imputa el importe; un Plan puede tener más de una asociada (se concatenan con <code>" - "</code>).</td></tr><tr><td><strong>Ajuste de Matrícula</strong></td><td>Recibo con <code>ImpAdm &lt; 0</code>; se excluye de casi toda la contabilidad (<code>AutoFilter Field:=BD_ImpAdm, Criteria1:="&gt;=0"</code> para excluirlo).</td></tr><tr><td><strong>AE4</strong></td><td>Código de Actividad Económica 4 = Enseñanzas Propias (<code>M72</code> conserva solo <code>AE=4</code> o <code>AE=300</code>).</td></tr><tr><td><strong>AE4x4 / AE4x1</strong></td><td>Ficheros/informes contables generados a partir de las 4 copias anuales EFP/CFC × Curso Ant/Pos (ver más abajo).</td></tr><tr><td><strong>Deleted / DeletedConJI</strong></td><td>Marca que recibe en <code>Prog_BD</code> un recibo que ha dejado de aparecer en la última importación de LSGES04; <code>DeletedConJI</code> (con aviso obligatorio) si ya tenía un JI asignado — es la salvaguarda para no perder silenciosamente un recibo ya justificado administrativamente.</td></tr></tbody></table></div>
+<h2>Qué es una Liquidación y cómo se identifica</h2>
+<p>Una Liquidación es el conjunto de recibos de <code>Prog_BD</code> (tabla <code>Lo_BD</code>) de un <strong>Plan + Curso Académico</strong> concretos. La genera <code>Rut_00_Liquid_TitProp(Liq_Plan, CursAcad)</code> en <code>M10__Liquid_EP.bas</code>: filtra <code>Lo_BD</code> por <code>BD_Plan = Liq_Plan</code> y <code>BD_C_Acad = CursAcad</code>, excluye los recibos de Ajuste de Matrícula (<code>BD_ImpAdm &lt; 0</code>), y, salvo que el Plan sea de Microcredencial, excluye también los recibos negativos (salvo switch <code>Sw_VerRecNeg</code>) y los recibos con <code>ImpCob = 0</code> (salvo switch <code>Sw_VerRecNoCob</code>). El resultado se vuelca a la tabla <code>Lo_Liq</code> de la hoja <code>Wk_TitP_Liquid</code>. Si no hay ningún recibo pagado, aborta con <code>MsgBox</code>.</p>
+<blockquote><p><em>Implementado en:</em> <code>Rut_00_Liquid_TitProp</code> (<code>M10__Liquid_EP.bas</code>).</p></blockquote>
+<h2>El ciclo de un recibo: de LSGES04 a <code>Prog_BD</code></h2>
+<pre><code>        Exportación LSGES04 (sistema contable UA)
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M01 — Importar a Prog_LsGes04            │
+   └─────────────────────────────────────────┘
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M02 — Depurar: fuera de curso, Matrícula │
+   │ = N, ActivEco ≠ 4, matrícula a coste 0,  │
+   │ subvencionados al 100%                   │
+   └─────────────────────────────────────────┘
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M02_Manage_Duplicates — detectar y       │
+   │ resolver referencias repetidas           │
+   └─────────────────────────────────────────┘
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M03 — Asignar cta. de ingreso (CCC)      │
+   │ M04 — Asignar Concepto Económico y       │
+   │       Tipo de Enseñanza                  │
+   │ M05 — Asignar Tipo de Recibo             │
+   │ M06 — Primera Tasa Admin. por matrícula  │
+   └─────────────────────────────────────────┘
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M07 — Merge-join con Prog_BD: altas,     │
+   │ actualizaciones, bajas (Deleted)         │
+   └─────────────────────────────────────────┘
+                        │
+                        ▼
+   ┌─────────────────────────────────────────┐
+   │ M08 — Actualizar Coef_VRI por Plan       │
+   └─────────────────────────────────────────┘</code></pre>
+<h3>M02 — Depuración inicial</h3>
+<p>Solo se procesan recibos del Curso Académico configurado, con <code>Matrícula ≠ N</code> y <code>ActivEco = 4</code>, descartando también las matrículas a coste cero y los recibos subvencionados al 100 % (<code>ImpRec = 0</code>). <code>M02_Del_Reg_EFP_o_CFCyAFC.bas</code> separa además el subconjunto EFP del CFC/AFC.</p>
+<h3>Duplicados (<code>M02_Manage_Duplicates.bas</code>)</h3>
+<p><code>RuT_Duplicates_Search</code> ordena por <code>BD_Ref</code> y compara cada fila con la anterior: si coinciden, marca la primera como <code>"RpN"</code> y la siguiente como <code>"RepeN+1"</code> en <code>BD_Incidencias</code>, y llama a <code>RuT_Duplicates_Search_Mark_DIFF</code>, que compara columna a columna (solo las marcadas <code>Compare=True</code> en <code>Prog_DefCol_BD</code>) y anota en <code>BD_H_Incidencias</code> el detalle <code>"En Col. nºX (Nombre)&lt;&gt;[valor]"</code>. Después borra de la tabla de trabajo todos los repetidos salvo el último de cada serie, copia los "finalistas" a <code>Prog_BD_Dupl</code> (histórico), y en esa tabla purga los que ya estaban repetidos de tandas anteriores (<code>RpIdem</code>) o los que no tuvieron ningún cambio real (<code>"(en 0 Cols)"</code>).</p>
+<blockquote><p><em>Implementado en:</em> <code>RuT_Duplicates_Search</code> / <code>RuT_Duplicates_Search_Mark_DIFF</code> (<code>M02_Manage_Duplicates.bas</code>).</p></blockquote>
+<h3>Tipo de Recibo (<code>M05_Asign_Tipo_Recibo.bas</code>)</h3>
+<p>Se clasifica cada fila de <code>Prog_LsGes04</code> mediante una cascada de <code>AdvancedFilter</code> contra rangos con nombre definidos en la hoja (<code>Tb_CriT_*</code>, no en el código VBA), en este orden:</p>
+<div class="tw"><table><thead><tr><th>Orden</th><th>Tipo asignado</th><th>Criterio (rango)</th></tr></thead><tbody><tr><td>1</td><td><code>_ERR_Date_</code></td><td><code>Tb_CriT_Reg_Err</code> — fechas inconsistentes</td></tr><tr><td>2</td><td><code>Emitido</code></td><td><code>Tb_CriT_Emitido</code></td></tr><tr><td>3</td><td><code>EjeAnt</code></td><td><code>Tb_CriT_EjeAnt</code> — del ejercicio contable anterior</td></tr><tr><td>4</td><td><code>Añejo</code></td><td><code>Tb_CriT_Añeja</code> — anteriores al ejercicio anterior</td></tr><tr><td>5</td><td><code>Aplazado</code></td><td><code>Tb_CriT_Aplazado</code></td></tr><tr><td>6</td><td><code>ADxAplz</code></td><td><code>Tb_CriT_ADxAplz</code> — anulado por aplazamiento, a cobrar el año siguiente</td></tr><tr><td>7</td><td><code>_Devol_</code></td><td><code>ImpRec &lt; 0</code></td></tr><tr><td>8</td><td><code>_AñoCont'XX_</code></td><td><code>ACont_Cob &lt; APP_AñoCont</code> (cobrado en un ejercicio anterior al de contabilización)</td></tr><tr><td>9</td><td><code>_Ajust_Matríc_</code></td><td><code>ImpAdm &lt; 0</code></td></tr></tbody></table></div>
+<p>El resultado se escribe en <code>BD_Tipo_Rec</code> (columna 36). Un contador final (<code>RegsSinTipo</code>) avisa si quedan recibos sin clasificar tras pasar las 9 reglas.</p>
+<blockquote><p><em>Implementado en:</em> <code>RuT_Determinar_Tipo_Recibo</code> (<code>M05_Asign_Tipo_Recibo.bas</code>). Nota: el texto de informe del paso 9 está actualmente copiado del paso 8 (ver <code>Informe_Bugs.md</code>, hallazgo A7) — el orden y el criterio de clasificación en sí son correctos, solo el mensaje de log está mal etiquetado.</p></blockquote>
+<h3>Coef_VRI (<code>M08_Actualizar_Tb_Coef_VRI.bas</code>)</h3>
+<p>Es un porcentaje de retención (entero, p. ej. 15 o 20) sobre el importe académico neto:</p>
+<pre><code>Rg_VRI = Round((Imp_Cob − Imp_Adm) × Coef_VRI / 100, 2)</code></pre>
+<p>Se guarda por Plan en <code>Prog_Coef_Ret_VRI</code>. <code>RuT_Lo_Coef_VRI_Actualizar</code> recorre <code>Prog_BD</code> agrupado por Plan y, si el Plan no existe aún en <code>Prog_Coef_Ret_VRI</code>, crea una fila nueva con <code>ORden="x"</code> y le asigna el máximo <code>Coef_VRI</code> visto en las filas de ese Plan; si es 0, usa el valor por defecto de la fila 1 (EFP) o 2 (CFC) de esa misma tabla. Cuando se da de alta un recibo nuevo (<code>M07</code>), se hace la búsqueda inversa: si el Plan no está en <code>Prog_Coef_Ret_VRI</code>, se usa igualmente ese valor por defecto 1/2 según EFP o CFC/AFC.</p>
+<blockquote><p><em>Implementado en:</em> <code>RuT_Lo_Coef_VRI_Actualizar</code> (<code>M08_Actualizar_Tb_Coef_VRI.bas</code>), reutilizado en <code>M07_Actualiz_BDatos_con_LsGes04.bas</code> y en el cálculo de <code>M10__Liquid_EP.bas</code>/<code>M39_Resumen_Planes_C_Acad.bas</code>.</p></blockquote>
+<h3>Sincronización <code>Prog_BD</code> ↔ <code>Prog_LsGes04</code> (<code>M07</code>)</h3>
+<p>Merge-join ordenado por <code>BD_Ref</code>: refs iguales → actualiza y registra incidencias de cambio de importe (<code>Chg_ImpRec</code>/<code>ImpCob</code>/<code>ImpAdm</code>); ref nueva → alta en <code>Prog_BD</code> con búsqueda de <code>Coef_VRI</code>; ref que ya no aparece en la última importación → se marca <code>"Deleted"</code> o, si ya tiene JI asignado, <code>"DeletedConJI"</code> con aviso obligatorio al usuario — la salvaguarda contra pérdida silenciosa de recibos ya justificados administrativamente.</p>
+<h3>Primera Tasa Administrativa por matrícula (<code>M06</code>)</h3>
+<p><code>Rut_Assign_Imp_AdmAcad_C_Acad</code> ordena por Plan+DNI+NumRec y, para cada combinación Plan+DNI <strong>nueva</strong>, copia el importe académico/administrativo/descuento del <strong>primer</strong> recibo a <code>BD_Rec_Imp_Acad/Adm/Dto</code> — los recibos repetidos del mismo alumno no vuelven a aportar tasa administrativa.</p>
+<h2>Botones por rango con nombre — la interfaz de <code>Wk_TitP_Liquid</code></h2>
+<p>No hay Ribbon custom ni UserForm de pantalla principal: la interacción diaria es directamente sobre la única hoja visible (<code>Wk_TitP_Liquid</code>), donde cada rango con nombre actúa como "botón" al hacer clic o escribir en él.</p>
+<p><strong>Al hacer clic (<code>Worksheet_SelectionChange</code>):</strong></p>
+<div class="tw"><table><thead><tr><th>Rango</th><th>Acción</th></tr></thead><tbody><tr><td><code>Liquid_Del_Filtro</code></td><td>Quita todos los filtros de la tabla</td></tr><tr><td><code>Liquid_Help</code></td><td>Muestra/oculta los comentarios de ayuda de celda</td></tr><tr><td><code>Liquid_Sw_VerRecNeg</code></td><td>Alterna ver recibos negativos</td></tr><tr><td><code>Liquid_Sw_VerRecNOCob</code></td><td>Alterna ver recibos no cobrados</td></tr><tr><td><code>Liquid_RDT_Totales</code></td><td>Rota entre las 3 vistas de resumen RDT (<code>Tot:</code> / <code>Tot=</code> / <code>Tot-</code>)</td></tr></tbody></table></div>
+<p><strong>Al escribir (<code>Worksheet_Change</code>):</strong></p>
+<div class="tw"><table><thead><tr><th>Rango</th><th>Acción</th></tr></thead><tbody><tr><td><code>Liquid_Plan</code></td><td>Cambia de Liquidación (avisa si hay cambios sin guardar, vía <code>Sw_Cmb</code>)</td></tr><tr><td><code>Liquid_Num_JI_Emi</code>, <code>Liquid_Num_AD_0010</code>, <code>Liquid_Num_JI_443</code>, <code>Liquid_Num_ExpAdm</code>, <code>Liquid_Num_RDT</code>, <code>Liquid_Coef_VRI</code>, <code>Liquid_Orgánica</code></td><td>Escriben ese valor en todas las filas visibles/filtradas de la Liquidación</td></tr><tr><td><code>Liquid_Filtro_N_Liquid</code>, <code>Liquid_Filtro_N_Recibo</code>, <code>Liquid_Filtro_Año_Vto</code>, <code>Liquid_Filtro_Año_Emi</code>, <code>Liquid_Filtro_Año_Cob</code></td><td>Filtran la tabla por la columna correspondiente</td></tr></tbody></table></div>
+<blockquote><p><em>Implementado en:</em> <code>Wk_TitP_Liquid.cls</code>.</p></blockquote>
+<h3>Guardar la Liquidación sobre <code>Prog_BD</code></h3>
+<p>Al guardar, <code>Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid</code> (<code>M10__Liquid_EP.bas</code>) hace un segundo merge-join, esta vez entre <code>Lo_TPLiquid</code> (lo que se ve en pantalla) y <code>Prog_BD</code>, ambos ordenados por Ref, y traslada a <code>Prog_BD</code> los campos JI/AD-0010/JI-443/ExpAdm/RDT/Coef_VRI/Orgánica/Observaciones y la Tasa Administrativa (ajustada si <code>Liq_Ajst_Tadm</code> no está vacío).</p>
+<blockquote><p>⚠️ Este merge-join tiene un <code>Case Else</code> ausente que puede desincronizar los dos punteros a mitad de recorrido — ver <code>Informe_Bugs.md</code>, hallazgo A3, antes de asumir que "guardar" siempre actualiza todo lo que debería.</p></blockquote>
+<h2>Cierre Contable de Planes (<code>M38</code>)</h2>
+<p><code>Rut_Cierre_Contable_AñoCont</code> primero verifica que la hoja activa coincide con el Curso Académico/Año Contable actuales (Ant vs Pos), abortando si no. Luego prepara <code>Prog_BD</code> (desprotege, ordena por <code>C_Acad</code>/<code>ACont_Emi</code>/<code>Plan</code>), filtra <code>ImpAdm &gt;= 0</code> (excluye Ajustes de Matrícula) y <code>Tipo_Rec &lt;&gt; "_ERR_Date_"</code>, y copia el rango visible resultante a una tabla temporal en la hoja <code>Sht__Buffer</code> — patrón "filtrar → copiar a Buffer → ListObject temporal" que se repite en <code>M22_NEW</code>, <code>M32</code>, <code>M39</code> y <code>M40</code>. Según sea Curso Académico Ant o Pos, recorre cada Plan (vía una <code>Collection</code> de valores únicos) calculando por <code>Application.SumIfs</code> los importes Emitido/Anulado/Cobrado/RDT/Pendiente-RDT/ADxAplz/Aplazado/EjeAnt/Pendiente-Cobro, separando siempre la parte Administrativa (concepto 1303) de la Académica (1310/1311) por resta.</p>
+<blockquote><p><em>Implementado en:</em> <code>Rut_Cierre_Contable_AñoCont</code>, <code>RuT_Cierre_Contable_Planes_CAcad_Ant</code>/<code>_Pos</code> (<code>M38_Cierre_Contable_PLANES.bas</code>).</p></blockquote>
+<h2>Números de JI (<code>M41</code>/<code>M42</code>)</h2>
+<p>Cada recibo de <code>Prog_BD</code> tiene 6 columnas de JI (<code>JI_Emi</code>, <code>AD_0010</code>, <code>JI_443</code>, cada una con variante <code>_Adm</code>/<code>_Acad</code>). El diseño previsto es:</p>
+<ul>
+<li><strong>M41</strong> (<code>Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos</code>) recorre la tabla-resumen del informe contable y, para cada combinación Tipo_Recibo+Concepto_Económico, filtra <code>Prog_BD</code> y vuelca (deduplicando con <code>Scripting.Dictionary</code>) los JI únicos encontrados, unidos con <code>", "</code>.</li>
+<li><strong>M42</strong> (<code>Rut_Añadir_a_BDatos_JIs_de_Inf_Recibos</code>) hace el camino inverso: toma el JI tecleado a mano en el informe-resumen y lo "explota" hacia todas las filas de detalle que comparten Tipo_Rec/Concepto en <code>Prog_BD</code>.</li>
+</ul>
+<blockquote><p>⚠️ <strong>Este flujo no compila en el estado actual de este libro</strong>: M41/M42 referencian <code>Sht__BD</code>/<code>Sht__Inf_Recibos_TIO</code>, hojas que no existen en Enseñanzas_Propias (parecen código traído sin adaptar del proyecto hermano PPub). Ver <code>Informe_Bugs.md</code>, hallazgo B3, antes de dar por buena esta descripción como comportamiento activo — es el diseño previsto, no necesariamente el que se ejecuta hoy.</p></blockquote>
+<h2>AE4x4 / AE4x1 y "las 4 copias"</h2>
+<p>Las "4 copias EFP/CFC de curso Ant/Pos" son los 4 ficheros <code>*_BaseDatos_Liq_*.xlsm</code> que <code>M79</code> genera cada año (uno por Tipo de Enseñanza EFP/CFCyAFC × uno por Curso Académico Ant/Pos). <code>M50</code> (<code>RuT_Inf_Contable_Recibos_AE4x4</code>) los reimporta secuencialmente en 4 pasos — <code>EFP_&lt;CAcadAnt&gt;</code>, <code>EFP_&lt;CAcadPos&gt;</code>, <code>CFCyAFC_&lt;CAcadAnt&gt;</code>, <code>CFCyAFC_&lt;CAcadPos&gt;</code> — cada uno vía <code>M51</code> (<code>Rut_Lo_Import_AE4x1</code>), que abre el Excel elegido en solo lectura, valida por nombre que es el fichero correcto y copia su tabla <code>BDatos</code> a un <code>ListObject</code> intermedio para generar los informes contables <code>Inf_Cont_AE4x4</code>/<code>AE4x41</code>.</p>
+<h3>Relación con el proyecto hermano "Precios Públicos - PPub"</h3>
+<p><code>M50_Inf_Cont_AE4x4.bas</code> lleva literalmente el comentario <code>'- M_410_Update_Lo_AE4</code> referenciando esa fase del proyecto <code>Precios Públicos - PPub</code> (mismo repo padre, carpeta <code>../Precios Públicos - PPub/</code>). Este libro EP es el que <strong>genera</strong> (vía <code>M79</code>) los ficheros AE4x4/AE4x1 que PPub luego importa en su pipeline 410–415 — antes de tocar la lógica de AE4/JI's/Coef_VRI en cualquiera de los dos libros, conviene revisar el módulo equivalente en el otro.</p>
+<blockquote><p>⚠️ El flujo M50/M51 tal como está exportado hoy tampoco compila de forma limpia (Subs públicas duplicadas entre <code>M50_Inf_Cont_AE4x4</code>/<code>_AE4x41</code> y entre <code>M51_Import_AE4x1</code>/<code>_AE4x11</code>, variable <code>Lo_AE4x1</code> no declarada en una de las dos ramas) — ver <code>Informe_Bugs.md</code>, hallazgos B1/B2/B5/B6. Todo apunta a que <code>_AE4x41</code>/<code>_AE4x11</code> son ramas de desarrollo en curso, no el camino que se ejecuta a diario.</p></blockquote>
+<h2>Restituir BDatos (<code>M71</code>)</h2>
+<p><code>Mod_Restituir_Tabla_Prog_BD</code> recupera el contenido de <code>Prog_BD</code> (y de <code>Prog_BD_Deleted</code>/<code>Prog_BD_Dupl</code>) desde un Excel de backup elegido a mano, e importa también los parámetros de <code>Prog__APP</code> (Año Contable, Curso Académico, EFP/CFC, Plan activo...) <strong>desde el backup</strong>, sobrescribiendo los del libro actual antes de mostrar ningún resumen. Tras la restitución ofrece, con dos <code>MsgBox</code> de confirmación, borrar registros no válidos (llama a <code>M72</code>) y/o generar directamente el Excel anual (llama a <code>M79</code>).</p>
+<blockquote><p>⚠️ A diferencia de <code>M51</code> (que valida el nombre del fichero elegido), <code>M71</code> acepta cualquier <code>*.xls?</code> sin comprobar que sea un backup de EP, y la sobrescritura de <code>Prog_BD</code>/<code>Prog__APP</code> ocurre sin ninguna confirmación previa — solo se informa después, ya consumada. Ver <code>Informe_Bugs.md</code>, hallazgo B12.</p></blockquote>
+<h2>M79 — copia anual del libro</h2>
+<p><code>Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos</code> construye el nombre <code>&lt;TipoEP&gt;_&lt;CursoAcad&gt;_BaseDatos_Liq_&lt;VersiónApp&gt;.xlsm</code> (<code>TipoEP</code> = <code>EFP_</code> o <code>CFCyAFC_</code>), propone la ruta vía <code>Application.GetSaveAsFilename</code> (el usuario puede cambiarla) y ejecuta <code>ThisWorkbook.SaveCopyAs</code> — copia binaria íntegra del libro actual (código y datos), sin reiniciar nada. Es la rutina que produce los 4 ficheros que <code>M50</code>/<code>M51</code> reimportan al año siguiente.</p>
+<h2><code>Rut_Lo.bas</code> — framework genérico de tablas</h2>
+<p>Caja de herramientas que el resto del proyecto usa para no reescribir lógica de <code>ListObject</code>:</p>
+<div class="tw"><table><thead><tr><th>Rutina</th><th>Qué hace</th></tr></thead><tbody><tr><td><code>Rut_Lo_DataBodyRange_Copy</code></td><td>Copia el <code>DataBodyRange</code> completo de una tabla origen a una destino, opcionalmente vaciando antes el destino</td></tr><tr><td><code>Rut_Lo_DataBodyRange_Filtered_Copy</code></td><td>Igual, pero solo con las filas <strong>visibles</strong> (filtradas) del origen; opcionalmente borra del origen las filas copiadas</td></tr><tr><td><code>Rut_Lo_WrkSht_Preparar</code></td><td>Muestra todas las filas/columnas ocultas y quita filtros de <code>.ListObjects(1)</code> de una hoja</td></tr><tr><td><code>Rut_Lo_Sort</code></td><td>Ordena una tabla por una columna (ascendente/descendente)</td></tr><tr><td><code>Rut_Lo_Filtro</code> / <code>Rut_Lo_Filtros_Quitar</code></td><td>Aplican o retiran el <code>AutoFilter</code> de una tabla</td></tr><tr><td><code>Rut_Lo_DataBodyRange_Filter_y_DEL</code></td><td>Filtra por 1-2 criterios y <strong>borra</strong> las filas visibles resultantes</td></tr></tbody></table></div>
+<p><code>Prog_DefCol*</code> (definición de columnas: nombre/orden/tipo/formato) <strong>no</strong> las consume <code>Rut_Lo.bas</code> — las usa una rutina distinta, <code>Rut_X_Format_LoData_LoDefCol</code> (<code>M90_Rut_Format_Colmns.bas</code>), y en la práctica solo <code>Prog_DefCol_BD</code> tiene consumidores reales (<code>M01</code>, <code>M50</code>); <code>Prog_DefCol1/2/3</code>, <code>Prog_DefCol_Aux</code>, <code>Prog_DefCol_InfRec_ACont</code> y <code>Prog_DefCol_Plan_Rsm</code> son catálogos sin ningún consumidor detectado en el código exportado.</p>
+<h2>Menú contextual personalizado</h2>
+<p><code>Rut__Right_Click_VBA.bas</code> sustituye el menú nativo de clic derecho en dos barras distintas de Excel (<code>"Cell"</code> y <code>"List Range Popup"</code>): oculta todas las opciones nativas dejando solo las propias (conversión Mayús/Minús/Propia, "Fill Red", insertar rectángulo), todas etiquetadas con un Tag propio para poder borrarlas limpiamente al cerrar el libro. La limpieza al cierre vive duplicada dentro de <code>Rut_ConfigExcel_RESTABLECER</code> (<code>M00_Ini_APP.bas</code>), que sí cuelga de <code>ThisWorkbook.Workbook_BeforeClose</code>.</p>
+<h2><code>Form_Menu</code> — menú de tareas auxiliares</h2>
+<p>UserForm que se autoajusta a pantalla completa vía <code>Application.Top/Left/Width/Height</code> + <code>Zoom</code> (nunca redimensiona controles a mano — el patrón "seguro" frente al bug de hit-test ya documentado en las notas globales de UserForms). Carga desde <code>Prog__Menú_Aux.ListObjects("Tb_Tareas")</code> una lista de tareas filtrada por usuario autorizado (o vacía = para todos) y, al pulsar "Ejecutar", despacha dinámicamente por nombre con <code>Application.Run</code> — una tarea puede encadenar varias rutinas separadas por <code>" + "</code>. Si el nombre no existe, captura el error y avisa con <code>MsgBox</code> en vez de reventar. También aloja los switches de depuración (Probando/DisplayAlerts/EnableEvents/WB_Deactivate), visibles solo para el usuario "Boss".</p>
+<h2><code>Form_MsgBox</code> — cuadro de mensaje propio</h2>
+<p>Título opcional (con o sin barra de ventana de Windows, vía API), icono seleccionable por control (<code>Lb_Img_Ask/Stop/Exclam/Ok/...</code>), marco rojo opcional, 1 a 3 botones configurables por cadena (<code>"Ok+Cancel+Stop"</code>, autoajustados en ancho) y alto autoajustado al mensaje. Se pilota con 4 variables <code>Public</code> (<code>MsgBx_Title</code>, <code>MsgBx_TitleBar</code>, <code>MsgBx_Msg</code>, <code>MsgBx_Answer</code>) declaradas en <code>M00_Ini_Var_APP.bas</code>.</p>
+<h2>Las hojas <code>Prog_*</code> están vacías a propósito</h2>
+<p>Confirmado por lectura completa: las ~29 hojas de catálogo (<code>Prog_BD</code>, <code>Prog_Concept</code>, <code>Prog_TipoRec</code>, <code>Prog_Coef_Ret_VRI</code>, <code>Prog_Orgánicas</code>...) y las de configuración (<code>Prog__APP</code>, <code>Prog__Usuarios</code>, <code>Prog__Menú_Aux</code>) tienen el code-behind vacío (como mucho un <code>Option Explicit</code> suelto). El contenido funcional vive siempre en el <code>ListObject</code> de la hoja o en los módulos <code>M*</code>/<code>Rut_*</code> que la referencian — no busques lógica de negocio dentro de un <code>Prog_*.cls</code>. Los <code>Wk_*.cls</code> son la excepción real a este patrón: <code>Wk_TitP_Liquid</code> (y en menor medida sus hermanas <code>Wk_TitP_LIQx_PDF</code>, <code>Wk_TitP_LiqPDF</code>, <code>Wk_TitP_UNO</code>) sí contienen lógica de eventos activa.</p>
+</article></main>
+<footer>Generado desde <code>EP_Conceptos_y_Reglas.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>

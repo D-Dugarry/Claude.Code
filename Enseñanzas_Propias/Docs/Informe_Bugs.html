@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm</h1>
+<p>Auditoría del código VBA exportado en <code>VBA_Moduls/</code> (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.</p>
+<p><strong>Resumen:</strong> 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos).</p>
+<blockquote><p><strong>Nota sobre codificación:</strong> los ficheros <code>.bas</code>/<code>.cls</code>/<code>.frm</code> están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre <code>VBA_Moduls/</code>, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver <code>CLAUDE.md</code> de este proyecto).</p></blockquote>
+<h2>Antes de tocar nada: compila el proyecto</h2>
+<p>Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error de compilación VBA (<code>Option Explicit</code> roto, nombre duplicado, tipo incompatible, <code>Sub</code>/<code>End Sub</code> descuadrados). <strong>Un solo error de compilación en cualquier módulo bloquea la ejecución de todas las macros del libro</strong>, no solo la rutina afectada — VBA compila el proyecto entero, no módulo a módulo. Antes de corregir nada, abre el editor VBA del <code>.xlsm</code> real y ejecuta <strong>Depurar → Compilar VBA Project</strong>, y anota qué marca primero: puede que algunos de estos 8 puntos ya estén corregidos ahí y esta exportación esté desactualizada, o puede que el libro lleve tiempo sin compilar limpio (varios de los módulos implicados — <code>M50_Inf_Cont_AE4x41</code>, <code>M51_Import_AE4x11</code>, <code>M41</code>/<code>M42</code> — parecen ramas de desarrollo/copias aún no terminadas, no el camino que se ejecuta a diario).</p>
+<h2>Índice</h2>
+<ul>
+<li><strong>Bloque A — Arranque, pipeline LSGES04 y núcleo de Liquidación</strong></li>
+<ul>
+<li>A1 · Importe cobrado truncado a <code>Long</code></li>
+<li>A2 · <code>Workbooks(IntialName).Close</code> falla si el usuario cambia el nombre al guardar</li>
+<li>A3 · Merge-join sin <code>Case Else</code> — desincronización silenciosa al guardar la Liquidación</li>
+<li>A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI</li>
+<li>A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)</li>
+<li>A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</li>
+<li>A7 · Mensaje de informe copiado y mal etiquetado</li>
+<li>A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</li>
+<li>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> (a verificar)</li>
+</ul>
+<li><strong>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</strong></li>
+<ul>
+<li>B1 · Sub pública duplicada: <code>RuT_Inf_Contable_Recibos_AE4x4</code></li>
+<li>B2 · Sub pública duplicada: <code>Rut_Lo_Import_AE4x1</code></li>
+<li>B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)</li>
+<li>B4 · <code>End Sub</code> huérfano en <code>M90_Rutinas_X.bas</code></li>
+<li>B5 · Variable de objeto <code>Lo_AE4x1</code> no declarada</li>
+<li>B6 · <code>Lo_AE4x1</code> usado sin inicializar</li>
+<li>B7 · Límite de filas hardcodeado a 5000</li>
+<li>B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada</li>
+<li>B9 · <code>Application.Calculation</code> guardado en variable <code>Boolean</code></li>
+<li>B10 · Año "2025" hardcodeado en nombres de fichero exportado</li>
+<li>B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)</li>
+<li>B12 · <code>M71_Restituir</code> sobrescribe datos y parámetros sin validar ni confirmar</li>
+<li>B13 · <code>Wk_Lista_Panes1.cls</code> sin ninguna referencia en el código (a verificar)</li>
+<li>B14 · Bucle <code>Do While</code> sin cota superior en M31/M32/M33</li>
+<li>B15 · Contraseña de correo en texto plano</li>
+</ul>
+<li><strong>Bloque C — Librería transversal <code>Rut_*</code>/<code>Prog_*</code> y formularios</strong></li>
+<ul>
+<li>C1 · Variable no declarada <code>LoTb</code> (typo de <code>Lo_Tb</code>)</li>
+<li>C2 · <code>.calcMode</code> no es un miembro de <code>Application</code></li>
+<li>C3 · <code>String</code> pasado donde se espera <code>Worksheet</code> por referencia (ruta en producción)</li>
+<li>C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></li>
+<li>C5 · <code>Rut_WrkSheet_ReducirPeso</code> opera sobre la hoja activa, no sobre la recibida</li>
+<li>C6 · Pérdida de datos en <code>M0999_Modif_Cols_BDatos.bas</code> si se reejecuta</li>
+<li>C7 · Valor mágico <code>-0.86</code> escrito sobre datos reales sin confirmación</li>
+<li>C8 · <code>For Each</code> que ignora la variable de iteración</li>
+<li>C9 · <code>Módulo3.bas</code> sin <code>Option Explicit</code>, con variables casi homónimas</li>
+<li>C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)</li>
+<li>C11 · Ruta de disco hardcodeada como fallback silencioso</li>
+</ul>
+</ul>
+<hr>
+<h2>Bloque A — Arranque, pipeline LSGES04 y núcleo de Liquidación</h2>
+<p><em>(ThisWorkbook, M00, M01–M09, M10, M12, M15, Wk_TitP_Liquid)</em></p>
+<h3>A1 · Importe cobrado truncado a <code>Long</code></h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M09_Importar_Sol_Liq.bas</code> — líneas 129, 151, 187 · <strong>Estado:</strong> ✅ Corregido (2026-09-14)</p>
+<pre><code>    Dim Cobrado     As Long:        Cobrado = 0
+...
+                    Cobrado = Cobrado + .Cells(LinLiq, CLiq_Imp_Cob)
+...
+        Right("__________" &amp; Cobrado, 8) &amp; "  Importe Cobrado en esta Liquidación." &amp; vbCrLf</code></pre>
+<p><code>Cobrado</code> acumula un importe monetario (con decimales) en una variable <code>Long</code>. Cada suma trunca los céntimos del <code>Currency</code>/<code>Double</code> de la celda, así que el total mostrado en el informe final ("Importe Cobrado en esta Liquidación") puede no coincidir con la suma real.</p>
+<p><strong>Impacto:</strong> el informe que ve el usuario tras importar una Solicitud de Liquidación muestra un importe cobrado incorrecto (redondeado a la baja), sin que nada avise del desajuste.</p>
+<p><strong>Arreglo:</strong> declarar <code>Cobrado As Currency</code> (o <code>Double</code>). Aplicado en <code>VBA_Moduls/M09_Importar_Sol_Liq.bas</code> (línea 130 tras el sello <code>Last Rev.</code>); las líneas de acumulación y de informe no necesitaron cambios.</p>
+<h3>A2 · <code>Workbooks(IntialName).Close</code> falla si el usuario cambia el nombre al guardar</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M12_Genera_LIQx_PDF.bas</code> — líneas 574, 582, 590-591</p>
+<pre><code>    IntialName = "LIQxPDF_" &amp; Wk_TitP_Liquid.Range("Liquid_Plan") &amp; " - " &amp; Format(Date, "dd-mmm-yyyy") &amp; ".xlsx"
+    FullName = FPath &amp; "LIQxPDF_" &amp; Wk_TitP_Liquid.Range("Liquid_Plan") &amp; " - " &amp; Format(Date, "dd-mmm-yyyy") &amp; ".xlsx"
+    sFileSaveName = Application.GetSaveAsFilename(FullName, "Excel Files (*.xlsx), *.xlsx")
+...
+            On Error GoTo 0
+...
+'    ActiveWorkbook.Close savechanges:=True
+    Workbooks(IntialName).Close SaveChanges:=True</code></pre>
+<p><code>IntialName</code> es solo el nombre <strong>sugerido</strong> para el diálogo <code>GetSaveAsFilename</code>; si el usuario lo cambia al guardar, el libro copiado queda con otro nombre y <code>Workbooks(IntialName)</code> no existe → error 9 "Subscript out of range", <strong>sin gestor de errores activo</strong> (el <code>On Error GoTo GestError</code> ya se ha desactivado con <code>On Error GoTo 0</code> dos líneas antes). La línea correcta original (<code>ActiveWorkbook.Close savechanges:=True</code>) sigue comentada justo encima, confirmando que es una regresión: las rutinas hermanas <code>Rut_Exportar_La_Liquidación</code> (M15) y <code>Rut_Exportar_La_LIQxn_PDF</code> (M12) sí usan <code>ActiveWorkbook.Close</code>.</p>
+<p><strong>Impacto:</strong> generar el PDF de Liquidación falla con un error críptico en cuanto el usuario cambia el nombre propuesto en el diálogo de guardado, y el libro temporal queda abierto sin cerrarse.</p>
+<p><strong>Arreglo:</strong> restaurar <code>ActiveWorkbook.Close SaveChanges:=True</code>.</p>
+<h3>A3 · Merge-join sin <code>Case Else</code> — desincronización silenciosa al guardar la Liquidación</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M10__Liquid_EP.bas</code> — líneas 742-778 (<code>Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid</code>)</p>
+<pre><code>    For F_Liquid = 1 To Lo_TPLiquid.DataBodyRange.Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
+
+        Select Case Lo_TPLiquid.DataBodyRange.Cells(F_Liquid, CLiq_Ref)
+
+            '--- Saltar al siguiente Lo_TitPHist   &lt;&lt;&lt;...
+            Case Is &gt; .Cells(F_TitPH, BD_Ref)
+                F_Liquid = F_Liquid - 1
+            '--- ACTUALIZAR CON Datos de la Liquidación &lt;&lt;&lt;...
+            Case Is = .Cells(F_TitPH, BD_Ref)
+
+                Set RowLiq = Lo_TPLiquid.ListRows(F_Liquid)
+                Set RowDat = Lo_TitPHist.ListRows(F_TitPH)
+
+                RowDat.Range(BD_Liquidado) = RowLiq.Range(CLiq_NumLiquid)
+                RowDat.Range(BD_JI_Emi_Acad) = RowLiq.Range(CLiq_JI_Emi)
+                ...
+        End Select
+
+        F_TitPH = F_TitPH + 1
+
+    Next F_Liquid</code></pre>
+<p>Es un merge-join de dos tablas ordenadas por <code>Ref</code> (línea 738/740), pero falta el caso <code>Case Is &lt; .Cells(F_TitPH, BD_Ref)</code> (o <code>Case Else</code>). Cuando la Ref de la Liquidación es <strong>menor</strong> que la de <code>Prog_BD</code> en la posición actual, el <code>Select Case</code> no entra en ninguna rama — pero <code>F_TitPH = F_TitPH + 1</code> se ejecuta igualmente, <strong>fuera</strong> del <code>Select</code>, avanzando el puntero de <code>Prog_BD</code> sin haber comparado nada. Esto desalinea ambos punteros para el resto del recorrido.</p>
+<p><strong>Impacto:</strong> al guardar una Liquidación, dejan de actualizarse silenciosamente en <code>Prog_BD</code> los campos JI, AD-0010, JI-443, ExpAdm, RDT, Coef_VRI, Orgánica y Tasa Administrativa de registros que sí deberían actualizarse — <strong>sin ningún aviso ni contador de "no actualizados"</strong>, a diferencia de <code>M07</code> (importación LSGES04), que sí avisa con <code>MsgBox</code> cuando algo no cuadra.</p>
+<p><strong>Arreglo:</strong> añadir <code>Case Is &lt; .Cells(F_TitPH, BD_Ref): F_TitPH = F_TitPH - 1</code> (o equivalente) para no perder el paso del merge-join.</p>
+<h3>A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M08_Actualizar_Tb_Coef_VRI.bas</code> — líneas 95-96, 105-106 (contraste con las 48-49, correctas)</p>
+<pre><code>    ' --- líneas 48-49, correctas ---
+    Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_ORden, xlAscending, True)
+    Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_Plan, xlAscending, False)
+    ...
+    ' --- líneas 95-96 y 105-106, repetidas igual en ambos bloques finales ---
+    Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_ORden, xlAscending, True)
+    Call Rut_Lo_Sort(Lo_RetVRI, BD_Plan, xlAscending, False)</code></pre>
+<p><code>Lo_RetVRI</code> es <code>Prog_Coef_Ret_VRI</code>, cuyo esquema de columnas es <code>CoefVRI_*</code> (con <code>Plan</code> en la columna 1); <code>BD_Plan</code> (=3) es la constante de la tabla <code>Prog_BD</code>, no la de esta tabla. Al reutilizarla aquí por error se ordena en realidad por <code>CoefVRI_Concepto</code> (columna 3) en vez de por <code>CoefVRI_Plan</code>. El bloque de preparación inicial sí lo hace bien; el error, con toda pinta de copia-pega, solo está en los dos bloques finales.</p>
+<p><strong>Impacto:</strong> acotado — solo afecta al desempate de filas nuevas (todas con <code>ORden="x"</code>) — pero es un fallo real y reproducible.</p>
+<p><strong>Arreglo:</strong> sustituir <code>BD_Plan</code> por <code>CoefVRI_Plan</code> en las líneas 96 y 106.</p>
+<h3>A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M05_Asign_Tipo_Recibo.bas</code> — líneas 35-40, 59-65 (patrón repetido para EjeAnt/Añejo/Aplazado/ADxAplz)</p>
+<pre><code>        .DataBodyRange.Columns(BD_Tipo_Rec).ClearContents
+        .DataBodyRange.Columns(52).Resize(, 56).ClearContents
+        '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 1).ClearContents
+...
+            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
+            .DataBodyRange.Columns(52).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"</code></pre>
+<p>Las columnas 52-56 de <code>Prog_LsGes04</code> se usan como "flags" internos por tipo (Emitido=52, EjeAnt=53, Añejo=54, Aplazado=55, ADxAplz=56), con números literales en vez de constantes con nombre. La línea comentada <code>BD_CriT_Emi</code>/<code>BD_CriT_ErrDate</code> demuestra que antes existían constantes específicas para este rango, ya no presentes en <code>M00_Ini_Var_APP.bas</code>. Además, esos mismos números <strong>coinciden</strong> con <code>BD_H_Incidencias</code> (52), <code>BD_EP_Ctrl</code> (53) y <code>BD_EP_GestReg</code> (54) del esquema de <code>Prog_BD</code> — aquí se reutilizan como scratch space en <code>Prog_LsGes04</code> (una tabla distinta) después de que <code>M02_Manage_Duplicates</code> ya haya usado la columna 52 como historial de diferencias de duplicados.</p>
+<p><strong>Impacto:</strong> si en el futuro se añade o quita una columna a <code>Lo_Ges04</code> (el propio pipeline añade y borra columnas temporales en varios puntos), estos números fijos apuntarán a la columna equivocada sin que salte ningún error.</p>
+<p><strong>Arreglo:</strong> definir constantes con nombre para estas 5 columnas de flags, o eliminarlas si son redundantes con <code>BD_Tipo_Rec</code>.</p>
+<h3>A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M02_Del_Reg_No_Válidos.bas</code> — línea 86 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-14)</p>
+<pre><code>        .Range.AdvancedFilter xlFilterInPlace, Prog_Filtros_TipRec.Range("Tb_CriT_ImpMatCeroLsGes04")
+        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+        If rowfind &gt; 0 Then
+'            On Error Resume Next
+            .DataBodyRange.SpecialCells(xlCellTypeVisible).EntireRow.Delete
+'            On Error GoTo 0
+                TxtMsg1 = "Borrados Recibos Matrícula de Actividad Acad. a Coste CERO"</code></pre>
+<p>Todos los demás borrados de filas filtradas del mismo pipeline usan <code>.Delete</code> sobre el rango de la tabla, no <code>.EntireRow.Delete</code>: confirmado al comparar contra las 4 ocurrencias hermanas del propio <code>M02_Del_Reg_No_Válidos.bas</code> (líneas 33, 49, 68, 103 antes del arreglo) y la de <code>M02_Del_Reg_EFP_o_CFCyAFC.bas</code>, todas <code>.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete</code> sin <code>.EntireRow</code>. Este último borra la fila <strong>completa de la hoja</strong> (todas las columnas, no solo las de la tabla) y desplaza el resto de filas de la hoja entera, no solo de la tabla.</p>
+<p><strong>Arreglo aplicado:</strong> quitado <code>.EntireRow</code> — ahora <code>.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete</code>, igual que las otras 5 ocurrencias del mismo patrón en el pipeline.</p>
+<h3>A7 · Mensaje de informe copiado y mal etiquetado</h3>
+<p><strong>Severidad:</strong> Bajo · <strong>Fichero:</strong> <code>M05_Asign_Tipo_Recibo.bas</code> — líneas 136-159 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-14)</p>
+<pre><code>        '------------------ Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
+        Call Rut_Lo_Filtros_Quitar(Lo_G04)
+        .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="&lt;" &amp; APP_AñoCont
+        ...
+        TxtProgreso = TxtProgreso &amp; vbCrLf &amp; ... &amp; " Registros _Contab_Ant_, Cobrados anteriormente y por lo tanto, ya Contabilizado."
+
+        '------------------ Filtra Cobradas en Años anteriores al de Emisión -------------------------------------   ← comentario IDÉNTICO
+        Call Rut_Lo_Filtros_Quitar(Lo_G04)
+        .Range.AutoFilter Field:=BD_ImpAdm, Criteria1:="&lt;0"                                                          ← pero el filtro real es OTRO
+        ...
+            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Ajust_Matríc_"
+        End If
+        TxtProgreso = TxtProgreso &amp; vbCrLf &amp; ... &amp; " Registros _Contab_Ant_, Cobrados anteriormente y por lo tanto, ya Contabilizado."   ← texto también copiado</code></pre>
+<p>El segundo bloque filtra en realidad <code>BD_ImpAdm &lt; 0</code> (Ajustes de Matrícula), pero conserva sin tocar el comentario de cabecera y el texto de informe del bloque anterior. El usuario que lee el log de ejecución ve una descripción que no corresponde al filtro realmente aplicado.</p>
+<p><strong>Arreglo aplicado:</strong> cabecera de comentario <code>'-_Ajust_Matríc_-...</code>, descripción <code>'--- Filtra Ajustes de Matrícula (ImpAdm negativo) ---...</code> y mensaje de progreso <code>"Registros _Ajust_Matríc_, Ajustes de Matrícula (Imp. Admin. negativo)."</code> — ya no repiten el texto del bloque <code>_Contab_Ant_</code> anterior.</p>
+<h3>A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</h3>
+<p><strong>Severidad:</strong> Medio, a verificar · <strong>Fichero:</strong> <code>M10__Liquid_EP.bas</code></p>
+<p>El módulo mezcla, en distintos puntos, <code>Prog__APP.Range("Sw_VerRecNeg")</code> (cualificado con la hoja) con <code>Range("Sw_VerRecNeg")</code> sin cualificar dentro de <code>Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones</code>, que se dispara desde <code>Worksheet_SelectionChange</code> de <code>Wk_TitP_Liquid</code> con esa hoja como activa, no <code>Prog__APP</code>. El propio <code>CLAUDE.md</code> de este proyecto documenta que <code>Hoja.Range("Nombre")</code> revienta con error 1004 si el nombre vive en otra hoja aunque sea de ámbito Libro; el caso simétrico (<code>Range()</code> sin cualificar resolviendo por la hoja activa) tiene el mismo riesgo si <code>Sw_VerRecNeg</code> resultara tener ámbito de hoja. No se ha podido verificar el ámbito real del nombre definido (vive en el <code>.xlsm</code>, no en el texto exportado): queda como sospecha, no como bug confirmado.</p>
+<h3>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> (a verificar)</h3>
+<p><strong>Severidad:</strong> Bajo, a verificar · <strong>Ficheros:</strong> <code>M00_Ini_Var_APP.bas</code> línea 232, <code>M08_Actualizar_Tb_Coef_VRI.bas</code> línea 11</p>
+<p><code>Coef_VRI</code> (porcentaje de retención VRI) se declara <code>Integer</code> en ambos sitios. Con los valores observados en el código (15, 20) es correcto, pero si algún Plan tuviera un coeficiente no entero en <code>Prog_Coef_Ret_VRI</code> (p. ej. 17,5%), se truncaría/redondearía silenciosamente al leerlo. No se ha podido confirmar si existen coeficientes no enteros en los datos reales.</p>
+<hr>
+<h2>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</h2>
+<p><em>Ficheros: M20–M22, M31–M39, M40–M44, M50–M51, M71–M72, M79–M80, M90, <code>Sht__Inf_*</code>, <code>Wk_Lista_Panes*</code>.</em></p>
+<h3>B1 · Sub pública duplicada: <code>RuT_Inf_Contable_Recibos_AE4x4</code></h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M50_Inf_Cont_AE4x4.bas:8</code> y <code>M50_Inf_Cont_AE4x41.bas:8</code></p>
+<pre><code>Sub RuT_Inf_Contable_Recibos_AE4x4()  '- Importar los 4 WB: EFP y CFC de AñoCon_Ant/Pos</code></pre>
+<p>Dos módulos estándar distintos declaran, ambos sin <code>Private</code>, una <code>Sub</code> pública con el nombre exacto — verificado con <code>grep</code> sobre los dos ficheros. Es un error de compilación de VBA ("Ambiguous name detected") que impide compilar el proyecto <strong>entero</strong>, no solo estas rutinas.</p>
+<p><strong>Arreglo:</strong> eliminar uno de los dos módulos (parece que <code>M50_Inf_Cont_AE4x41.bas</code> es una rama de desarrollo, ver B6) o marcarlo <code>Private</code>/renombrarlo.</p>
+<h3>B2 · Sub pública duplicada: <code>Rut_Lo_Import_AE4x1</code></h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M51_Import_AE4x1.bas:8-13</code> y <code>M51_Import_AE4x11.bas:8-13</code></p>
+<pre><code>Sub Rut_Lo_Import_AE4x1(Ws_AE4x1 As Worksheet, _
+                                  Arch_New_Name As String, _
+                                  SheetNom As String, _
+                                  Optional NameFileAE4 As String, _
+                                  Optional PathFileAE4 As String, _
+                                  Optional SW_Inicilizar_Ws As Boolean = False)</code></pre>
+<p>Misma firma, misma Sub pública, en dos módulos distintos — verificado. Segundo "Ambiguous name detected" independiente del anterior, agravando el bloqueo de compilación.</p>
+<p><strong>Arreglo:</strong> igual que B1.</p>
+<h3>B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M41_Añadir_Núm_JIs_al_Inf.bas:13,15</code> y <code>M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40</code></p>
+<pre><code>        Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
+        Dim Lo_Inf          As ListObject:      Set Lo_Inf = Sht_Inf.ListObjects(1)
+        Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)</code></pre>
+<p>Ni <code>Sht__Inf_Recibos_TIO</code> ni <code>Sht__BD</code> existen como CodeName de ninguna hoja de este proyecto (la tabla de datos aquí se llama <code>Prog_BD</code>, no <code>Sht__BD</code>, y no hay ninguna hoja "TIO"). Con <code>Option Explicit</code>, "Variable no definida" en compilación. Todo apunta a que <code>M41</code>/<code>M42</code> son código copiado literalmente del proyecto hermano <em>Precios Públicos - PPub</em> (que sí tiene esas hojas) y nunca adaptado a Enseñanzas_Propias — coherente con que M42 también reescriba <code>Prog_BD</code>/<code>Sht_Inf</code> en la línea 32-40 mezclando nombres de ambos proyectos.</p>
+<p><strong>Impacto:</strong> el flujo de "añadir números de JI al informe / a la base de datos", tal como está exportado hoy, no compila en este libro.</p>
+<p><strong>Arreglo:</strong> sustituir por <code>Prog_BD</code> y por la hoja EP correspondiente (<code>Sht__Inf_EFP_ACont1_CAcad</code> / <code>_2_CAcad</code> / CFC), o excluir estos dos módulos del proyecto hasta portarlos correctamente.</p>
+<h3>B4 · <code>End Sub</code> huérfano en <code>M90_Rutinas_X.bas</code></h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M90_Rutinas_X.bas</code> — líneas 193-203</p>
+<pre><code>    .AutoFilter Field:=CTa_Ref, Criteria1:=Application.Transpose(Lo_Busca_JI.DataBodyRange.Columns(2)), Operator:=xlFilterValues
+
+    End With
+
+End Sub     '  &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+
+' ==================================================================================================================================
+End Sub
+' ==================================================================================================================================
+Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></pre>
+<p>La línea 197 ya cierra correctamente <code>Rut_Filtro_NumJI_2_en_Tasas</code>; la línea 200 es un segundo <code>End Sub</code> sin ningún <code>Sub</code>/<code>Function</code> abierto que cerrar. Error de sintaxis, impide compilar el módulo.</p>
+<p><strong>Arreglo:</strong> borrar la línea 200.</p>
+<h3>B5 · Variable de objeto <code>Lo_AE4x1</code> no declarada</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M51_Import_AE4x1.bas</code> — líneas 25, 93</p>
+<pre><code>    Dim Ws_AE4          As Worksheet:   Set Ws_AE4 = Lo_AE4x1.Parent
+...
+    Else
+        Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_ClsBk, Lo_AE4x1, False)
+    End If</code></pre>
+<p><code>Lo_AE4x1</code> no se declara en ningún punto de este módulo (solo existe un <code>Dim Lo_AE4x1 As ListObject</code> local en el OTRO módulo casi-gemelo, <code>M51_Import_AE4x11.bas:94</code>, que no aplica aquí). Con <code>Option Explicit</code>, tercer error de compilación independiente de este cluster de ficheros.</p>
+<h3>B6 · <code>Lo_AE4x1</code> usado sin inicializar</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M51_Import_AE4x11.bas</code> — líneas 90-98</p>
+<pre><code>    If SW_Inicilizar_Ws Then       '- Es el 1º, sólo copiar Lo_ClsBk en Ws_AE4x1
+        Call Rut_WrkSheet_Vaciar(Ws_AE4x1.Name)
+        Lo_ClsBk.Range.Copy Destination:=Ws_AE4x1.Range("A1")
+        Set Lo_AE4x1 = Ws_AE4x1.ListObjects(1)
+    Else
+        Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_ClsBk, Lo_AE4x1, False)
+    End If</code></pre>
+<p><code>Lo_AE4x1</code> solo se asigna dentro de la rama <code>If SW_Inicilizar_Ws</code>; la rama <code>Else</code> lo usa sin haberlo asignado nunca. Los 8 puntos de llamada (4 en <code>M50_Inf_Cont_AE4x4.bas</code> y 4 en <code>M50_Inf_Cont_AE4x41.bas</code>) pasan siempre <code>False</code> como último argumento, así que <code>Lo_AE4x1</code> permanecería <code>Nothing</code> en tiempo de ejecución. Aunque B1/B2/B3/B5 ya impiden compilar, esto confirma que el flujo AE4 está incompleto también a nivel lógico: falta pasar <code>True</code> en la primera de las 4 importaciones.</p>
+<h3>B7 · Límite de filas hardcodeado a 5000</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M21_Resumen_Tit_Propios_UNO.bas</code> — línea 101</p>
+<pre><code>    For Fila_DR = 1 To 5000 'Lo_TPH.ListRows.Count</code></pre>
+<p>El bucle está limitado a 5000 iteraciones fijas en vez de usar <code>Lo_TPH.ListRows.Count</code>, que queda comentado justo al lado — delatando la intención original. Si <code>Prog_BD</code> supera las 5000 filas, se truncan datos silenciosamente; si tiene menos, <code>Lo_TPH.ListRows(Fila_DR)</code> lanza "Subscript out of range" al superar el número real de filas.</p>
+<p><strong>Arreglo:</strong> <code>For Fila_DR = 1 To Lo_TPH.ListRows.Count</code>.</p>
+<h3>B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M33_List_PLANES_Anulados.bas</code> — líneas 74-77</p>
+<pre><code>    For Cont = 2 To Lo_TitPH.ListRows.Count
+        If .Cells(Cont, BD_Tipo_Rec) = "Deleted" Then GoTo Reg_Siguiente
+        If Cells(ContIni, BD_ImpAdm) &lt; 0 Then GoTo Reg_Siguiente
+        If .Cells(Cont, BD_Plan) &lt;&gt; Cod_Plan Then</code></pre>
+<p>La línea 76 debería ser <code>.Cells(Cont, BD_ImpAdm)</code> — cualificada con el <code>.</code> del <code>With Lo_TitPH.DataBodyRange</code> en curso, y usando <code>Cont</code> (la variable del bucle) — tal como hacen los módulos hermanos <code>M31_List_PLANES.bas:90</code> y <code>M32_List_PLANES_Devoluc.bas:67</code>. Al faltar el punto, <code>Cells(...)</code> referencia implícitamente la hoja <strong>activa</strong>, no <code>Lo_TitPH.DataBodyRange</code>; y al usar <code>ContIni</code> (constante fijada antes del bucle) en vez de <code>Cont</code>, siempre mira la misma celda de la primera fila.</p>
+<p><strong>Impacto:</strong> el filtro de "excluir Ajustes de Matrícula" de este informe de Anulados nunca actúa como se pretende.</p>
+<p><strong>Arreglo:</strong> <code>If .Cells(Cont, BD_ImpAdm) &lt; 0 Then GoTo Reg_Siguiente</code>.</p>
+<h3>B9 · <code>Application.Calculation</code> guardado en variable <code>Boolean</code></h3>
+<p><strong>Severidad:</strong> Alto · <strong>Ficheros:</strong> <code>M40_Inf_Contab_Recibos.bas:170,601</code>, <code>M41_Añadir_Núm_JIs_al_Inf.bas:27,228</code>, <code>M42_Añadir_Núm_JIs_a_BDatos.bas:27,91</code></p>
+<pre><code>    Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
+...
+    Application.Calculation = Sw_Calculation</code></pre>
+<p><code>Application.Calculation</code> devuelve una constante <code>XlCalculation</code> (p. ej. <code>xlCalculationAutomatic = -4105</code>), no un booleano. Al guardarla en <code>Boolean</code>, cualquier valor no-cero se convierte en <code>True</code>, perdiendo qué modo había realmente; al restaurar, <code>Application.Calculation = Sw_Calculation</code> escribe <code>True</code> (-1), que no es ningún miembro válido de <code>XlCalculation</code>. El mismo patrón aparece también en <code>Rut_WS.bas</code> (ver C5) y <code>M10__Liquid_EP.bas</code>.</p>
+<p><strong>Arreglo:</strong> <code>Dim Sw_Calculation As XlCalculation</code> (o <code>Long</code>).</p>
+<h3>B10 · Año "2025" hardcodeado en nombres de fichero exportado</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Ficheros:</strong> <code>M38x_Export_Cierre_Contable.bas:21-22</code>, y de forma idéntica <code>M22_Inf_EPs_para_UXXI_NEW.bas:489-490</code></p>
+<pre><code>    FichName = "NUEVO_" &amp; TipoEP &amp; Prog__APP.Range("APP_CursAcad") _
+               &amp; "_Cierre_2025 " &amp; Format(Now, "(yyyy-mm-dd_hhmm)") &amp; ".xlsx"</code></pre>
+<p>El "2025" no depende de <code>APP_CursAcad</code>/<code>APP_AñoCont</code>; en cursos posteriores el fichero exportado seguirá llamándose "..._Cierre_2025..." aunque se genere en otro año contable.</p>
+<p><strong>Arreglo:</strong> sustituir el literal <code>"_Cierre_2025"</code> por <code>"_Cierre_" &amp; Prog__APP.Range("APP_AñoCont")</code>.</p>
+<h3>B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)</h3>
+<p><strong>Severidad:</strong> Medio, a verificar · <strong>Ficheros:</strong> <code>M22_Inf_EPs_para_UXXI.bas</code> (<code>Rut_Informe_EPs_para_UXXI_OLD</code>) y <code>M22_Inf_EPs_para_UXXI_NEW.bas</code> (<code>Rut_Informe_EPs_para_UXXI</code>)</p>
+<p>No colisionan en compilación (nombres de Sub distintos), pero ambas escriben en la misma hoja destino <code>Sht__Inf_EPs_UXXI</code>, y la agrupación cambió: la versión OLD agrupa por <code>Plan &amp; Curso_Acad_Ant &amp; Año_Emi_Ant</code> (tres claves), la NEW agrupa solo por <code>Cod_Plan &amp; Año_Emi</code> (dos claves — se eliminó <code>Curso_Acad</code>), y los <code>SumIfs</code> que siguen tampoco filtran ya por <code>BD_C_Acad</code>. Si el mismo código de Plan se reutiliza en dos ediciones (Curso_Acad) distintas que comparten año contable de emisión, la versión NEW fusionaría en una sola fila-resumen datos que la OLD mantenía separados. No se ha confirmado si los códigos de Plan son siempre únicos por Curso_Acad en los datos reales, ni si <code>_OLD</code> sigue invocándose desde algún botón/Ribbon no auditado en este trabajo (por grep no aparece ninguna llamada en el código exportado).</p>
+<h3>B12 · <code>M71_Restituir</code> sobrescribe datos y parámetros sin validar ni confirmar</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M71_Restituir_BDatos_EP_Work.bas</code> — líneas 28-44, 56-65, 109</p>
+<pre><code>        .Filters.Add "Sólo Ficheros Excel", "*.xls?", 1
+        If .Show &lt;&gt; -1 Then
+            ...
+        Else
+            Arch__EP_New = .SelectedItems(1)
+...
+    Prog__APP.Range("APP_AñoCont") = ClsBk.Sheets(Prog__APP.Name).Range("APP_AñoCont")
+    Prog__APP.Range("APP_CursAcad") = ClsBk.Sheets(Prog__APP.Name).Range("APP_CursAcad")
+    ...
+    Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_ClsBk, Lo_BD, True)</code></pre>
+<p>A diferencia de <code>M51</code> (que valida que el fichero elegido empiece por el nombre esperado), el selector aquí acepta cualquier <code>*.xls?</code> sin comprobar que sea realmente un backup de Enseñanzas Propias. Los parámetros de <code>Prog__APP</code> (Año Contable, Curso Académico, EFP/CFC, Plan activo...) se sobrescriben <strong>desde el backup</strong> antes de mostrar ningún resumen, y la tabla <code>Prog_BD</code> completa se sustituye (<code>True</code> = vaciar destino primero) sin ningún <code>MsgBox</code> de confirmación previo — el único aviso llega después, ya consumado, en el log de <code>Form_Menu.TB_Informe</code>.</p>
+<p><strong>Impacto:</strong> elegir por error el fichero equivocado cambia silenciosamente el Año Contable/Curso Académico activos de la aplicación y sustituye los datos de trabajo, sin posibilidad de cancelar tras verlo.</p>
+<p><strong>Arreglo:</strong> validar el nombre del fichero elegido (como hace M51) y pedir confirmación explícita antes de sobrescribir <code>Prog__APP</code>/<code>Prog_BD</code>.</p>
+<h3>B13 · <code>Wk_Lista_Panes1.cls</code> sin ninguna referencia en el código (a verificar)</h3>
+<p><strong>Severidad:</strong> Bajo, a verificar · <strong>Fichero:</strong> <code>Wk_Lista_Panes1.cls</code></p>
+<p>Solo <code>Wk_Lista_Panes</code> se usa (<code>M31_List_PLANES.bas:29</code>); <code>Wk_Lista_Panes1</code> (hoja vacía, sin código propio) no aparece en ningún otro <code>.bas</code>/<code>.cls</code> del proyecto. Probable hoja duplicada/huérfana, candidata a limpieza — pero esta tarea no ha auditado macros asignadas a shapes ni el XML del Ribbon, así que un grep negativo en el código no es prueba suficiente de "huérfano" (ver la nota ya recogida en el <code>CLAUDE.md</code> global sobre este mismo riesgo).</p>
+<h3>B14 · Bucle <code>Do While</code> sin cota superior en M31/M32/M33</h3>
+<p><strong>Severidad:</strong> Bajo · <strong>Ficheros:</strong> <code>M31_List_PLANES.bas:59-61</code>, <code>M32_List_PLANES_Devoluc.bas:40-42</code>, <code>M33_List_PLANES_Anulados.bas:47-49</code> (mismo patrón en los tres)</p>
+<pre><code>    Do While .Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) &lt; 0
+        ContIni = ContIni + 1
+    Loop
+    Cont = ContIni
+    Cod_Plan = .Cells(Cont, BD_Plan)</code></pre>
+<p>Si todas las filas de <code>Prog_BD</code> cumplieran la condición de salto, <code>ContIni</code> superaría <code>Lo_TitPH.ListRows.Count</code> y la siguiente lectura fallaría con un error de ejecución en vez de un mensaje claro tipo "no hay datos". Caso límite, baja probabilidad en uso real.</p>
+<h3>B15 · Contraseña de correo en texto plano</h3>
+<p><strong>Severidad:</strong> Bajo · <strong>Fichero:</strong> <code>M80_Mandar_Correo.bas</code> — línea 126 y <code>Rut_Cambiar_Contraseña_Email</code> (líneas 142-151)</p>
+<p>La contraseña SMTP se lee/escribe/muestra en una celda (<code>Range("APP_MailClau")</code>) y en <code>MsgBox</code>/<code>InputBox</code> sin ningún enmascarado. No es un bug funcional, pero es una práctica de higiene de datos a revisar.</p>
+<hr>
+<h2>Bloque C — Librería transversal <code>Rut_*</code>/<code>Prog_*</code> y formularios</h2>
+<p><em>Ficheros: <code>Rut_Lo</code>, <code>Rut_WB</code>, <code>Rut_WS</code>, <code>Rut__Right_Click_VBA</code>, <code>Form_*</code>, <code>M0999_*</code>, <code>Módulo*</code>.</em></p>
+<h3>C1 · Variable no declarada <code>LoTb</code> (typo de <code>Lo_Tb</code>)</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_Lo.bas</code> — línea 136 (<code>Option Explicit</code> activo)</p>
+<pre><code>Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, columna As Integer, Criterio As String, Optional SW_Clear As Boolean = False)
+    If SW_Clear And Not Lo_Tb.AutoFilter Is Nothing Then LoTb.AutoFilter.ShowAllData
+    Lo_Tb.Range.AutoFilter Field:=columna, Criteria1:=Criterio
+End Sub</code></pre>
+<p>El parámetro se llama <code>Lo_Tb</code>, pero la línea usa <code>LoTb</code> (sin guion bajo), no declarada en ningún sitio del proyecto (confirmado con grep global). Con <code>Option Explicit</code>, "Variable no definida" en compilación. Esta <code>Sub</code> en concreto no la llama nadie (existe un duplicado correcto y sí usado, <code>Rut_x_Filtro_LoTb</code> en <code>M90_Rutinas_X.bas</code>, consistente con <code>LoTb</code>), pero el error de compilación afecta igualmente a todo el proyecto.</p>
+<p><strong>Arreglo:</strong> cambiar <code>LoTb</code> por <code>Lo_Tb</code> (o borrar la Sub, ya que está duplicada y sin uso).</p>
+<h3>C2 · <code>.calcMode</code> no es un miembro de <code>Application</code></h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_Lo_Export_XlsX.bas</code> — línea 44 (<code>Rut_Lo_Export_to_New_WB</code>)</p>
+<pre><code>    Dim calcMode    As XlCalculation
+...
+    With Application
+        .ScreenUpdating = False
+        .EnableEvents = False
+        .calcMode = .Calculation
+        .Calculation = xlCalculationManual
+    End With
+...
+    With Application
+        .ScreenUpdating = True
+        .Calculation = calcMode
+    End With</code></pre>
+<p><code>calcMode</code> se declara como variable local (línea 20) para guardar el modo de cálculo y restaurarlo después (eso sí, correcto al final). Pero dentro del <code>With Application</code>, <code>.calcMode = .Calculation</code> lleva el punto delante de <code>calcMode</code>, así que VBA lo interpreta como <code>Application.calcMode</code> — propiedad que no existe → "Método o miembro de datos no encontrado" en compilación. El patrón correcto (<code>calcMode = .Calculation</code>, sin punto inicial) sí se usa de forma consistente 4 veces en <code>Rut__Right_Click_VBA.bas</code>.</p>
+<p><strong>Arreglo:</strong> quitar el punto inicial → <code>calcMode = .Calculation</code>.</p>
+<h3>C3 · <code>String</code> pasado donde se espera <code>Worksheet</code> por referencia (ruta en producción)</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 42-49, 58-70</p>
+<pre><code>Sub Rut_WrkSheet_Preparar(WrkSht As Worksheet)  '- Mostrar todas las Filas y Columnas, y Quitar Filtros.
+    With WrkSht
+        .Columns.EntireColumn.Hidden = False
+        .Rows.EntireRow.Hidden = False
+        Call Rut_Lo_Filtros_Quitar(.ListObjects(1))
+    End With
+End Sub
+...
+Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja incluso los objetos (Shapes) ---
+    ...
+    With Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
+        ...
+        .Unprotect
+        Call Rut_WrkSheet_Preparar(WrkSht)</code></pre>
+<p><code>Rut_WrkSheet_Preparar</code> exige un <code>Worksheet</code> por parámetro (ByRef implícito, línea 42); <code>Rut_WrkSheet_Vaciar</code> le pasa su propio parámetro <code>WrkSht</code>, que es <code>String</code> (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, <code>Rut_WrkSheet_Vaciar</code> <strong>está activamente en uso</strong>: la llaman <code>M09_Importar_Sol_Liq.bas:76</code>, <code>M12_Genera_LIQx_PDF.bas:24,303</code>, <code>M51_Import_AE4x1.bas:90</code>, <code>M51_Import_AE4x11.bas:92</code> y <code>Rut_Hipervinculos.bas:13</code>.</p>
+<p><strong>Arreglo:</strong> <code>Call Rut_WrkSheet_Preparar(Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht))</code> — pasar el objeto <code>Worksheet</code>, no el nombre.</p>
+<h3>C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Mensaje.frm</code> — línea 20 (<code>UserForm_Activate</code>)</p>
+<pre><code>Sub UserForm_Activate()
+Rut_Actualizar_1_LS_VAL
+Unload Me
+End Sub</code></pre>
+<p><code>Rut_Actualizar_1_LS_VAL</code> no existe en ningún módulo del proyecto (comprobado con grep global, no solo en el bloque revisado). Al ser una llamada directa (no <code>Application.Run</code> con cadena), VBA la resuelve en compilación: "Sub o función no definida". El propio formulario <code>Mensaje</code> tampoco lo muestra nadie (ni <code>Mensaje.Show</code> ni <code>Load Mensaje</code> aparecen en ningún módulo) — código huérfano por ambos lados.</p>
+<p><strong>Sugerencia:</strong> si <code>Mensaje.frm</code> ya no se usa, eliminarlo; si se pretendía llamar a otra rutina, corregir el nombre.</p>
+<h3>C5 · <code>Rut_WrkSheet_ReducirPeso</code> opera sobre la hoja activa, no sobre la recibida</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 20-38</p>
+<pre><code>Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRange As Boolean = False)
+        Dim ws      As Worksheet:       Set ws = Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
+        Dim Lo      As ListObject:      Set Lo = ws.ListObjects(1)
+        Dim Sw_Calculation  As Boolean:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlManual
+    With ws
+        ...
+        With Lo.Range
+            Range(.Cells(.Rows.Count, .Columns.Count).Address).Select   ' Selecciona la última celda de la tabla
+            ActiveCell.Offset(1, 1).Select
+        End With
+        .Range(ActiveCell.Address &amp; ":" &amp; Cells(Rows.Count, 1).Address).EntireRow.Delete
+        .Range(ActiveCell.Address &amp; ":" &amp; Cells(1, Columns.Count).Address).EntireColumn.Delete</code></pre>
+<p><code>Range(...)</code>, <code>ActiveCell</code> y <code>Cells(...)</code> van sin cualificar: aunque están dentro de <code>With ws</code>/<code>With Lo.Range</code>, al no llevar el punto delante actúan sobre la hoja <strong>activa</strong> en ese momento, no sobre <code>ws</code> (la hoja recibida por parámetro). Además, el mismo defecto de C9/B9 se repite aquí: <code>Sw_Calculation</code> guarda <code>Application.Calculation</code> (un <code>XlCalculation</code>) en una variable <code>Boolean</code>.</p>
+<p><strong>Impacto:</strong> si en el momento de la llamada la hoja activa es distinta de <code>WrkSht</code>, el <code>.Select</code>/<code>EntireRow.Delete</code>/<code>EntireColumn.Delete</code> borraría filas/columnas de la hoja equivocada.</p>
+<p><strong>Arreglo:</strong> cualificar todo con <code>ws.</code> (<code>ws.Range(...)</code>, sustituyendo <code>ActiveCell</code> por una variable <code>Range</code> propia calculada dentro del <code>With Lo.Range</code>); y declarar <code>Sw_Calculation As XlCalculation</code>.</p>
+<h3>C6 · Pérdida de datos en <code>M0999_Modif_Cols_BDatos.bas</code> si se reejecuta</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M0999_Modif_Cols_BDatos.bas</code> — líneas 97-102 (<code>Reorganizar_ListObject_Solo</code>)</p>
+<pre><code>    Lo.ListColumns("Col_55").DataBodyRange.Copy
+    Lo.ListColumns("Col_56").DataBodyRange.Copy
+    Lo.ListColumns("Col_57").DataBodyRange.Copy
+    Lo.ListColumns("Col_55").Delete: Lo.ListColumns("Col_56").Delete: Lo.ListColumns("Col_57").Delete
+    Lo.ListColumns.Add.Name = "Col_55": Lo.ListColumns.Add.Name = "Col_56": Lo.ListColumns.Add.Name = "Col_57"
+    Lo.ListColumns("Col_55").DataBodyRange.PasteSpecial xlPasteValues</code></pre>
+<p>Cada <code>.Copy</code> sobrescribe el portapapeles del anterior: al llegar al <code>PasteSpecial</code> solo sobrevive la copia de <code>Col_57</code>, y ni siquiera se pega en <code>Col_57</code> sino en <code>Col_55</code>. Se borran las 3 columnas y solo se "recupera" un pegado, y el equivocado. Es una migración "de un solo uso" (nombrada por fecha, como sus hermanas <code>Reorganizar_Lo_BDatos_Cambio_Ene_26</code>/<code>_Nov_2025</code>), que además usa <code>ActiveWorkbook</code>/<code>Worksheets(...)</code> sin cualificar por libro.</p>
+<p><strong>Impacto:</strong> si alguien vuelve a lanzar este módulo por error (Alt+F8) sobre <code>Prog_BD</code> real, puede corromper o perder columnas de la base de datos.</p>
+<p><strong>Sugerencia:</strong> cualificar con <code>ThisWorkbook.Worksheets(...)</code>, y pegar cada columna justo después de copiarla, no encadenar 3 <code>.Copy</code> seguidos; o retirar el módulo del libro de producción si el cambio ya se aplicó.</p>
+<h3>C7 · Valor mágico <code>-0.86</code> escrito sobre datos reales sin confirmación</h3>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M0999_Busca_Planes_ImpAdmERR.bas</code> — líneas 56-57</p>
+<pre><code>                    RowData.Range(BD_Rec_Imp_INSS) = RowData.Range(BD_Rec_Imp_Adm)
+                    RowData.Range(BD_Rec_Imp_Adm) = -0.86</code></pre>
+<p>Sin <code>MsgBox</code> de confirmación previa y sin comprobar si la fila ya fue "arreglada" antes: no es idempotente — si se ejecuta dos veces, la segunda sobrescribiría de nuevo con <code>-0.86</code> filas que ya tuvieran ese valor por otro motivo. Opera directamente sobre <code>Prog_BD.ListObjects(1)</code>, la tabla de producción.</p>
+<p><strong>Sugerencia:</strong> añadir una comprobación de "ya aplicado" y una confirmación explícita antes de escribir, o mover el módulo fuera del libro de producción si ya cumplió su propósito puntual.</p>
+<h3>C8 · <code>For Each</code> que ignora la variable de iteración</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 72-75 (dentro de <code>Rut_WrkSheet_Vaciar</code>)</p>
+<pre><code>        Dim tbl As ListObject
+        For Each tbl In .ListObjects
+            If .ListObjects(1).ShowAutoFilter Then .ListObjects(1).AutoFilter.ShowAllData   '- Quitar filtro Tabla
+        Next tbl</code></pre>
+<p>El bucle recorre <code>tbl</code>, pero el cuerpo siempre opera sobre <code>.ListObjects(1)</code> (la primera tabla), nunca sobre <code>tbl</code>. En una hoja con una sola tabla no se nota; en una con varias, solo se le quita el filtro a la primera, tantas veces como tablas haya.</p>
+<p><strong>Arreglo:</strong> sustituir <code>.ListObjects(1)</code> por <code>tbl</code> dentro del bucle.</p>
+<h3>C9 · <code>Módulo3.bas</code> sin <code>Option Explicit</code>, con variables casi homónimas</h3>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>Módulo3.bas</code> (sin línea <code>Option Explicit</code> tras el <code>Attribute VB_Name</code>)</p>
+<p>El fichero declara a nivel de módulo unas 80 variables acumuladoras del resumen contable de planes (<code>Imp_Emis</code>, <code>Imp__ADx</code>, <code>TImpADxAdm</code>...) y redeclara localmente variantes muy parecidas dentro de <code>RuT_Estadística_Contable_Planes_CAcad_Pos</code> (p. ej. <code>Imp_ADx</code> frente a <code>Imp__ADx</code>, con y sin doble guion bajo, conviviendo en el mismo fichero). Sin <code>Option Explicit</code>, un typo futuro en cualquiera de esos nombres tan parecidos no daría error de compilación: crearía silenciosamente una <code>Variant</code> nueva (siempre 0/vacía), y el total contable saldría mal sin aviso. Es el único módulo de "prueba" revisado sin <code>Option Explicit</code> — todos sus hermanos (<code>M0999_*</code>, <code>Módulo_Filtro_Avanzado_Prueba</code>, <code>Módulo1/4/5</code>) sí lo tienen.</p>
+<p><strong>Arreglo:</strong> añadir <code>Option Explicit</code> y compilar para detectar cualquier variable ya mal escrita.</p>
+<h3>C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)</h3>
+<p><strong>Severidad:</strong> Medio, a verificar · <strong>Fichero:</strong> <code>Rut__Right_Click_VBA.bas</code> línea 202 vs línea 283, invocadas desde <code>M00_Ini_APP.bas</code> líneas 85-86</p>
+<pre><code>Private Sub DelMenúRightClickCell()      ' Rut__Right_Click_VBA.bas:202
+...
+Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (pública)</code></pre>
+<pre><code>    Run ("DelMenúRightClickCell") '- Elimina otros posible Menús XML     ' M00_Ini_APP.bas:85
+    Run ("DelMenúRightClickList") '- Elimina otros posible Menús XML     ' M00_Ini_APP.bas:86</code></pre>
+<p><code>Rut_ConfigExcel_RESTABLECER</code> (que cuelga de <code>ThisWorkbook.Workbook_BeforeClose</code>, es decir, se ejecuta cada vez que se cierra el libro) llama por nombre, vía <code>Run</code>, a una Sub <code>Private</code> declarada en <strong>otro módulo</strong> — patrón conocido como problemático en VBA (<code>Run</code>/<code>Application.Run</code> sobre un procedimiento <code>Private</code> de otro módulo puede fallar con error 1004). Tampoco hay ningún <code>On Error</code> activo todavía en esas dos líneas concretas. No se puede confirmar sin ejecutar el VBA real, así que queda como sospecha razonable, no como bug confirmado — pero la asimetría entre las dos Subs gemelas (una <code>Private</code>, la otra pública) ya llama la atención por sí sola.</p>
+<p><strong>Sugerencia:</strong> hacer <code>DelMenúRightClickCell</code> pública (como su gemela) para eliminar la duda, y probar cerrando el libro para confirmar que no salta ningún error.</p>
+<h3>C11 · Ruta de disco hardcodeada como fallback silencioso</h3>
+<p><strong>Severidad:</strong> Bajo · <strong>Fichero:</strong> <code>Rut_Wb_CopSegTimed_USB_HD.bas</code> — líneas 192-194</p>
+<pre><code>        If Not Fnc_Range_Exist("APP_CopSeg_Usb_Path") Then
+            MsgBox "¡¡¡ Falta crear el Range('APP_CopSeg_Usb_Path') !!!", vbExclamation, "Procedimiento: Copia de Seguridad"
+            FichPath = "F:\__CopSeg Versiones Programas\" &amp; FichNom &amp; " " &amp; Format(Now, "(yymmdd_hhmm)") &amp; Tipo &amp; FichExt</code></pre>
+<p>Solo se usa si falta el rango con nombre <code>APP_CopSeg_Usb_Path</code> (si existe, se usa ese en su lugar), pero el fallback da por hecho que en la máquina donde se ejecute existe <code>F:\__CopSeg Versiones Programas\</code>. Dado que este libro se usa entre varios ordenadores, si el rango de configuración se pierde en una copia del libro, el fallback podría apuntar a una ruta que no existe en esa máquina — al menos hay un <code>MsgBox</code> previo que avisa de la falta del Range.</p>
+<p><strong>Sugerencia:</strong> si el rango no existe, pedir la ruta con <code>Application.GetSaveAsFilename</code>/<code>FileDialog</code> en vez de asumir una ruta fija.</p>
+<hr>
+<p><em>Auditoría realizada mediante lectura completa de los 133 módulos exportados (no solo búsqueda de patrones), con verificación cruzada directa contra el fichero real de los 6 hallazgos más críticos (B1, B2, B4, C1, C3, A3) antes de incluirlos en este informe. Los hallazgos marcados "a verificar" señalan sospechas razonables que no se han podido confirmar por completo con el código en texto plano — antes de invertir tiempo en corregirlos, confírmalos contra el <code>.xlsm</code> real.</em></p>
+</article></main>
+<footer>Generado desde <code>Informe_Bugs.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>
