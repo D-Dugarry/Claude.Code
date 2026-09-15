@@ -64,7 +64,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <main><article>
 <h1>Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm</h1>
 <p>Auditoría del código VBA exportado en <code>VBA_Moduls/</code> (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.</p>
-<p><strong>Resumen:</strong> 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos).</p>
+<p><strong>Resumen:</strong> 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos, 1 descartado).</p>
 <blockquote><p><strong>Nota sobre codificación:</strong> los ficheros <code>.bas</code>/<code>.cls</code>/<code>.frm</code> están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre <code>VBA_Moduls/</code>, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver <code>CLAUDE.md</code> de este proyecto).</p></blockquote>
 <h2>Antes de tocar nada: compila el proyecto</h2>
 <p>Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error de compilación VBA (<code>Option Explicit</code> roto, nombre duplicado, tipo incompatible, <code>Sub</code>/<code>End Sub</code> descuadrados). <strong>Un solo error de compilación en cualquier módulo bloquea la ejecución de todas las macros del libro</strong>, no solo la rutina afectada — VBA compila el proyecto entero, no módulo a módulo. Antes de corregir nada, abre el editor VBA del <code>.xlsm</code> real y ejecuta <strong>Depurar → Compilar VBA Project</strong>, y anota qué marca primero: puede que algunos de estos 8 puntos ya estén corregidos ahí y esta exportación esté desactualizada, o puede que el libro lleve tiempo sin compilar limpio (varios de los módulos implicados — <code>M50_Inf_Cont_AE4x41</code>, <code>M51_Import_AE4x11</code>, <code>M41</code>/<code>M42</code> — parecen ramas de desarrollo/copias aún no terminadas, no el camino que se ejecuta a diario).</p>
@@ -80,7 +80,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li>A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</li>
 <li>A7 · Mensaje de informe copiado y mal etiquetado</li>
 <li>A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</li>
-<li>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> (a verificar)</li>
+<li>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> — descartado</li>
 </ul>
 <li><strong>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</strong></li>
 <ul>
@@ -221,9 +221,10 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <h3>A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</h3>
 <p><strong>Severidad:</strong> Medio, a verificar · <strong>Fichero:</strong> <code>M10__Liquid_EP.bas</code></p>
 <p>El módulo mezcla, en distintos puntos, <code>Prog__APP.Range("Sw_VerRecNeg")</code> (cualificado con la hoja) con <code>Range("Sw_VerRecNeg")</code> sin cualificar dentro de <code>Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones</code>, que se dispara desde <code>Worksheet_SelectionChange</code> de <code>Wk_TitP_Liquid</code> con esa hoja como activa, no <code>Prog__APP</code>. El propio <code>CLAUDE.md</code> de este proyecto documenta que <code>Hoja.Range("Nombre")</code> revienta con error 1004 si el nombre vive en otra hoja aunque sea de ámbito Libro; el caso simétrico (<code>Range()</code> sin cualificar resolviendo por la hoja activa) tiene el mismo riesgo si <code>Sw_VerRecNeg</code> resultara tener ámbito de hoja. No se ha podido verificar el ámbito real del nombre definido (vive en el <code>.xlsm</code>, no en el texto exportado): queda como sospecha, no como bug confirmado.</p>
-<h3>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> (a verificar)</h3>
-<p><strong>Severidad:</strong> Bajo, a verificar · <strong>Ficheros:</strong> <code>M00_Ini_Var_APP.bas</code> línea 232, <code>M08_Actualizar_Tb_Coef_VRI.bas</code> línea 11</p>
-<p><code>Coef_VRI</code> (porcentaje de retención VRI) se declara <code>Integer</code> en ambos sitios. Con los valores observados en el código (15, 20) es correcto, pero si algún Plan tuviera un coeficiente no entero en <code>Prog_Coef_Ret_VRI</code> (p. ej. 17,5%), se truncaría/redondearía silenciosamente al leerlo. No se ha podido confirmar si existen coeficientes no enteros en los datos reales.</p>
+<h3>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> — descartado</h3>
+<p><strong>Severidad:</strong> Bajo · <strong>Ficheros:</strong> <code>M00_Ini_Var_APP.bas</code> línea 232, <code>M08_Actualizar_Tb_Coef_VRI.bas</code> línea 11 · <strong>Estado:</strong> ❌ Descartado (2026-09-15) — no es un bug</p>
+<p><code>Coef_VRI</code> (porcentaje de retención VRI) se declara <code>Integer</code> en ambos sitios. Con los valores observados en el código (15, 20) es correcto, y quedaba como sospecha por si algún Plan tuviera un coeficiente no entero en <code>Prog_Coef_Ret_VRI</code> (p. ej. 17,5%), que se truncaría/redondearía silenciosamente al leerlo.</p>
+<p><strong>Verificado por el usuario:</strong> <code>Coef_VRI</code> solo contiene números enteros — es una retención fijada por el Vicerrectorado de Investigación en puntos porcentuales enteros, nunca con decimales. <code>Integer</code> es el tipo correcto; no hay truncamiento posible en la práctica.</p>
 <hr>
 <h2>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</h2>
 <p><em>Ficheros: M20–M22, M31–M39, M40–M44, M50–M51, M71–M72, M79–M80, M90, <code>Sht__Inf_*</code>, <code>Wk_Lista_Panes*</code>.</em></p>

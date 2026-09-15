@@ -2,7 +2,7 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos).
+**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos, 1 descartado).
 
 > **Nota sobre codificación:** los ficheros `.bas`/`.cls`/`.frm` están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre `VBA_Moduls/`, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver `CLAUDE.md` de este proyecto).
 
@@ -21,7 +21,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - A6 · `.EntireRow.Delete` en vez de `.Delete`, único caso del pipeline
   - A7 · Mensaje de informe copiado y mal etiquetado
   - A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")` (a verificar)
-  - A9 · `Coef_VRI` declarado `Integer` (a verificar)
+  - A9 · `Coef_VRI` declarado `Integer` — descartado
 - **Bloque B — Informes, Cierre Contable y AE4x4/AE4x1**
   - B1 · Sub pública duplicada: `RuT_Inf_Contable_Recibos_AE4x4`
   - B2 · Sub pública duplicada: `Rut_Lo_Import_AE4x1`
@@ -208,10 +208,12 @@ El segundo bloque filtra en realidad `BD_ImpAdm < 0` (Ajustes de Matrícula), pe
 
 El módulo mezcla, en distintos puntos, `Prog__APP.Range("Sw_VerRecNeg")` (cualificado con la hoja) con `Range("Sw_VerRecNeg")` sin cualificar dentro de `Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones`, que se dispara desde `Worksheet_SelectionChange` de `Wk_TitP_Liquid` con esa hoja como activa, no `Prog__APP`. El propio `CLAUDE.md` de este proyecto documenta que `Hoja.Range("Nombre")` revienta con error 1004 si el nombre vive en otra hoja aunque sea de ámbito Libro; el caso simétrico (`Range()` sin cualificar resolviendo por la hoja activa) tiene el mismo riesgo si `Sw_VerRecNeg` resultara tener ámbito de hoja. No se ha podido verificar el ámbito real del nombre definido (vive en el `.xlsm`, no en el texto exportado): queda como sospecha, no como bug confirmado.
 
-### A9 · `Coef_VRI` declarado `Integer` (a verificar)
-**Severidad:** Bajo, a verificar · **Ficheros:** `M00_Ini_Var_APP.bas` línea 232, `M08_Actualizar_Tb_Coef_VRI.bas` línea 11
+### A9 · `Coef_VRI` declarado `Integer` — descartado
+**Severidad:** Bajo · **Ficheros:** `M00_Ini_Var_APP.bas` línea 232, `M08_Actualizar_Tb_Coef_VRI.bas` línea 11 · **Estado:** ❌ Descartado (2026-09-15) — no es un bug
 
-`Coef_VRI` (porcentaje de retención VRI) se declara `Integer` en ambos sitios. Con los valores observados en el código (15, 20) es correcto, pero si algún Plan tuviera un coeficiente no entero en `Prog_Coef_Ret_VRI` (p. ej. 17,5%), se truncaría/redondearía silenciosamente al leerlo. No se ha podido confirmar si existen coeficientes no enteros en los datos reales.
+`Coef_VRI` (porcentaje de retención VRI) se declara `Integer` en ambos sitios. Con los valores observados en el código (15, 20) es correcto, y quedaba como sospecha por si algún Plan tuviera un coeficiente no entero en `Prog_Coef_Ret_VRI` (p. ej. 17,5%), que se truncaría/redondearía silenciosamente al leerlo.
+
+**Verificado por el usuario:** `Coef_VRI` solo contiene números enteros — es una retención fijada por el Vicerrectorado de Investigación en puntos porcentuales enteros, nunca con decimales. `Integer` es el tipo correcto; no hay truncamiento posible en la práctica.
 
 ---
 
