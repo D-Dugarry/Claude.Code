@@ -1,6 +1,6 @@
 # EP - Conceptos y Reglas
 
-Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante (`EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm`). Este documento recoge, a partir de una lectura completa del código VBA exportado en `VBA_Moduls/`, los conceptos de negocio y las reglas que el código realmente aplica — no es un manual de usuario, es una referencia para quien vaya a tocar el código.
+Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante (`EP_202x-2x_BaseDatos-LIQ _V3.xlsm`). Este documento recoge, a partir de una lectura completa del código VBA exportado en `VBA_Moduls/`, los conceptos de negocio y las reglas que el código realmente aplica — no es un manual de usuario, es una referencia para quien vaya a tocar el código.
 
 ## Ámbito
 

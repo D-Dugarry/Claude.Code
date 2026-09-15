@@ -1,4 +1,4 @@
-# Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm
+# Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V3.xlsm
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 

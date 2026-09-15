@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este proyecto
 
-Libro Excel con VBA (`EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm`, ~5 MB) que gestiona la **Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante** (EFP: Enseñanzas de Formación Permanente; CFC/AFC: Cursos y Actividades de Formación Complementaria). El código VBA vive exportado como texto plano en `VBA_Moduls/` (133 ficheros `.bas`/`.cls`/`.frm`/`.frx`); el `.xlsm` es el binario real donde se ejecuta y que contiene además los datos (tablas Excel).
+Libro Excel con VBA (`EP_202x-2x_BaseDatos-LIQ _V3.xlsm`, ~5 MB) que gestiona la **Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante** (EFP: Enseñanzas de Formación Permanente; CFC/AFC: Cursos y Actividades de Formación Complementaria). El código VBA vive exportado como texto plano en `VBA_Moduls/` (133 ficheros `.bas`/`.cls`/`.frm`/`.frx`); el `.xlsm` es el binario real donde se ejecuta y que contiene además los datos (tablas Excel).
 
 `202x-2x` en el nombre del fichero es un placeholder genérico: `M79_Crear_WB_EP_CAcad.bas` (`Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos`) genera, a partir de esta plantilla, una copia real por combinación EFP/CFCyAFC × curso académico (`<Tipo>_<CursoAcad>_BaseDatos_Liq_<versión>.xlsm`) — este `.xlsm` es la plantilla/versión de programación, no un curso concreto.
 
