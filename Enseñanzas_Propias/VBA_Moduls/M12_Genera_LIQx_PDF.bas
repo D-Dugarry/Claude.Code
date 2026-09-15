@@ -1,4 +1,5 @@
 Attribute VB_Name = "M12_Genera_LIQx_PDF"
+' Last Rev. 2026-09-15 14:10
 Option Explicit
 
 ' ==================================================================================================================================
@@ -587,8 +588,7 @@ Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
         ActiveWorkbook.ActiveSheet.UsedRange.ClearComments
         Application.EnableEvents = False
     '- Grabo los cambios y Cierro el Archivo ---------------------------
-'    ActiveWorkbook.Close savechanges:=True
-    Workbooks(IntialName).Close SaveChanges:=True
+    ActiveWorkbook.Close SaveChanges:=True
     
         MsgBox "¡¡¡ Archivo guardado !!!", vbOKOnly, "Proceso: Archivar Liquidación"
     Form_Menu.TB_Informe = "¡¡¡ Proceso concluido con éxito !!!   He tardado: " & Round(Timer - H_Inicio, 2) & " seg." & _

@@ -2,7 +2,7 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos, 1 descartado).
+**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (6 corregidos, 1 descartado).
 
 > **Nota sobre codificación:** los ficheros `.bas`/`.cls`/`.frm` están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre `VBA_Moduls/`, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver `CLAUDE.md` de este proyecto).
 
@@ -74,7 +74,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
 **Arreglo:** declarar `Cobrado As Currency` (o `Double`). Aplicado en `VBA_Moduls/M09_Importar_Sol_Liq.bas` (línea 130 tras el sello `Last Rev.`); las líneas de acumulación y de informe no necesitaron cambios.
 
 ### A2 · `Workbooks(IntialName).Close` falla si el usuario cambia el nombre al guardar
-**Severidad:** Alto · **Fichero:** `M12_Genera_LIQx_PDF.bas` — líneas 574, 582, 590-591
+**Severidad:** Alto · **Fichero:** `M12_Genera_LIQx_PDF.bas` — líneas 574, 582, 590-591 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-15)
 
 ```vba
     IntialName = "LIQxPDF_" & Wk_TitP_Liquid.Range("Liquid_Plan") & " - " & Format(Date, "dd-mmm-yyyy") & ".xlsx"
@@ -91,7 +91,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
 
 **Impacto:** generar el PDF de Liquidación falla con un error críptico en cuanto el usuario cambia el nombre propuesto en el diálogo de guardado, y el libro temporal queda abierto sin cerrarse.
 
-**Arreglo:** restaurar `ActiveWorkbook.Close SaveChanges:=True`.
+**Arreglo:** restaurada `ActiveWorkbook.Close SaveChanges:=True` en `VBA_Moduls/M12_Genera_LIQx_PDF.bas` (línea 591 tras el sello `Last Rev.`), eliminando la línea rota y la comentada que quedaba redundante.
 
 ### A3 · Merge-join sin `Case Else` — desincronización silenciosa al guardar la Liquidación
 **Severidad:** Alto · **Fichero:** `M10__Liquid_EP.bas` — líneas 742-778 (`Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid`)
@@ -221,7 +221,7 @@ El módulo mezcla, en distintos puntos, `Prog__APP.Range("Sw_VerRecNeg")` (cuali
 *Ficheros: M20–M22, M31–M39, M40–M44, M50–M51, M71–M72, M79–M80, M90, `Sht__Inf_*`, `Wk_Lista_Panes*`.*
 
 ### B1 · Sub pública duplicada: `RuT_Inf_Contable_Recibos_AE4x4`
-**Severidad:** Crítico · **Ficheros:** `M50_Inf_Cont_AE4x4.bas:8` y `M50_Inf_Cont_AE4x41.bas:8`
+**Severidad:** Crítico · **Ficheros:** `M50_Inf_Cont_AE4x4.bas:8` y `M50_Inf_Cont_AE4x41.bas:8` · **Estado:** ✅ Corregido (2026-09-15)
 
 ```vba
 Sub RuT_Inf_Contable_Recibos_AE4x4()  '- Importar los 4 WB: EFP y CFC de AñoCon_Ant/Pos
@@ -229,10 +229,10 @@ Sub RuT_Inf_Contable_Recibos_AE4x4()  '- Importar los 4 WB: EFP y CFC de AñoCon
 
 Dos módulos estándar distintos declaran, ambos sin `Private`, una `Sub` pública con el nombre exacto — verificado con `grep` sobre los dos ficheros. Es un error de compilación de VBA ("Ambiguous name detected") que impide compilar el proyecto **entero**, no solo estas rutinas.
 
-**Arreglo:** eliminar uno de los dos módulos (parece que `M50_Inf_Cont_AE4x41.bas` es una rama de desarrollo, ver B6) o marcarlo `Private`/renombrarlo.
+**Arreglo:** eliminado el módulo `M50_Inf_Cont_AE4x41.bas` (la rama de desarrollo: le faltaba el log de progreso `Rut_TimeLap_Inf` y el `Set ActivForm`), tanto del proyecto VBA real (`vbaProject.bin`, confirmado con `oletools`) como de `VBA_Moduls/`. Antes de borrar se auditaron macros de shapes, Ribbon y la tabla `Tb_Tareas` del menú auxiliar: ninguno de los dos módulos estaba enganchado a la UI.
 
 ### B2 · Sub pública duplicada: `Rut_Lo_Import_AE4x1`
-**Severidad:** Crítico · **Ficheros:** `M51_Import_AE4x1.bas:8-13` y `M51_Import_AE4x11.bas:8-13`
+**Severidad:** Crítico · **Ficheros:** `M51_Import_AE4x1.bas:8-13` y `M51_Import_AE4x11.bas:8-13` · **Estado:** ✅ Corregido (2026-09-15)
 
 ```vba
 Sub Rut_Lo_Import_AE4x1(Ws_AE4x1 As Worksheet, _
@@ -245,7 +245,7 @@ Sub Rut_Lo_Import_AE4x1(Ws_AE4x1 As Worksheet, _
 
 Misma firma, misma Sub pública, en dos módulos distintos — verificado. Segundo "Ambiguous name detected" independiente del anterior, agravando el bloqueo de compilación.
 
-**Arreglo:** igual que B1.
+**Arreglo:** eliminado el módulo `M51_Import_AE4x11.bas` (misma rama de desarrollo que B1), tanto del proyecto VBA real como de `VBA_Moduls/`, manteniendo `M51_Import_AE4x1.bas`. ⚠️ Ese módulo superviviente sigue teniendo un bug de compilación independiente y ahora más urgente — ver B5.
 
 ### B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)
 **Severidad:** Crítico · **Ficheros:** `M41_Añadir_Núm_JIs_al_Inf.bas:13,15` y `M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40`
@@ -293,7 +293,7 @@ La línea 197 ya cierra correctamente `Rut_Filtro_NumJI_2_en_Tasas`; la línea 2
     End If
 ```
 
-`Lo_AE4x1` no se declara en ningún punto de este módulo (solo existe un `Dim Lo_AE4x1 As ListObject` local en el OTRO módulo casi-gemelo, `M51_Import_AE4x11.bas:94`, que no aplica aquí). Con `Option Explicit`, tercer error de compilación independiente de este cluster de ficheros.
+`Lo_AE4x1` no se declara en ningún punto de este módulo. Nota (2026-09-15): tras resolver B2, el módulo gemelo `M51_Import_AE4x11.bas` —que tenía el único `Dim Lo_AE4x1 As ListObject` local del proyecto, aunque no aplicaba aquí por ser otro módulo— ya no existe. Este hallazgo sigue exactamente igual de crítico: `Option Explicit` sigue rompiendo la compilación de `M51_Import_AE4x1.bas` con "Variable no definida".
 
 ### B6 · `Lo_AE4x1` usado sin inicializar
 **Severidad:** Alto · **Fichero:** `M51_Import_AE4x11.bas` — líneas 90-98
@@ -309,6 +309,8 @@ La línea 197 ya cierra correctamente `Rut_Filtro_NumJI_2_en_Tasas`; la línea 2
 ```
 
 `Lo_AE4x1` solo se asigna dentro de la rama `If SW_Inicilizar_Ws`; la rama `Else` lo usa sin haberlo asignado nunca. Los 8 puntos de llamada (4 en `M50_Inf_Cont_AE4x4.bas` y 4 en `M50_Inf_Cont_AE4x41.bas`) pasan siempre `False` como último argumento, así que `Lo_AE4x1` permanecería `Nothing` en tiempo de ejecución. Aunque B1/B2/B3/B5 ya impiden compilar, esto confirma que el flujo AE4 está incompleto también a nivel lógico: falta pasar `True` en la primera de las 4 importaciones.
+
+Nota (2026-09-15): tras resolver B2, este fichero (`M51_Import_AE4x11.bas`) ya no existe. El problema de fondo persiste, y de forma más grave, en el módulo superviviente `M51_Import_AE4x1.bas`: ahí la rama `If SW_Inicilizar_Ws` tampoco asigna `Set Lo_AE4x1 = ...` (solo copia el rango), así que `Lo_AE4x1` no se asigna en NINGUNA rama — coincide con B5. Las 4 llamadas restantes (solo desde `M50_Inf_Cont_AE4x4.bas`) siguen pasando `False`.
 
 ### B7 · Límite de filas hardcodeado a 5000
 **Severidad:** Alto · **Fichero:** `M21_Resumen_Tit_Propios_UNO.bas` — línea 101
@@ -474,7 +476,7 @@ Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja inc
         Call Rut_WrkSheet_Preparar(WrkSht)
 ```
 
-`Rut_WrkSheet_Preparar` exige un `Worksheet` por parámetro (ByRef implícito, línea 42); `Rut_WrkSheet_Vaciar` le pasa su propio parámetro `WrkSht`, que es `String` (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, `Rut_WrkSheet_Vaciar` **está activamente en uso**: la llaman `M09_Importar_Sol_Liq.bas:76`, `M12_Genera_LIQx_PDF.bas:24,303`, `M51_Import_AE4x1.bas:90`, `M51_Import_AE4x11.bas:92` y `Rut_Hipervinculos.bas:13`.
+`Rut_WrkSheet_Preparar` exige un `Worksheet` por parámetro (ByRef implícito, línea 42); `Rut_WrkSheet_Vaciar` le pasa su propio parámetro `WrkSht`, que es `String` (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, `Rut_WrkSheet_Vaciar` **está activamente en uso**: la llaman `M09_Importar_Sol_Liq.bas:76`, `M12_Genera_LIQx_PDF.bas:24,303`, `M51_Import_AE4x1.bas:90` y `Rut_Hipervinculos.bas:13` (nota 2026-09-15: `M51_Import_AE4x11.bas:92` ya no existe, ver B2).
 
 **Arreglo:** `Call Rut_WrkSheet_Preparar(Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht))` — pasar el objeto `Worksheet`, no el nombre.
 

@@ -64,7 +64,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <main><article>
 <h1>Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V3.xlsm</h1>
 <p>Auditoría del código VBA exportado en <code>VBA_Moduls/</code> (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.</p>
-<p><strong>Resumen:</strong> 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (3 corregidos, 1 descartado).</p>
+<p><strong>Resumen:</strong> 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (6 corregidos, 1 descartado).</p>
 <blockquote><p><strong>Nota sobre codificación:</strong> los ficheros <code>.bas</code>/<code>.cls</code>/<code>.frm</code> están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre <code>VBA_Moduls/</code>, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver <code>CLAUDE.md</code> de este proyecto).</p></blockquote>
 <h2>Antes de tocar nada: compila el proyecto</h2>
 <p>Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error de compilación VBA (<code>Option Explicit</code> roto, nombre duplicado, tipo incompatible, <code>Sub</code>/<code>End Sub</code> descuadrados). <strong>Un solo error de compilación en cualquier módulo bloquea la ejecución de todas las macros del libro</strong>, no solo la rutina afectada — VBA compila el proyecto entero, no módulo a módulo. Antes de corregir nada, abre el editor VBA del <code>.xlsm</code> real y ejecuta <strong>Depurar → Compilar VBA Project</strong>, y anota qué marca primero: puede que algunos de estos 8 puntos ya estén corregidos ahí y esta exportación esté desactualizada, o puede que el libro lleve tiempo sin compilar limpio (varios de los módulos implicados — <code>M50_Inf_Cont_AE4x41</code>, <code>M51_Import_AE4x11</code>, <code>M41</code>/<code>M42</code> — parecen ramas de desarrollo/copias aún no terminadas, no el camino que se ejecuta a diario).</p>
@@ -129,7 +129,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <p><strong>Impacto:</strong> el informe que ve el usuario tras importar una Solicitud de Liquidación muestra un importe cobrado incorrecto (redondeado a la baja), sin que nada avise del desajuste.</p>
 <p><strong>Arreglo:</strong> declarar <code>Cobrado As Currency</code> (o <code>Double</code>). Aplicado en <code>VBA_Moduls/M09_Importar_Sol_Liq.bas</code> (línea 130 tras el sello <code>Last Rev.</code>); las líneas de acumulación y de informe no necesitaron cambios.</p>
 <h3>A2 · <code>Workbooks(IntialName).Close</code> falla si el usuario cambia el nombre al guardar</h3>
-<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M12_Genera_LIQx_PDF.bas</code> — líneas 574, 582, 590-591</p>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M12_Genera_LIQx_PDF.bas</code> — líneas 574, 582, 590-591 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-15)</p>
 <pre><code>    IntialName = "LIQxPDF_" &amp; Wk_TitP_Liquid.Range("Liquid_Plan") &amp; " - " &amp; Format(Date, "dd-mmm-yyyy") &amp; ".xlsx"
     FullName = FPath &amp; "LIQxPDF_" &amp; Wk_TitP_Liquid.Range("Liquid_Plan") &amp; " - " &amp; Format(Date, "dd-mmm-yyyy") &amp; ".xlsx"
     sFileSaveName = Application.GetSaveAsFilename(FullName, "Excel Files (*.xlsx), *.xlsx")
@@ -140,7 +140,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
     Workbooks(IntialName).Close SaveChanges:=True</code></pre>
 <p><code>IntialName</code> es solo el nombre <strong>sugerido</strong> para el diálogo <code>GetSaveAsFilename</code>; si el usuario lo cambia al guardar, el libro copiado queda con otro nombre y <code>Workbooks(IntialName)</code> no existe → error 9 "Subscript out of range", <strong>sin gestor de errores activo</strong> (el <code>On Error GoTo GestError</code> ya se ha desactivado con <code>On Error GoTo 0</code> dos líneas antes). La línea correcta original (<code>ActiveWorkbook.Close savechanges:=True</code>) sigue comentada justo encima, confirmando que es una regresión: las rutinas hermanas <code>Rut_Exportar_La_Liquidación</code> (M15) y <code>Rut_Exportar_La_LIQxn_PDF</code> (M12) sí usan <code>ActiveWorkbook.Close</code>.</p>
 <p><strong>Impacto:</strong> generar el PDF de Liquidación falla con un error críptico en cuanto el usuario cambia el nombre propuesto en el diálogo de guardado, y el libro temporal queda abierto sin cerrarse.</p>
-<p><strong>Arreglo:</strong> restaurar <code>ActiveWorkbook.Close SaveChanges:=True</code>.</p>
+<p><strong>Arreglo:</strong> restaurada <code>ActiveWorkbook.Close SaveChanges:=True</code> en <code>VBA_Moduls/M12_Genera_LIQx_PDF.bas</code> (línea 591 tras el sello <code>Last Rev.</code>), eliminando la línea rota y la comentada que quedaba redundante.</p>
 <h3>A3 · Merge-join sin <code>Case Else</code> — desincronización silenciosa al guardar la Liquidación</h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M10__Liquid_EP.bas</code> — líneas 742-778 (<code>Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid</code>)</p>
 <pre><code>    For F_Liquid = 1 To Lo_TPLiquid.DataBodyRange.Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
@@ -229,12 +229,12 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <h2>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</h2>
 <p><em>Ficheros: M20–M22, M31–M39, M40–M44, M50–M51, M71–M72, M79–M80, M90, <code>Sht__Inf_*</code>, <code>Wk_Lista_Panes*</code>.</em></p>
 <h3>B1 · Sub pública duplicada: <code>RuT_Inf_Contable_Recibos_AE4x4</code></h3>
-<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M50_Inf_Cont_AE4x4.bas:8</code> y <code>M50_Inf_Cont_AE4x41.bas:8</code></p>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M50_Inf_Cont_AE4x4.bas:8</code> y <code>M50_Inf_Cont_AE4x41.bas:8</code> · <strong>Estado:</strong> ✅ Corregido (2026-09-15)</p>
 <pre><code>Sub RuT_Inf_Contable_Recibos_AE4x4()  '- Importar los 4 WB: EFP y CFC de AñoCon_Ant/Pos</code></pre>
 <p>Dos módulos estándar distintos declaran, ambos sin <code>Private</code>, una <code>Sub</code> pública con el nombre exacto — verificado con <code>grep</code> sobre los dos ficheros. Es un error de compilación de VBA ("Ambiguous name detected") que impide compilar el proyecto <strong>entero</strong>, no solo estas rutinas.</p>
-<p><strong>Arreglo:</strong> eliminar uno de los dos módulos (parece que <code>M50_Inf_Cont_AE4x41.bas</code> es una rama de desarrollo, ver B6) o marcarlo <code>Private</code>/renombrarlo.</p>
+<p><strong>Arreglo:</strong> eliminado el módulo <code>M50_Inf_Cont_AE4x41.bas</code> (la rama de desarrollo: le faltaba el log de progreso <code>Rut_TimeLap_Inf</code> y el <code>Set ActivForm</code>), tanto del proyecto VBA real (<code>vbaProject.bin</code>, confirmado con <code>oletools</code>) como de <code>VBA_Moduls/</code>. Antes de borrar se auditaron macros de shapes, Ribbon y la tabla <code>Tb_Tareas</code> del menú auxiliar: ninguno de los dos módulos estaba enganchado a la UI.</p>
 <h3>B2 · Sub pública duplicada: <code>Rut_Lo_Import_AE4x1</code></h3>
-<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M51_Import_AE4x1.bas:8-13</code> y <code>M51_Import_AE4x11.bas:8-13</code></p>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M51_Import_AE4x1.bas:8-13</code> y <code>M51_Import_AE4x11.bas:8-13</code> · <strong>Estado:</strong> ✅ Corregido (2026-09-15)</p>
 <pre><code>Sub Rut_Lo_Import_AE4x1(Ws_AE4x1 As Worksheet, _
                                   Arch_New_Name As String, _
                                   SheetNom As String, _
@@ -242,7 +242,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
                                   Optional PathFileAE4 As String, _
                                   Optional SW_Inicilizar_Ws As Boolean = False)</code></pre>
 <p>Misma firma, misma Sub pública, en dos módulos distintos — verificado. Segundo "Ambiguous name detected" independiente del anterior, agravando el bloqueo de compilación.</p>
-<p><strong>Arreglo:</strong> igual que B1.</p>
+<p><strong>Arreglo:</strong> eliminado el módulo <code>M51_Import_AE4x11.bas</code> (misma rama de desarrollo que B1), tanto del proyecto VBA real como de <code>VBA_Moduls/</code>, manteniendo <code>M51_Import_AE4x1.bas</code>. ⚠️ Ese módulo superviviente sigue teniendo un bug de compilación independiente y ahora más urgente — ver B5.</p>
 <h3>B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)</h3>
 <p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M41_Añadir_Núm_JIs_al_Inf.bas:13,15</code> y <code>M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40</code></p>
 <pre><code>        Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
@@ -272,7 +272,7 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></p
     Else
         Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_ClsBk, Lo_AE4x1, False)
     End If</code></pre>
-<p><code>Lo_AE4x1</code> no se declara en ningún punto de este módulo (solo existe un <code>Dim Lo_AE4x1 As ListObject</code> local en el OTRO módulo casi-gemelo, <code>M51_Import_AE4x11.bas:94</code>, que no aplica aquí). Con <code>Option Explicit</code>, tercer error de compilación independiente de este cluster de ficheros.</p>
+<p><code>Lo_AE4x1</code> no se declara en ningún punto de este módulo. Nota (2026-09-15): tras resolver B2, el módulo gemelo <code>M51_Import_AE4x11.bas</code> —que tenía el único <code>Dim Lo_AE4x1 As ListObject</code> local del proyecto, aunque no aplicaba aquí por ser otro módulo— ya no existe. Este hallazgo sigue exactamente igual de crítico: <code>Option Explicit</code> sigue rompiendo la compilación de <code>M51_Import_AE4x1.bas</code> con "Variable no definida".</p>
 <h3>B6 · <code>Lo_AE4x1</code> usado sin inicializar</h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M51_Import_AE4x11.bas</code> — líneas 90-98</p>
 <pre><code>    If SW_Inicilizar_Ws Then       '- Es el 1º, sólo copiar Lo_ClsBk en Ws_AE4x1
@@ -283,6 +283,7 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></p
         Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_ClsBk, Lo_AE4x1, False)
     End If</code></pre>
 <p><code>Lo_AE4x1</code> solo se asigna dentro de la rama <code>If SW_Inicilizar_Ws</code>; la rama <code>Else</code> lo usa sin haberlo asignado nunca. Los 8 puntos de llamada (4 en <code>M50_Inf_Cont_AE4x4.bas</code> y 4 en <code>M50_Inf_Cont_AE4x41.bas</code>) pasan siempre <code>False</code> como último argumento, así que <code>Lo_AE4x1</code> permanecería <code>Nothing</code> en tiempo de ejecución. Aunque B1/B2/B3/B5 ya impiden compilar, esto confirma que el flujo AE4 está incompleto también a nivel lógico: falta pasar <code>True</code> en la primera de las 4 importaciones.</p>
+<p>Nota (2026-09-15): tras resolver B2, este fichero (<code>M51_Import_AE4x11.bas</code>) ya no existe. El problema de fondo persiste, y de forma más grave, en el módulo superviviente <code>M51_Import_AE4x1.bas</code>: ahí la rama <code>If SW_Inicilizar_Ws</code> tampoco asigna <code>Set Lo_AE4x1 = ...</code> (solo copia el rango), así que <code>Lo_AE4x1</code> no se asigna en NINGUNA rama — coincide con B5. Las 4 llamadas restantes (solo desde <code>M50_Inf_Cont_AE4x4.bas</code>) siguen pasando <code>False</code>.</p>
 <h3>B7 · Límite de filas hardcodeado a 5000</h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M21_Resumen_Tit_Propios_UNO.bas</code> — línea 101</p>
 <pre><code>    For Fila_DR = 1 To 5000 'Lo_TPH.ListRows.Count</code></pre>
@@ -386,7 +387,7 @@ Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja inc
         ...
         .Unprotect
         Call Rut_WrkSheet_Preparar(WrkSht)</code></pre>
-<p><code>Rut_WrkSheet_Preparar</code> exige un <code>Worksheet</code> por parámetro (ByRef implícito, línea 42); <code>Rut_WrkSheet_Vaciar</code> le pasa su propio parámetro <code>WrkSht</code>, que es <code>String</code> (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, <code>Rut_WrkSheet_Vaciar</code> <strong>está activamente en uso</strong>: la llaman <code>M09_Importar_Sol_Liq.bas:76</code>, <code>M12_Genera_LIQx_PDF.bas:24,303</code>, <code>M51_Import_AE4x1.bas:90</code>, <code>M51_Import_AE4x11.bas:92</code> y <code>Rut_Hipervinculos.bas:13</code>.</p>
+<p><code>Rut_WrkSheet_Preparar</code> exige un <code>Worksheet</code> por parámetro (ByRef implícito, línea 42); <code>Rut_WrkSheet_Vaciar</code> le pasa su propio parámetro <code>WrkSht</code>, que es <code>String</code> (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, <code>Rut_WrkSheet_Vaciar</code> <strong>está activamente en uso</strong>: la llaman <code>M09_Importar_Sol_Liq.bas:76</code>, <code>M12_Genera_LIQx_PDF.bas:24,303</code>, <code>M51_Import_AE4x1.bas:90</code> y <code>Rut_Hipervinculos.bas:13</code> (nota 2026-09-15: <code>M51_Import_AE4x11.bas:92</code> ya no existe, ver B2).</p>
 <p><strong>Arreglo:</strong> <code>Call Rut_WrkSheet_Preparar(Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht))</code> — pasar el objeto <code>Worksheet</code>, no el nombre.</p>
 <h3>C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Mensaje.frm</code> — línea 20 (<code>UserForm_Activate</code>)</p>
