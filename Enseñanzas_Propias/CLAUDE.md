@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es este proyecto
 
-Libro Excel con VBA (`EP_202x-2x_BaseDatos-LIQ _V3.xlsm`, ~5 MB) que gestiona la **Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante** (EFP: Enseñanzas de Formación Permanente; CFC/AFC: Cursos y Actividades de Formación Complementaria). El código VBA vive exportado como texto plano en `VBA_Moduls/` (133 ficheros `.bas`/`.cls`/`.frm`/`.frx`); el `.xlsm` es el binario real donde se ejecuta y que contiene además los datos (tablas Excel).
+Libro Excel con VBA (`EP_202x-2x_BaseDatos-LIQ _V3.xlsm`, ~5 MB) que gestiona la **Liquidación de Enseñanzas Propias / Títulos Propios de la Universidad de Alicante** (EFP: Enseñanzas de Formación Permanente; CFC/AFC: Cursos y Actividades de Formación Complementaria). El código VBA vive exportado como texto plano en `VBA_Moduls/` (131 ficheros `.bas`/`.cls`/`.frm`/`.frx`); el `.xlsm` es el binario real donde se ejecuta y que contiene además los datos (tablas Excel).
 
 `202x-2x` en el nombre del fichero es un placeholder genérico: `M79_Crear_WB_EP_CAcad.bas` (`Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos`) genera, a partir de esta plantilla, una copia real por combinación EFP/CFCyAFC × curso académico (`<Tipo>_<CursoAcad>_BaseDatos_Liq_<versión>.xlsm`) — este `.xlsm` es la plantilla/versión de programación, no un curso concreto.
 
@@ -26,7 +26,7 @@ Los ficheros `.bas`/`.cls`/`.frm` son **Windows-1252 (CP1252), no UTF-8**, con f
 
 `VBProject.Protection = 1`. En el Office actual, abrir el libro por **Automation/COM** (`Workbooks.Open` + `.VBProject.VBComponents`) falla de inmediato con "No se puede ejecutar la operación porque el proyecto está protegido", **sin llegar a mostrar ningún diálogo de contraseña** aunque la ventana del editor VBA esté visible — el truco de rellenar el diálogo por `win32gui`/`win32api` (el que usa la app `Import_Export_VBA_Moduls`) ya no funciona en esta build de Office para proyectos protegidos.
 
-Vía que sí funciona: el propio libro trae una macro de auto-exportación, **`Rut_VBA_Export_Moduls`** (en `Rut_VBA_Moduls_Export.bas`). Con el libro abierto normalmente en Excel (contraseña introducida a mano si el VBE la pide al expandir el árbol del proyecto), ejecútala desde el editor VBA (F5, o `Rut_VBA_Export_Moduls` en la ventana Inmediato). Exporta los 133 componentes a `[RutaLibro]\[NombreLibro]_VBA_Moduls\`; copia el resultado sobre `VBA_Moduls/` en este repo.
+Vía que sí funciona: el propio libro trae una macro de auto-exportación, **`Rut_VBA_Export_Moduls`** (en `Rut_VBA_Moduls_Export.bas`). Con el libro abierto normalmente en Excel (contraseña introducida a mano si el VBE la pide al expandir el árbol del proyecto), ejecútala desde el editor VBA (F5, o `Rut_VBA_Export_Moduls` en la ventana Inmediato). Exporta los 131 componentes a `[RutaLibro]\[NombreLibro]_VBA_Moduls\`; copia el resultado sobre `VBA_Moduls/` en este repo.
 
 ## Arquitectura
 
