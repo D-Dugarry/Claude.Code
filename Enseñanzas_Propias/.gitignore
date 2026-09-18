@@ -5,3 +5,7 @@
 # Copias de seguridad con marca de tiempo y carpetas de trabajo locales (no versionar)
 CopiaSeguridad/
 Arch Datos Pruebas/
+
+# Carpetas de re-exportacion de modulos VBA con marca de tiempo (generadas por Rut_VBA_Export_Moduls)
+*_BACKUP_[0-9]*/
+*_VBA_Moduls/
