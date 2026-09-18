@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
+' Last Rev. 2026-09-18 19:20
 Option Explicit
 
 
@@ -69,40 +70,6 @@ End Sub
 '###################################################################################################################################
 '###################################################################################################################################
 ' Copia el DataBodyRange FILTRADO de Lo_Source en Lo_Target,      Opcional: Borrar primero contenido de Lo_Target y Borrar los registros filtrados de Lo_Source
-Sub Rut_Lo_DataBodyRange_Filtered_Copy_OLD____(Lo_Source As ListObject, _
-                                       Lo_Target As ListObject, _
-                                       Optional DelFirstLoTarget As Boolean = False, _
-                                       Optional DelLoSourceFilteredRows As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
-Debug.Print "Rut_Lo_DataBodyRange_Filtered_Copy"
-    Dim ws As Worksheet
-    Set ws = Lo_Target.Parent
-    
-    If Lo_Target.ShowTotals Then Lo_Target.ShowTotals = False
-    
-    If DelFirstLoTarget And Not Lo_Target.DataBodyRange Is Nothing Then Lo_Target.DataBodyRange.Delete
-    
-    Dim RangoACopiar    As Range
-    On Error Resume Next
-    Set RangoACopiar = Lo_Source.DataBodyRange.SpecialCells(xlCellTypeVisible)
-    On Error GoTo 0
-    If RangoACopiar Is Nothing Then Exit Sub
-    
-    '- Pega datos justo debajo de la Lo_Target
-    Dim StartRowAdd     As Long:        StartRowAdd = Lo_Target.Range.Row + Lo_Target.Range.Rows.Count  '- Fila donde tiene que pegar el Rango
-    RangoACopiar.Copy Destination:=ws.Cells(StartRowAdd, Lo_Target.Range.Column)   '- No tiene porque empezar en la columna A, Lo_Target.Range.Column es la columna por la que empieza Lo_Target
-    
-    '- Como copio un Rango, Lo_Target NO se expande, Sólo se copia a continuación y forman parte de la Listobject.
-    '- Tengo que Redimensionar la tabla para incluir las nuevas filas en la Listobject
-    Dim RowsACopiar         As Long:        RowsACopiar = RangoACopiar.Rows.Count
-    Dim NuevoRangoAmpliado  As Range       '- Defino un NuevoRango que abarca la Lo_Target más el Rango Copiado.
-    Set NuevoRangoAmpliado = ws.Range(Lo_Target.Range.Cells(1, 1), _
-                             ws.Cells(StartRowAdd + RowsACopiar - 1, Lo_Target.Range.Column + Lo_Target.Range.Columns.Count - 1))
-    Lo_Target.Resize NuevoRangoAmpliado   '- Redefino Lo_Target con el tamaño de Lo_Target más el Rango Copiado: NuevoRangoAmpliado
-    
-    If DelLoSourceFilteredRows Then RangoACopiar.Delete     '- Como estamos dentro del "IF Not RangoACopiar Is Nothing" el Rango tiene datos y los podemos Borrar
-    Application.CutCopyMode = False
-End Sub
 ' ----------------------------------------------------------------------------------------------------------------------------------
 '###################################################################################################################################
 Sub Rut_Lo_WrkSht_Preparar(WrkSht As Worksheet)
@@ -130,14 +97,6 @@ Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, columna As Integer, VarOrden As Strin
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 
-'###################################################################################################################################
-Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, columna As Integer, Criterio As String, Optional SW_Clear As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
-    If SW_Clear And Not Lo_Tb.AutoFilter Is Nothing Then LoTb.AutoFilter.ShowAllData
-    Lo_Tb.Range.AutoFilter Field:=columna, Criteria1:=Criterio
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
-
                             '#######################################################################################################
                             Sub Rut_Filtros_Quitar_ActivSheet_LstObj()      ' Muestra Todas las Solicitudes y Activar Filtros >>>>>>
                                     Call Rut_Lo_Filtros_Quitar(ActiveSheet.ListObjects(1))
@@ -154,14 +113,6 @@ Sub Rut_Lo_Filtros_Quitar(ByRef Lo_Tb As ListObject)      ' Muestra Todas las So
             .ShowAutoFilter = True
         End If
     End With
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
-
-
-Sub Rut_Copiar_EntireRow_LstObjct() '- Rut_Añade_Row_entera, DataBodyRange.Rows(2) ES OBLIGATORIO sino no funciona
-                
-ActiveSheet.ListObjects("Tab_INI").DataBodyRange.Rows(2).Copy ActiveSheet.ListObjects("Tab_FIN").ListRows(3).Range '
-                
 End Sub
 
 

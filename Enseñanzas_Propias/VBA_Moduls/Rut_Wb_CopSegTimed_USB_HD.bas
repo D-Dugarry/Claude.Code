@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
+' Last Rev. 2026-09-18 19:20
 Option Explicit
 
 ' ==================================================================================================================================
@@ -347,57 +348,6 @@ End Sub     ' Rut_WrkBooK_CopSegTimed_WB_HD
 '''
 ''' ==================================================================================================================================
 '''     EJEMPLO: Procedimiento para actualizar la tabla (por si necesitas refrescar después de borrar)
-Sub EJEMPLO_ActualizarTabla()
-''' ==================================================================================================================================
-    Dim ws As Worksheet
-    Dim tblArchivos As ListObject
-    Dim carpetaSeleccionada As String
-    Dim FSO As Object
-    Dim Folder As Object
-    Dim objFile As Object
-    Dim i As Long
-    
-    Set ws = ActiveSheet
-    Set tblArchivos = ws.ListObjects("TablaArchivos")
-    carpetaSeleccionada = ws.Range("Z1").Value
-    
-    If carpetaSeleccionada = "" Then
-        MsgBox "No se encontró información de la carpeta.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Limpiar tabla existente (excepto encabezados)
-    If tblArchivos.ListRows.Count > 0 Then
-        tblArchivos.DataBodyRange.Delete
-    End If
-    
-    ' Volver a llenar la tabla
-    Set FSO = CreateObject("Scripting.FileSystemObject")
-    Set Folder = FSO.GetFolder(carpetaSeleccionada)
-    
-    i = 1
-    For Each objFile In Folder.Files
-        tblArchivos.ListRows.Add
-        tblArchivos.DataBodyRange(i, 1) = objFile.Name
-        tblArchivos.DataBodyRange(i, 2) = objFile.DateLastModified
-        tblArchivos.DataBodyRange(i, 3) = Round(objFile.Size / 1024, 2)
-        i = i + 1
-    Next objFile
-    
-    ' Reordenar la tabla
-    With tblArchivos.Sort
-        .sortFields.Clear
-        .sortFields.Add Key:=tblArchivos.ListColumns("Nombre Archivo").DataBodyRange, _
-            SortOn:=xlSortOnValues, Order:=xlAscending
-        .sortFields.Add Key:=tblArchivos.ListColumns("Fecha Modificación").DataBodyRange, _
-            SortOn:=xlSortOnValues, Order:=xlAscending
-        .Header = xlYes
-        .Apply
-    End With
-    
-    MsgBox "Tabla actualizada correctamente.", vbInformation
-    Set FSO = Nothing
-End Sub
 ''' ----------------------------------------------------------------------------------------------------------------------------------
 
 
