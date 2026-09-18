@@ -1,4 +1,5 @@
 Attribute VB_Name = "M08_Actualizar_Tb_Coef_VRI"
+' Last Rev. 2026-09-18 19:19
 '2026-02-06
 '- M31_Listar_PLANES
 Option Explicit
@@ -93,7 +94,7 @@ With Lo_BD.DataBodyRange
         End If
     Next
     Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_ORden, xlAscending, True)
-    Call Rut_Lo_Sort(Lo_RetVRI, BD_Plan, xlAscending, False)
+    Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_Plan, xlAscending, False)
     
     '- Visualizo el progreso
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & Format(Now, "hh:mm:ss") & _

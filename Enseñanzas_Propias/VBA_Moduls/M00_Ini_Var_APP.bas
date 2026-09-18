@@ -1,4 +1,5 @@
 Attribute VB_Name = "M00_Ini_Var_APP"
+' Last Rev. 2026-09-18 23:21
 '- M00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -57,6 +58,16 @@ Public Const BD_Incidencias        As Integer = 51   ' col: ay
 Public Const BD_H_Incidencias      As Integer = 52   ' col: bz
 Public Const BD_EP_Ctrl            As Integer = 53   ' col: ba
 Public Const BD_EP_GestReg         As Integer = 54   ' col: bb
+
+'--- Flags internos de Tipo_Recibo en Prog_LsGes04 (M05_Asign_Tipo_Recibo) ------
+'    Columnas de marca por tipo; el valor definitivo va en BD_Tipo_Rec.
+Public Const G04_Flag_Emitido      As Integer = 52   ' col: az
+Public Const G04_Flag_EjeAnt       As Integer = 53   ' col: ba
+Public Const G04_Flag_Anejo        As Integer = 54   ' col: bb
+Public Const G04_Flag_Aplazado     As Integer = 55   ' col: bc
+Public Const G04_Flag_ADxAplz      As Integer = 56   ' col: bd
+Public Const G04_Flag_Primera      As Integer = G04_Flag_Emitido
+Public Const G04_Flag_Cuantas      As Integer = G04_Flag_ADxAplz - G04_Flag_Emitido + 1
 
 '--- Tabla de Liquidación Plán ---------------------------------------------------
 Public Const CLiq_DNI             As Integer = 1       ' col: a
@@ -237,6 +248,7 @@ Public Const Task_SheetsButton       As Integer = 10      ' col: j
     Public MsgBx_Answer         As Integer  '- Variable para el Formulario del MsgBox, Botón pulsado
 
 
+    Public ActivForm           As Object      '- Identificamos que Formulario esta Activo. ----------
     Public Lo_Tareas           As ListObject
     
 Public CantChanges   As Integer

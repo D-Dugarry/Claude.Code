@@ -1,12 +1,12 @@
 Attribute VB_Name = "M05_Asign_Tipo_Recibo"
-' Last Rev. 2026-09-14 12:25
+' Last Rev. 2026-09-18 19:19
 '2026-01-06
 Option Explicit
 
             Sub RuT_Determinar_Tipo_Recibo_ByHand()
                 Prog_LsGes04.Unprotect
                 Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
-                Call RuT_Determinar_Tipo_Recibo(Prog_LsGes04.ListObjects(1))
+                Call RuT_Determinar_Tipo_Recibo
             End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Clasificar Recibos en Emitidos, Remesados, EjeAnt, ADxAplz, Añejas ---------------------------------------------------------------------------
@@ -36,9 +36,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         Call Rut_Lo_Sort(Lo_G04, BD_ACont_Cob, xlAscending, False)
             
         .DataBodyRange.Columns(BD_Tipo_Rec).ClearContents
-        .DataBodyRange.Columns(52).Resize(, 56).ClearContents
-        '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 1).ClearContents
-        '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 2).ClearContents
+        .DataBodyRange.Columns(G04_Flag_Primera).Resize(, G04_Flag_Cuantas).ClearContents
 
         TxtProgreso = TxtProgreso & vbCrLf & String(8, " ") & " Tipificado de Recibos. " & String(8, "_")
         
@@ -60,7 +58,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
-            .DataBodyRange.Columns(52).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
+            .DataBodyRange.Columns(G04_Flag_Emitido).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
             RegsCanTot = RegsCanTot + rowfind
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros Emitidos."
@@ -71,7 +69,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
-            .DataBodyRange.Columns(53).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
+            .DataBodyRange.Columns(G04_Flag_EjeAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
             RegsCanTot = RegsCanTot + rowfind
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
@@ -82,7 +80,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
-            .DataBodyRange.Columns(54).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
+            .DataBodyRange.Columns(G04_Flag_Anejo).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
             RegsCanTot = RegsCanTot + rowfind
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
@@ -93,7 +91,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
-            .DataBodyRange.Columns(55).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
+            .DataBodyRange.Columns(G04_Flag_Aplazado).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
             RegsCanTot = RegsCanTot + rowfind
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
@@ -104,7 +102,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
-            .DataBodyRange.Columns(56).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
+            .DataBodyRange.Columns(G04_Flag_ADxAplz).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
             RegsCanTot = RegsCanTot + rowfind
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
@@ -115,7 +113,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
 '        RowFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
 '        If RowFind > 0 Then
 '            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz_SinCob"
-'            .DataBodyRange.Columns(56).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz_SinCob"
+'            .DataBodyRange.Columns(G04_Flag_ADxAplz).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz_SinCob"
 '            RegsCanTot = RegsCanTot + RowFind
 '        End If
 '        TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & _
