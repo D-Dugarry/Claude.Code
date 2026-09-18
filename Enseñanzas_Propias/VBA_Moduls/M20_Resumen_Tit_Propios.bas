@@ -1,4 +1,5 @@
 Attribute VB_Name = "M20_Resumen_Tit_Propios"
+' Last Rev. 2026-09-19 00:07
 Option Explicit
 
 ' ==================================================================================================================================
@@ -7,6 +8,7 @@ Sub Rut_Resumen_Tab_TitPropios()    ' ==========================================
 '--- Tabla Sht__Inf_EPs_UXXI  Tit.Propios-Resumen ----------------------
  Dim AñoCont                As String:          AñoCont = Prog__APP.Range("APP_AñoCont")
  Dim CursAcad               As String:          CursAcad = Prog__APP.Range("APP_CursAcad")
+ Dim AñoContAnt            As Integer:         AñoContAnt = Left(CursAcad, 4)      '- El 1º Año del Curso Académico
  Const CtTP_Cod_Plan          As Integer = 1
  Const CtTP_Curso_Acad        As Integer = 2
  Const CtTP_Año_Emi           As Integer = 3
