@@ -101,6 +101,9 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li>B14 · Bucle <code>Do While</code> sin cota superior en M31/M32/M33</li>
 <li>B15 · Contraseña de correo en texto plano</li>
 <li>B16 · Cuatro rutinas de otro libro en <code>M90_Rutinas_X.bas</code> (hallazgo posterior)</li>
+<li>B17 · <code>ActivForm</code> usada en 6 módulos y declarada en ninguno</li>
+<li>B18 · <code>AñoContAnt</code> sin declarar en <code>M20_Resumen_Tit_Propios.bas</code></li>
+<li>B19 · <code>Cod_Plan</code> sin declarar y vaciado antes de usarse (<code>M21_Resumen_Tit_Propios_UNO.bas</code>)</li>
 </ul>
 <li><strong>Bloque C — Librería transversal <code>Rut_*</code>/<code>Prog_*</code> y formularios</strong></li>
 <ul>
@@ -115,6 +118,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li>C9 · <code>Módulo3.bas</code> sin <code>Option Explicit</code>, con variables casi homónimas</li>
 <li>C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)</li>
 <li>C11 · Ruta de disco hardcodeada como fallback silencioso</li>
+<li>C12 · <code>.UsedRange</code> como instrucción suelta — propiedad usada como si fuera un método</li>
 </ul>
 </ul>
 <hr>
@@ -182,7 +186,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 </ul>
 <p>Si la premisa de diseño se cumple siempre, el coste en ejecución es cero y ninguno de los dos avisos llega a aparecer.</p>
 <h3>A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI</h3>
-<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M08_Actualizar_Tb_Coef_VRI.bas</code> — líneas 95-96, 105-106 (contraste con las 48-49, correctas)</p>
+<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M08_Actualizar_Tb_Coef_VRI.bas</code> — línea 96 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
 <pre><code>    ' --- líneas 48-49, correctas ---
     Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_ORden, xlAscending, True)
     Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_Plan, xlAscending, False)
@@ -192,9 +196,9 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
     Call Rut_Lo_Sort(Lo_RetVRI, BD_Plan, xlAscending, False)</code></pre>
 <p><code>Lo_RetVRI</code> es <code>Prog_Coef_Ret_VRI</code>, cuyo esquema de columnas es <code>CoefVRI_*</code> (con <code>Plan</code> en la columna 1); <code>BD_Plan</code> (=3) es la constante de la tabla <code>Prog_BD</code>, no la de esta tabla. Al reutilizarla aquí por error se ordena en realidad por <code>CoefVRI_Concepto</code> (columna 3) en vez de por <code>CoefVRI_Plan</code>. El bloque de preparación inicial sí lo hace bien; el error, con toda pinta de copia-pega, solo está en los dos bloques finales.</p>
 <p><strong>Impacto:</strong> acotado — solo afecta al desempate de filas nuevas (todas con <code>ORden="x"</code>) — pero es un fallo real y reproducible.</p>
-<p><strong>Arreglo:</strong> sustituir <code>BD_Plan</code> por <code>CoefVRI_Plan</code> en las líneas 96 y 106.</p>
+<p><strong>Arreglo aplicado:</strong> sustituido <code>BD_Plan</code> por <code>CoefVRI_Plan</code> en la línea 96. La línea 106 (bloque <code>Restablecer_Valores:</code>) ya usaba <code>CoefVRI_Plan</code> correctamente, así que la única ocurrencia errónea era la 96.</p>
 <h3>A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)</h3>
-<p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M05_Asign_Tipo_Recibo.bas</code> — líneas 35-40, 59-65 (patrón repetido para EjeAnt/Añejo/Aplazado/ADxAplz)</p>
+<p><strong>Severidad:</strong> Medio · <strong>Ficheros:</strong> <code>M05_Asign_Tipo_Recibo.bas</code> — líneas 35-40, 59-65 · <code>M00_Ini_Var_APP.bas</code> · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
 <pre><code>        .DataBodyRange.Columns(BD_Tipo_Rec).ClearContents
         .DataBodyRange.Columns(52).Resize(, 56).ClearContents
         '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 1).ClearContents
@@ -203,7 +207,19 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
             .DataBodyRange.Columns(52).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"</code></pre>
 <p>Las columnas 52-56 de <code>Prog_LsGes04</code> se usan como "flags" internos por tipo (Emitido=52, EjeAnt=53, Añejo=54, Aplazado=55, ADxAplz=56), con números literales en vez de constantes con nombre. La línea comentada <code>BD_CriT_Emi</code>/<code>BD_CriT_ErrDate</code> demuestra que antes existían constantes específicas para este rango, ya no presentes en <code>M00_Ini_Var_APP.bas</code>. Además, esos mismos números <strong>coinciden</strong> con <code>BD_H_Incidencias</code> (52), <code>BD_EP_Ctrl</code> (53) y <code>BD_EP_GestReg</code> (54) del esquema de <code>Prog_BD</code> — aquí se reutilizan como scratch space en <code>Prog_LsGes04</code> (una tabla distinta) después de que <code>M02_Manage_Duplicates</code> ya haya usado la columna 52 como historial de diferencias de duplicados.</p>
 <p><strong>Impacto:</strong> si en el futuro se añade o quita una columna a <code>Lo_Ges04</code> (el propio pipeline añade y borra columnas temporales en varios puntos), estos números fijos apuntarán a la columna equivocada sin que salte ningún error.</p>
-<p><strong>Arreglo:</strong> definir constantes con nombre para estas 5 columnas de flags, o eliminarlas si son redundantes con <code>BD_Tipo_Rec</code>.</p>
+<p><strong>Bug adicional detectado al arreglarlo (línea 39):</strong> <code>.DataBodyRange.Columns(52).Resize(, 56).ClearContents</code> <strong>no limpia las columnas 52-56</strong>, sino las <strong>52-107</strong>: el segundo argumento de <code>Resize</code> es el <em>número de columnas</em> del rango resultante (el ancho), no la columna final. Limpiaba por tanto 56 columnas a partir de la 52, arrasando todo lo que hubiera más allá del rango de flags dentro de la tabla. El equivalente correcto es <code>Resize(, 5)</code>.</p>
+<p><strong>Arreglo aplicado:</strong> definidas las 5 constantes con nombre en <code>M00_Ini_Var_APP.bas</code>, justo tras el esquema de <code>Prog_BD</code>, más dos derivadas para el <code>ClearContents</code> (así el rango a limpiar se recalcula solo si algún día cambia el bloque):</p>
+<pre><code>'--- Flags internos de Tipo_Recibo en Prog_LsGes04 (M05_Asign_Tipo_Recibo) ------
+'    Columnas de marca por tipo; el valor definitivo va en BD_Tipo_Rec.
+Public Const G04_Flag_Emitido      As Integer = 52   ' col: az
+Public Const G04_Flag_EjeAnt       As Integer = 53   ' col: ba
+Public Const G04_Flag_Anejo        As Integer = 54   ' col: bb
+Public Const G04_Flag_Aplazado     As Integer = 55   ' col: bc
+Public Const G04_Flag_ADxAplz      As Integer = 56   ' col: bd
+Public Const G04_Flag_Primera      As Integer = G04_Flag_Emitido
+Public Const G04_Flag_Cuantas      As Integer = G04_Flag_ADxAplz - G04_Flag_Emitido + 1</code></pre>
+<p>En <code>M05</code> se han sustituido los 6 literales por las constantes, y el <code>ClearContents</code> pasa a ser <code>.DataBodyRange.Columns(G04_Flag_Primera).Resize(, G04_Flag_Cuantas).ClearContents</code> — que ahora sí limpia exactamente las 5 columnas de flags, corrigiendo de paso el <code>Resize(, 56)</code>. Se han eliminado también las dos líneas comentadas obsoletas que referenciaban <code>BD_CriT_Emi</code>/<code>BD_CriT_ErrDate</code> (constantes ya inexistentes).</p>
+<p><strong>Nota de diseño:</strong> estas 5 columnas <strong>solo se escriben, nunca se leen</strong> en ninguno de los 131 módulos (el valor operativo es <code>BD_Tipo_Rec</code>, que recibe el mismo texto una línea más arriba en cada bloque). Se han conservado —en vez de eliminarlas— por decisión del usuario, al servir de marca visible en la propia hoja. Los números <strong>coinciden</strong> con <code>BD_H_Incidencias</code> (52), <code>BD_EP_Ctrl</code> (53) y <code>BD_EP_GestReg</code> (54) del esquema de <code>Prog_BD</code>, pero se trata de tablas distintas: los nuevos nombres <code>G04_*</code> dejan explícito que pertenecen a <code>Prog_LsGes04</code>.</p>
 <h3>A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</h3>
 <p><strong>Severidad:</strong> Medio · <strong>Fichero:</strong> <code>M02_Del_Reg_No_Válidos.bas</code> — línea 86 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-14)</p>
 <pre><code>        .Range.AdvancedFilter xlFilterInPlace, Prog_Filtros_TipRec.Range("Tb_CriT_ImpMatCeroLsGes04")
@@ -280,7 +296,7 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></p
 <p>La línea 197 ya cierra correctamente <code>Rut_Filtro_NumJI_2_en_Tasas</code>; la línea 200 es un segundo <code>End Sub</code> sin ningún <code>Sub</code>/<code>Function</code> abierto que cerrar. Error de sintaxis, impide compilar el módulo.</p>
 <p><strong>Arreglo aplicado:</strong> borrada la línea 200. El módulo tenía 19 <code>Sub</code> / 20 <code>End Sub</code>; ahora 15/15 tras esta corrección y la de B16.</p>
 <h3>B5 · Variable de objeto <code>Lo_AE4x1</code> no declarada</h3>
-<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M51_Import_AE4x1.bas</code> — líneas 25, 93</p>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M51_Import_AE4x1.bas</code> — líneas 25, 93 · <strong>Estado:</strong> ⏸️ Módulo desactivado (2026-09-18) — el bug sigue sin resolver</p>
 <pre><code>    Dim Ws_AE4          As Worksheet:   Set Ws_AE4 = Lo_AE4x1.Parent
 ...
     Else
@@ -298,6 +314,19 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></p
     End If</code></pre>
 <p><code>Lo_AE4x1</code> solo se asigna dentro de la rama <code>If SW_Inicilizar_Ws</code>; la rama <code>Else</code> lo usa sin haberlo asignado nunca. Los 8 puntos de llamada (4 en <code>M50_Inf_Cont_AE4x4.bas</code> y 4 en <code>M50_Inf_Cont_AE4x41.bas</code>) pasan siempre <code>False</code> como último argumento, así que <code>Lo_AE4x1</code> permanecería <code>Nothing</code> en tiempo de ejecución. Aunque B1/B2/B3/B5 ya impiden compilar, esto confirma que el flujo AE4 está incompleto también a nivel lógico: falta pasar <code>True</code> en la primera de las 4 importaciones.</p>
 <p>Nota (2026-09-15): tras resolver B2, este fichero (<code>M51_Import_AE4x11.bas</code>) ya no existe. El problema de fondo persiste, y de forma más grave, en el módulo superviviente <code>M51_Import_AE4x1.bas</code>: ahí la rama <code>If SW_Inicilizar_Ws</code> tampoco asigna <code>Set Lo_AE4x1 = ...</code> (solo copia el rango), así que <code>Lo_AE4x1</code> no se asigna en NINGUNA rama — coincide con B5. Las 4 llamadas restantes (solo desde <code>M50_Inf_Cont_AE4x4.bas</code>) siguen pasando <code>False</code>.</p>
+<h3>B5/B6 · Decisión: módulos <code>M50</code> y <code>M51</code> desactivados por completo (2026-09-18)</h3>
+<p>Ante la imposibilidad de compilar el proyecto con el flujo AE4x4/AE4x1 en este estado, se han <strong>comentado íntegramente</strong> los dos módulos implicados:</p>
+<div class="tw"><table><thead><tr><th>Módulo</th><th>Rutina pública única</th><th>Líneas</th></tr></thead><tbody><tr><td><code>M50_Inf_Cont_AE4x4.bas</code></td><td><code>RuT_Inf_Contable_Recibos_AE4x4</code></td><td>114</td></tr><tr><td><code>M51_Import_AE4x1.bas</code></td><td><code>Rut_Lo_Import_AE4x1</code></td><td>127</td></tr></tbody></table></div>
+<p>De cada fichero solo quedan sin comentar la línea <code>Attribute VB_Name</code> (obligatoria para poder reimportar el módulo), el sello <code>Last Rev.</code> y una cabecera nueva que explica el motivo de la desactivación y qué hay que resolver antes de reactivarlo. <code>Option Explicit</code> queda comentado por ser una instrucción del módulo. Verificado que <strong>no queda ni una sola línea de código viva</strong> en ninguno de los dos.</p>
+<p><strong>Auditoría previa por las 4 vías</strong> — ninguna invocación viva de las dos rutinas:</p>
+<ol>
+<li><strong>Código VBA</strong> — <code>Rut_Lo_Import_AE4x1</code> solo la llamaba <code>M50</code> (4 veces, líneas 45/51/57/63), que queda comentado a la vez; <code>RuT_Inf_Contable_Recibos_AE4x4</code> no la llamaba nadie.</li>
+<li><strong>Macros asignadas a shapes</strong> — ninguno de los 66 shapes con macro del <code>.xlsm</code> apunta a ellas.</li>
+<li><strong>Tabla <code>Tb_Tareas</code> del menú auxiliar</strong> — vector crítico aquí, porque <code>Form_Menu.frm:266</code> ejecuta las tareas con <code>Application.Run Rut_Name</code> leyendo el <strong>nombre de la rutina de la columna 3</strong> de la tabla: una invocación dinámica que ningún grep del código ve. Leídas las 40 tareas reales del libro (<code>xl/tables/table12.xml</code> → <code>sheet10.xml</code>): <strong>ninguna</strong> apunta a estas dos rutinas.</li>
+<li><strong>Resto del XML</strong> del libro — las dos cadenas no aparecen en ninguna celda; solo dentro de <code>vbaProject.bin</code>, que es el propio código compilado, no una invocación.</li>
+</ol>
+<p><strong>Efecto colateral revisado:</strong> al comentar <code>M50</code> desaparece el único <code>Set ActivForm</code> del proyecto (ver B17), con lo que <code>ActivForm</code> queda declarada en <code>M00</code> pero sin ningún uso vivo. Es inofensivo para compilar, y la declaración <strong>se mantiene</strong>: <code>M03</code>, <code>M04</code>, <code>M05</code> y <code>M90_Rut_Format_Colmns</code> la siguen usando en líneas comentadas, y cualquiera de ellas que se reactive la necesitará (con su propio <code>Set</code>, ya que no cuelgan de <code>M50</code>).</p>
+<p><strong>Para reactivar el flujo AE4</strong> hay que resolver antes B5/B6: declarar <code>Lo_AE4x1</code> (probablemente <code>Public</code> en <code>M00_Ini_Var_APP.bas</code>, como el resto de objetos del proyecto), añadir su <code>Set Lo_AE4x1 = Ws_AE4x1.ListObjects(1)</code> tras la copia del rango en la rama <code>If SW_Inicilizar_Ws</code>, y cambiar a <code>True</code> la primera de las 4 llamadas de <code>M50</code> para que esa rama llegue a ejecutarse.</p>
 <h3>B7 · Límite de filas hardcodeado a 5000</h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>M21_Resumen_Tit_Propios_UNO.bas</code> — línea 101</p>
 <pre><code>    For Fila_DR = 1 To 5000 'Lo_TPH.ListRows.Count</code></pre>
@@ -365,7 +394,54 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)</code></p
 <div class="tw"><table><thead><tr><th>Identificador</th><th>Qué sería</th><th>Dónde se usaba</th></tr></thead><tbody><tr><td><code>Hp_BuscarJI_1</code>, <code>Hp_BuscarJI_2</code>, <code>Hp_T_Aplic</code></td><td>CodeName de hoja</td><td><code>M90_Rutinas_X.bas</code></td></tr><tr><td><code>Lo_Aplic</code></td><td><code>ListObject</code></td><td><code>M90_Rutinas_X.bas</code></td></tr><tr><td><code>CTa_Ref</code></td><td><code>Const</code> de columna</td><td><code>M90_Rutinas_X.bas</code></td></tr><tr><td><code>Lo_Prog_Colns</code>, <code>LastCol_Tb_Solicitudes</code></td><td><code>ListObject</code> / <code>Const</code></td><td><code>M90_Rutinas_X.bas</code> + <code>M90_Rutinas_Menú_Aux.bas</code></td></tr></tbody></table></div>
 <p>Tres indicios de que es código ajeno a este libro: el prefijo <code>Hp_</code> no es la convención de aquí (<code>Prog_*</code>, <code>Wk_*</code>, <code>Sht__*</code>); los comentarios hablan de <em>Tasas</em>, <em>Aplicaciones</em> y <em>Solicitudes</em>, no de Liquidación de Títulos Propios; y ninguno de los identificadores aparece tampoco en PPub.</p>
 <p><strong>Arreglo aplicado:</strong> eliminadas las 4 rutinas que dependían de los cinco primeros identificadores (<code>Rut_Filtro_NumJI_1_en_Tasas</code>, <code>Rut_Filtro_NumJI_2_en_Tasas</code>, <code>Rut_Ajustar_V_H_Alignment</code>, <code>Rut_Filas_Ajustar_Alto</code>), tras auditar las 4 vías de invocación: sin llamadas en el código VBA, sin macro asignada en ninguno de los 68 shapes del <code>.xlsm</code>, sin apariciones en <code>sharedStrings</code> ni en ninguna otra parte XML (el libro no tiene Ribbon custom). Módulo de 365 a 254 líneas.</p>
-<p><strong>⚠️ Pendiente — el proyecto aún no compila:</strong> <code>Lo_Prog_Colns</code> y <code>LastCol_Tb_Solicitudes</code> siguen sin declarar, usados en <code>Rut_Columnas_Ajustar_Ancho</code> y <code>Rut_Columnas_Mostrar</code> de este módulo y en <code>M90_Rutinas_Menú_Aux.bas:89-90</code>. A diferencia de las anteriores, <strong>estas rutinas sí parecen propias de este libro</strong> (<code>Rut_Columnas_Mostrar</code> escribe en <code>Form_Menu.TB_Informe</code>, el menú auxiliar), así que lo correcto es <strong>declararlas apuntando a la tabla real</strong> — probablemente el <code>ListObject</code> de alguna hoja <code>Prog_DefCol*</code>, cuyas filas 4, 5, 7 y 11 se usan como ancho, alineación horizontal, marca "Ocultar" y alineación vertical — no borrar el código.</p>
+<p><strong>Resuelto provisionalmente (2026-09-18):</strong> <code>Lo_Prog_Colns</code> y <code>LastCol_Tb_Solicitudes</code> seguían sin declarar, usados en <code>Rut_Columnas_Ajustar_Ancho</code> y <code>Rut_Columnas_Mostrar</code> de este módulo y en <code>M90_Rutinas_Menú_Aux.bas:89-90</code>. El usuario <strong>comentó esas rutinas</strong> para desbloquear la compilación (ver el apéndice, sección "Comentadas por el usuario"). Sigue en pie el criterio de que <strong>estas rutinas sí parecen propias de este libro</strong> (<code>Rut_Columnas_Mostrar</code> escribe en <code>Form_Menu.TB_Informe</code>, el menú auxiliar): si se quieren recuperar, lo correcto es <strong>declarar las variables apuntando a la tabla real</strong> — probablemente el <code>ListObject</code> de alguna hoja <code>Prog_DefCol*</code>, cuyas filas 4, 5, 7 y 11 se usan como ancho, alineación horizontal, marca "Ocultar" y alineación vertical — en vez de dejarlas comentadas para siempre.</p>
+<h3>B17 · <code>ActivForm</code> usada en 6 módulos y declarada en ninguno</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M00_Ini_Var_APP.bas</code> (la declaración que faltaba), <code>M50_Inf_Cont_AE4x4.bas</code>, <code>M51_Import_AE4x1.bas</code> · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
+<p>Detectado al compilar tras los arreglos de C3: el VBE marca <code>No se ha definido la variable</code> sobre <code>ActivForm</code> en <code>M51_Import_AE4x1.bas:20</code>.</p>
+<pre><code>    Dim TxT_ProgIni     As String:      TxT_ProgIni = ActivForm.Controls("TBx_Informe")</code></pre>
+<p><code>ActivForm</code> es el UserForm activo, sobre el que las rutinas largas van escribiendo el progreso vía <code>Rut_TimeLap_Inf(ActivForm, "TBx_Informe", …)</code>. Aparece <strong>41 veces en 6 módulos</strong> (<code>M03</code>, <code>M04</code>, <code>M05</code>, <code>M50</code>, <code>M51</code>, <code>M90_Rut_Format_Colmns</code>) y tiene su <code>Set</code> en <code>M50_Inf_Cont_AE4x4.bas:24</code>:</p>
+<pre><code>    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.</code></pre>
+<p>…pero <strong>no se declara en ningún punto del proyecto</strong>. No es código ajeno importado (a diferencia de B3 y B16): el libro hermano <strong>PPub sí la declara</strong>, en el módulo equivalente a nuestro <code>M00_Ini_Var_APP.bas</code>, exactamente una línea antes de <code>Lo_Tareas</code>:</p>
+<pre><code>' Precios Públicos - PPub, M_000_Ini_Var_APP.bas:355
+    Public ActivForm        As Object      '- Identificamos qué Formulario está Activo.  ----------
+    Public Lo_Tareas        As ListObject</code></pre>
+<p>Nuestro <code>M00</code> conserva <code>Lo_Tareas</code> y todo el bloque de alrededor (<code>MsgBx_*</code>, etc.) en el mismo orden, pero le falta justo la línea de <code>ActivForm</code>: se perdió al derivar este libro de PPub.</p>
+<p><strong>Arreglo aplicado:</strong> restituida <code>Public ActivForm As Object</code> en <code>M00_Ini_Var_APP.bas</code>, en la misma posición que ocupa en PPub (justo antes de <code>Public Lo_Tareas</code>). <code>Public</code> es el ámbito correcto: el <code>Set</code> vive en <code>M50</code> y el uso en <code>M51</code>, módulos distintos.</p>
+<p><strong>Verificado que no queda un Error 91 latente:</strong> las 4 llamadas a <code>Rut_Lo_Import_AE4x1</code> (<code>M50:45,51,57,63</code>) son posteriores al <code>Set</code> de <code>M50:24</code>, así que <code>ActivForm</code> llegaba poblado a <code>M51</code>. En <code>M03</code>, <code>M04</code>, <code>M05</code> y <code>M90_Rut_Format_Colmns</code> todas las apariciones están <strong>en líneas comentadas</strong>, así que no hay ninguna ruta viva que la use sin asignar. Cuidado si se reactiva alguna: habría que añadirle su propio <code>Set</code> (esas rutinas no cuelgan de <code>M50</code>).</p>
+<p><strong>Actualización (2026-09-18, posterior):</strong> al desactivarse por completo <code>M50</code> y <code>M51</code> (ver B5/B6), el único <code>Set ActivForm</code> del proyecto queda comentado, así que <code>ActivForm</code> pasa a estar <strong>declarada pero sin ningún uso vivo</strong>. La declaración se conserva a propósito: es la correcta según PPub, no estorba a la compilación, y la necesitará cualquiera de las rutinas comentadas de <code>M03</code>/<code>M04</code>/<code>M05</code>/<code>M90</code> o el propio flujo AE4 cuando se reactiven.</p>
+<h3>B18 · <code>AñoContAnt</code> sin declarar en <code>M20_Resumen_Tit_Propios.bas</code></h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M20_Resumen_Tit_Propios.bas</code> — línea 183 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-19)</p>
+<p>Detectado al compilar: <code>No se ha definido la variable</code> sobre <code>AñoContAnt</code>, dentro del bloque "Importe Aplz Aplazado" de <code>Rut_Resumen_Tab_TitPropios</code>:</p>
+<pre><code>            '--- Importe Aplz Aplazado --------
+            If RwPH.Range(BD_ImpCob) &gt; 0 And RwPH.Range(BD_ACont_Vto) &gt; AñoContAnt Or _</code></pre>
+<p>A diferencia de B3/B16/B17, aquí <strong>no hay nada ajeno ni exótico</strong>: <code>AñoContAnt</code> es una variable normal del dominio —el primer año del curso académico, "2025" en "2025-26"— que <strong>otros 5 módulos declaran localmente con la misma línea</strong> (<code>M20_Inf_EP_UXXI</code>, <code>M22_Inf_EPs_para_UXXI</code>, <code>M22_..._NEW</code>, <code>M32_List_Anul_y_Devoluciones</code>, <code>M39_Resumen_Planes_C_Acad</code>):</p>
+<pre><code>    Dim AñoContAnt      As Integer:     AñoContAnt = Left(CursoAcad, 4)   '- El 1º Año de Curso</code></pre>
+<p>Simplemente se olvidó en este módulo, que la usa una única vez. Su fuente (<code>APP_CursAcad</code>) ya estaba leída en la rutina.</p>
+<p><strong>Arreglo aplicado:</strong> añadida la declaración junto a las demás, al principio de <code>Rut_Resumen_Tab_TitPropios</code>:</p>
+<pre><code> Dim AñoContAnt            As Integer:         AñoContAnt = Left(CursAcad, 4)      '- El 1º Año del Curso Académico</code></pre>
+<p><strong>Un detalle que había que mirar antes de copiar y pegar:</strong> en este módulo la variable del curso académico <strong>no se llama <code>CursoAcad</code> sino <code>CursAcad</code></strong> (el nombre local, ya declarado en la línea 9). Copiar literalmente la línea de los otros módulos habría dejado un segundo "variable no definida" en su lugar. <code>Integer</code> es el tipo correcto: se compara contra <code>BD_ACont_Vto</code>, un año contable numérico, igual que en los 5 módulos hermanos.</p>
+<p><strong>⚠️ Inconsistencia preexistente detectada de paso (no corregida):</strong> en este módulo <code>AñoCont</code> se declara <strong><code>As String</code></strong>, mientras que en los otros cuatro es <code>As Integer</code>:</p>
+<div class="tw"><table><thead><tr><th>Módulo</th><th><code>AñoCont</code></th></tr></thead><tbody><tr><td><code>M20_Resumen_Tit_Propios.bas</code></td><td><strong><code>String</code></strong></td></tr><tr><td><code>M20_Inf_EP_UXXI.bas</code>, <code>M22_Inf_EPs_para_UXXI.bas</code>, <code>M32_List_Anul_y_Devoluciones.bas</code>, <code>M39_Resumen_Planes_C_Acad.bas</code></td><td><code>Integer</code></td></tr></tbody></table></div>
+<p>Y aquí se usa en comparaciones y aritmética numéricas (<code>&gt; AñoCont</code>, <code>AñoCont + 1</code>, líneas 161-247). VBA lo resuelve por coerción implícita, así que "funciona", pero un <code>String</code> en una comparación de orden puede comparar como texto en vez de como número en según qué contexto. <strong>No se ha tocado</strong>: no bloquea la compilación y cambiar el tipo podría alterar resultados de un informe en producción. Conviene verificarlo con datos reales antes de unificarlo.</p>
+<h3>B19 · <code>Cod_Plan</code> sin declarar y vaciado antes de usarse (<code>M21_Resumen_Tit_Propios_UNO.bas</code>)</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M21_Resumen_Tit_Propios_UNO.bas</code> — líneas 94-95 y 106 · <strong>Estado:</strong> ⏸️ Módulo desactivado (2026-09-19) — decisión de diseño pendiente</p>
+<p>Detectado al compilar: <code>No se ha definido la variable</code> sobre <code>Cod_Plan</code>, en el filtro principal del bucle de <code>Rut_Resumen_Tab_TitPropios_UNO</code>:</p>
+<pre><code>    Range("TP_Cod_Plan") = ""                                    ' línea 94  ← lo VACÍA
+    Range("TP_Cod_Plan").Offset(0, 1) = Range("APP_CursAcad")    ' línea 95
+    ...
+        If RwPH.Range(BD_Plan) &lt;&gt; Cod_Plan Then GoTo Siguiente_Fila   ' línea 106  ← y aquí filtra por él</code></pre>
+<p><strong>No basta con declarar la variable</strong>, y por eso no se ha aplicado un arreglo mecánico: hay un problema de diseño detrás. El módulo es la variante "un solo plan" de <code>M20_Resumen_Tit_Propios</code>, y <code>Cod_Plan</code> es el plan que hay que resumir. El rastro de dónde debería salir está en el code-behind de la hoja, <code>Wk_TitP_UNO.cls:22</code>, <strong>entero comentado</strong>:</p>
+<pre><code>'        Rut_Resumen_Tab_TitPropios_UNO (Range("TP_Cod_Plan"))</code></pre>
+<p>Es decir: en el diseño original la rutina <strong>recibía el código de plan como parámetro</strong>, disparada por el <code>Worksheet_Change</code> de la hoja al escribir en la celda. Ese evento está desactivado, y la firma actual no tiene parámetros. Además, la línea 94 <strong>vacía <code>TP_Cod_Plan</code></strong> justo antes del bucle que lo necesita, con lo que leerlo ahí devolvería siempre cadena vacía.</p>
+<p><strong>Dato relevante sobre el rango</strong> (verificado en <code>xl/workbook.xml</code>): <code>TP_Cod_Plan</code> es un nombre de <strong>ámbito de hoja, definido tres veces</strong> en tres hojas distintas:</p>
+<div class="tw"><table><thead><tr><th>Nombre</th><th>Apunta a</th><th>Hoja (CodeName)</th></tr></thead><tbody><tr><td><code>TP_Cod_Plan</code></td><td><code>EP_Resumen_1!$F$1</code></td><td>—</td></tr><tr><td><code>TP_Cod_Plan</code></td><td><code>EP_UXXI!$F$2</code></td><td>—</td></tr><tr><td><code>TP_Cod_Plan</code></td><td><code>Tit_Propio_UNO!$F$1</code></td><td><strong><code>Wk_TitP_UNO</code></strong> ← el de este módulo</td></tr></tbody></table></div>
+<p>Los <code>Range("TP_Cod_Plan")</code> <strong>sin cualificar</strong> de las líneas 94-95 resuelven por la hoja activa, exactamente el riesgo que documenta el <code>CLAUDE.md</code> del proyecto (mismo patrón que A8). Al reactivar el módulo hay que cualificar: <code>Wk_TitP_UNO.Range("TP_Cod_Plan")</code>.</p>
+<p><strong>⚠️ A diferencia de <code>M50</code>/<code>M51</code>, esta rutina SÍ estaba viva.</strong> Auditadas las 4 vías: no la llama ningún código VBA (la única referencia, <code>Wk_TitP_UNO.cls:22</code>, está comentada) ni ningún shape, pero <strong>sí figura en la tabla <code>Tb_Tareas</code></strong> del menú auxiliar — fila 31, tarea <em>"2_ Exportar Tabla Resumen de UN Tit.Propio"</em> —, que <code>Form_Menu.frm:266</code> ejecuta con <code>Application.Run</code>. Mientras el módulo esté comentado, <strong>esa entrada del menú fallará al pulsarla</strong>: conviene quitar o marcar esa fila en <code>Tb_Tareas</code> mientras tanto.</p>
+<p><strong>Decisión aplicada:</strong> comentar el módulo entero (289 → 305 líneas, 0 de código vivo), a la espera de decidir de dónde sale el plan. Las dos salidas razonables, cuando se retome:</p>
+<ol>
+<li><strong>Leer el plan del rango antes de vaciarlo</strong> — coherente con que la tarea se lance desde el menú sin argumentos: el usuario escribe el plan en <code>Tit_Propio_UNO!F1</code> y luego lanza la tarea. Requiere <code>Dim Cod_Plan As String: Cod_Plan = Wk_TitP_UNO.Range("TP_Cod_Plan")</code> al principio, control de vacío, y mover el vaciado de la línea 94 a después de la lectura.</li>
+<li><strong>Restaurar el diseño original</strong> — devolver el parámetro a la firma (<code>Sub Rut_Resumen_Tab_TitPropios_UNO(Cod_Plan As String)</code>) y reactivar el <code>Worksheet_Change</code> de <code>Wk_TitP_UNO.cls</code>. Esto es <strong>incompatible</strong> con lanzarla desde <code>Tb_Tareas</code> sin argumentos, así que habría que quitarla del menú.</li>
+</ol>
 <h2>Bloque C — Librería transversal <code>Rut_*</code>/<code>Prog_*</code> y formularios</h2>
 <p><em>Ficheros: <code>Rut_Lo</code>, <code>Rut_WB</code>, <code>Rut_WS</code>, <code>Rut__Right_Click_VBA</code>, <code>Form_*</code>, <code>M0999_*</code>, <code>Módulo*</code>.</em></p>
 <h3>C1 · Variable no declarada <code>LoTb</code> (typo de <code>Lo_Tb</code>)</h3>
@@ -394,7 +470,7 @@ End Sub</code></pre>
 <p><code>calcMode</code> se declara como variable local (línea 20) para guardar el modo de cálculo y restaurarlo después (eso sí, correcto al final). Pero dentro del <code>With Application</code>, <code>.calcMode = .Calculation</code> lleva el punto delante de <code>calcMode</code>, así que VBA lo interpreta como <code>Application.calcMode</code> — propiedad que no existe → "Método o miembro de datos no encontrado" en compilación. El patrón correcto (<code>calcMode = .Calculation</code>, sin punto inicial) sí se usa de forma consistente 4 veces en <code>Rut__Right_Click_VBA.bas</code>.</p>
 <p><strong>Arreglo:</strong> quitar el punto inicial → <code>calcMode = .Calculation</code>.</p>
 <h3>C3 · <code>String</code> pasado donde se espera <code>Worksheet</code> por referencia (ruta en producción)</h3>
-<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 42-49, 58-70</p>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 42-49, 58-70 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
 <pre><code>Sub Rut_WrkSheet_Preparar(WrkSht As Worksheet)  '- Mostrar todas las Filas y Columnas, y Quitar Filtros.
     With WrkSht
         .Columns.EntireColumn.Hidden = False
@@ -410,15 +486,33 @@ Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja inc
         .Unprotect
         Call Rut_WrkSheet_Preparar(WrkSht)</code></pre>
 <p><code>Rut_WrkSheet_Preparar</code> exige un <code>Worksheet</code> por parámetro (ByRef implícito, línea 42); <code>Rut_WrkSheet_Vaciar</code> le pasa su propio parámetro <code>WrkSht</code>, que es <code>String</code> (línea 58) → "Error de compilación: Tipo de argumento ByRef incompatible". A diferencia de otros hallazgos de este bloque, <code>Rut_WrkSheet_Vaciar</code> <strong>está activamente en uso</strong>: la llaman <code>M09_Importar_Sol_Liq.bas:76</code>, <code>M12_Genera_LIQx_PDF.bas:24,303</code>, <code>M51_Import_AE4x1.bas:90</code> y <code>Rut_Hipervinculos.bas:13</code> (nota 2026-09-15: <code>M51_Import_AE4x11.bas:92</code> ya no existe, ver B2).</p>
-<p><strong>Arreglo:</strong> <code>Call Rut_WrkSheet_Preparar(Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht))</code> — pasar el objeto <code>Worksheet</code>, no el nombre.</p>
+<p><strong>Arreglo aplicado (2026-09-18):</strong> en vez del parche mínimo que se proponía aquí (envolver el argumento en <code>Application.Workbooks(...).Sheets(WrkSht)</code>), se ha cambiado <strong>la firma</strong> de la rutina por coherencia con <code>Rut_WrkSheet_Preparar</code> y con el resto de la librería <code>Rut_*</code>, que ya trabaja con objetos:</p>
+<pre><code>Sub Rut_WrkSheet_Vaciar(WrkSht As Worksheet)      '--- Borra Toda la Hoja incluso los objetos (Shapes) ---
+    ...
+    With WrkSht                                   '- antes: Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
+        ...
+        Call Rut_WrkSheet_Preparar(WrkSht)        '- ahora ya recibe el Worksheet que espera</code></pre>
+<p>Así desaparece además la resolución por nombre contra <code>ThisWorkbook</code>, que era una limitación implícita (la hoja tenía que vivir sí o sí en este libro) y una fuente de error en ejecución si el nombre no existía.</p>
+<p><strong>Llamadas adaptadas (5):</strong></p>
+<ul>
+<li><code>M09_Importar_Sol_Liq.bas:77</code>, <code>M12_Genera_LIQx_PDF.bas:25</code> y <code>:304</code>, <code>M51_Import_AE4x1.bas:90</code> — pasaban <code>&lt;Hoja&gt;.Name</code>; ahora pasan el propio objeto de hoja (<code>Prog_Sol_Liq</code>, <code>Wk_TitP_LIQx_PDF</code>, <code>Ws_AE4x1</code>).</li>
+<li><code>Rut_Hipervinculos.bas:13</code> — era el único caso que pasaba un <strong>literal</strong> (<code>"Hipervínculos"</code>). Se ha reordenado el bloque para obtener antes la referencia y pasarla:</li>
+</ul>
+<pre><code>    If Fnc_WrkSheet_Exist("Hipervínculos") Then
+        Set hojaResultado = ThisWorkbook.Sheets("Hipervínculos")
+        Call Rut_WrkSheet_Vaciar(hojaResultado)</code></pre>
+<p><code>WrkSht_Activa</code> (el nombre de la hoja activa que se guarda para restaurarla al final) sigue siendo <code>String</code> a propósito: ahí sí se quiere el nombre.</p>
 <h3>C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></h3>
-<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Mensaje.frm</code> — línea 20 (<code>UserForm_Activate</code>)</p>
+<p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Mensaje.frm</code> — línea 20 (<code>UserForm_Activate</code>) · <strong>Estado:</strong> ✅ Corregido (2026-09-19) — UserForm eliminado</p>
 <pre><code>Sub UserForm_Activate()
 Rut_Actualizar_1_LS_VAL
 Unload Me
 End Sub</code></pre>
 <p><code>Rut_Actualizar_1_LS_VAL</code> no existe en ningún módulo del proyecto (comprobado con grep global, no solo en el bloque revisado). Al ser una llamada directa (no <code>Application.Run</code> con cadena), VBA la resuelve en compilación: "Sub o función no definida". El propio formulario <code>Mensaje</code> tampoco lo muestra nadie (ni <code>Mensaje.Show</code> ni <code>Load Mensaje</code> aparecen en ningún módulo) — código huérfano por ambos lados.</p>
-<p><strong>Sugerencia:</strong> si <code>Mensaje.frm</code> ya no se usa, eliminarlo; si se pretendía llamar a otra rutina, corregir el nombre.</p>
+<p><strong>Arreglo aplicado (2026-09-19):</strong> eliminados <code>Mensaje.frm</code> y <code>Mensaje.frx</code> del repo. El UserForm entero eran 23 líneas, de las cuales 4 de código, y su única acción al abrirse era llamar a la rutina inexistente y descargarse a sí mismo — no mostraba nada ni tenía lógica propia.</p>
+<p><strong>Auditado por las 4 vías antes de borrarlo</strong>, todas negativas: ningún <code>Mensaje.Show</code>/<code>Load Mensaje</code> en el código, ningún shape con macro que lo invoque, ninguna entrada en <code>Tb_Tareas</code> ni en ninguna celda del libro. Se comprobó además que <code>Rut_Actualizar_1_LS_VAL</code> <strong>tampoco existe en PPub</strong>, así que no es un caso de código importado a medias (a diferencia de B3, B16 o B17, donde el libro hermano sí tenía el original): es una llamada a algo que no ha existido nunca en ninguno de los dos libros.</p>
+<p>Verificado tras el borrado que no queda ninguna referencia colgando. Ojo con un falso positivo al buscar: <code>Form_MsgBox.frm</code> contiene cuatro apariciones de <code>Lb_Mensaje</code>, que es un <strong>control</strong> de ese formulario, sin ninguna relación con el UserForm eliminado. Quedan 3 formularios: <code>Form_Menu</code>, <code>Form_MsgBox</code> y <code>Form_Usuario</code>.</p>
+<p><strong>⚠️ Pendiente en el <code>.xlsm</code>:</strong> el componente sigue dentro del libro. Hay que quitarlo a mano en el editor VBA — clic derecho sobre <code>Mensaje</code> en el árbol del proyecto → <em>Quitar Mensaje…</em> → <em>No</em> cuando pregunte si exportar. Reimportar los módulos no lo elimina solo.</p>
 <h3>C5 · <code>Rut_WrkSheet_ReducirPeso</code> opera sobre la hoja activa, no sobre la recibida</h3>
 <p><strong>Severidad:</strong> Alto · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 20-38</p>
 <pre><code>Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRange As Boolean = False)
@@ -481,6 +575,22 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
             FichPath = "F:\__CopSeg Versiones Programas\" &amp; FichNom &amp; " " &amp; Format(Now, "(yymmdd_hhmm)") &amp; Tipo &amp; FichExt</code></pre>
 <p>Solo se usa si falta el rango con nombre <code>APP_CopSeg_Usb_Path</code> (si existe, se usa ese en su lugar), pero el fallback da por hecho que en la máquina donde se ejecute existe <code>F:\__CopSeg Versiones Programas\</code>. Dado que este libro se usa entre varios ordenadores, si el rango de configuración se pierde en una copia del libro, el fallback podría apuntar a una ruta que no existe en esa máquina — al menos hay un <code>MsgBox</code> previo que avisa de la falta del Range.</p>
 <p><strong>Sugerencia:</strong> si el rango no existe, pedir la ruta con <code>Application.GetSaveAsFilename</code>/<code>FileDialog</code> en vez de asumir una ruta fija.</p>
+<h3>C12 · <code>.UsedRange</code> como instrucción suelta — propiedad usada como si fuera un método</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_WS.bas</code> — líneas 30 y 64 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
+<p>Detectado al compilar tras los arreglos de C3/B17: <code>El uso de la propiedad no es válido</code>, señalando <code>.UsedRange</code> en <code>Rut_WrkSheet_Vaciar</code>.</p>
+<pre><code>    With WrkSht
+        ...
+            .Columns.Delete     ' --- con esto se borran hasta los "Shapes"
+            .UsedRange          ' ← línea suelta: NO es una instrucción válida</code></pre>
+<p>La intención es legítima y el truco es conocido: tras borrar filas y columnas, <strong>leer <code>UsedRange</code> fuerza a Excel a recalcular el rango usado</strong> de la hoja, para que la barra de desplazamiento no siga creyendo que la hoja es enorme. El problema es que <code>UsedRange</code> es una <strong>propiedad que devuelve un <code>Range</code></strong>, no un método: una línea que solo nombra la propiedad, sin leer su valor ni asignar nada, no es una instrucción válida en VBA.</p>
+<p>Aparecía <strong>dos veces en el mismo módulo</strong>, y llamativamente solo una rompía la compilación:</p>
+<div class="tw"><table><thead><tr><th>Línea</th><th>Código</th><th>¿Compila?</th></tr></thead><tbody><tr><td>30, en <code>Rut_WrkSheet_ReducirPeso</code></td><td><code>ActiveSheet.UsedRange</code></td><td>Sí — VBA lo admite como expresión con el objeto cualificado</td></tr><tr><td>64, en <code>Rut_WrkSheet_Vaciar</code></td><td><code>.UsedRange</code> (colgando del <code>With</code>)</td><td><strong>No</strong> — "El uso de la propiedad no es válido"</td></tr></tbody></table></div>
+<p>Esa asimetría es la que hizo que el fallo pasara desapercibido: la variante de la línea 30 lleva años en el módulo sin dar guerra, aunque <strong>tampoco surtía efecto</strong> (nombrar la propiedad sin leerla no fuerza nada).</p>
+<p><strong>Arreglo aplicado:</strong> en ambos casos se lee la propiedad a una variable descartable, que es el idiom habitual y deja constancia de la intención:</p>
+<pre><code>    Dim Dummy_UsedRange As String   '- Solo para forzar la lectura de UsedRange (ver mas abajo)
+    ...
+    Dummy_UsedRange = .UsedRange.Address   ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)</code></pre>
+<p>Así se corrige de paso la línea 30, que compilaba pero no hacía nada. Barrido del resto del proyecto en busca del mismo patrón (líneas que empiezan por <code>.</code> con una propiedad conocida y sin <code>=</code> ni paréntesis): <strong>no hay más casos</strong>. Queda la gemela comentada en <code>M90_Rutinas_X.bas:25</code>, que si alguna vez se reactiva arrastrará el mismo error.</p>
 <hr>
 <h2>Apéndice · Limpieza de código muerto en los módulos <code>Rut_*</code> (2026-09-18)</h2>
 <p>Auditoría independiente de los bugs: qué rutinas de los 15 módulos <code>Rut_*</code> no las llama nadie. <strong>75 rutinas analizadas, 29 sin ninguna invocación.</strong></p>
@@ -501,9 +611,15 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
 <p><strong>⚠️ <code>Rut_VBA_Export_Moduls</code></strong> — aparece como huérfana, pero es la macro de auto-exportación documentada en el <code>CLAUDE.md</code> del proyecto. <strong>No borrar:</strong> al estar el proyecto VBA protegido con contraseña, es la única vía de exportar los módulos.</p>
 <p><strong><code>NewMenúRightClickCell</code> / <code>NewMenúRightClickList</code></strong> — construyen el menú contextual personalizado. Sus gemelas <code>DelMenú*</code> <strong>sí</strong> se llaman (<code>M00_Ini_APP.bas:85-86</code>), pero las <code>New*</code> solo se invocan desde líneas comentadas: el menú custom puede estar a medio desactivar. Requiere decisión, no limpieza automática.</p>
 <p><strong><code>RuT_Antes_de_Cerrar_WorkBook</code></strong> — versión alternativa de <code>Workbook_BeforeClose</code>; el evento real (<code>ThisWorkbook.cls:26</code>) hace otra cosa. Antes de borrarla conviene decidir si su contenido debería estar en el evento.</p>
+<h3>Comentadas por el usuario para poder compilar (2026-09-18)</h3>
+<p>El usuario comentó 12 rutinas que impedían compilar el proyecto y reexportó los módulos. Todas fallaban por <strong>identificadores que no existen en este libro</strong> — <code>Lo_Prog_Colns</code>, <code>Solicitudes</code>, <code>LastCol_Tb_Solicitudes</code> —, residuos del libro hermano <strong>PPub</strong> sin adaptar, la misma familia que B3 y B16:</p>
+<div class="tw"><table><thead><tr><th>Módulo</th><th>Rutinas comentadas</th></tr></thead><tbody><tr><td><code>M90_Rutinas_Menú_Aux.bas</code></td><td><code>Rut_Mostrar_Col_Ocultas</code></td></tr><tr><td><code>M90_Rutinas_X.bas</code></td><td><code>Rut_Columnas_Ajustar_Ancho</code>, <code>Rut_Columnas_Mostrar</code>, <code>Rut_Visible_Hidde_Tablas_Prog</code></td></tr><tr><td><code>Rut_Ranges.bas</code></td><td><code>Rut_Ranges_List_ALL</code>, <code>RuT_UsedRange_Save_New_WorkBook_Liq_TPV</code>, <code>RuT_UsedRange2_Save_New_WorkBook_Liq_TPV</code>, <code>RuT_Range_Save_New_WorkBook_Liq_TPV</code>, <code>RuT_Range1_Save_Liquidación_New_WorkBook</code></td></tr><tr><td><code>Rut_Wb_CopSegTimed_USB_HD.bas</code></td><td><code>Rut_WrkBook_CopSegTimed_List_Organize</code>, <code>Rut_WrkBook_Folder_List_File</code>, <code>Rut_WrkBook_CopSegTimed_List_Selected_Del</code></td></tr></tbody></table></div>
+<p><strong>Verificado por las 4 vías</strong> (código vivo, macros de shapes en <code>xl/drawings/*.xml</code>, <code>sharedStrings.xml</code>, sin Ribbon custom): <strong>ninguna de las 12 tiene invocación viva</strong>, así que comentarlas no rompe nada en ejecución. Único falso positivo del grep: <code>Rut_Columnas_Mostrar</code> aparece dentro de <code>Rut_Columnas_Mostrar_WrkSht</code>, que es una rutina <strong>distinta y viva</strong>.</p>
+<p>Ojo a la contradicción con la sección anterior: tres de ellas (<code>Rut_Ranges_List_ALL</code>, <code>Rut_WrkBook_CopSegTimed_List_Organize</code>, <code>Rut_WrkBook_CopSegTimed_List_Selected_Del</code>) figuraban como <em>"conservadas a propósito — herramientas de diagnóstico manual"</em>. Estaban <strong>rotas de todos modos</strong> (no compilaban), así que conservarlas no aportaba nada real. Si alguna se quiere recuperar, hay que adaptarla primero a los objetos de este libro; si no, procede borrarlas del todo en vez de dejarlas comentadas.</p>
 <h3>Pendiente</h3>
 <ul>
-<li><strong>Grupo 2 — 8 variantes <code>ByHand</code>/<code>_01</code></strong> de rutinas vivas, sin decidir: <code>Rut_Lo_Export_to_New_WB_ByHand</code>, <code>Rut_WrkSheet_To_PDF_ByHand</code>, <code>RuT_Sort_Sheets_ByHand</code>, <code>Rut_Ws_All_Stratistics_01</code> y las 4 variantes casi idénticas de <code>RuT_*Save_New_WorkBook_Liq_TPV</code> en <code>Rut_Ranges.bas</code>.</li>
+<li><strong>Decidir sobre las 12 rutinas comentadas arriba</strong>: borrarlas definitivamente o adaptarlas a los objetos de este libro.</li>
+<li><strong>Grupo 2 — 8 variantes <code>ByHand</code>/<code>_01</code></strong> de rutinas vivas, sin decidir: <code>Rut_Lo_Export_to_New_WB_ByHand</code>, <code>Rut_WrkSheet_To_PDF_ByHand</code>, <code>RuT_Sort_Sheets_ByHand</code>, <code>Rut_Ws_All_Stratistics_01</code> y las 4 variantes casi idénticas de <code>RuT_*Save_New_WorkBook_Liq_TPV</code> en <code>Rut_Ranges.bas</code> (estas 4 últimas son justamente parte de las comentadas ahora).</li>
 <li><strong>Los módulos <code>M*</code> no se han auditado</strong> — previsiblemente tienen más código muerto (<code>M90_CopSeg_USB_HD.bas</code> está entero comentado).</li>
 </ul>
 <hr>
