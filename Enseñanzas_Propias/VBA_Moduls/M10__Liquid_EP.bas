@@ -1,5 +1,6 @@
 Attribute VB_Name = "M10__Liquid_EP"
 '- M10_Liquid_EP - Modif: 2025-10-15
+' Last Rev. 2026-09-18 18:06
 Option Explicit
 
 Public Sw_Cmb        As Boolean
@@ -722,6 +723,9 @@ End Sub     ' Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones     <<<<<<<<
 Sub Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid()
 ' ==================================================================================================================================
 Dim F_TitPH              As Long:   F_TitPH = 1
+Dim N_TitPH              As Long
+Dim Reg_NoEmparejados    As Long
+Dim Refs_NoEmparejadas   As String
 Dim F_Liquid               As Long
 Rut_Off_Functions
     
@@ -739,10 +743,21 @@ Dim Lo_TPLiquid        As ListObject:           Set Lo_TPLiquid = Wk_TitP_Liquid
     Lo_TPLiquid.AutoFilter.ShowAllData
     Call Rut_Lo_Sort(Lo_TPLiquid, CLiq_Ref, xlAscending, True)
 
+    N_TitPH = Lo_TitPHist.DataBodyRange.Rows.Count
+
 With Lo_TitPHist.DataBodyRange
 
     For F_Liquid = 1 To Lo_TPLiquid.DataBodyRange.Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
         
+        '--- Guard: si se agota el Historico, el resto de la Liquidacion queda sin emparejar ------
+        If F_TitPH > N_TitPH Then
+            Reg_NoEmparejados = Reg_NoEmparejados + 1
+            If Reg_NoEmparejados <= 10 Then
+                Refs_NoEmparejadas = Refs_NoEmparejadas & vbCrLf & "   - Ref: " & Lo_TPLiquid.DataBodyRange.Cells(F_Liquid, CLiq_Ref)
+            End If
+            GoTo Siguiente_F_Liquid
+        End If
+
         Select Case Lo_TPLiquid.DataBodyRange.Cells(F_Liquid, CLiq_Ref)
         
             '--- Saltar al siguiente Lo_TitPHist   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -770,8 +785,18 @@ With Lo_TitPHist.DataBodyRange
                     RowDat.Range(BD_Rec_Imp_Adm) = RowLiq.Range(CLiq_Ajst_Tadm)
                 End If
                 
+            '--- Ref de la Liquidacion MENOR que la del Historico: no existe en Prog_BD  <<<<<<<<<<<<<<
+            '    (no deberia ocurrir: la Liquidacion sale del Historico). Se anota y se sigue.
+            Case Else
+                Reg_NoEmparejados = Reg_NoEmparejados + 1
+                If Reg_NoEmparejados <= 10 Then
+                    Refs_NoEmparejadas = Refs_NoEmparejadas & vbCrLf & "   - Ref: " & Lo_TPLiquid.DataBodyRange.Cells(F_Liquid, CLiq_Ref)
+                End If
+                F_TitPH = F_TitPH - 1      '--- Compensa el incremento de abajo: no avanzo en el Historico
+
         End Select
         
+Siguiente_F_Liquid:
         F_TitPH = F_TitPH + 1
         
     Next F_Liquid
@@ -789,6 +814,15 @@ Call Rut_EnableEvents_Status_Reset
     
     Call Rut_Lo_Sort(Lo_TitPHist, BD_Ref, xlAscending, True)
     Call Rut_Lo_Sort(Lo_TPLiquid, CLiq_Nombre, xlAscending, True)
+    If Reg_NoEmparejados > 0 Then
+        MsgBox "¡¡¡ ATENCIÓN !!!" & vbCrLf & vbCrLf & _
+               "Hay " & Reg_NoEmparejados & " registro(s) de la Liquidación que NO se han " & _
+               "encontrado en el Histórico (Prog_BD) y, por tanto, NO se han actualizado." & vbCrLf & _
+               Refs_NoEmparejadas & vbCrLf & vbCrLf & _
+               "Revise que la columna Ref sea del mismo tipo en ambas tablas.", _
+               vbOKOnly + vbExclamation, "Proceso: Liquidación de Títulos Propios"
+    End If
+
 MsgBox "¡¡¡ Hecho !!!" & vbCrLf & vbCrLf & "Ya están los datos de Tasa Adm. y Nº de Liquidación, JI, ExpAdm y RDT guardados, en: " & F_Liquid - 1 & " Reg.", _
                         vbOKOnly, "Proceso: Liquidación de Títulos Propios"
 Rut_On_Functions

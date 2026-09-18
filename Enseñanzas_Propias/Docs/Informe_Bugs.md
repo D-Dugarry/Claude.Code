@@ -2,7 +2,7 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (6 corregidos, 1 descartado).
+**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (7 corregidos, 1 descartado).
 
 > **Nota sobre codificación:** los ficheros `.bas`/`.cls`/`.frm` están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre `VBA_Moduls/`, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver `CLAUDE.md` de este proyecto).
 
@@ -94,7 +94,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
 **Arreglo:** restaurada `ActiveWorkbook.Close SaveChanges:=True` en `VBA_Moduls/M12_Genera_LIQx_PDF.bas` (línea 591 tras el sello `Last Rev.`), eliminando la línea rota y la comentada que quedaba redundante.
 
 ### A3 · Merge-join sin `Case Else` — desincronización silenciosa al guardar la Liquidación
-**Severidad:** Alto · **Fichero:** `M10__Liquid_EP.bas` — líneas 742-778 (`Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid`)
+**Severidad:** Alto · **Fichero:** `M10__Liquid_EP.bas` — líneas 742-778 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
 
 ```vba
     For F_Liquid = 1 To Lo_TPLiquid.DataBodyRange.Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
@@ -124,7 +124,20 @@ Es un merge-join de dos tablas ordenadas por `Ref` (línea 738/740), pero falta 
 
 **Impacto:** al guardar una Liquidación, dejan de actualizarse silenciosamente en `Prog_BD` los campos JI, AD-0010, JI-443, ExpAdm, RDT, Coef_VRI, Orgánica y Tasa Administrativa de registros que sí deberían actualizarse — **sin ningún aviso ni contador de "no actualizados"**, a diferencia de `M07` (importación LSGES04), que sí avisa con `MsgBox` cuando algo no cuadra.
 
-**Arreglo:** añadir `Case Is < .Cells(F_TitPH, BD_Ref): F_TitPH = F_TitPH - 1` (o equivalente) para no perder el paso del merge-join.
+**Objeción considerada — "el `Case Else` nunca puede darse":** es cierto que, por diseño, todas las filas de la Liquidación salen del Histórico y no se añaden filas nuevas, es decir `Ref_Liquid ⊆ Ref_BD`. Pero el `Select Case` no compara conjuntos, compara **la posición de dos punteros que avanzan a distinto ritmo**, y hay dos vías por las que se llega al caso `<` con la premisa intacta:
+
+1. **Desbordamiento de `F_TitPH` (verificado por simulación).** `F_TitPH` se incrementa en cada iteración del `For`, incondicionalmente, y nada comprueba que siga dentro de la tabla. `.Cells(F_TitPH, BD_Ref)` con `F_TitPH` mayor que el número de filas **no da error**: lee celdas vacías de debajo del `DataBodyRange`. Y `"R99" > Empty` es `True`, así que entra en `Case Is >`, `F_Liquid` retrocede, `F_TitPH` sigue subiendo → **bucle infinito**. Basta con que el último `Ref` de la Liquidación sea mayor que el último del Histórico.
+2. **Orden no idéntico entre las dos tablas.** `Rut_Lo_Sort` ordena con `xlSortNormal`; si la columna `Ref` no es homogénea de tipo entre `Prog_BD` (col. 11) y la Liquidación (col. 19) — unos valores numéricos y otros texto —, Excel coloca los números antes que el texto y el mismo `Ref` cae en posición relativa distinta en cada tabla.
+
+**Demostración del impacto silencioso:** simulando el código original con `Prog_BD = [R01..R06]` y `Liquidación = [R02, R03b, R04]`, sólo se actualiza `R02`: **`R04` existe en ambas tablas y no se actualiza**, y el `MsgBox` final sigue diciendo "¡¡¡Hecho!!!". Con el arreglo se actualizan `R02` y `R04`, y se reporta únicamente `R03b`.
+
+**Arreglo aplicado:** no sólo se recupera el paso del merge-join, sino que se convierte el fallo silencioso en un fallo visible:
+
+- Guard `If F_TitPH > N_TitPH` al principio del bucle, que corta el bucle infinito y contabiliza como "no emparejado" el resto de la Liquidación.
+- `Case Else` con `F_TitPH = F_TitPH - 1` (compensa el `+1` de abajo: no se avanza en el Histórico) que anota la `Ref` no encontrada y continúa.
+- Contador `Reg_NoEmparejados` + lista de las 10 primeras `Ref`, mostrados en un `MsgBox` de advertencia **antes** del "¡¡¡Hecho!!!", en la línea de lo que ya hace `M07`.
+
+Si la premisa de diseño se cumple siempre, el coste en ejecución es cero y ninguno de los dos avisos llega a aparecer.
 
 ### A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI
 **Severidad:** Medio · **Fichero:** `M08_Actualizar_Tb_Coef_VRI.bas` — líneas 95-96, 105-106 (contraste con las 48-49, correctas)
