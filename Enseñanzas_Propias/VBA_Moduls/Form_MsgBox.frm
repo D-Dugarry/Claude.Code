@@ -2,9 +2,9 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} Form_MsgBox 
    Caption         =   "UserForm1"
    ClientHeight    =   3528
-   ClientLeft      =   105
-   ClientTop       =   450
-   ClientWidth     =   11985
+   ClientLeft      =   110
+   ClientTop       =   460
+   ClientWidth     =   11990
    OleObjectBlob   =   "Form_MsgBox.frx":0000
    StartUpPosition =   1  'Centrar en propietario
 End

@@ -483,61 +483,61 @@ Rut_On_Functions
 End Sub     ' RuT_Marcar_Repetidos   --------------------------------------------------------------------------------------------
 '===================================================================================================================================
 
-'==================================================================================================================================
-Sub RuT_Añadir_AD_0010()   '- Voy a añadir manualmente los números de AD-0010.
-'==================================================================================================================================
-Dim RowNow              As ListRow
-Dim F_Lo                As Long
-Dim Plan                As Integer:      Plan = 0
-Dim TRows_Lo            As Long
-Dim rowfind     As Variant
-
-Rut_Off_Functions
-
-Dim Lo_TitPH        As ListObject:      Set Lo_TitPH = Prog_BD.ListObjects(1)
-    TRows_Lo = Lo_TitPH.ListRows.Count
-Dim Lo_Plazos       As ListObject:      Set Lo_Plazos = Prog_TitP_Plazos.ListObjects(1)
-
-'   Recorro toda la Tabla Tip-Hist  ----------------------------------------------------------
-
-    Prog_BD.Select
-    Prog_BD.Unprotect
-    
-    Lo_TitPH.ShowTotals = False
-    If Lo_TitPH.Parent.FilterMode Then Lo_TitPH.Parent.ShowAllData
-    Call Rut_Lo_Sort(Lo_TitPH, BD_Plan, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_TitPH, BD_NumRec, xlAscending)    '- Ordenar primero accelera un montón el borrado -----
-    '- Recorrer toda la tabla --------------------------
-    For F_Lo = 1 To Lo_TitPH.ListRows.Count
-
-        Set RowNow = Lo_TitPH.ListRows(F_Lo)
-
-        If RowNow.Range(BD_Concepto) <> "1311.00" Then GoTo Sig_Fila
-        If RowNow.Range(BD_ACont_Emi) = "2024" Then GoTo Sig_Fila
-        If RowNow.Range(BD_ACont_Cob) = "2023" Then GoTo Sig_Fila
-        If Plan <> RowNow.Range(BD_Plan) Then
-            Plan = RowNow.Range(BD_Plan)
-             ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
-            rowfind = Application.Match(Plan, Lo_Plazos.DataBodyRange.Columns(1), 0)
-            If IsError(rowfind) Then Debug.Print "Plan no encontrado: " & Plan:     GoTo Sig_Fila
-        Else
-            If IsError(rowfind) Then GoTo Sig_Fila
-        End If
-        
-        RowNow.Range(BD_AD_Emi_Acad) = Lo_Plazos.DataBodyRange.Cells(rowfind, 2 + RowNow.Range(BD_NumRec).Value)
-    
-'        If F_Lo Mod 100 = 0 Then
-'            Debug.Print "Actualizando Tasas Adm.:" & _
-'                                        vbCrLf & Format(F_Lo, "#,##0") & " de " & Format(TRows_Lo, "#,##0")
+''==================================================================================================================================
+'Sub RuT_Añadir_AD_0010()   '- Voy a añadir manualmente los números de AD-0010.
+''==================================================================================================================================
+'Dim RowNow              As ListRow
+'Dim F_Lo                As Long
+'Dim Plan                As Integer:      Plan = 0
+'Dim TRows_Lo            As Long
+'Dim rowfind     As Variant
+'
+'Rut_Off_Functions
+'
+'Dim Lo_TitPH        As ListObject:      Set Lo_TitPH = Prog_BD.ListObjects(1)
+'    TRows_Lo = Lo_TitPH.ListRows.Count
+'Dim Lo_Plazos       As ListObject:      Set Lo_Plazos = Prog_TitP_Plazos.ListObjects(1)
+'
+''   Recorro toda la Tabla Tip-Hist  ----------------------------------------------------------
+'
+'    Prog_BD.Select
+'    Prog_BD.Unprotect
+'
+'    Lo_TitPH.ShowTotals = False
+'    If Lo_TitPH.Parent.FilterMode Then Lo_TitPH.Parent.ShowAllData
+'    Call Rut_Lo_Sort(Lo_TitPH, BD_Plan, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+'    Call Rut_Lo_Sort(Lo_TitPH, BD_NumRec, xlAscending)    '- Ordenar primero accelera un montón el borrado -----
+'    '- Recorrer toda la tabla --------------------------
+'    For F_Lo = 1 To Lo_TitPH.ListRows.Count
+'
+'        Set RowNow = Lo_TitPH.ListRows(F_Lo)
+'
+'        If RowNow.Range(BD_Concepto) <> "1311.00" Then GoTo Sig_Fila
+'        If RowNow.Range(BD_ACont_Emi) = "2024" Then GoTo Sig_Fila
+'        If RowNow.Range(BD_ACont_Cob) = "2023" Then GoTo Sig_Fila
+'        If Plan <> RowNow.Range(BD_Plan) Then
+'            Plan = RowNow.Range(BD_Plan)
+'             ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
+'            rowfind = Application.Match(Plan, Lo_Plazos.DataBodyRange.Columns(1), 0)
+'            If IsError(rowfind) Then Debug.Print "Plan no encontrado: " & Plan:     GoTo Sig_Fila
+'        Else
+'            If IsError(rowfind) Then GoTo Sig_Fila
 '        End If
-Sig_Fila:
-    Next
-    '---------------------------------------------------------------------------------------------------------------------------------------
-Debug.Print "Finalizado"
-Restablecer_Valores:
-Rut_On_Functions
-End Sub     ' RuT_Añadir_AD_0010   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+'
+'        RowNow.Range(BD_AD_Emi_Acad) = Lo_Plazos.DataBodyRange.Cells(rowfind, 2 + RowNow.Range(BD_NumRec).Value)
+'
+''        If F_Lo Mod 100 = 0 Then
+''            Debug.Print "Actualizando Tasas Adm.:" & _
+''                                        vbCrLf & Format(F_Lo, "#,##0") & " de " & Format(TRows_Lo, "#,##0")
+''        End If
+'Sig_Fila:
+'    Next
+'    '---------------------------------------------------------------------------------------------------------------------------------------
+'Debug.Print "Finalizado"
+'Restablecer_Valores:
+'Rut_On_Functions
+'End Sub     ' RuT_Añadir_AD_0010   --------------------------------------------------------------------------------------------
+''===================================================================================================================================
 
 
 

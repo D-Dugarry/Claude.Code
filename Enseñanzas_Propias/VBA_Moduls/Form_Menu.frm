@@ -2,7 +2,7 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} Form_Menu 
    Caption         =   "Menú de tareas auxiliares"
    ClientHeight    =   35445
-   ClientLeft      =   615
+   ClientLeft      =   620
    ClientTop       =   1050
    ClientWidth     =   23760
    OleObjectBlob   =   "Form_Menu.frx":0000
@@ -23,10 +23,6 @@ Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As 
 
 Private Sub Btn_Eixir_Click()
     Unload Me
-End Sub
-
-Private Sub Frame1_Click()
-
 End Sub
 
 ' ------------------------------------------------------------------------------------------------------

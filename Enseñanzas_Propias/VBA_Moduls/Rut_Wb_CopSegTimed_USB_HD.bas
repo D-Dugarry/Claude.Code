@@ -5,179 +5,179 @@ Option Explicit
 ' ==================================================================================================================================
 ' ==================================================================================================================================
 ' ==================================================================================================================================
-Sub Rut_WrkBook_CopSegTimed_List_Organize()   '- Importa todos los ficheros de un directorio -------------------------
-' ==================================================================================================================================
-Dim FichDialog As FileDialog
-Dim FichRuta As String
-    '- Seleccionar Carpeta ---------------------------
-    Set FichDialog = Application.FileDialog(msoFileDialogFolderPicker)
-    With FichDialog
-         .Title = "Choose Folder where you have excel files"
-         .ButtonName = "Choose"
-         If .Show = True Then
-            If .SelectedItems.Count > 0 Then FichRuta = .SelectedItems(1)
-         End If
-    End With
-    If FichRuta = "" Then GoTo Final Else Range("Ruta_CopSeg") = FichRuta
-    Call Rut_WrkBook_Folder_List_File(FichRuta)
-Final:
-End Sub
+'Sub Rut_WrkBook_CopSegTimed_List_Organize()   '- Importa todos los ficheros de un directorio -------------------------
+'' ==================================================================================================================================
+'Dim FichDialog As FileDialog
+'Dim FichRuta As String
+'    '- Seleccionar Carpeta ---------------------------
+'    Set FichDialog = Application.FileDialog(msoFileDialogFolderPicker)
+'    With FichDialog
+'         .Title = "Choose Folder where you have excel files"
+'         .ButtonName = "Choose"
+'         If .Show = True Then
+'            If .SelectedItems.Count > 0 Then FichRuta = .SelectedItems(1)
+'         End If
+'    End With
+'    If FichRuta = "" Then GoTo Final Else Range("Ruta_CopSeg") = FichRuta
+'    Call Rut_WrkBook_Folder_List_File(FichRuta)
+'Final:
+'End Sub
 ' ----------------------------------------------------------------------------------------------------------------------------------
 
 ' ==================================================================================================================================
-Sub Rut_WrkBook_Folder_List_File(FichRuta As String)   '- Importa todos los ficheros de un directorio -------------------------
-' ==================================================================================================================================
-Dim Pos             As Integer
-Dim ShortName       As String:      ShortName = ""
-Dim FichSistOjct    As New FileSystemObject    '- Ver Nota #01 -----
-Dim Fichero         As File
-Dim Lo_WB_List      As ListObject:      Set Lo_WB_List = Prog_WB_List.ListObjects("Tb_WB_List")
-Dim Lo_WB_Names     As ListObject:      Set Lo_WB_Names = Prog_WB_List.ListObjects("Tb_WB_Names")
-Dim NewRow          As ListRow
-Dim NewRowLo2       As ListRow
-    Application.ScreenUpdating = False
-    With Prog_WB_List
-        .Unprotect
-        '- Preparar Tablas
-        .Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
-        .Rows.EntireRow.Hidden = False              ' Mostrar todas las Filas
-        If .FilterMode Then .ShowAllData            ' Deshacer Filtros
-        If Not Lo_WB_List.DataBodyRange Is Nothing Then Lo_WB_List.DataBodyRange.Delete
-        If Not Lo_WB_Names.DataBodyRange Is Nothing Then Lo_WB_Names.DataBodyRange.Delete
-        '- Generar Lista
-        With Lo_WB_List
-            For Each Fichero In FichSistOjct.GetFolder(FichRuta).Files
-                Set NewRow = .ListRows.Add
-                    NewRow.Range(1) = Fichero.Name
-                    NewRow.Range(2) = Fichero.DateLastModified
-                    NewRow.Range(3) = Round(Fichero.Size / 1024, 2) ' Tamaño en KB
-                    Pos = InStr(Fichero.Name, " (") - 1
-                    If Pos > 0 Then
-                        NewRow.Range(4) = Left(Fichero.Name, Pos)
-                    Else
-                        NewRow.Range(4) = Left(Fichero.Name, Len(Fichero.Name) - 5)
-                    End If
-            Next Fichero
-            '- Ordeno lista por Nombre Corto y Fecha
-            With .Sort
-                .sortFields.Clear
-                .sortFields.Add Key:=Lo_WB_List.ListColumns(4).Range, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-                .sortFields.Add Key:=Lo_WB_List.ListColumns(2).Range, SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
-                .Header = xlYes
-                .MatchCase = False
-                .Orientation = xlTopToBottom
-                .SortMethod = xlPinYin
-                .Apply
-            End With
-            '- Genero la 2ª Tabla que lista los Archivos con el número de copias que tiene
-            Dim i   As Integer
-            For i = 1 To Lo_WB_List.ListRows.Count
-                Set NewRow = .ListRows(i)
-                    If ShortName <> NewRow.Range(4) Then
-                        ShortName = NewRow.Range(4)
-                        Set NewRowLo2 = Lo_WB_Names.ListRows.Add
-                            NewRowLo2.Range(1) = ShortName
-                            NewRowLo2.Range(2) = 1
-                    Else
-                        NewRowLo2.Range(2) = NewRowLo2.Range(2) + 1
-                    End If
-            Next i
-        End With
-    End With
-    Range("b1").Select
-    Application.ScreenUpdating = True
-    MsgBox "All Files Listed successfully!", vbInformation
-End Sub     '- Rut_WrkBook_Folder_List_File
+'Sub Rut_WrkBook_Folder_List_File(FichRuta As String)   '- Importa todos los ficheros de un directorio -------------------------
+'' ==================================================================================================================================
+'Dim Pos             As Integer
+'Dim ShortName       As String:      ShortName = ""
+'Dim FichSistOjct    As New FileSystemObject    '- Ver Nota #01 -----
+'Dim Fichero         As File
+'Dim Lo_WB_List      As ListObject:      Set Lo_WB_List = Prog_WB_List.ListObjects("Tb_WB_List")
+'Dim Lo_WB_Names     As ListObject:      Set Lo_WB_Names = Prog_WB_List.ListObjects("Tb_WB_Names")
+'Dim NewRow          As ListRow
+'Dim NewRowLo2       As ListRow
+'    Application.ScreenUpdating = False
+'    With Prog_WB_List
+'        .Unprotect
+'        '- Preparar Tablas
+'        .Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
+'        .Rows.EntireRow.Hidden = False              ' Mostrar todas las Filas
+'        If .FilterMode Then .ShowAllData            ' Deshacer Filtros
+'        If Not Lo_WB_List.DataBodyRange Is Nothing Then Lo_WB_List.DataBodyRange.Delete
+'        If Not Lo_WB_Names.DataBodyRange Is Nothing Then Lo_WB_Names.DataBodyRange.Delete
+'        '- Generar Lista
+'        With Lo_WB_List
+'            For Each Fichero In FichSistOjct.GetFolder(FichRuta).Files
+'                Set NewRow = .ListRows.Add
+'                    NewRow.Range(1) = Fichero.Name
+'                    NewRow.Range(2) = Fichero.DateLastModified
+'                    NewRow.Range(3) = Round(Fichero.Size / 1024, 2) ' Tamaño en KB
+'                    Pos = InStr(Fichero.Name, " (") - 1
+'                    If Pos > 0 Then
+'                        NewRow.Range(4) = Left(Fichero.Name, Pos)
+'                    Else
+'                        NewRow.Range(4) = Left(Fichero.Name, Len(Fichero.Name) - 5)
+'                    End If
+'            Next Fichero
+'            '- Ordeno lista por Nombre Corto y Fecha
+'            With .Sort
+'                .sortFields.Clear
+'                .sortFields.Add Key:=Lo_WB_List.ListColumns(4).Range, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+'                .sortFields.Add Key:=Lo_WB_List.ListColumns(2).Range, SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+'                .Header = xlYes
+'                .MatchCase = False
+'                .Orientation = xlTopToBottom
+'                .SortMethod = xlPinYin
+'                .Apply
+'            End With
+'            '- Genero la 2ª Tabla que lista los Archivos con el número de copias que tiene
+'            Dim i   As Integer
+'            For i = 1 To Lo_WB_List.ListRows.Count
+'                Set NewRow = .ListRows(i)
+'                    If ShortName <> NewRow.Range(4) Then
+'                        ShortName = NewRow.Range(4)
+'                        Set NewRowLo2 = Lo_WB_Names.ListRows.Add
+'                            NewRowLo2.Range(1) = ShortName
+'                            NewRowLo2.Range(2) = 1
+'                    Else
+'                        NewRowLo2.Range(2) = NewRowLo2.Range(2) + 1
+'                    End If
+'            Next i
+'        End With
+'    End With
+'    Range("b1").Select
+'    Application.ScreenUpdating = True
+'    MsgBox "All Files Listed successfully!", vbInformation
+'End Sub     '- Rut_WrkBook_Folder_List_File
 ' ----------------------------------------------------------------------------------------------------------------------------------
 
 ' ==================================================================================================================================
 ' Procedimiento para borrar archivos seleccionados
-Sub Rut_WrkBook_CopSegTimed_List_Selected_Del()
-' ==================================================================================================================================
-    Dim ws                  As Worksheet:           Set ws = Prog_WB_List
-    Dim Lo_WB_List          As ListObject:          Set Lo_WB_List = ws.ListObjects("Tb_WB_List")
-    Dim FolderSelected      As String
-    Dim fila                As ListRow
-    Dim FileToDel           As String
-    Dim FSO                 As Object       '- FSO = File Sistem Object
-    Dim FilesDeleted        As Integer
-    Dim Respuesta           As VbMsgBoxResult
-    ' Obtener la carpeta seleccionada (guardada en rango "Ruta_CopSeg")
-    FolderSelected = ws.Range("Ruta_CopSeg").Value
-        If FolderSelected = "" Then
-            MsgBox "No se encontró información de la carpeta en rango 'Ruta_CopSeg'.", vbExclamation
-            Exit Sub
-        End If
-    
-    ' Verificar si hay Ficheros en la Tabla
-    If Lo_WB_List.DataBodyRange Is Nothing Then
-        MsgBox "No hay datos en la tabla.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Contar filas seleccionadas
-    Dim filasSeleccionadas As Range
-    On Error Resume Next
-    Set filasSeleccionadas = Application.Intersect(Lo_WB_List.DataBodyRange, Selection)
-    On Error GoTo 0
-    
-    ' Verificar si hay filas seleccionadas de la Tabla
-    If filasSeleccionadas Is Nothing Then
-        MsgBox "Por favor, seleccione al menos una fila en la tabla de archivos.", vbExclamation
-        Exit Sub
-    End If
-    
-    ' Pedir confirmación
-    Respuesta = MsgBox("¿Está seguro de que desea borrar " & filasSeleccionadas.Rows.Count & _
-                       " archivo(s) de la carpeta?" & vbCrLf & vbCrLf & _
-                       "Carpeta: " & FolderSelected & vbCrLf & vbCrLf & _
-                       "Esta acción no se puede deshacer.", _
-                       vbExclamation + vbYesNo + vbDefaultButton2, "Confirmar borrado")
-    
-    If Respuesta <> vbYes Then Exit Sub
-    
-    ' Crear objeto FileSystemObject
-    Set FSO = CreateObject("Scripting.FileSystemObject")
-    FilesDeleted = 0
-    
-    ' Procesar cada fila seleccionada -----------------------------------------------------------------
-    Dim FilaIndex As Long
-    Dim RangoFila As Range
-    
-    For Each RangoFila In filasSeleccionadas.Rows
-        FilaIndex = RangoFila.Row - Lo_WB_List.HeaderRowRange.Row
-        
-        If FilaIndex >= 1 And FilaIndex <= Lo_WB_List.ListRows.Count Then
-            ' Obtener el nombre del archivo
-            FileToDel = FolderSelected & "\" & Lo_WB_List.DataBodyRange(FilaIndex, 1)
-            
-            ' Verificar si el archivo existe y borrarlo
-            If FSO.FileExists(FileToDel) Then
-                On Error Resume Next
-                FSO.DeleteFile FileToDel, True
-                On Error GoTo 0
-                
-                If Not FSO.FileExists(FileToDel) Then
-                    FilesDeleted = FilesDeleted + 1
-                    ' Marcar la fila para eliminación (pero no eliminarla todavía)
-                    Lo_WB_List.DataBodyRange(FilaIndex, 1) = "[BORRADO] " & Lo_WB_List.DataBodyRange(FilaIndex, 1)
-                Else
-                    MsgBox "No se pudo borrar: " & FileToDel, vbExclamation
-                End If
-            Else
-                MsgBox "Archivo no encontrado: " & FileToDel, vbExclamation
-            End If
-        End If
-    Next RangoFila
-    
-    MsgBox "Operación completada." & vbCrLf & _
-           "Archivos borrados: " & FilesDeleted, vbInformation
-    '- Actualizar la tabla
-    Call Rut_WrkBook_Folder_List_File(FolderSelected)
-    
-    Set FSO = Nothing
-    
-End Sub     '- Rut_WrkBook_CopSegTimed_List_Selected_Del
+'Sub Rut_WrkBook_CopSegTimed_List_Selected_Del()
+'' ==================================================================================================================================
+'    Dim ws                  As Worksheet:           Set ws = Prog_WB_List
+'    Dim Lo_WB_List          As ListObject:          Set Lo_WB_List = ws.ListObjects("Tb_WB_List")
+'    Dim FolderSelected      As String
+'    Dim fila                As ListRow
+'    Dim FileToDel           As String
+'    Dim FSO                 As Object       '- FSO = File Sistem Object
+'    Dim FilesDeleted        As Integer
+'    Dim Respuesta           As VbMsgBoxResult
+'    ' Obtener la carpeta seleccionada (guardada en rango "Ruta_CopSeg")
+'    FolderSelected = ws.Range("Ruta_CopSeg").Value
+'        If FolderSelected = "" Then
+'            MsgBox "No se encontró información de la carpeta en rango 'Ruta_CopSeg'.", vbExclamation
+'            Exit Sub
+'        End If
+'
+'    ' Verificar si hay Ficheros en la Tabla
+'    If Lo_WB_List.DataBodyRange Is Nothing Then
+'        MsgBox "No hay datos en la tabla.", vbExclamation
+'        Exit Sub
+'    End If
+'
+'    ' Contar filas seleccionadas
+'    Dim filasSeleccionadas As Range
+'    On Error Resume Next
+'    Set filasSeleccionadas = Application.Intersect(Lo_WB_List.DataBodyRange, Selection)
+'    On Error GoTo 0
+'
+'    ' Verificar si hay filas seleccionadas de la Tabla
+'    If filasSeleccionadas Is Nothing Then
+'        MsgBox "Por favor, seleccione al menos una fila en la tabla de archivos.", vbExclamation
+'        Exit Sub
+'    End If
+'
+'    ' Pedir confirmación
+'    Respuesta = MsgBox("¿Está seguro de que desea borrar " & filasSeleccionadas.Rows.Count & _
+'                       " archivo(s) de la carpeta?" & vbCrLf & vbCrLf & _
+'                       "Carpeta: " & FolderSelected & vbCrLf & vbCrLf & _
+'                       "Esta acción no se puede deshacer.", _
+'                       vbExclamation + vbYesNo + vbDefaultButton2, "Confirmar borrado")
+'
+'    If Respuesta <> vbYes Then Exit Sub
+'
+'    ' Crear objeto FileSystemObject
+'    Set FSO = CreateObject("Scripting.FileSystemObject")
+'    FilesDeleted = 0
+'
+'    ' Procesar cada fila seleccionada -----------------------------------------------------------------
+'    Dim FilaIndex As Long
+'    Dim RangoFila As Range
+'
+'    For Each RangoFila In filasSeleccionadas.Rows
+'        FilaIndex = RangoFila.Row - Lo_WB_List.HeaderRowRange.Row
+'
+'        If FilaIndex >= 1 And FilaIndex <= Lo_WB_List.ListRows.Count Then
+'            ' Obtener el nombre del archivo
+'            FileToDel = FolderSelected & "\" & Lo_WB_List.DataBodyRange(FilaIndex, 1)
+'
+'            ' Verificar si el archivo existe y borrarlo
+'            If FSO.FileExists(FileToDel) Then
+'                On Error Resume Next
+'                FSO.DeleteFile FileToDel, True
+'                On Error GoTo 0
+'
+'                If Not FSO.FileExists(FileToDel) Then
+'                    FilesDeleted = FilesDeleted + 1
+'                    ' Marcar la fila para eliminación (pero no eliminarla todavía)
+'                    Lo_WB_List.DataBodyRange(FilaIndex, 1) = "[BORRADO] " & Lo_WB_List.DataBodyRange(FilaIndex, 1)
+'                Else
+'                    MsgBox "No se pudo borrar: " & FileToDel, vbExclamation
+'                End If
+'            Else
+'                MsgBox "Archivo no encontrado: " & FileToDel, vbExclamation
+'            End If
+'        End If
+'    Next RangoFila
+'
+'    MsgBox "Operación completada." & vbCrLf & _
+'           "Archivos borrados: " & FilesDeleted, vbInformation
+'    '- Actualizar la tabla
+'    Call Rut_WrkBook_Folder_List_File(FolderSelected)
+'
+'    Set FSO = Nothing
+'
+'End Sub     '- Rut_WrkBook_CopSegTimed_List_Selected_Del
 ' ----------------------------------------------------------------------------------------------------------------------------------
 
 '===================================================================================================================================

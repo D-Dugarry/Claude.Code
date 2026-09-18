@@ -2,7 +2,7 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} Form_Usuario 
    Caption         =   "Identificación de Usuario"
    ClientHeight    =   7995
-   ClientLeft      =   2115
+   ClientLeft      =   2120
    ClientTop       =   2460
    ClientWidth     =   17070
    OleObjectBlob   =   "Form_Usuario.frx":0000

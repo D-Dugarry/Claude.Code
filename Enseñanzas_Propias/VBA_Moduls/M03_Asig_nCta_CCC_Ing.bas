@@ -3,9 +3,9 @@ Attribute VB_Name = "M03_Asig_nCta_CCC_Ing"
 Option Explicit
 
             Sub RuT_Determinar_Cta_Ingreso_ByHand()
-                Prog_LsGes04.Unprotect
-                Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
-                Call RuT_Determinar_Cta_Ingreso(Prog_LsGes04.ListObjects(1), BD_FVto, BD_ACont_Vto)
+'                Prog_LsGes04.Unprotect
+'                Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
+'                Call RuT_Determinar_Cta_Ingreso(Prog_LsGes04.ListObjects(1), BD_FVto, BD_ACont_Vto)
             End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Rellenar Col Cta_Ingreso con nº Cta. correspondiente ---------------------------------------------------------

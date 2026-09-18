@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-18 19:20
+' Last Rev. 2026-09-18 19:19
 Option Explicit
 
 
@@ -10,7 +10,7 @@ Option Explicit
                               Optional DelFirstLoTarget As Boolean = False)
     
     If DelFirstLoTarget And Not Lo_Target.DataBodyRange Is Nothing Then Lo_Target.DataBodyRange.Delete
-    If Lo_Source.DataBodyRange Is Nothing Then MsgBox "Tabla de Origen Sin Datos": GoTo Fin
+    If Lo_Source.DataBodyRange Is Nothing Then MsgBox "Tabla de Origen Sin Datos": Exit Sub
     Lo_Source.DataBodyRange.Copy
     If Lo_Target.DataBodyRange Is Nothing Then
         Lo_Target.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues

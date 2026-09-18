@@ -82,17 +82,17 @@ Sub Rut_Show_All_Columns()
     Form_Menu.TB_Informe = "All columns are visible"
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
-Sub Rut_Mostrar_Col_Ocultas()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-Dim Cont_Col As Integer
-Solicitudes.Unprotect
-Application.ScreenUpdating = False
-        For Cont_Col = 1 To LastCol_Tb_Solicitudes
-            If Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) = "Ocultar" Then Columns(Cont_Col).Hidden = False
-        Next Cont_Col
-Application.ScreenUpdating = True
-Solicitudes.Protect
-Form_Menu.TB_Informe = "Columnas Ocultas al Usuario Visibles"
-End Sub     ' RuT_Mostrar_Ocultar_Col     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'Sub Rut_Mostrar_Col_Ocultas()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'Dim Cont_Col As Integer
+''Solicitudes.Unprotect
+'Application.ScreenUpdating = False
+'        For Cont_Col = 1 To LastCol_Tb_Solicitudes
+'            If Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) = "Ocultar" Then Columns(Cont_Col).Hidden = False
+'        Next Cont_Col
+'Application.ScreenUpdating = True
+'Solicitudes.Protect
+'Form_Menu.TB_Informe = "Columnas Ocultas al Usuario Visibles"
+'End Sub     ' RuT_Mostrar_Ocultar_Col     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ' ==================================================================================================================================
 Sub Rut_ProtectUnProtect_ActivSheet()
     If ActiveSheet.ProtectContents Then
