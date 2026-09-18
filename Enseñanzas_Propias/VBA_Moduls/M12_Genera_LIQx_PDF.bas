@@ -1,5 +1,5 @@
 Attribute VB_Name = "M12_Genera_LIQx_PDF"
-' Last Rev. 2026-09-15 14:10
+' Last Rev. 2026-09-18 23:14
 Option Explicit
 
 ' ==================================================================================================================================
@@ -22,7 +22,7 @@ Set LoT_TPLiquid = Wk_TitP_Liquid.ListObjects(1)
 
 Rut_Off_Functions
 
-    Call Rut_WrkSheet_Vaciar(Wk_TitP_LIQx_PDF.Name)
+    Call Rut_WrkSheet_Vaciar(Wk_TitP_LIQx_PDF)
     
     Wk_TitP_LIQx_PDF.Select
     
@@ -301,7 +301,7 @@ Set LoT_TPLiquid = Wk_TitP_Liquid.ListObjects(1)
 
 Rut_Off_Functions
 
-    Call Rut_WrkSheet_Vaciar(Wk_TitP_LIQx_PDF.Name)
+    Call Rut_WrkSheet_Vaciar(Wk_TitP_LIQx_PDF)
     
     Wk_TitP_LIQx_PDF.Select
     

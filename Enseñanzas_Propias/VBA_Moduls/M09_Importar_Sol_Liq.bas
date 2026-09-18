@@ -1,5 +1,5 @@
 Attribute VB_Name = "M09_Importar_Sol_Liq"
-' Last Rev. 2026-09-14 12:25
+' Last Rev. 2026-09-18 23:14
 '- M04_Importar_Sol_Liq
 Option Explicit
 
@@ -74,7 +74,7 @@ Rut_Off_Functions
             Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
     '   Borrar el contenido de la hoja Prog_Sol_Liq    ------------------------------------------------------------
     Prog_Sol_Liq.Visible = xlSheetVisible
-    Call Rut_WrkSheet_Vaciar(Prog_Sol_Liq.Name)
+    Call Rut_WrkSheet_Vaciar(Prog_Sol_Liq)
     '   Copio el excel    ------------------------------------------------------------------------------------------
     Dim ClsBk          As Variant
     Set ClsBk = Workbooks.Open(Arch_Select)

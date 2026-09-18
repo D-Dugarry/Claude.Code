@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_WS"
-' Last Rev. 2026-09-18 19:20
+' Last Rev. 2026-09-18 23:54
 Option Explicit
 
 ' ==================================================================================================================================
@@ -15,6 +15,7 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
 ' ==================================================================================================================================
         Dim ws      As Worksheet:       Set ws = Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
         Dim Lo      As ListObject:      Set Lo = ws.ListObjects(1)
+        Dim Dummy_UsedRange As String   '- Solo para forzar la lectura de UsedRange (ver mas abajo)
         Dim Sw_Calculation  As Boolean:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlManual
     With ws
         .Columns.EntireColumn.Hidden = False    ' Mostrar todas las Columnas
@@ -27,7 +28,7 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
         End With
         .Range(ActiveCell.Address & ":" & Cells(Rows.Count, 1).Address).EntireRow.Delete
         .Range(ActiveCell.Address & ":" & Cells(1, Columns.Count).Address).EntireColumn.Delete
-        ActiveSheet.UsedRange                       ' Para restablecer el rango de celdas en uso
+        Dummy_UsedRange = .UsedRange.Address        ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)
     End With
     Application.Calculation = Sw_Calculation
 End Sub
@@ -42,14 +43,15 @@ Sub Rut_WrkSheet_Preparar(WrkSht As Worksheet)  '- Mostrar todas las Filas y Col
     End With
 End Sub
 ' ==================================================================================================================================
-Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja incluso los objetos (Shapes)  -------------------------------
+Sub Rut_WrkSheet_Vaciar(WrkSht As Worksheet)      '--- Borra Toda la Hoja incluso los objetos (Shapes)  -------------------------------
 ' ==================================================================================================================================
     Dim WrkSht_Activa    As String:     WrkSht_Activa = ActiveSheet.Name
+    Dim Dummy_UsedRange  As String      '- Solo para forzar la lectura de UsedRange (ver mas abajo)
     Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
 
         Application.ScreenUpdating = False
         
-    With Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
+    With WrkSht
             Dim Visual_Status   As Variant:  Visual_Status = .Visible   '--- para dejar la hoja en el mismo estado de Visibilidad ---
             Dim Protect_Status   As Boolean:  Protect_Status = .ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
         .Visible = xlHidden
@@ -61,7 +63,7 @@ Sub Rut_WrkSheet_Vaciar(ByVal WrkSht As String)      '--- Borra Toda la Hoja inc
             If .ListObjects(1).ShowAutoFilter Then .ListObjects(1).AutoFilter.ShowAllData   '- Quitar filtro Tabla
         Next tbl
             .Columns.Delete     ' --- con esto se borran hasta los "Shapes"
-            .UsedRange
+            Dummy_UsedRange = .UsedRange.Address   ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)
         .Visible = Visual_Status
         If Protect_Status Then .Protect
         Sheets(WrkSht_Activa).Select

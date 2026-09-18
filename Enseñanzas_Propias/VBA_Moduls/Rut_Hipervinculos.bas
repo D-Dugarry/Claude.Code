@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_Hipervinculos"
+' Last Rev. 2026-09-18 23:14
 Option Explicit
 
 ' ==================================================================================================================================
@@ -10,8 +11,8 @@ Sub ListarHipervinculos()
 
     ' Crear una nueva hoja para mostrar los resultados
     If Fnc_WrkSheet_Exist("Hipervínculos") Then
-        Call Rut_WrkSheet_Vaciar("Hipervínculos")
         Set hojaResultado = ThisWorkbook.Sheets("Hipervínculos")
+        Call Rut_WrkSheet_Vaciar(hojaResultado)
     Else
         Set hojaResultado = ThisWorkbook.Sheets.Add
         hojaResultado.Name = "Hipervínculos"
