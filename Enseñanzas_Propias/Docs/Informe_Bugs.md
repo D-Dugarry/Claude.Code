@@ -2,7 +2,9 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 8 Críticos · 11 Altos · 10 Medios · 6 Bajos — 35 hallazgos (7 corregidos, 1 descartado).
+**Resumen:** 9 Críticos · 11 Altos · 10 Medios · 6 Bajos — 36 hallazgos (9 corregidos, 1 descartado).
+
+> **Actualización 2026-09-18:** añadido **B16**, detectado al compilar el proyecto tras corregir A3. Además de los bugs, se ha hecho una **limpieza de código muerto** en los módulos `Rut_*` (ver el apéndice al final).
 
 > **Nota sobre codificación:** los ficheros `.bas`/`.cls`/`.frm` están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre `VBA_Moduls/`, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver `CLAUDE.md` de este proyecto).
 
@@ -38,6 +40,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - B13 · `Wk_Lista_Panes1.cls` sin ninguna referencia en el código (a verificar)
   - B14 · Bucle `Do While` sin cota superior en M31/M32/M33
   - B15 · Contraseña de correo en texto plano
+  - B16 · Cuatro rutinas de otro libro en `M90_Rutinas_X.bas` (hallazgo posterior)
 - **Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios**
   - C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
   - C2 · `.calcMode` no es un miembro de `Application`
@@ -276,7 +279,7 @@ Ni `Sht__Inf_Recibos_TIO` ni `Sht__BD` existen como CodeName de ninguna hoja de 
 **Arreglo:** sustituir por `Prog_BD` y por la hoja EP correspondiente (`Sht__Inf_EFP_ACont1_CAcad` / `_2_CAcad` / CFC), o excluir estos dos módulos del proyecto hasta portarlos correctamente.
 
 ### B4 · `End Sub` huérfano en `M90_Rutinas_X.bas`
-**Severidad:** Crítico · **Fichero:** `M90_Rutinas_X.bas` — líneas 193-203
+**Severidad:** Crítico · **Fichero:** `M90_Rutinas_X.bas` — líneas 193-203 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
 
 ```vba
     .AutoFilter Field:=CTa_Ref, Criteria1:=Application.Transpose(Lo_Busca_JI.DataBodyRange.Columns(2)), Operator:=xlFilterValues
@@ -293,7 +296,7 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, columna As Integer)
 
 La línea 197 ya cierra correctamente `Rut_Filtro_NumJI_2_en_Tasas`; la línea 200 es un segundo `End Sub` sin ningún `Sub`/`Function` abierto que cerrar. Error de sintaxis, impide compilar el módulo.
 
-**Arreglo:** borrar la línea 200.
+**Arreglo aplicado:** borrada la línea 200. El módulo tenía 19 `Sub` / 20 `End Sub`; ahora 15/15 tras esta corrección y la de B16.
 
 ### B5 · Variable de objeto `Lo_AE4x1` no declarada
 **Severidad:** Crítico · **Fichero:** `M51_Import_AE4x1.bas` — líneas 25, 93
@@ -428,6 +431,26 @@ Si todas las filas de `Prog_BD` cumplieran la condición de salto, `ContIni` sup
 La contraseña SMTP se lee/escribe/muestra en una celda (`Range("APP_MailClau")`) y en `MsgBox`/`InputBox` sin ningún enmascarado. No es un bug funcional, pero es una práctica de higiene de datos a revisar.
 
 ---
+
+### B16 · Cuatro rutinas de otro libro en `M90_Rutinas_X.bas` (hallazgo posterior)
+**Severidad:** Crítico · **Fichero:** `M90_Rutinas_X.bas` — líneas 137-226 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
+
+Detectado al compilar el proyecto tras corregir A3: el VBE marca `No se ha definido la variable` sobre `Hp_BuscarJI_1`. Es el mismo patrón que B3 (código importado de otro libro sin adaptar), pero en un fichero distinto y con origen distinto: **no viene de PPub**, donde estos identificadores tampoco existen, sino de un tercer libro, el de Tasas/Aplicaciones.
+
+Siete identificadores usados y declarados en ningún sitio del proyecto:
+
+| Identificador | Qué sería | Dónde se usaba |
+|---|---|---|
+| `Hp_BuscarJI_1`, `Hp_BuscarJI_2`, `Hp_T_Aplic` | CodeName de hoja | `M90_Rutinas_X.bas` |
+| `Lo_Aplic` | `ListObject` | `M90_Rutinas_X.bas` |
+| `CTa_Ref` | `Const` de columna | `M90_Rutinas_X.bas` |
+| `Lo_Prog_Colns`, `LastCol_Tb_Solicitudes` | `ListObject` / `Const` | `M90_Rutinas_X.bas` + `M90_Rutinas_Menú_Aux.bas` |
+
+Tres indicios de que es código ajeno a este libro: el prefijo `Hp_` no es la convención de aquí (`Prog_*`, `Wk_*`, `Sht__*`); los comentarios hablan de *Tasas*, *Aplicaciones* y *Solicitudes*, no de Liquidación de Títulos Propios; y ninguno de los identificadores aparece tampoco en PPub.
+
+**Arreglo aplicado:** eliminadas las 4 rutinas que dependían de los cinco primeros identificadores (`Rut_Filtro_NumJI_1_en_Tasas`, `Rut_Filtro_NumJI_2_en_Tasas`, `Rut_Ajustar_V_H_Alignment`, `Rut_Filas_Ajustar_Alto`), tras auditar las 4 vías de invocación: sin llamadas en el código VBA, sin macro asignada en ninguno de los 68 shapes del `.xlsm`, sin apariciones en `sharedStrings` ni en ninguna otra parte XML (el libro no tiene Ribbon custom). Módulo de 365 a 254 líneas.
+
+**⚠️ Pendiente — el proyecto aún no compila:** `Lo_Prog_Colns` y `LastCol_Tb_Solicitudes` siguen sin declarar, usados en `Rut_Columnas_Ajustar_Ancho` y `Rut_Columnas_Mostrar` de este módulo y en `M90_Rutinas_Menú_Aux.bas:89-90`. A diferencia de las anteriores, **estas rutinas sí parecen propias de este libro** (`Rut_Columnas_Mostrar` escribe en `Form_Menu.TB_Informe`, el menú auxiliar), así que lo correcto es **declararlas apuntando a la tabla real** — probablemente el `ListObject` de alguna hoja `Prog_DefCol*`, cuyas filas 4, 5, 7 y 11 se usan como ancho, alineación horizontal, marca "Ocultar" y alineación vertical — no borrar el código.
 
 ## Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios
 *Ficheros: `Rut_Lo`, `Rut_WB`, `Rut_WS`, `Rut__Right_Click_VBA`, `Form_*`, `M0999_*`, `Módulo*`.*
@@ -612,6 +635,54 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
 Solo se usa si falta el rango con nombre `APP_CopSeg_Usb_Path` (si existe, se usa ese en su lugar), pero el fallback da por hecho que en la máquina donde se ejecute existe `F:\__CopSeg Versiones Programas\`. Dado que este libro se usa entre varios ordenadores, si el rango de configuración se pierde en una copia del libro, el fallback podría apuntar a una ruta que no existe en esa máquina — al menos hay un `MsgBox` previo que avisa de la falta del Range.
 
 **Sugerencia:** si el rango no existe, pedir la ruta con `Application.GetSaveAsFilename`/`FileDialog` en vez de asumir una ruta fija.
+
+---
+
+## Apéndice · Limpieza de código muerto en los módulos `Rut_*` (2026-09-18)
+
+Auditoría independiente de los bugs: qué rutinas de los 15 módulos `Rut_*` no las llama nadie. **75 rutinas analizadas, 29 sin ninguna invocación.**
+
+### Método
+
+Un grep negativo sobre el código exportado **no es prueba suficiente** en un libro VBA: el punto de invocación puede vivir fuera del texto fuente. Se cruzaron las cuatro vías:
+
+1. **Código VBA** — los 131 módulos exportados, descartando líneas comentadas, y capturando también las llamadas indirectas por `Run("...")` y `.OnAction` (cadenas de texto que un grep de nombres no ve).
+2. **Macros asignadas a shapes** — `xl/drawings/*.xml` del `.xlsm` leído como zip: **68 shapes con macro**, 22 nombres distintos.
+3. **`sharedStrings.xml`** — por si la rutina se invoca desde una tabla de configuración o el menú dinámico.
+4. **Resto de partes XML** del `.xlsm`. El libro no tiene Ribbon custom, así que esa vía no aplica.
+
+Un detalle que casi provoca un borrado erróneo: hay nombres que son **prefijo de otros vivos** (`Rut_Lo_Filtro` vs `Rut_Lo_Filtros_Quitar`, con 69 usos). Los anclajes deben exigir el nombre exacto seguido de `(` o fin de palabra.
+
+### Eliminadas (9)
+
+| Módulo | Rutina | Motivo |
+|---|---|---|
+| `Rut_Lo.bas` | `Rut_Lo_DataBodyRange_Filtered_Copy_OLD____` | Existe la versión viva (9 usos) |
+| `Rut_Lo.bas` | `Rut_Lo_Filtro` | Huérfana **y rota**: usaba `LoTb` en vez de `Lo_Tb` |
+| `Rut_Lo.bas` | `Rut_Copiar_EntireRow_LstObjct` | Huérfana **y rota**: tablas `Tab_INI`/`Tab_FIN` inexistentes |
+| `Rut_Lo_Export_XlsX.bas` | `Rut_Lo_Export_KKKK…K` | Nombre aporreado |
+| `Rut_Ranges.bas` | `Ejemplo_Selección_Múltiple` | "Ejemplo" |
+| `Rut_Wb_CopSegTimed_USB_HD.bas` | `EJEMPLO_ActualizarTabla` | "EJEMPLO" |
+| `Rut_WS.bas` | `Rut_WrkSheet_ReducirPeso_xx` | Existe la viva (3 usos) |
+| `Rut_WS.bas` | `Rut_WrkSheet_Vaciar_xx` | Existe la viva (6 usos) |
+| `Rut_WS.bas` | `Rutxxxx_Exportar_La_Liquidación` | Prefijo `Rutxxxx` |
+
+**−225 líneas.** Verificado tras el borrado: `Sub`/`End Sub` equilibrado en los 5 módulos, CP1252 sin `U+FFFD` ni BOM, CRLF íntegro, y **ninguna rutina viva pasó a huérfana** (prueba de que no se borró nada que fuera llamado).
+
+### Conservadas a propósito
+
+**Herramientas de diagnóstico manual** — huérfanas por diseño, se lanzan con F5 cuando hacen falta: `ListarHipervinculos`, `Rut_Ranges_List_ALL`, `RevisarFormulasEnHojas`, `Rut_Wb_Shapes_Statistics_List`, `RuT_AllSheets_Crear_Lista`, `RuT_AllSheets_Visible_OrNot`, `Rut_WrkBook_CopSegTimed_List_Organize`, `Rut_WrkBook_CopSegTimed_List_Selected_Del`.
+
+**⚠️ `Rut_VBA_Export_Moduls`** — aparece como huérfana, pero es la macro de auto-exportación documentada en el `CLAUDE.md` del proyecto. **No borrar:** al estar el proyecto VBA protegido con contraseña, es la única vía de exportar los módulos.
+
+**`NewMenúRightClickCell` / `NewMenúRightClickList`** — construyen el menú contextual personalizado. Sus gemelas `DelMenú*` **sí** se llaman (`M00_Ini_APP.bas:85-86`), pero las `New*` solo se invocan desde líneas comentadas: el menú custom puede estar a medio desactivar. Requiere decisión, no limpieza automática.
+
+**`RuT_Antes_de_Cerrar_WorkBook`** — versión alternativa de `Workbook_BeforeClose`; el evento real (`ThisWorkbook.cls:26`) hace otra cosa. Antes de borrarla conviene decidir si su contenido debería estar en el evento.
+
+### Pendiente
+
+- **Grupo 2 — 8 variantes `ByHand`/`_01`** de rutinas vivas, sin decidir: `Rut_Lo_Export_to_New_WB_ByHand`, `Rut_WrkSheet_To_PDF_ByHand`, `RuT_Sort_Sheets_ByHand`, `Rut_Ws_All_Stratistics_01` y las 4 variantes casi idénticas de `RuT_*Save_New_WorkBook_Liq_TPV` en `Rut_Ranges.bas`.
+- **Los módulos `M*` no se han auditado** — previsiblemente tienen más código muerto (`M90_CopSeg_USB_HD.bas` está entero comentado).
 
 ---
 
