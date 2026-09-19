@@ -1,4 +1,5 @@
 Attribute VB_Name = "M00_Ini_APP"
+' Last Rev. 2026-09-19 08:28
 '2026-01-09
 '- M00_Ini_APP
 
@@ -88,11 +89,11 @@ Sub Rut_ConfigExcel_RESTABLECER()        '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     Application.CommandBars("Cell").Reset           '- Restablece el menú contextual de las celdas a su estado original
     'Esta línea restablece la barra de comandos llamada "Cell" a su configuración original.
     'La barra de comandos "Cell" es la que aparece cuando haces clic derecho en una celda en Excel. _
-     Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
+    ' Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
     Application.CommandBars("List Range Popup").Reset   '- Restablece el menú contextual de una tabla o en un rango con formato de tabla
     'Esta línea restablece la barra de comandos llamada "List Range Popup" a su configuración original.
     'La barra de comandos "List Range Popup" es la que aparece cuando haces clic derecho en un rango de celdas que forma parte de una lista o tabla en Excel. _
-     Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
+    ' Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
     
     
     On Error GoTo ErrorHandler

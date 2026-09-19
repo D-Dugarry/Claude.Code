@@ -1,5 +1,5 @@
 Attribute VB_Name = "M20_Resumen_Tit_Propios"
-' Last Rev. 2026-09-19 00:07
+' Last Rev. 2026-09-19 08:28
 Option Explicit
 
 ' ==================================================================================================================================
@@ -81,6 +81,7 @@ Dim R_Emi_Acad          As Currency
 Dim R_Cob_Acad          As Currency
 Dim R_Rdt_Acad          As Currency
 Dim R_ADx_Acad          As Currency
+Dim R_Pdt_Acad          As Currency
 
 Dim ProgresoTarea       As String
 

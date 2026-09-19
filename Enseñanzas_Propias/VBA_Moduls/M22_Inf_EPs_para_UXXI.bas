@@ -1,4 +1,5 @@
 Attribute VB_Name = "M22_Inf_EPs_para_UXXI"
+' Last Rev. 2026-09-19 08:28
 Option Explicit
 
 ' ==================================================================================================================================
@@ -78,6 +79,7 @@ Dim R_Cob_C_Acad_Adm    As Currency
 Dim R_Cob_Acont         As Currency
 Dim R_Rdt_Acad          As Currency
 Dim R_ADx_Acad          As Currency
+Dim R_Aplz_Acad         As Currency
 
 Dim ProgresoTarea       As String
 

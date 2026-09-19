@@ -1,4 +1,5 @@
 Attribute VB_Name = "M32_List_Anul_y_Devoluciones"
+' Last Rev. 2026-09-19 08:28
 '2026-01-31
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -173,7 +174,7 @@ With Lo_BD.DataBodyRange
             End If
             ' Visualizo Nuevo Cod_Plan
             'Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Format(Cont_Anul, "00") & "º " & Cod_Plan & " " & Left(RowNew.Range(Lst_DNI) & String(15, " "), 16) & _
-                                   Left(.Cells(Cont, BD_Nom) & String(15, " "), 30) & " " & RowNew.Range(Lst_Obs) & vbLf
+            '                       Left(.Cells(Cont, BD_Nom) & String(15, " "), 30) & " " & RowNew.Range(Lst_Obs) & vbLf
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Anul, "00") & "º " & Cod_Plan & " " & _
                                    .Cells(Cont, BD_Nom) & "  ( " & RowNew.Range(Lst_DNI) & " )" & vbLf & _
                                    String(15, " ") & "Obs.: "" " & RowNew.Range(Lst_Obs) & " """ & vbLf

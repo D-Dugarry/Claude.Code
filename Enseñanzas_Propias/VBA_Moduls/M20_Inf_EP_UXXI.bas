@@ -1,4 +1,5 @@
 Attribute VB_Name = "M20_Inf_EP_UXXI"
+' Last Rev. 2026-09-19 08:28
 '2026-01-30
 '-M20_Inf_EP_Resumen_1
 Option Explicit
@@ -193,7 +194,7 @@ Dim ContRec26   As Long
             
             RwTP.Range(CtTP_Cant_Reg) = RwTP.Range(CtTP_Cant_Reg) + 1
 '''If RwPH.Range(BD_Plan) = "GI37" Then Debug.Print "Detall:", RwPH.Range(BD_Ref) & " - " & RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy"), _
-                                            RwTP.Range(CtTP_Cob_Total), RwPH.Range(BD_ImpCob), RwTP.Range(CtTP_Cob_Tadm)
+'''                                            RwTP.Range(CtTP_Cob_Total), RwPH.Range(BD_ImpCob), RwTP.Range(CtTP_Cob_Tadm)
 
         Else    '------ Es el primero de una serie y tengo que introducir los datos comunes ---------------------------------------------------------
         
@@ -250,7 +251,7 @@ Dim ContRec26   As Long
             End If
             
 '''If RwPH.Range(BD_Plan) = "GI37" Then Debug.Print "Primer:", RwPH.Range(BD_Ref) & " - " & RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy"), _
-                                            RwTP.Range(CtTP_Cob_Total), RwPH.Range(BD_ImpCob), RwTP.Range(CtTP_Cob_Tadm)
+'''                                            RwTP.Range(CtTP_Cob_Total), RwPH.Range(BD_ImpCob), RwTP.Range(CtTP_Cob_Tadm)
 '            RwTP.Range (CtTP_Descripción)="LIQ-TitProp_"  &RwPH.Range(BD_Plan ) & "-N Curso" & RwPH.Range(BD_C_Acad) &"_AñoCont_20"&DERECHA([@plan];2)&" - " & RwPH.Range(BD_NomPlan)
             
             ' =====================================================================================
