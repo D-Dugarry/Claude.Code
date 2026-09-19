@@ -64,8 +64,8 @@ Sub Reorganizar_ListObject_Solo()
     iCol57 = Lo.ListColumns("Col_57").Index
     
     '--- 1) Insertar 2 columnas VACÍAS a la izquierda de "Col_33"
-    Lo.ListColumns.Add Position:=iCol33, Name:="Nueva_Col1"
-    Lo.ListColumns.Add Position:=iCol33, Name:="Nueva_Col2"
+    Lo.ListColumns.Add(Position:=iCol33).Name = "Nueva_Col1"
+    Lo.ListColumns.Add(Position:=iCol33).Name = "Nueva_Col2"
     
     ' Recalcular índices (se movieron todos los de la derecha)
     iCol36 = Lo.ListColumns("Col_36").Index + 2
@@ -82,15 +82,15 @@ Sub Reorganizar_ListObject_Solo()
     Lo.ListColumns("Col_45").Delete     ' Eliminar originales
     Lo.ListColumns("Col_46").Delete
     Lo.ListColumns("Col_47").Delete
-    Lo.ListColumns.Add Position:=iCol36 - 2, Name:="Col_45"
-    Lo.ListColumns.Add Position:=iCol36 - 1, Name:="Col_46"
-    Lo.ListColumns.Add Position:=iCol36, Name:="Col_47"
+    Lo.ListColumns.Add(Position:=iCol36 - 2).Name = "Col_45"
+    Lo.ListColumns.Add(Position:=iCol36 - 1).Name = "Col_46"
+    Lo.ListColumns.Add(Position:=iCol36).Name = "Col_47"
     ' Copiar datos de backup o regenerarlos
     
     '--- 3) Mover col 50 ANTES de col 40
     Lo.ListColumns("Col_50").DataBodyRange.Copy
     Lo.ListColumns("Col_50").Delete
-    Lo.ListColumns.Add Position:=iCol40 - 1, Name:="Col_50"
+    Lo.ListColumns.Add(Position:=iCol40 - 1).Name = "Col_50"
     Lo.ListColumns("Col_50").DataBodyRange.PasteSpecial xlPasteValues
     
     '--- 4) Mover cols 55-57 AL FINAL

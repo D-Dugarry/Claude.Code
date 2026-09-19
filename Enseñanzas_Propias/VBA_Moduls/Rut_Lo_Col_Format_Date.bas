@@ -309,7 +309,7 @@ End Function
 
 ' Mostrar reporte de estadísticas
 Private Sub MostrarReporteEstadisticas( _
-    ByRef estadisticas As Dictionary, _
+    ByRef estadisticas As Scripting.Dictionary, _
     ByVal nombreTabla As String, _
     ByVal nombreColumna As String)
     

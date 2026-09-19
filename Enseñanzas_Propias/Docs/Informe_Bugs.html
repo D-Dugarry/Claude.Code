@@ -64,61 +64,64 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <main><article>
 <h1>Informe de Bugs — EP_202x-2x_BaseDatos-LIQ _V3.xlsm</h1>
 <p>Auditoría del código VBA exportado en <code>VBA_Moduls/</code> (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.</p>
-<p><strong>Resumen:</strong> 9 Críticos · 11 Altos · 10 Medios · 6 Bajos — 36 hallazgos (9 corregidos, 1 descartado).</p>
-<blockquote><p><strong>Actualización 2026-09-18:</strong> añadido <strong>B16</strong>, detectado al compilar el proyecto tras corregir A3. Además de los bugs, se ha hecho una <strong>limpieza de código muerto</strong> en los módulos <code>Rut_*</code> (ver el apéndice al final).</p></blockquote>
+<p><strong>Resumen:</strong> 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (20 corregidos, 4 desactivados/aparcados, 1 descartado).</p>
+<blockquote><p><strong>Actualización 2026-09-19 (3ª):</strong> el proyecto <strong>compila limpio</strong> tras esta sesión. Añadidos <strong>C13</strong> y <strong>C14</strong> (dos errores de compilación más, detectados y corregidos sobre la marcha: <code>Dictionary</code> ambiguo entre Scripting Runtime/Word, y <code>ListColumns.Add</code> con un argumento <code>Name:=</code> inexistente). <strong>B3 pasa a desactivado</strong> (módulos <code>M41</code>/<code>M42</code> comentados enteros, mismo patrón que B5/B6/B19), confirmado por el usuario como importación pendiente de adaptar desde otra app.</p><p><strong>Actualización 2026-09-18:</strong> añadido <strong>B16</strong>, detectado al compilar el proyecto tras corregir A3. Además de los bugs, se ha hecho una <strong>limpieza de código muerto</strong> en los módulos <code>Rut_*</code> (ver el apéndice al final).</p></blockquote>
 <blockquote><p><strong>Nota sobre codificación:</strong> los ficheros <code>.bas</code>/<code>.cls</code>/<code>.frm</code> están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre <code>VBA_Moduls/</code>, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver <code>CLAUDE.md</code> de este proyecto).</p></blockquote>
 <h2>Antes de tocar nada: compila el proyecto</h2>
 <p>Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error de compilación VBA (<code>Option Explicit</code> roto, nombre duplicado, tipo incompatible, <code>Sub</code>/<code>End Sub</code> descuadrados). <strong>Un solo error de compilación en cualquier módulo bloquea la ejecución de todas las macros del libro</strong>, no solo la rutina afectada — VBA compila el proyecto entero, no módulo a módulo. Antes de corregir nada, abre el editor VBA del <code>.xlsm</code> real y ejecuta <strong>Depurar → Compilar VBA Project</strong>, y anota qué marca primero: puede que algunos de estos 8 puntos ya estén corregidos ahí y esta exportación esté desactualizada, o puede que el libro lleve tiempo sin compilar limpio (varios de los módulos implicados — <code>M50_Inf_Cont_AE4x41</code>, <code>M51_Import_AE4x11</code>, <code>M41</code>/<code>M42</code> — parecen ramas de desarrollo/copias aún no terminadas, no el camino que se ejecuta a diario).</p>
 <h2>Índice</h2>
+<p><strong>Leyenda:</strong> ✅ Corregido · ⏸️ Desactivado/aparcado (módulo comentado, decisión pendiente) · ❌ Descartado (no era bug) · ○ Pendiente</p>
 <ul>
 <li><strong>Bloque A — Arranque, pipeline LSGES04 y núcleo de Liquidación</strong></li>
 <ul>
-<li>A1 · Importe cobrado truncado a <code>Long</code></li>
-<li>A2 · <code>Workbooks(IntialName).Close</code> falla si el usuario cambia el nombre al guardar</li>
-<li>A3 · Merge-join sin <code>Case Else</code> — desincronización silenciosa al guardar la Liquidación</li>
-<li>A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI</li>
-<li>A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)</li>
-<li>A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</li>
-<li>A7 · Mensaje de informe copiado y mal etiquetado</li>
-<li>A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</li>
-<li>A9 · <code>Coef_VRI</code> declarado <code>Integer</code> — descartado</li>
+<li>✅ A1 · Importe cobrado truncado a <code>Long</code></li>
+<li>✅ A2 · <code>Workbooks(IntialName).Close</code> falla si el usuario cambia el nombre al guardar</li>
+<li>✅ A3 · Merge-join sin <code>Case Else</code> — desincronización silenciosa al guardar la Liquidación</li>
+<li>✅ A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI</li>
+<li>✅ A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)</li>
+<li>✅ A6 · <code>.EntireRow.Delete</code> en vez de <code>.Delete</code>, único caso del pipeline</li>
+<li>✅ A7 · Mensaje de informe copiado y mal etiquetado</li>
+<li>○ A8 · Cualificación inconsistente de <code>Range("Sw_VerRecNeg")</code> (a verificar)</li>
+<li>❌ A9 · <code>Coef_VRI</code> declarado <code>Integer</code> — descartado</li>
 </ul>
 <li><strong>Bloque B — Informes, Cierre Contable y AE4x4/AE4x1</strong></li>
 <ul>
-<li>B1 · Sub pública duplicada: <code>RuT_Inf_Contable_Recibos_AE4x4</code></li>
-<li>B2 · Sub pública duplicada: <code>Rut_Lo_Import_AE4x1</code></li>
-<li>B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)</li>
-<li>B4 · <code>End Sub</code> huérfano en <code>M90_Rutinas_X.bas</code></li>
-<li>B5 · Variable de objeto <code>Lo_AE4x1</code> no declarada</li>
-<li>B6 · <code>Lo_AE4x1</code> usado sin inicializar</li>
-<li>B7 · Límite de filas hardcodeado a 5000</li>
-<li>B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada</li>
-<li>B9 · <code>Application.Calculation</code> guardado en variable <code>Boolean</code></li>
-<li>B10 · Año "2025" hardcodeado en nombres de fichero exportado</li>
-<li>B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)</li>
-<li>B12 · <code>M71_Restituir</code> sobrescribe datos y parámetros sin validar ni confirmar</li>
-<li>B13 · <code>Wk_Lista_Panes1.cls</code> sin ninguna referencia en el código (a verificar)</li>
-<li>B14 · Bucle <code>Do While</code> sin cota superior en M31/M32/M33</li>
-<li>B15 · Contraseña de correo en texto plano</li>
-<li>B16 · Cuatro rutinas de otro libro en <code>M90_Rutinas_X.bas</code> (hallazgo posterior)</li>
-<li>B17 · <code>ActivForm</code> usada en 6 módulos y declarada en ninguno</li>
-<li>B18 · <code>AñoContAnt</code> sin declarar en <code>M20_Resumen_Tit_Propios.bas</code></li>
-<li>B19 · <code>Cod_Plan</code> sin declarar y vaciado antes de usarse (<code>M21_Resumen_Tit_Propios_UNO.bas</code>)</li>
+<li>✅ B1 · Sub pública duplicada: <code>RuT_Inf_Contable_Recibos_AE4x4</code></li>
+<li>✅ B2 · Sub pública duplicada: <code>Rut_Lo_Import_AE4x1</code></li>
+<li>⏸️ B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar) — módulos desactivados</li>
+<li>✅ B4 · <code>End Sub</code> huérfano en <code>M90_Rutinas_X.bas</code></li>
+<li>⏸️ B5 · Variable de objeto <code>Lo_AE4x1</code> no declarada — módulo desactivado</li>
+<li>⏸️ B6 · <code>Lo_AE4x1</code> usado sin inicializar — módulo desactivado</li>
+<li>○ B7 · Límite de filas hardcodeado a 5000</li>
+<li>○ B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada</li>
+<li>○ B9 · <code>Application.Calculation</code> guardado en variable <code>Boolean</code></li>
+<li>○ B10 · Año "2025" hardcodeado en nombres de fichero exportado</li>
+<li>○ B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)</li>
+<li>○ B12 · <code>M71_Restituir</code> sobrescribe datos y parámetros sin validar ni confirmar</li>
+<li>○ B13 · <code>Wk_Lista_Panes1.cls</code> sin ninguna referencia en el código (a verificar)</li>
+<li>○ B14 · Bucle <code>Do While</code> sin cota superior en M31/M32/M33</li>
+<li>○ B15 · Contraseña de correo en texto plano</li>
+<li>✅ B16 · Cuatro rutinas de otro libro en <code>M90_Rutinas_X.bas</code> (hallazgo posterior)</li>
+<li>✅ B17 · <code>ActivForm</code> usada en 6 módulos y declarada en ninguno</li>
+<li>✅ B18 · <code>AñoContAnt</code> sin declarar en <code>M20_Resumen_Tit_Propios.bas</code></li>
+<li>⏸️ B19 · <code>Cod_Plan</code> sin declarar y vaciado antes de usarse (<code>M21_Resumen_Tit_Propios_UNO.bas</code>) — módulo desactivado</li>
 </ul>
 <li><strong>Bloque C — Librería transversal <code>Rut_*</code>/<code>Prog_*</code> y formularios</strong></li>
 <ul>
-<li>C1 · Variable no declarada <code>LoTb</code> (typo de <code>Lo_Tb</code>)</li>
-<li>C2 · <code>.calcMode</code> no es un miembro de <code>Application</code></li>
-<li>C3 · <code>String</code> pasado donde se espera <code>Worksheet</code> por referencia (ruta en producción)</li>
-<li>C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></li>
-<li>C5 · <code>Rut_WrkSheet_ReducirPeso</code> opera sobre la hoja activa, no sobre la recibida</li>
-<li>C6 · Pérdida de datos en <code>M0999_Modif_Cols_BDatos.bas</code> si se reejecuta</li>
-<li>C7 · Valor mágico <code>-0.86</code> escrito sobre datos reales sin confirmación</li>
-<li>C8 · <code>For Each</code> que ignora la variable de iteración</li>
-<li>C9 · <code>Módulo3.bas</code> sin <code>Option Explicit</code>, con variables casi homónimas</li>
-<li>C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)</li>
-<li>C11 · Ruta de disco hardcodeada como fallback silencioso</li>
-<li>C12 · <code>.UsedRange</code> como instrucción suelta — propiedad usada como si fuera un método</li>
+<li>○ C1 · Variable no declarada <code>LoTb</code> (typo de <code>Lo_Tb</code>)</li>
+<li>○ C2 · <code>.calcMode</code> no es un miembro de <code>Application</code></li>
+<li>✅ C3 · <code>String</code> pasado donde se espera <code>Worksheet</code> por referencia (ruta en producción)</li>
+<li>✅ C4 · Llamada a una rutina que no existe: <code>Rut_Actualizar_1_LS_VAL</code></li>
+<li>○ C5 · <code>Rut_WrkSheet_ReducirPeso</code> opera sobre la hoja activa, no sobre la recibida</li>
+<li>○ C6 · Pérdida de datos en <code>M0999_Modif_Cols_BDatos.bas</code> si se reejecuta</li>
+<li>○ C7 · Valor mágico <code>-0.86</code> escrito sobre datos reales sin confirmación</li>
+<li>○ C8 · <code>For Each</code> que ignora la variable de iteración</li>
+<li>○ C9 · <code>Módulo3.bas</code> sin <code>Option Explicit</code>, con variables casi homónimas</li>
+<li>○ C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)</li>
+<li>○ C11 · Ruta de disco hardcodeada como fallback silencioso</li>
+<li>✅ C12 · <code>.UsedRange</code> como instrucción suelta — propiedad usada como si fuera un método</li>
+<li>✅ C13 · <code>Dictionary</code> ambiguo entre Scripting Runtime y Word Object Library</li>
+<li>✅ C14 · <code>ListColumns.Add</code> con un argumento <code>Name:=</code> que no existe</li>
 </ul>
 </ul>
 <hr>
@@ -274,13 +277,14 @@ Public Const G04_Flag_Cuantas      As Integer = G04_Flag_ADxAplz - G04_Flag_Emit
 <p>Misma firma, misma Sub pública, en dos módulos distintos — verificado. Segundo "Ambiguous name detected" independiente del anterior, agravando el bloqueo de compilación.</p>
 <p><strong>Arreglo:</strong> eliminado el módulo <code>M51_Import_AE4x11.bas</code> (misma rama de desarrollo que B1), tanto del proyecto VBA real como de <code>VBA_Moduls/</code>, manteniendo <code>M51_Import_AE4x1.bas</code>. ⚠️ Ese módulo superviviente sigue teniendo un bug de compilación independiente y ahora más urgente — ver B5.</p>
 <h3>B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)</h3>
-<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M41_Añadir_Núm_JIs_al_Inf.bas:13,15</code> y <code>M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40</code></p>
+<p><strong>Severidad:</strong> Crítico · <strong>Ficheros:</strong> <code>M41_Añadir_Núm_JIs_al_Inf.bas:13,15</code> y <code>M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40</code> · <strong>Estado:</strong> ⏸️ Módulos desactivados (2026-09-19) — el bug de fondo sigue sin resolver</p>
 <pre><code>        Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
         Dim Lo_Inf          As ListObject:      Set Lo_Inf = Sht_Inf.ListObjects(1)
         Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)</code></pre>
 <p>Ni <code>Sht__Inf_Recibos_TIO</code> ni <code>Sht__BD</code> existen como CodeName de ninguna hoja de este proyecto (la tabla de datos aquí se llama <code>Prog_BD</code>, no <code>Sht__BD</code>, y no hay ninguna hoja "TIO"). Con <code>Option Explicit</code>, "Variable no definida" en compilación. Todo apunta a que <code>M41</code>/<code>M42</code> son código copiado literalmente del proyecto hermano <em>Precios Públicos - PPub</em> (que sí tiene esas hojas) y nunca adaptado a Enseñanzas_Propias — coherente con que M42 también reescriba <code>Prog_BD</code>/<code>Sht_Inf</code> en la línea 32-40 mezclando nombres de ambos proyectos.</p>
 <p><strong>Impacto:</strong> el flujo de "añadir números de JI al informe / a la base de datos", tal como está exportado hoy, no compila en este libro.</p>
-<p><strong>Arreglo:</strong> sustituir por <code>Prog_BD</code> y por la hoja EP correspondiente (<code>Sht__Inf_EFP_ACont1_CAcad</code> / <code>_2_CAcad</code> / CFC), o excluir estos dos módulos del proyecto hasta portarlos correctamente.</p>
+<p><strong>Decisión aplicada (2026-09-19):</strong> mismo patrón que B5/B6/B19 — el usuario confirmó que ambos módulos son una importación a medio adaptar desde otra app, y prefirió <strong>comentarlos enteros</strong> (0 líneas de código vivo) en vez de intentar adivinar la hoja correcta. De cada fichero solo quedan sin comentar <code>Attribute VB_Name</code>, <code>Option Explicit</code> y una cabecera con el sello <code>Last Rev.</code> explicando el motivo. Auditados por las 4 vías: sin invocación viva en código, shapes ni <code>Tb_Tareas</code>.</p>
+<p><strong>Para reactivar en el futuro:</strong> sustituir <code>Sht_Inf_Recibos_TIO</code> por la hoja EP correspondiente (<code>Sht__Inf_EFP_ACont1_CAcad</code> / <code>_2_CAcad</code> / CFC) y <code>Sht__BD</code> por <code>Prog_BD</code>, verificando antes con un volcado real de <code>ThisWorkbook.VBComponents</code> u otra confirmación directa — no adivinar por el nombre.</p>
 <h3>B4 · <code>End Sub</code> huérfano en <code>M90_Rutinas_X.bas</code></h3>
 <p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M90_Rutinas_X.bas</code> — líneas 193-203 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-18)</p>
 <pre><code>    .AutoFilter Field:=CTa_Ref, Criteria1:=Application.Transpose(Lo_Busca_JI.DataBodyRange.Columns(2)), Operator:=xlFilterValues
@@ -591,6 +595,24 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
     ...
     Dummy_UsedRange = .UsedRange.Address   ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)</code></pre>
 <p>Así se corrige de paso la línea 30, que compilaba pero no hacía nada. Barrido del resto del proyecto en busca del mismo patrón (líneas que empiezan por <code>.</code> con una propiedad conocida y sin <code>=</code> ni paréntesis): <strong>no hay más casos</strong>. Queda la gemela comentada en <code>M90_Rutinas_X.bas:25</code>, que si alguna vez se reactiva arrastrará el mismo error.</p>
+<h3>C13 · <code>Dictionary</code> ambiguo entre Scripting Runtime y Word Object Library</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>Rut_Lo_Col_Format_Date.bas</code> — línea 312 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-19)</p>
+<pre><code>Private Sub MostrarReporteEstadisticas( _
+    ByRef estadisticas As Dictionary, _
+    ByVal nombreTabla As String, _
+    ByVal nombreColumna As String)
+    ...
+    For Each clave In estadisticas.Keys</code></pre>
+<p>Detectado al compilar: "No se encontró el método o el dato miembro" sobre <code>.Keys</code>. El proyecto tiene referenciadas a la vez <strong>Microsoft Scripting Runtime</strong> y <strong>Microsoft Word 16.0 Object Library</strong>, y ambas exponen un tipo llamado <code>Dictionary</code> (colección clave/valor en Scripting Runtime; diccionario de corrección ortográfica en Word). Al declarar el parámetro <code>As Dictionary</code> sin cualificar, el compilador lo resolvió contra <code>Word.Dictionary</code>, que no tiene <code>.Keys</code>. La variable que se le pasa (<code>estadisticas</code>, creada con <code>CreateObject("Scripting.Dictionary")</code> en la rutina llamante) está declarada <code>As Object</code> ahí, por eso no daba el mismo error en ese punto — el fallo solo aparecía en el parámetro tipado.</p>
+<p><strong>Impacto:</strong> <code>MostrarReporteEstadisticas</code> no compilaba, bloqueando el proyecto entero (como todo error de compilación VBA).</p>
+<p><strong>Arreglo aplicado:</strong> cualificado el tipo con su librería: <code>ByRef estadisticas As Scripting.Dictionary</code>.</p>
+<p><strong>Nota general:</strong> cualquier otro <code>As Dictionary</code> sin cualificar en este proyecto corre el mismo riesgo mientras ambas referencias sigan activas; no se ha encontrado ninguna otra ocurrencia en el barrido de esta sesión.</p>
+<h3>C14 · <code>ListColumns.Add</code> con un argumento <code>Name:=</code> que no existe</h3>
+<p><strong>Severidad:</strong> Crítico · <strong>Fichero:</strong> <code>M0999_Modif_Cols_BDatos.bas</code> — líneas 67, 68, 85, 86, 87, 93 (antes del arreglo) · <strong>Estado:</strong> ✅ Corregido (2026-09-19)</p>
+<pre><code>Lo.ListColumns.Add Position:=iCol33, Name:="Nueva_Col1"</code></pre>
+<p>Detectado al compilar: "No se encontró el argumento con nombre", señalando <code>Name:=</code>. <code>ListColumns.Add</code> solo admite el argumento con nombre <code>Position</code>; no existe ningún argumento <code>Name</code> en su firma. <code>Add</code> devuelve el objeto <code>ListColumn</code> recién creado, así que el nombre hay que asignarlo en una instrucción aparte sobre ese objeto.</p>
+<p><strong>Impacto:</strong> <code>Reorganizar_ListObject_Solo</code> (rutina de migración puntual, ver también C6 en el mismo módulo) no compilaba.</p>
+<p><strong>Arreglo aplicado:</strong> las 6 ocurrencias pasan de <code>Add Position:=X, Name:="Y"</code> a <code>Add(Position:=X).Name = "Y"</code> (paréntesis obligatorios para encadenar <code>.Name</code> sobre el valor devuelto por la función en la misma línea).</p>
 <hr>
 <h2>Apéndice · Limpieza de código muerto en los módulos <code>Rut_*</code> (2026-09-18)</h2>
 <p>Auditoría independiente de los bugs: qué rutinas de los 15 módulos <code>Rut_*</code> no las llama nadie. <strong>75 rutinas analizadas, 29 sin ninguna invocación.</strong></p>

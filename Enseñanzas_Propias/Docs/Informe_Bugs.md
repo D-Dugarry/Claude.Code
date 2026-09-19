@@ -2,8 +2,10 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 9 Críticos · 11 Altos · 10 Medios · 6 Bajos — 36 hallazgos (9 corregidos, 1 descartado).
+**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (20 corregidos, 4 desactivados/aparcados, 1 descartado).
 
+> **Actualización 2026-09-19 (3ª):** el proyecto **compila limpio** tras esta sesión. Añadidos **C13** y **C14** (dos errores de compilación más, detectados y corregidos sobre la marcha: `Dictionary` ambiguo entre Scripting Runtime/Word, y `ListColumns.Add` con un argumento `Name:=` inexistente). **B3 pasa a desactivado** (módulos `M41`/`M42` comentados enteros, mismo patrón que B5/B6/B19), confirmado por el usuario como importación pendiente de adaptar desde otra app.
+>
 > **Actualización 2026-09-18:** añadido **B16**, detectado al compilar el proyecto tras corregir A3. Además de los bugs, se ha hecho una **limpieza de código muerto** en los módulos `Rut_*` (ver el apéndice al final).
 
 > **Nota sobre codificación:** los ficheros `.bas`/`.cls`/`.frm` están en CP1252, no UTF-8. Antes de aplicar cualquier corrección directamente sobre `VBA_Moduls/`, edítalos siempre con un script que preserve CP1252/CRLF — nunca con el Editor de texto plano ni herramientas UTF-8 (ver `CLAUDE.md` de este proyecto).
@@ -14,49 +16,53 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
 
 ## Índice
 
+**Leyenda:** ✅ Corregido · ⏸️ Desactivado/aparcado (módulo comentado, decisión pendiente) · ❌ Descartado (no era bug) · ○ Pendiente
+
 - **Bloque A — Arranque, pipeline LSGES04 y núcleo de Liquidación**
-  - A1 · Importe cobrado truncado a `Long`
-  - A2 · `Workbooks(IntialName).Close` falla si el usuario cambia el nombre al guardar
-  - A3 · Merge-join sin `Case Else` — desincronización silenciosa al guardar la Liquidación
-  - A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI
-  - A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)
-  - A6 · `.EntireRow.Delete` en vez de `.Delete`, único caso del pipeline
-  - A7 · Mensaje de informe copiado y mal etiquetado
-  - A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")` (a verificar)
-  - A9 · `Coef_VRI` declarado `Integer` — descartado
+  - ✅ A1 · Importe cobrado truncado a `Long`
+  - ✅ A2 · `Workbooks(IntialName).Close` falla si el usuario cambia el nombre al guardar
+  - ✅ A3 · Merge-join sin `Case Else` — desincronización silenciosa al guardar la Liquidación
+  - ✅ A4 · Constante equivocada al ordenar la tabla de Coeficientes VRI
+  - ✅ A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)
+  - ✅ A6 · `.EntireRow.Delete` en vez de `.Delete`, único caso del pipeline
+  - ✅ A7 · Mensaje de informe copiado y mal etiquetado
+  - ○ A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")` (a verificar)
+  - ❌ A9 · `Coef_VRI` declarado `Integer` — descartado
 - **Bloque B — Informes, Cierre Contable y AE4x4/AE4x1**
-  - B1 · Sub pública duplicada: `RuT_Inf_Contable_Recibos_AE4x4`
-  - B2 · Sub pública duplicada: `Rut_Lo_Import_AE4x1`
-  - B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)
-  - B4 · `End Sub` huérfano en `M90_Rutinas_X.bas`
-  - B5 · Variable de objeto `Lo_AE4x1` no declarada
-  - B6 · `Lo_AE4x1` usado sin inicializar
-  - B7 · Límite de filas hardcodeado a 5000
-  - B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
-  - B9 · `Application.Calculation` guardado en variable `Boolean`
-  - B10 · Año "2025" hardcodeado en nombres de fichero exportado
-  - B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)
-  - B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
-  - B13 · `Wk_Lista_Panes1.cls` sin ninguna referencia en el código (a verificar)
-  - B14 · Bucle `Do While` sin cota superior en M31/M32/M33
-  - B15 · Contraseña de correo en texto plano
-  - B16 · Cuatro rutinas de otro libro en `M90_Rutinas_X.bas` (hallazgo posterior)
-  - B17 · `ActivForm` usada en 6 módulos y declarada en ninguno
-  - B18 · `AñoContAnt` sin declarar en `M20_Resumen_Tit_Propios.bas`
-  - B19 · `Cod_Plan` sin declarar y vaciado antes de usarse (`M21_Resumen_Tit_Propios_UNO.bas`)
+  - ✅ B1 · Sub pública duplicada: `RuT_Inf_Contable_Recibos_AE4x4`
+  - ✅ B2 · Sub pública duplicada: `Rut_Lo_Import_AE4x1`
+  - ⏸️ B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar) — módulos desactivados
+  - ✅ B4 · `End Sub` huérfano en `M90_Rutinas_X.bas`
+  - ⏸️ B5 · Variable de objeto `Lo_AE4x1` no declarada — módulo desactivado
+  - ⏸️ B6 · `Lo_AE4x1` usado sin inicializar — módulo desactivado
+  - ○ B7 · Límite de filas hardcodeado a 5000
+  - ○ B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
+  - ○ B9 · `Application.Calculation` guardado en variable `Boolean`
+  - ○ B10 · Año "2025" hardcodeado en nombres de fichero exportado
+  - ○ B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)
+  - ○ B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
+  - ○ B13 · `Wk_Lista_Panes1.cls` sin ninguna referencia en el código (a verificar)
+  - ○ B14 · Bucle `Do While` sin cota superior en M31/M32/M33
+  - ○ B15 · Contraseña de correo en texto plano
+  - ✅ B16 · Cuatro rutinas de otro libro en `M90_Rutinas_X.bas` (hallazgo posterior)
+  - ✅ B17 · `ActivForm` usada en 6 módulos y declarada en ninguno
+  - ✅ B18 · `AñoContAnt` sin declarar en `M20_Resumen_Tit_Propios.bas`
+  - ⏸️ B19 · `Cod_Plan` sin declarar y vaciado antes de usarse (`M21_Resumen_Tit_Propios_UNO.bas`) — módulo desactivado
 - **Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios**
-  - C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
-  - C2 · `.calcMode` no es un miembro de `Application`
-  - C3 · `String` pasado donde se espera `Worksheet` por referencia (ruta en producción)
-  - C4 · Llamada a una rutina que no existe: `Rut_Actualizar_1_LS_VAL`
-  - C5 · `Rut_WrkSheet_ReducirPeso` opera sobre la hoja activa, no sobre la recibida
-  - C6 · Pérdida de datos en `M0999_Modif_Cols_BDatos.bas` si se reejecuta
-  - C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
-  - C8 · `For Each` que ignora la variable de iteración
-  - C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas
-  - C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)
-  - C11 · Ruta de disco hardcodeada como fallback silencioso
-  - C12 · `.UsedRange` como instrucción suelta — propiedad usada como si fuera un método
+  - ○ C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
+  - ○ C2 · `.calcMode` no es un miembro de `Application`
+  - ✅ C3 · `String` pasado donde se espera `Worksheet` por referencia (ruta en producción)
+  - ✅ C4 · Llamada a una rutina que no existe: `Rut_Actualizar_1_LS_VAL`
+  - ○ C5 · `Rut_WrkSheet_ReducirPeso` opera sobre la hoja activa, no sobre la recibida
+  - ○ C6 · Pérdida de datos en `M0999_Modif_Cols_BDatos.bas` si se reejecuta
+  - ○ C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
+  - ○ C8 · `For Each` que ignora la variable de iteración
+  - ○ C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas
+  - ○ C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)
+  - ○ C11 · Ruta de disco hardcodeada como fallback silencioso
+  - ✅ C12 · `.UsedRange` como instrucción suelta — propiedad usada como si fuera un método
+  - ✅ C13 · `Dictionary` ambiguo entre Scripting Runtime y Word Object Library
+  - ✅ C14 · `ListColumns.Add` con un argumento `Name:=` que no existe
 
 ---
 
@@ -286,7 +292,7 @@ Misma firma, misma Sub pública, en dos módulos distintos — verificado. Segun
 **Arreglo:** eliminado el módulo `M51_Import_AE4x11.bas` (misma rama de desarrollo que B1), tanto del proyecto VBA real como de `VBA_Moduls/`, manteniendo `M51_Import_AE4x1.bas`. ⚠️ Ese módulo superviviente sigue teniendo un bug de compilación independiente y ahora más urgente — ver B5.
 
 ### B3 · Objetos de hoja inexistentes en este libro (código de PPub sin adaptar)
-**Severidad:** Crítico · **Ficheros:** `M41_Añadir_Núm_JIs_al_Inf.bas:13,15` y `M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40`
+**Severidad:** Crítico · **Ficheros:** `M41_Añadir_Núm_JIs_al_Inf.bas:13,15` y `M42_Añadir_Núm_JIs_a_BDatos.bas:13,15,32,40` · **Estado:** ⏸️ Módulos desactivados (2026-09-19) — el bug de fondo sigue sin resolver
 
 ```vba
         Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
@@ -298,7 +304,9 @@ Ni `Sht__Inf_Recibos_TIO` ni `Sht__BD` existen como CodeName de ninguna hoja de 
 
 **Impacto:** el flujo de "añadir números de JI al informe / a la base de datos", tal como está exportado hoy, no compila en este libro.
 
-**Arreglo:** sustituir por `Prog_BD` y por la hoja EP correspondiente (`Sht__Inf_EFP_ACont1_CAcad` / `_2_CAcad` / CFC), o excluir estos dos módulos del proyecto hasta portarlos correctamente.
+**Decisión aplicada (2026-09-19):** mismo patrón que B5/B6/B19 — el usuario confirmó que ambos módulos son una importación a medio adaptar desde otra app, y prefirió **comentarlos enteros** (0 líneas de código vivo) en vez de intentar adivinar la hoja correcta. De cada fichero solo quedan sin comentar `Attribute VB_Name`, `Option Explicit` y una cabecera con el sello `Last Rev.` explicando el motivo. Auditados por las 4 vías: sin invocación viva en código, shapes ni `Tb_Tareas`.
+
+**Para reactivar en el futuro:** sustituir `Sht_Inf_Recibos_TIO` por la hoja EP correspondiente (`Sht__Inf_EFP_ACont1_CAcad` / `_2_CAcad` / CFC) y `Sht__BD` por `Prog_BD`, verificando antes con un volcado real de `ThisWorkbook.VBComponents` u otra confirmación directa — no adivinar por el nombre.
 
 ### B4 · `End Sub` huérfano en `M90_Rutinas_X.bas`
 **Severidad:** Crítico · **Fichero:** `M90_Rutinas_X.bas` — líneas 193-203 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
@@ -843,6 +851,39 @@ Esa asimetría es la que hizo que el fallo pasara desapercibido: la variante de 
 ```
 
 Así se corrige de paso la línea 30, que compilaba pero no hacía nada. Barrido del resto del proyecto en busca del mismo patrón (líneas que empiezan por `.` con una propiedad conocida y sin `=` ni paréntesis): **no hay más casos**. Queda la gemela comentada en `M90_Rutinas_X.bas:25`, que si alguna vez se reactiva arrastrará el mismo error.
+
+### C13 · `Dictionary` ambiguo entre Scripting Runtime y Word Object Library
+**Severidad:** Crítico · **Fichero:** `Rut_Lo_Col_Format_Date.bas` — línea 312 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-19)
+
+```vba
+Private Sub MostrarReporteEstadisticas( _
+    ByRef estadisticas As Dictionary, _
+    ByVal nombreTabla As String, _
+    ByVal nombreColumna As String)
+    ...
+    For Each clave In estadisticas.Keys
+```
+
+Detectado al compilar: "No se encontró el método o el dato miembro" sobre `.Keys`. El proyecto tiene referenciadas a la vez **Microsoft Scripting Runtime** y **Microsoft Word 16.0 Object Library**, y ambas exponen un tipo llamado `Dictionary` (colección clave/valor en Scripting Runtime; diccionario de corrección ortográfica en Word). Al declarar el parámetro `As Dictionary` sin cualificar, el compilador lo resolvió contra `Word.Dictionary`, que no tiene `.Keys`. La variable que se le pasa (`estadisticas`, creada con `CreateObject("Scripting.Dictionary")` en la rutina llamante) está declarada `As Object` ahí, por eso no daba el mismo error en ese punto — el fallo solo aparecía en el parámetro tipado.
+
+**Impacto:** `MostrarReporteEstadisticas` no compilaba, bloqueando el proyecto entero (como todo error de compilación VBA).
+
+**Arreglo aplicado:** cualificado el tipo con su librería: `ByRef estadisticas As Scripting.Dictionary`.
+
+**Nota general:** cualquier otro `As Dictionary` sin cualificar en este proyecto corre el mismo riesgo mientras ambas referencias sigan activas; no se ha encontrado ninguna otra ocurrencia en el barrido de esta sesión.
+
+### C14 · `ListColumns.Add` con un argumento `Name:=` que no existe
+**Severidad:** Crítico · **Fichero:** `M0999_Modif_Cols_BDatos.bas` — líneas 67, 68, 85, 86, 87, 93 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-19)
+
+```vba
+Lo.ListColumns.Add Position:=iCol33, Name:="Nueva_Col1"
+```
+
+Detectado al compilar: "No se encontró el argumento con nombre", señalando `Name:=`. `ListColumns.Add` solo admite el argumento con nombre `Position`; no existe ningún argumento `Name` en su firma. `Add` devuelve el objeto `ListColumn` recién creado, así que el nombre hay que asignarlo en una instrucción aparte sobre ese objeto.
+
+**Impacto:** `Reorganizar_ListObject_Solo` (rutina de migración puntual, ver también C6 en el mismo módulo) no compilaba.
+
+**Arreglo aplicado:** las 6 ocurrencias pasan de `Add Position:=X, Name:="Y"` a `Add(Position:=X).Name = "Y"` (paréntesis obligatorios para encadenar `.Name` sobre el valor devuelto por la función en la misma línea).
 
 ---
 
