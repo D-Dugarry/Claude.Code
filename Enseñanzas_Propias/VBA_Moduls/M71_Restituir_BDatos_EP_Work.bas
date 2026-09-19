@@ -60,8 +60,8 @@ Rut_Off_Functions
     Prog__APP.Range("APP_EFP_o_CFC") = ClsBk.Sheets(Prog__APP.Name).Range("APP_EFP_o_CFC")
     Prog__APP.Range("APP_CopSeg_HD_Date") = ClsBk.Sheets(Prog__APP.Name).Range("APP_CopSeg_HD_Date")
     Prog__APP.Range("APP_BorrarPLAN") = ClsBk.Sheets(Prog__APP.Name).Range("APP_BorrarPLAN")
-    Prog__APP.Range("Sw_VerRecNeg") = ClsBk.Sheets(Prog__APP.Name).Range("Sw_VerRecNeg")
-    Prog__APP.Range("Sw_VerRecNoCob") = ClsBk.Sheets(Prog__APP.Name).Range("Sw_VerRecNoCob")
+    Prog__APP_Switch.Range("Sw_VerRecNeg") = ClsBk.Sheets(Prog__APP_Switch.Name).Range("Sw_VerRecNeg")
+    Prog__APP_Switch.Range("Sw_VerRecNoCob") = ClsBk.Sheets(Prog__APP_Switch.Name).Range("Sw_VerRecNoCob")
     Prog__APP.Range("APP_PlanMicroCred") = ClsBk.Sheets(Prog__APP.Name).Range("APP_PlanMicroCred")
     Dim ColPlan     As String
     ColPlan = UCase(ClsBk.Sheets(Wk_TitP_Liquid.Name).Range("Liquid_Plan"))
@@ -202,7 +202,7 @@ Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, S
 
 Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '''    Application.EnableEvents = False
-    Debug.Print "SW_EnableEvents = " & Range("SW_EnableEvents")
+    Debug.Print "Sw_EnableEvents = " & Prog__APP_Switch.Range("Sw_EnableEvents")
     Call Rut_EnableEvents_Status_Reset
     Wk_TitP_Liquid.Select
 

@@ -137,9 +137,9 @@ Sw_Cmb = False:     PlanAnt = Liq_Plan:     CrsAcadAnt = CursAcad
             If InStr(RowDat.Range(BD_EP_GestReg), "Deleted") > 0 Then GoTo Sig_Fila
 
         Else
-            If RowDat.Range(BD_ImpRec) < 0 And Not Range("Sw_VerRecNeg") Then GoTo Sig_Fila
-            'If Len(RowDat.Range(BD_FCob)) = 0 And RowDat.Range(BD_ImpRec) >= 0 And Not Range("Sw_VerRecNoCob") Then GoTo Sig_Fila
-            If RowDat.Range(BD_ImpCob) = 0 And Not Range("Sw_VerRecNoCob") And RowDat.Range(BD_ImpRec) > 0 Then GoTo Sig_Fila
+            If RowDat.Range(BD_ImpRec) < 0 And Not Prog__APP_Switch.Range("Sw_VerRecNeg") Then GoTo Sig_Fila
+            'If Len(RowDat.Range(BD_FCob)) = 0 And RowDat.Range(BD_ImpRec) >= 0 And Not Prog__APP_Switch.Range("Sw_VerRecNoCob") Then GoTo Sig_Fila
+            If RowDat.Range(BD_ImpCob) = 0 And Not Prog__APP_Switch.Range("Sw_VerRecNoCob") And RowDat.Range(BD_ImpRec) > 0 Then GoTo Sig_Fila
         End If
         ' -------=============  Genero Texto de Descripción del JI  ==================---------
         If Range("Liquid_Plan_Name") = "" Then
@@ -312,8 +312,8 @@ With Lo_TPLiquid.DataBodyRange
 '                RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
 '                RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
 '                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Prog__APP.Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Prog__APP.Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
                 RgT_T_Acad = RgT_T_Acad + Cells(F_Tb_RDT - 1, ColRDT_T_Acad)
                 RgT_Org = RgT_Org + Cells(F_Tb_RDT - 1, ColRDT_Org)
                 RgT_VRI = RgT_VRI + Cells(F_Tb_RDT - 1, ColRDT_VRI)
@@ -333,8 +333,8 @@ With Lo_TPLiquid.DataBodyRange
             Rg_RDT = .Cells(F_Liq, CLiq_RDT)
             Rg_Coef_VRI = Val(.Cells(F_Liq, CLiq_Coef_VRI))
             
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
             Rg_T_Acad = Rg_Imp_Cob - Rg_Imp_Adm
@@ -366,8 +366,8 @@ With Lo_TPLiquid.DataBodyRange
             If InStr(1, Rg_Num_Liq, .Cells(F_Liq, CLiq_NumLiquid), 1) = 0 Then ' Si tiene varias liquidaciones...
                 Rg_Num_Liq = Rg_Num_Liq & "-" & .Cells(F_Liq, CLiq_NumLiquid)
             End If
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
 ''            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And .Cells(F_Liq, CLiq_Imp_Cob) > 0 Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
 ''            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And .Cells(F_Liq, CLiq_Imp_Adm) > 0 Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
@@ -633,8 +633,8 @@ With Lo_TPLiquid.DataBodyRange
             If F_Tb_RDT > F_Tb_RDT_N1 Then
 '                RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
 '                RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
                 RgT_T_Acad = RgT_T_Acad + Cells(F_Tb_RDT - 1, ColRDT_T_Acad)
                 RgT_Org = RgT_Org + Cells(F_Tb_RDT - 1, ColRDT_Org)
                 RgT_VRI = RgT_VRI + Cells(F_Tb_RDT - 1, ColRDT_VRI)
@@ -654,8 +654,8 @@ With Lo_TPLiquid.DataBodyRange
             Rg_RDT = .Cells(F_Liq, CLiq_RDT)
             Rg_Coef_VRI = Val(.Cells(F_Liq, CLiq_Coef_VRI))
             
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) Then Rg_Imp_Cob = .Cells(F_Liq, CLiq_Imp_Cob) Else Rg_Imp_Cob = 0
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) Then Rg_Imp_Adm = .Cells(F_Liq, CLiq_Imp_Adm) Else Rg_Imp_Adm = 0
             Rg_T_Acad = Rg_Imp_Cob - Rg_Imp_Adm
@@ -687,8 +687,8 @@ With Lo_TPLiquid.DataBodyRange
             If InStr(1, Rg_Num_Liq, .Cells(F_Liq, CLiq_NumLiquid), 1) = 0 Then ' Si tiene varias liquidaciones...
                 Rg_Num_Liq = Rg_Num_Liq & "-" & .Cells(F_Liq, CLiq_NumLiquid)
             End If
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
-            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And (.Cells(F_Liq, CLiq_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
+            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) And (.Cells(F_Liq, CLiq_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg")) Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Adm)) Then Rg_Imp_Adm = Rg_Imp_Adm + .Cells(F_Liq, CLiq_Imp_Adm)
 '            If IsNumeric(.Cells(F_Liq, CLiq_Imp_Cob)) And .Cells(F_Liq, CLiq_Imp_Cob) > 0 Then Rg_Imp_Cob = Rg_Imp_Cob + .Cells(F_Liq, CLiq_Imp_Cob)
@@ -703,8 +703,8 @@ End With
 
 '                RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
 '                RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
-                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Cob = RgT_Imp_Cob + Cells(F_Tb_RDT - 1, ColRDT_Imp_Cob)
+                If Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm) > 0 Or Prog__APP_Switch.Range("Sw_VerRecNeg") Then RgT_Imp_Adm = RgT_Imp_Adm + Cells(F_Tb_RDT - 1, ColRDT_Imp_Adm)
                 
                 RgT_T_Acad = RgT_T_Acad + Cells(F_Tb_RDT - 1, ColRDT_T_Acad)
                 RgT_Org = RgT_Org + Cells(F_Tb_RDT - 1, ColRDT_Org)

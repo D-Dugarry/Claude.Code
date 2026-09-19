@@ -98,7 +98,7 @@ Dim FirmaCorreo             As String
     With Correo
         .From = Range("APP_MailCta")               ' Emisor
         .Subject = MailAsunto               ' Asunto del correo
-            If Range("SW_Probando") Then                 ' Destinatario  -----------------------------------
+            If Prog__APP_Switch.Range("Sw_Probando") Then                 ' Destinatario  -----------------------------------
                 .To = "dugarry@gcloud.ua.es"        ' Destinatario  En Prueba -------------------------
             Else                                    ' Destinatario  -----------------------------------
                 .To = MailDestinatario              ' Destinatario  -----------------------------------

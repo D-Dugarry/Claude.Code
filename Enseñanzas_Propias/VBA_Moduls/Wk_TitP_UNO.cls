@@ -13,7 +13,7 @@ Attribute VB_Exposed = True
 'Sub Worksheet_Change(ByVal Target As Range) '>>>>>>>>>>>> SI CAMBIA EL CONTENIDO DE LA CELDA SE ACTIVA (aunque acabe teniendo el mismo dato)
 ''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'If Not range("SW_EnableEvents") Then Exit Sub
+'If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 '
 '    ' ============ Cambiar Plan  ==========================================================================
 '    If Not Application.Intersect(Target, Range("TP_Cod_Plan")) Is Nothing Then

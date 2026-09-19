@@ -1,5 +1,5 @@
 Attribute VB_Name = "M00_Ini_Var_APP"
-' Last Rev. 2026-09-18 23:21
+' Last Rev. 2026-09-19 20:52
 '- M00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -233,7 +233,6 @@ Public Const Task_SheetsButton       As Integer = 10      ' col: j
 
 
 '    Public SW_Probando                  As Boolean
-    Public SW_Cancelado                 As Boolean
     Public SW_Col_Ocultas               As Boolean
 
     Public Index_Tarea                  As Integer

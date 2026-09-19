@@ -15,7 +15,7 @@ Sub Worksheet_Change(ByVal Target As Range) '>>>>>>>>>>>> SI CAMBIA EL CONTENIDO
 '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-If Not Prog__APP.Range("SW_EnableEvents") Then Exit Sub
+If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
     
     ' ============ Cambiar Plan  ==========================================================================
     If Not Application.Intersect(Target, Range("TP_Cod_Plan")) Is Nothing Then
@@ -75,7 +75,7 @@ End Sub
 ''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '
-'If not range("SW_EnableEvents")  Then Exit Sub
+'If not Prog__APP_Switch.Range("Sw_EnableEvents")  Then Exit Sub
 '
 '    ' ============ Form_Intro_Num_ExpAdm_JI_RDT  ==========================================================================
 '    If Not Application.Intersect(Target, _

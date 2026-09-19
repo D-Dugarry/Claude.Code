@@ -17,7 +17,7 @@ Sub RuT_Determinar_Cta_Ingreso(Lo_Data As ListObject, _
 
 Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
     Dim rowfind     As Variant
-    Dim SW_Boss     As Boolean:     SW_Boss = Range("SW_Boss")
+    Dim Sw_Boss     As Boolean:     Sw_Boss = Prog__APP_Switch.Range("Sw_Boss")
     Dim TxtProgreso As String:      TxtProgreso = Form_Menu.TB_Informe
     Lo_Data.ShowTotals = False
         
@@ -153,7 +153,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
     
     End With    '- Lo_Data.
     
-    If SW_Boss Then Form_Menu.TB_Informe = TxtProgreso
+    If Sw_Boss Then Form_Menu.TB_Informe = TxtProgreso
     Lo_Data.ShowTotals = True
         
 Call Rut_Lo_Filtros_Quitar(Lo_Data)

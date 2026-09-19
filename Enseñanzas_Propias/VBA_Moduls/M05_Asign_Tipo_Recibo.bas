@@ -18,7 +18,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     Dim RegsSinTipo     As Long
     Dim APP_AñoCont     As String:          APP_AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim TxtProgreso     As String:          TxtProgreso = Form_Menu.TB_Informe
-    Dim SW_Boss         As Boolean:         SW_Boss = Range("SW_Boss")
+    Dim Sw_Boss         As Boolean:         Sw_Boss = Prog__APP_Switch.Range("Sw_Boss")
     
     Dim Lo_G04          As ListObject:      Set Lo_G04 = Prog_LsGes04.ListObjects(1)
     Application.ScreenUpdating = False
@@ -202,7 +202,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         
     End With    '- Lo_G04
     
-    If SW_Boss Then Form_Menu.TB_Informe = TxtProgreso
+    If Sw_Boss Then Form_Menu.TB_Informe = TxtProgreso
     Call Rut_Lo_Filtros_Quitar(Lo_G04)
     Lo_G04.ShowTotals = True
 Application.ScreenUpdating = True

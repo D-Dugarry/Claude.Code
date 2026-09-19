@@ -44,24 +44,24 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub ChBx_Prueba_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
-    Range("SW_Probando") = Not Range("SW_Probando")
+    Prog__APP_Switch.Range("Sw_Probando") = Not Prog__APP_Switch.Range("Sw_Probando")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub ChBx_DisplayAlerts_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
-    Range("SW_DisplayAlerts") = Not Range("SW_DisplayAlerts")
-    Application.DisplayAlerts = Prog__APP.Range("SW_EnableEvents")
+    Prog__APP_Switch.Range("Sw_DisplayAlerts") = Not Prog__APP_Switch.Range("Sw_DisplayAlerts")
+    Application.DisplayAlerts = Prog__APP_Switch.Range("Sw_EnableEvents")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub ChBx_EnableEvents_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
-    Range("SW_EnableEvents") = Not Range("SW_EnableEvents")
-    Application.EnableEvents = Prog__APP.Range("SW_EnableEvents")
+    Prog__APP_Switch.Range("Sw_EnableEvents") = Not Prog__APP_Switch.Range("Sw_EnableEvents")
+    Application.EnableEvents = Prog__APP_Switch.Range("Sw_EnableEvents")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub ChBx_WB_Deactivate_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
-    Range("SW_WB_Deactivate") = Not Range("SW_WB_Deactivate")
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = Not Prog__APP_Switch.Range("Sw_WB_Deactivate")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 
@@ -162,13 +162,13 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     End If
 
     Ws_Saltar_Al_Activar = True ' para que no salte el evento ChBx_xxx_Click() e invierta el valor
-    Me.ChBx_Prueba.Value = Range("SW_Probando").Value
-    Me.ChBx_DisplayAlerts.Value = Range("SW_DisplayAlerts").Value
-    Me.ChBx_EnableEvents.Value = Range("SW_EnableEvents").Value
-    Me.ChBx_WB_Deactivate.Value = Range("SW_WB_Deactivate")
+    Me.ChBx_Prueba.Value = Prog__APP_Switch.Range("Sw_Probando").Value
+    Me.ChBx_DisplayAlerts.Value = Prog__APP_Switch.Range("Sw_DisplayAlerts").Value
+    Me.ChBx_EnableEvents.Value = Prog__APP_Switch.Range("Sw_EnableEvents").Value
+    Me.ChBx_WB_Deactivate.Value = Prog__APP_Switch.Range("Sw_WB_Deactivate")
     Ws_Saltar_Al_Activar = False
     
-    If Range("SW_Boss") Then
+    If Prog__APP_Switch.Range("Sw_Boss") Then
         Me.Lb_Tarea_Name.Visible = True
         Me.TBx_Tarea_Name.Visible = True
         Me.Lb_Rutina_Name.Visible = True
@@ -261,13 +261,13 @@ Dim ImagenName        As String
         Rut_Name = Left(Rutinas_Name, Pos_Delimitador - 1)
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         If ImagenName <> "" Then
-            If Range("SW_Boss") Then Me.Frm_Switches.Visible = False
+            If Prog__APP_Switch.Range("Sw_Boss") Then Me.Frm_Switches.Visible = False
             Me.Controls(ImagenName).Visible = True
             On Error GoTo Nombre_Rutina_NO_Encontrado
             Application.Run Rut_Name
             On Error GoTo 0
             Me.Controls(ImagenName).Visible = False
-            If Prog__APP.Range("SW_Boss") Then Me.Frm_Switches.Visible = True
+            If Prog__APP_Switch.Range("Sw_Boss") Then Me.Frm_Switches.Visible = True
         Else
             Application.Run Rut_Name
         End If

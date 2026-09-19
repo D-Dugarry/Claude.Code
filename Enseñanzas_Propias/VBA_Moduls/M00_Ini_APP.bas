@@ -1,5 +1,5 @@
 Attribute VB_Name = "M00_Ini_APP"
-' Last Rev. 2026-09-19 08:28
+' Last Rev. 2026-09-19 21:08
 '2026-01-09
 '- M00_Ini_APP
 
@@ -14,7 +14,7 @@ Rut_ConfigExcel_Establecer
 Rut_Off_Functions
     
     
-    Range("SW_EnableEvents") = True
+    Prog__APP_Switch.Range("Sw_EnableEvents") = True
 
     If Left(ActiveWorkbook.Path, 18) = "https://nexe.ua.es" And Range("Usuario_ID") = "" Then Form_Usuario.Show
 '        Rut_Usuario_Chg
@@ -34,7 +34,7 @@ Rut_Off_Functions
     
     Debug.Print "Rut_00_Liquid_TitProp(UCase(Range('Liquid_Plan')), Range('Liquid_Curso_Acad'))", Range("Liquid_Plan")
     Call Rut_00_Liquid_TitProp(UCase(Range("Liquid_Plan")), Range("Liquid_Curso_Acad"))
-    If Range("Sw_VerRecNeg") Then Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
+    If Prog__APP_Switch.Range("Sw_VerRecNeg") Then Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
 
     ' Fijar Filas y Columnas ---------------------------
     With ActiveWindow
@@ -65,7 +65,7 @@ On Error Resume Next
         .DisplayFullScreen = True                                       'Ves pantalla completa
         .DisplayFormulaBar = False                                      'Muestra/Oculta la barra de formulas
         .DisplayStatusBar = False                                       'Muestra/Oculta la barra de estado
-        .EnableEvents = Prog__APP.Range("SW_EnableEvents")
+        .EnableEvents = Prog__APP_Switch.Range("Sw_EnableEvents")
         .ExecuteExcel4Macro "show.toolbar(""Ribbon"",false)"            'Muestra/Oculta la cinta de botones
     End With
     With ActiveWindow
@@ -83,9 +83,6 @@ End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
 Sub Rut_ConfigExcel_RESTABLECER()        '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ' ==================================================================================================================================
-    Run ("DelMenúRightClickCell") '- Elimina otros posible Menús XML
-    Run ("DelMenúRightClickList") '- Elimina otros posible Menús XML
-    
     Application.CommandBars("Cell").Reset           '- Restablece el menú contextual de las celdas a su estado original
     'Esta línea restablece la barra de comandos llamada "Cell" a su configuración original.
     'La barra de comandos "Cell" es la que aparece cuando haces clic derecho en una celda en Excel. _
@@ -130,11 +127,11 @@ End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Sub Rut_Off_Functions()
     Application.Calculation = xlCalculationManual
     Application.ScreenUpdating = False
-    If Prog__APP.Range("SW_EnableEvents") Then Application.EnableEvents = False:     Prog__APP.Range("SW_EnableEvents") = False               ' DesHABILITA LOS EVENTOS
+    If Prog__APP_Switch.Range("Sw_EnableEvents") Then Application.EnableEvents = False:     Prog__APP_Switch.Range("Sw_EnableEvents") = False               ' DesHABILITA LOS EVENTOS
 End Sub
 ' ==================================================================================================================================
 Sub Rut_On_Functions()
-    If Prog__APP.Range("Sw_Calculation") Then
+    If Prog__APP_Switch.Range("Sw_Calculation") Then
         Application.Calculation = xlCalculationAutomatic
     Else
          Application.Calculation = xlCalculationManual
@@ -142,11 +139,11 @@ Sub Rut_On_Functions()
     Application.DisplayAlerts = True
     Application.ScreenUpdating = True
 
-    If Prog__APP.Range("SW_EnableEvents") Then
+    If Prog__APP_Switch.Range("Sw_EnableEvents") Then
         Application.EnableEvents = True
     Else
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-        Prog__APP.Range("SW_EnableEvents") = True
+        Prog__APP_Switch.Range("Sw_EnableEvents") = True
     End If
 
 End Sub
@@ -194,27 +191,27 @@ End Sub
 ' ----------------------------------------------------------------------------------------------------------------------------------
 ' ==================================================================================================================================
     Sub Rut_EnableEvents_Status_Reset()       '- Deja el Status_Events según el Switch ----
-        Application.EnableEvents = Prog__APP.Range("SW_EnableEvents")
+        Application.EnableEvents = Prog__APP_Switch.Range("Sw_EnableEvents")
     End Sub
 ' ----------------------------------------------------------------------------------------------------------------------------------
 ' ==================================================================================================================================
 Sub Rut_Enable_Events_Status_Choose(Optional Choose As String = "CHANGE")      ' Para permitir las rutinas que se activan cuando ocurre un evento
     Select Case UCase(Choose)
         Case "CHANGE"
-                            Prog__APP.Range("SW_EnableEvents") = Not Prog__APP.Range("SW_EnableEvents")
-                            Application.EnableEvents = Range("SW_EnableEvents")
+                            Prog__APP_Switch.Range("Sw_EnableEvents") = Not Prog__APP_Switch.Range("Sw_EnableEvents")
+                            Application.EnableEvents = Prog__APP_Switch.Range("Sw_EnableEvents")
         Case "ON"
                             Application.EnableEvents = True
-                            Prog__APP.Range("SW_EnableEvents") = True
+                            Prog__APP_Switch.Range("Sw_EnableEvents") = True
         Case "OFF"
 '                        '- Verifica Application.Ready antes: Usa If Application.Ready Then Application.EnableEvents = False para evitar el error.
 '                        If Application.Ready Then Application.EnableEvents = False                        ' INHABILITA LOS EVENTOS
-'                        Prog__APP.Range("SW_EnableEvents") = False
+'                        Prog__APP_Switch.Range("Sw_EnableEvents") = False
                         
                             Application.EnableEvents = False
-                            Prog__APP.Range("SW_EnableEvents") = False
+                            Prog__APP_Switch.Range("Sw_EnableEvents") = False
     End Select
-    Form_Menu.TB_Informe = "Enable Events Status now is: " & Prog__APP.Range("SW_EnableEvents")
+    Form_Menu.TB_Informe = "Enable Events Status now is: " & Prog__APP_Switch.Range("Sw_EnableEvents")
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
 

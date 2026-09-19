@@ -10,13 +10,13 @@ Attribute VB_Exposed = True
 ' ==================================================================================================================================
 Sub Workbook_Open()
 ' ==================================================================================================================================
-    Range("SW_EnableEvents") = True
+    Prog__APP_Switch.Range("Sw_EnableEvents") = True
     Call Rut_EnableEvents_Status_Reset
     Rut_ConfigExcel_Establecer
     Range("Usuario_ID") = ""
-    Range("SW_Boss") = False
-    Range("SW_Probando") = False
-    Range("SW_EnableEvents") = True
+    Prog__APP_Switch.Range("Sw_Boss") = False
+    Prog__APP_Switch.Range("Sw_Probando") = False
+    Prog__APP_Switch.Range("Sw_EnableEvents") = True
     Set Lo_Tareas = Prog__Menú_Aux.ListObjects("Tb_Tareas")
     Call Rut_Usuario_Chg
     If Date - Range("APP_CopSeg_HD_Date") > 7 Then Call Rut_WrkBooK_CopSegTimed_WB_HD

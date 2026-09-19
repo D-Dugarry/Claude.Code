@@ -33,9 +33,9 @@ Sub Rut_Chg_Usuario()
 End Sub
 ' ==================================================================================================================================
 Sub Rut_OnOff_SW_VerRecNeg()
-    Range("Sw_VerRecNeg") = Not Range("Sw_VerRecNeg")
-    'If Range("Sw_VerRecNeg") Then Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
-    If Range("Sw_VerRecNeg") Then
+    Prog__APP_Switch.Range("Sw_VerRecNeg") = Not Prog__APP_Switch.Range("Sw_VerRecNeg")
+    'If Prog__APP_Switch.Range("Sw_VerRecNeg") Then Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
+    If Prog__APP_Switch.Range("Sw_VerRecNeg") Then
         Range("Liquid_Sw_VerRecNeg").Interior.ColorIndex = 6
         Range("Liquid_Sw_VerRecNeg").Font.ColorIndex = 13
         Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg."
@@ -45,12 +45,12 @@ Sub Rut_OnOff_SW_VerRecNeg()
         Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
     End If
     Call Rut_00_Liquid_TitProp(UCase(Range("Liquid_Plan")), Range("Liquid_Curso_Acad"))
-    Form_Menu.TB_Informe = "Visualizar registros negativos: Sw_VerRecNeg = " & Range("Sw_VerRecNeg")
+    Form_Menu.TB_Informe = "Visualizar registros negativos: Sw_VerRecNeg = " & Prog__APP_Switch.Range("Sw_VerRecNeg")
 End Sub
 ' ==================================================================================================================================
 Sub Rut_OnOff_SW_VerRecNoCob()
-    Range("Sw_VerRecNoCob") = Not Range("Sw_VerRecNoCob")
-    If Range("Sw_VerRecNoCob") Then
+    Prog__APP_Switch.Range("Sw_VerRecNoCob") = Not Prog__APP_Switch.Range("Sw_VerRecNoCob")
+    If Prog__APP_Switch.Range("Sw_VerRecNoCob") Then
         Range("Liquid_Sw_VerRecNoCob").Interior.ColorIndex = 6
         Range("Liquid_Sw_VerRecNoCob").Font.ColorIndex = 13
         Range("Liquid_Sw_VerRecNoCob") = "Hide No.Cob."
@@ -60,15 +60,15 @@ Sub Rut_OnOff_SW_VerRecNoCob()
         Range("Liquid_Sw_VerRecNoCob") = "Ver No.Cob."
     End If
     Call Rut_00_Liquid_TitProp(UCase(Range("Liquid_Plan")), Range("Liquid_Curso_Acad"))
-    Form_Menu.TB_Informe = "Visualizar registros NO cobrados: Sw_VerRecNoCob = " & Range("Sw_VerRecNoCob")
+    Form_Menu.TB_Informe = "Visualizar registros NO cobrados: Sw_VerRecNoCob = " & Prog__APP_Switch.Range("Sw_VerRecNoCob")
 End Sub
 'Sub Rut_OnOff_SW_Probando()
-'    If Range("SW_Probando") Then
-'        Range("SW_Probando") = False
+'    If Prog__APP_Switch.Range("Sw_Probando") Then
+'        Prog__APP_Switch.Range("Sw_Probando") = False
 '        Form_Menu.Lb_SW_Probando.Visible = False
 '        Form_Menu.TB_Informe = "SW_Probando DesActivado"
 '    Else
-'        Range("SW_Probando") = True
+'        Prog__APP_Switch.Range("Sw_Probando") = True
 '        Form_Menu.Lb_SW_Probando.Visible = True
 '        Form_Menu.TB_Informe = "SW_Probando Activado"
 '    End If

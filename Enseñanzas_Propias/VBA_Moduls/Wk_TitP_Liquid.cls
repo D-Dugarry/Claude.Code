@@ -14,7 +14,7 @@ Option Explicit
 Sub Worksheet_SelectionChange(ByVal Target As Range)    '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-If Not Prog__APP.Range("SW_EnableEvents") Then Exit Sub
+If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 Debug.Print "CantSelectionChange", CantSelectionChange, ActiveCell.Address
 CantSelectionChange = CantSelectionChange + 1
     ' ============ Quitar Todos los filtros de la Liquidación  ===========================================================
@@ -107,7 +107,7 @@ Sub Worksheet_Change(ByVal Target As Range)     '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-If Not Prog__APP.Range("SW_EnableEvents") Then Exit Sub
+If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 Debug.Print "CantChanges", CantChanges, ActiveCell.Address
 CantChanges = CantChanges + 1
     ' ============ Cambiar Liquidación  ==========================================================================

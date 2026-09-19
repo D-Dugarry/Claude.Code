@@ -43,8 +43,8 @@ Private Sub TBx_Usuario_AfterUpdate()
         Range("App_LetraUnidRed") = ""
         Range("App_MailUsu") = ""
         Range("App_RutaAPP") = ""
-        Range("SW_Boss") = False
-        Range("SW_Probando") = False
+        Prog__APP_Switch.Range("Sw_Boss") = False
+        Prog__APP_Switch.Range("Sw_Probando") = False
         Me.Tbx_UserName = "Usuario sin Activar"
         Me.Tbx_UserMail = ""
         Me.Tbx_UserExt = ""
@@ -89,13 +89,13 @@ Private Sub TBx_Usuario_AfterUpdate()
             Me.Tbx_Unidad_NEXE = Range("App_LetraUnidRed") '& ":"
             Form_Menu.Tbx_Unidad_NEXE = Range("App_LetraUnidRed") & ":"
                         If Range("Usuario_ID") = "Boss" Then
-                            Range("SW_Boss") = True
+                            Prog__APP_Switch.Range("Sw_Boss") = True
                             Form_Menu.Lb_Tarea_Name.Visible = True
                             Form_Menu.TBx_Tarea_Name.Visible = True
                             Form_Menu.Lb_Rutina_Name.Visible = True
                             Form_Menu.TBx_Rutina_Name.Visible = True
                         Else
-                            Range("SW_Boss") = False
+                            Prog__APP_Switch.Range("Sw_Boss") = False
                             Form_Menu.Lb_Tarea_Name.Visible = False
                             Form_Menu.TBx_Tarea_Name.Visible = False
                             Form_Menu.Lb_Rutina_Name.Visible = False
