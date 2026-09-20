@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Export_XlsX"
-' Last Rev. 2026-09-18 19:20
+' Last Rev. 2026-09-20 23:15
 '2025-12-20
 Option Explicit
 
@@ -42,7 +42,7 @@ Sub Rut_Lo_Export_to_New_WB(ByVal Lo_Data As ListObject)
     With Application
         .ScreenUpdating = False
         .EnableEvents = False
-        .calcMode = .Calculation
+        calcMode = .Calculation
         .Calculation = xlCalculationManual
     End With
     

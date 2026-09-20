@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
-' Last Rev. 2026-09-18 19:20
+' Last Rev. 2026-09-20 23:36
 Option Explicit
 
 ' ==================================================================================================================================
@@ -191,8 +191,19 @@ Debug.Print "Rut_WrkBook_CopSegTimed_USB,   Tipo: " & Tipo
     Dim FichPath        As String
         'fichPath = ThisWorkbook.Path & "\" & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
         If Not Fnc_Range_Exist("APP_CopSeg_Usb_Path") Then
-            MsgBox "¡¡¡ Falta crear el Range('APP_CopSeg_Usb_Path') !!!", vbExclamation, "Procedimiento: Copia de Seguridad"
-            FichPath = "F:\__CopSeg Versiones Programas\" & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
+            MsgBox "¡¡¡ Falta crear el Range('APP_CopSeg_Usb_Path') !!!, elige la carpeta de destino", vbExclamation, "Procedimiento: Copia de Seguridad"
+            '- Sin el Range de configuracion no hay ruta fiable en esta maquina: pedir la carpeta en vez de
+            '  asumir una ruta fija que puede no existir aqui (ver C11 del Informe_Bugs)
+            Dim CarpetaElegida As String
+            With Application.FileDialog(msoFileDialogFolderPicker)
+                .Title = "Elige la carpeta para la Copia de Seguridad (USB)"
+                If .Show = -1 Then
+                    CarpetaElegida = .SelectedItems(1) & "\"
+                Else
+                    Exit Sub     '- Usuario cancela
+                End If
+            End With
+            FichPath = CarpetaElegida & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
         Else
             FichPath = Range("APP_CopSeg_Usb_Path") & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
         End If

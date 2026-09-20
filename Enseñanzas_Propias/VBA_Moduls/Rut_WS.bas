@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_WS"
-' Last Rev. 2026-09-18 23:54
+' Last Rev. 2026-09-20 23:23
 Option Explicit
 
 ' ==================================================================================================================================
@@ -15,19 +15,19 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
 ' ==================================================================================================================================
         Dim ws      As Worksheet:       Set ws = Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
         Dim Lo      As ListObject:      Set Lo = ws.ListObjects(1)
+        Dim RgIni   As Range            '- Primera celda a borrar (esquina siguiente a la Tabla)
         Dim Dummy_UsedRange As String   '- Solo para forzar la lectura de UsedRange (ver mas abajo)
-        Dim Sw_Calculation  As Boolean:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlManual
+        Dim Sw_Calculation  As XlCalculation:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlManual
     With ws
         .Columns.EntireColumn.Hidden = False    ' Mostrar todas las Columnas
         .Rows.EntireRow.Hidden = False          ' Mostrar todas las Filas
         Call Rut_Lo_Filtros_Quitar(Lo)          ' Deshacer Filtros
         If Sw_Del_DataBodyRange And Not Lo.DataBodyRange Is Nothing Then Lo.DataBodyRange.Delete
         With Lo.Range                           ' Borra la filas de abajo y columnas de la derecha del la Tabla .ListObjects(1)
-            Range(.Cells(.Rows.Count, .Columns.Count).Address).Select   ' Selecciona la última celda de la tabla
-            ActiveCell.Offset(1, 1).Select
+            Set RgIni = .Cells(.Rows.Count, .Columns.Count).Offset(1, 1)   ' Primera celda tras la ultima de la tabla
         End With
-        .Range(ActiveCell.Address & ":" & Cells(Rows.Count, 1).Address).EntireRow.Delete
-        .Range(ActiveCell.Address & ":" & Cells(1, Columns.Count).Address).EntireColumn.Delete
+        .Range(RgIni.Address & ":" & .Cells(.Rows.Count, 1).Address).EntireRow.Delete
+        .Range(RgIni.Address & ":" & .Cells(1, .Columns.Count).Address).EntireColumn.Delete
         Dummy_UsedRange = .UsedRange.Address        ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)
     End With
     Application.Calculation = Sw_Calculation
@@ -60,7 +60,7 @@ Sub Rut_WrkSheet_Vaciar(WrkSht As Worksheet)      '--- Borra Toda la Hoja inclus
         ' Limpiar filtros de todas las tablas
         Dim tbl As ListObject
         For Each tbl In .ListObjects
-            If .ListObjects(1).ShowAutoFilter Then .ListObjects(1).AutoFilter.ShowAllData   '- Quitar filtro Tabla
+            If tbl.ShowAutoFilter Then tbl.AutoFilter.ShowAllData   '- Quitar filtro Tabla
         Next tbl
             .Columns.Delete     ' --- con esto se borran hasta los "Shapes"
             Dummy_UsedRange = .UsedRange.Address   ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)

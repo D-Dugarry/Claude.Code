@@ -1,5 +1,6 @@
 Attribute VB_Name = "M0999_Modif_Cols_BDatos"
 Option Explicit
+' Last Rev. 2026-09-20 23:20
 Sub Reorganizar_Lo_BDatos_Cambio_Ene_26()
     Dim Lo As ListObject
     Set Lo = ActiveWorkbook.Worksheets("BDatos").ListObjects(1)
@@ -93,13 +94,20 @@ Sub Reorganizar_ListObject_Solo()
     Lo.ListColumns.Add(Position:=iCol40 - 1).Name = "Col_50"
     Lo.ListColumns("Col_50").DataBodyRange.PasteSpecial xlPasteValues
     
-    '--- 4) Mover cols 55-57 AL FINAL
+    '--- 4) Mover cols 55-57 AL FINAL (copiar y pegar cada columna de una en una,
+    '       igual que el patron del paso 3, para no perder el portapapeles previo)
     Lo.ListColumns("Col_55").DataBodyRange.Copy
-    Lo.ListColumns("Col_56").DataBodyRange.Copy
-    Lo.ListColumns("Col_57").DataBodyRange.Copy
-    Lo.ListColumns("Col_55").Delete: Lo.ListColumns("Col_56").Delete: Lo.ListColumns("Col_57").Delete
-    Lo.ListColumns.Add.Name = "Col_55": Lo.ListColumns.Add.Name = "Col_56": Lo.ListColumns.Add.Name = "Col_57"
+    Lo.ListColumns("Col_55").Delete
+    Lo.ListColumns.Add.Name = "Col_55"
     Lo.ListColumns("Col_55").DataBodyRange.PasteSpecial xlPasteValues
+    Lo.ListColumns("Col_56").DataBodyRange.Copy
+    Lo.ListColumns("Col_56").Delete
+    Lo.ListColumns.Add.Name = "Col_56"
+    Lo.ListColumns("Col_56").DataBodyRange.PasteSpecial xlPasteValues
+    Lo.ListColumns("Col_57").DataBodyRange.Copy
+    Lo.ListColumns("Col_57").Delete
+    Lo.ListColumns.Add.Name = "Col_57"
+    Lo.ListColumns("Col_57").DataBodyRange.PasteSpecial xlPasteValues
     Application.CutCopyMode = False
 End Sub
 
