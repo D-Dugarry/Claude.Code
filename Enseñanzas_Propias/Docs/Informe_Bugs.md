@@ -2,8 +2,10 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (21 corregidos, 4 desactivados/aparcados, 1 descartado).
+**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (21 corregidos, 6 desactivados/aparcados, 1 descartado).
 
+> **Actualización 2026-09-19 (5ª):** revisión de higiene del informe, sin tocar código: todos los bugs que caen enteramente sobre un módulo ya comentado/desactivado pasan a ⏸️ Desactivado/aparcado, para no volver a evaluarlos hasta que se decida reactivar ese módulo. **B7** (`M21_Resumen_Tit_Propios_UNO.bas`, mismo módulo que B19) y **B9** (parcialmente: las ocurrencias en `M41`/`M42`, mismos módulos que B3 — la ocurrencia en `M40_Inf_Contab_Recibos.bas`, que sigue activo, queda ○ pendiente).
+>
 > **Actualización 2026-09-19 (4ª):** corregido **A8** (switches de la app cualificados de forma inconsistente): pasan a `Prog__APP_Switch.Range("Sw_xxxx")` (hoja `SwitchsAPP`), tanto en el código VBA como en el renombrado ya hecho en los rangos con nombre del `.xlsm`. Limpieza adicional en la misma sesión: eliminada `Public SW_Cancelado` (variable sin ningún uso) de `M00_Ini_Var_APP.bas`, y eliminado `Rut__Right_Click_VBA.bas` completo (menú contextual custom huérfano — auditado por las 4 vías: grep VBA, macros de shapes, `Tb_Tareas` y Ribbon), junto con las 2 llamadas `Run(...)` inertes que quedaban en `M00_Ini_APP.bas`. Esto deja también resuelta la sospecha de **C10** (asimetría Private/Public en `DelMenúRightClickCell`/`List`): el módulo entero ya no existe.
 >
 > **Actualización 2026-09-19 (3ª):** el proyecto **compila limpio** tras esta sesión. Añadidos **C13** y **C14** (dos errores de compilación más, detectados y corregidos sobre la marcha: `Dictionary` ambiguo entre Scripting Runtime/Word, y `ListColumns.Add` con un argumento `Name:=` inexistente). **B3 pasa a desactivado** (módulos `M41`/`M42` comentados enteros, mismo patrón que B5/B6/B19), confirmado por el usuario como importación pendiente de adaptar desde otra app.
@@ -37,9 +39,9 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - ✅ B4 · `End Sub` huérfano en `M90_Rutinas_X.bas`
   - ⏸️ B5 · Variable de objeto `Lo_AE4x1` no declarada — módulo desactivado
   - ⏸️ B6 · `Lo_AE4x1` usado sin inicializar — módulo desactivado
-  - ○ B7 · Límite de filas hardcodeado a 5000
+  - ⏸️ B7 · Límite de filas hardcodeado a 5000 — módulo desactivado
   - ○ B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
-  - ○ B9 · `Application.Calculation` guardado en variable `Boolean`
+  - ○ B9 · `Application.Calculation` guardado en variable `Boolean` (parcial: M41/M42 desactivados, M40 sigue activo)
   - ○ B10 · Año "2025" hardcodeado en nombres de fichero exportado
   - ○ B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)
   - ○ B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
@@ -389,7 +391,7 @@ De cada fichero solo quedan sin comentar la línea `Attribute VB_Name` (obligato
 **Para reactivar el flujo AE4** hay que resolver antes B5/B6: declarar `Lo_AE4x1` (probablemente `Public` en `M00_Ini_Var_APP.bas`, como el resto de objetos del proyecto), añadir su `Set Lo_AE4x1 = Ws_AE4x1.ListObjects(1)` tras la copia del rango en la rama `If SW_Inicilizar_Ws`, y cambiar a `True` la primera de las 4 llamadas de `M50` para que esa rama llegue a ejecutarse.
 
 ### B7 · Límite de filas hardcodeado a 5000
-**Severidad:** Alto · **Fichero:** `M21_Resumen_Tit_Propios_UNO.bas` — línea 101
+**Severidad:** Alto · **Fichero:** `M21_Resumen_Tit_Propios_UNO.bas` — línea 101 · **Estado:** ⏸️ Módulo desactivado (2026-09-19) — el bug de fondo sigue sin resolver
 
 ```vba
     For Fila_DR = 1 To 5000 'Lo_TPH.ListRows.Count
@@ -397,7 +399,9 @@ De cada fichero solo quedan sin comentar la línea `Attribute VB_Name` (obligato
 
 El bucle está limitado a 5000 iteraciones fijas en vez de usar `Lo_TPH.ListRows.Count`, que queda comentado justo al lado — delatando la intención original. Si `Prog_BD` supera las 5000 filas, se truncan datos silenciosamente; si tiene menos, `Lo_TPH.ListRows(Fila_DR)` lanza "Subscript out of range" al superar el número real de filas.
 
-**Arreglo:** `For Fila_DR = 1 To Lo_TPH.ListRows.Count`.
+**Arreglo (si se reactiva):** `For Fila_DR = 1 To Lo_TPH.ListRows.Count`.
+
+**Módulo desactivado (2026-09-19):** `M21_Resumen_Tit_Propios_UNO.bas` es el mismo módulo que comenta B19 por completo (`Cod_Plan` sin declarar, decisión de diseño pendiente). Mientras siga comentado, este bug queda aparcado junto con el de fondo — no aporta corregirlo aislado.
 
 ### B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
 **Severidad:** Alto · **Fichero:** `M33_List_PLANES_Anulados.bas` — líneas 74-77
@@ -427,6 +431,8 @@ La línea 76 debería ser `.Cells(Cont, BD_ImpAdm)` — cualificada con el `.` d
 `Application.Calculation` devuelve una constante `XlCalculation` (p. ej. `xlCalculationAutomatic = -4105`), no un booleano. Al guardarla en `Boolean`, cualquier valor no-cero se convierte en `True`, perdiendo qué modo había realmente; al restaurar, `Application.Calculation = Sw_Calculation` escribe `True` (-1), que no es ningún miembro válido de `XlCalculation`. El mismo patrón aparece también en `Rut_WS.bas` (ver C5) y `M10__Liquid_EP.bas`.
 
 **Arreglo:** `Dim Sw_Calculation As XlCalculation` (o `Long`).
+
+**Parcialmente aparcado (2026-09-19):** `M41_Añadir_Núm_JIs_al_Inf.bas` y `M42_Añadir_Núm_JIs_a_BDatos.bas` están desactivados por completo (ver B3) — las ocurrencias ahí quedan ⏸️, sin urgencia mientras el módulo siga comentado. La de `M40_Inf_Contab_Recibos.bas` **sigue activa** y el bug persiste en ese fichero; queda ○ pendiente solo para ese caso.
 
 ### B10 · Año "2025" hardcodeado en nombres de fichero exportado
 **Severidad:** Medio · **Ficheros:** `M38x_Export_Cierre_Contable.bas:21-22`, y de forma idéntica `M22_Inf_EPs_para_UXXI_NEW.bas:489-490`
