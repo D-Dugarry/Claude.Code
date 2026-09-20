@@ -2,8 +2,10 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (20 corregidos, 4 desactivados/aparcados, 1 descartado).
+**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (21 corregidos, 4 desactivados/aparcados, 1 descartado).
 
+> **Actualización 2026-09-19 (4ª):** corregido **A8** (switches de la app cualificados de forma inconsistente): pasan a `Prog__APP_Switch.Range("Sw_xxxx")` (hoja `SwitchsAPP`), tanto en el código VBA como en el renombrado ya hecho en los rangos con nombre del `.xlsm`. Limpieza adicional en la misma sesión: eliminada `Public SW_Cancelado` (variable sin ningún uso) de `M00_Ini_Var_APP.bas`, y eliminado `Rut__Right_Click_VBA.bas` completo (menú contextual custom huérfano — auditado por las 4 vías: grep VBA, macros de shapes, `Tb_Tareas` y Ribbon), junto con las 2 llamadas `Run(...)` inertes que quedaban en `M00_Ini_APP.bas`. Esto deja también resuelta la sospecha de **C10** (asimetría Private/Public en `DelMenúRightClickCell`/`List`): el módulo entero ya no existe.
+>
 > **Actualización 2026-09-19 (3ª):** el proyecto **compila limpio** tras esta sesión. Añadidos **C13** y **C14** (dos errores de compilación más, detectados y corregidos sobre la marcha: `Dictionary` ambiguo entre Scripting Runtime/Word, y `ListColumns.Add` con un argumento `Name:=` inexistente). **B3 pasa a desactivado** (módulos `M41`/`M42` comentados enteros, mismo patrón que B5/B6/B19), confirmado por el usuario como importación pendiente de adaptar desde otra app.
 >
 > **Actualización 2026-09-18:** añadido **B16**, detectado al compilar el proyecto tras corregir A3. Además de los bugs, se ha hecho una **limpieza de código muerto** en los módulos `Rut_*` (ver el apéndice al final).
@@ -26,7 +28,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - ✅ A5 · Columnas de flags de Tipo_Recibo hardcodeadas (52–56)
   - ✅ A6 · `.EntireRow.Delete` en vez de `.Delete`, único caso del pipeline
   - ✅ A7 · Mensaje de informe copiado y mal etiquetado
-  - ○ A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")` (a verificar)
+  - ✅ A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")`
   - ❌ A9 · `Coef_VRI` declarado `Integer` — descartado
 - **Bloque B — Informes, Cierre Contable y AE4x4/AE4x1**
   - ✅ B1 · Sub pública duplicada: `RuT_Inf_Contable_Recibos_AE4x4`
@@ -58,7 +60,7 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - ○ C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
   - ○ C8 · `For Each` que ignora la variable de iteración
   - ○ C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas
-  - ○ C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)
+  - ✅ C10 · Asimetría Private/Public en rutinas invocadas por nombre (resuelto: módulo eliminado)
   - ○ C11 · Ruta de disco hardcodeada como fallback silencioso
   - ✅ C12 · `.UsedRange` como instrucción suelta — propiedad usada como si fuera un método
   - ✅ C13 · `Dictionary` ambiguo entre Scripting Runtime y Word Object Library
@@ -247,10 +249,16 @@ El segundo bloque filtra en realidad `BD_ImpAdm < 0` (Ajustes de Matrícula), pe
 
 **Arreglo aplicado:** cabecera de comentario `'-_Ajust_Matríc_-...`, descripción `'--- Filtra Ajustes de Matrícula (ImpAdm negativo) ---...` y mensaje de progreso `"Registros _Ajust_Matríc_, Ajustes de Matrícula (Imp. Admin. negativo)."` — ya no repiten el texto del bloque `_Contab_Ant_` anterior.
 
-### A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")` (a verificar)
-**Severidad:** Medio, a verificar · **Fichero:** `M10__Liquid_EP.bas`
+### A8 · Cualificación inconsistente de `Range("Sw_VerRecNeg")`
+**Severidad:** Medio · **Ficheros:** varios (switches de la app) · **Estado:** ✅ Corregido (2026-09-19, 4ª sesión)
 
-El módulo mezcla, en distintos puntos, `Prog__APP.Range("Sw_VerRecNeg")` (cualificado con la hoja) con `Range("Sw_VerRecNeg")` sin cualificar dentro de `Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones`, que se dispara desde `Worksheet_SelectionChange` de `Wk_TitP_Liquid` con esa hoja como activa, no `Prog__APP`. El propio `CLAUDE.md` de este proyecto documenta que `Hoja.Range("Nombre")` revienta con error 1004 si el nombre vive en otra hoja aunque sea de ámbito Libro; el caso simétrico (`Range()` sin cualificar resolviendo por la hoja activa) tiene el mismo riesgo si `Sw_VerRecNeg` resultara tener ámbito de hoja. No se ha podido verificar el ámbito real del nombre definido (vive en el `.xlsm`, no en el texto exportado): queda como sospecha, no como bug confirmado.
+El módulo `M10__Liquid_EP.bas` mezclaba, en distintos puntos, `Prog__APP.Range("Sw_VerRecNeg")` (cualificado con la hoja equivocada) con `Range("Sw_VerRecNeg")` sin cualificar dentro de `Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones`, que se dispara desde `Worksheet_SelectionChange` de `Wk_TitP_Liquid` con esa hoja como activa, no `Prog__APP`. El propio `CLAUDE.md` de este proyecto documenta que `Hoja.Range("Nombre")` revienta con error 1004 si el nombre vive en otra hoja aunque sea de ámbito Libro; el caso simétrico (`Range()` sin cualificar resolviendo por la hoja activa) tiene el mismo riesgo si `Sw_VerRecNeg` resultara tener ámbito de hoja.
+
+**Verificado el ámbito real:** los 8 switches de la app (`Sw_Boss`, `Sw_Calculation`, `Sw_DisplayAlerts`, `Sw_EnableEvents`, `Sw_Probando`, `Sw_VerRecNeg`, `Sw_VerRecNoCob`, `Sw_WB_Deactivate`) viven en la hoja `SwitchsAPP` (CodeName `Prog__APP_Switch`), **no** en `Prog__APP`. Además, varias llamadas en el código usaban el nombre en mayúsculas (`SW_xxxx`), inconsistente con el rango real ya renombrado en el `.xlsm` a minúsculas (`Sw_xxxx`).
+
+**Arreglo aplicado:** todas las cualificaciones pasan a `Prog__APP_Switch.Range("Sw_xxxx")`, y el texto de las llamadas se renombra de `SW_xxxx` a `Sw_xxxx` en todo el código VBA, acorde al renombrado ya hecho en los rangos con nombre del `.xlsm`. **Sin tocar:** `Liquid_Sw_VerRecNeg`/`Liquid_Sw_VerRecNOCob` (hoja `Wk_TitP_Liquid`) — son el control visual de la hoja de liquidación, un rango distinto de su switch de estado homónimo, y no formaban parte de este bug.
+
+**Nota:** `Sw_Changes`, `Sw_Test`, `Sw_RightClickMenú_Visible` y `Sw_RightClickMenú_Restricted` son huecos reservados en la tabla `SwitchsAPP` (12 filas de nombre) sin `definedName` real asociado — referenciarlos con `Range(...)` da error 1004. `Sw_RightClickMenú_Restricted` en concreto era usado (mal, con el nombre `SW_...`) por `Rut__Right_Click_VBA.bas`, eliminado en esta misma sesión por huérfano (ver apéndice).
 
 ### A9 · `Coef_VRI` declarado `Integer` — descartado
 **Severidad:** Bajo · **Ficheros:** `M00_Ini_Var_APP.bas` línea 232, `M08_Actualizar_Tb_Coef_VRI.bas` línea 11 · **Estado:** ❌ Descartado (2026-09-15) — no es un bug
@@ -608,7 +616,7 @@ Los `Range("TP_Cod_Plan")` **sin cualificar** de las líneas 94-95 resuelven por
 2. **Restaurar el diseño original** — devolver el parámetro a la firma (`Sub Rut_Resumen_Tab_TitPropios_UNO(Cod_Plan As String)`) y reactivar el `Worksheet_Change` de `Wk_TitP_UNO.cls`. Esto es **incompatible** con lanzarla desde `Tb_Tareas` sin argumentos, así que habría que quitarla del menú.
 
 ## Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios
-*Ficheros: `Rut_Lo`, `Rut_WB`, `Rut_WS`, `Rut__Right_Click_VBA`, `Form_*`, `M0999_*`, `Módulo*`.*
+*Ficheros: `Rut_Lo`, `Rut_WB`, `Rut_WS`, `Form_*`, `M0999_*`, `Módulo*`. (`Rut__Right_Click_VBA.bas` eliminado en la 4ª sesión, ver C10 y el apéndice.)*
 
 ### C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
 **Severidad:** Crítico · **Fichero:** `Rut_Lo.bas` — línea 136 (`Option Explicit` activo)
@@ -788,8 +796,8 @@ El fichero declara a nivel de módulo unas 80 variables acumuladoras del resumen
 
 **Arreglo:** añadir `Option Explicit` y compilar para detectar cualquier variable ya mal escrita.
 
-### C10 · Asimetría Private/Public en rutinas invocadas por nombre (a verificar)
-**Severidad:** Medio, a verificar · **Fichero:** `Rut__Right_Click_VBA.bas` línea 202 vs línea 283, invocadas desde `M00_Ini_APP.bas` líneas 85-86
+### C10 · Asimetría Private/Public en rutinas invocadas por nombre
+**Severidad:** Medio · **Fichero:** `Rut__Right_Click_VBA.bas` (eliminado) · **Estado:** ✅ Resuelto (2026-09-19, 4ª sesión) — módulo completo eliminado por huérfano
 
 ```vba
 Private Sub DelMenúRightClickCell()      ' Rut__Right_Click_VBA.bas:202
@@ -802,9 +810,9 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
     Run ("DelMenúRightClickList") '- Elimina otros posible Menús XML     ' M00_Ini_APP.bas:86
 ```
 
-`Rut_ConfigExcel_RESTABLECER` (que cuelga de `ThisWorkbook.Workbook_BeforeClose`, es decir, se ejecuta cada vez que se cierra el libro) llama por nombre, vía `Run`, a una Sub `Private` declarada en **otro módulo** — patrón conocido como problemático en VBA (`Run`/`Application.Run` sobre un procedimiento `Private` de otro módulo puede fallar con error 1004). Tampoco hay ningún `On Error` activo todavía en esas dos líneas concretas. No se puede confirmar sin ejecutar el VBA real, así que queda como sospecha razonable, no como bug confirmado — pero la asimetría entre las dos Subs gemelas (una `Private`, la otra pública) ya llama la atención por sí sola.
+`Rut_ConfigExcel_RESTABLECER` (que cuelga de `ThisWorkbook.Workbook_BeforeClose`, es decir, se ejecuta cada vez que se cierra el libro) llamaba por nombre, vía `Run`, a una Sub `Private` declarada en **otro módulo** — patrón conocido como problemático en VBA (`Run`/`Application.Run` sobre un procedimiento `Private` de otro módulo puede fallar con error 1004). Tampoco había ningún `On Error` activo en esas dos líneas.
 
-**Sugerencia:** hacer `DelMenúRightClickCell` pública (como su gemela) para eliminar la duda, y probar cerrando el libro para confirmar que no salta ningún error.
+**Resuelto de raíz, no parcheado:** al auditar `Rut__Right_Click_VBA.bas` completo por las 4 vías (grep VBA, macros de shapes en `xl/drawings/*.xml`, `Tb_Tareas`, Ribbon — este libro no tiene `customUI14.xml`) se confirmó que **nada llamaba de verdad** a `NewMenúRightClickCell`/`NewMenúRightClickList`/`Rut_Context_Buttons_Hide`/`Rut_Context_Buttons_Restore`; solo `M00_Ini_APP.bas` invocaba (vía `Run(...)`) las dos rutinas de borrado, que nunca llegaban a crear nada porque las `New*` estaban comentadas. El módulo usaba además `Prog__APP.Range("SW_RightClickMenú_Restricted")`, un nombre que nunca existió como `definedName` real (ver [[A8]]). Se eliminó el módulo entero y las 2 llamadas `Run(...)` inertes en `M00_Ini_APP.bas`; la asimetría Private/Public deja de ser relevante porque ya no hay ninguna llamada por nombre a resolver.
 
 ### C11 · Ruta de disco hardcodeada como fallback silencioso
 **Severidad:** Bajo · **Fichero:** `Rut_Wb_CopSegTimed_USB_HD.bas` — líneas 192-194
@@ -948,6 +956,10 @@ Ojo a la contradicción con la sección anterior: tres de ellas (`Rut_Ranges_Lis
 - **Decidir sobre las 12 rutinas comentadas arriba**: borrarlas definitivamente o adaptarlas a los objetos de este libro.
 - **Grupo 2 — 8 variantes `ByHand`/`_01`** de rutinas vivas, sin decidir: `Rut_Lo_Export_to_New_WB_ByHand`, `Rut_WrkSheet_To_PDF_ByHand`, `RuT_Sort_Sheets_ByHand`, `Rut_Ws_All_Stratistics_01` y las 4 variantes casi idénticas de `RuT_*Save_New_WorkBook_Liq_TPV` en `Rut_Ranges.bas` (estas 4 últimas son justamente parte de las comentadas ahora).
 - **Los módulos `M*` no se han auditado** — previsiblemente tienen más código muerto (`M90_CopSeg_USB_HD.bas` está entero comentado).
+
+### `Rut__Right_Click_VBA.bas` eliminado por completo (2026-09-19, 4ª sesión)
+
+Confirmado huérfano y borrado del repo y del `.xlsm` real: ver [[C10]] (que documentaba la sospecha sobre la asimetría Private/Public de sus dos rutinas gemelas) y [[A8]] (el `Prog__APP.Range("SW_RightClickMenú_Restricted")` que usaba, un nombre nunca existente como `definedName`). Auditado por las 4 vías antes de eliminar: grep VBA, macros de shapes, `Tb_Tareas` y Ribbon — el libro no tiene `customUI14.xml`. De paso se eliminó `Public SW_Cancelado` de `M00_Ini_Var_APP.bas` (variable sin ningún uso) y las 2 llamadas `Run(...)` inertes que quedaban en `M00_Ini_APP.bas` apuntando al módulo ya eliminado.
 
 ---
 
