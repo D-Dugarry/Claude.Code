@@ -1,5 +1,5 @@
 Attribute VB_Name = "M31_List_PLANES"
-'2026-01-12
+' Last Rev. 2026-09-20 14:39
 '- M31_Listar_PLANES
 Option Explicit
 '==================================================================================================================================
@@ -56,7 +56,7 @@ Sub RuT_Listar_Planes()
 
 With Lo_BD.DataBodyRange
     '- Tratando el 1º Recibo
-    Do While .Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0
+    Do While ContIni <= Lo_BD.ListRows.Count And (.Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0)
         ContIni = ContIni + 1
     Loop
     Cont = ContIni

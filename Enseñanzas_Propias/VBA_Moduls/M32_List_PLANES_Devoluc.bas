@@ -1,5 +1,5 @@
 Attribute VB_Name = "M32_List_PLANES_Devoluc"
-'2026-01-12
+' Last Rev. 2026-09-20 14:39
 '- M32_Listar_PLANES_Devoluc
 Option Explicit
 '==================================================================================================================================
@@ -37,7 +37,7 @@ Sub RuT_Listar_Planes_Devoluciones()
 
 With Lo_TitPH.DataBodyRange
     '- Tratando el 1º Recibo
-    Do While .Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0
+    Do While ContIni <= Lo_TitPH.ListRows.Count And (.Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0)
         ContIni = ContIni + 1
     Loop
     Cont = ContIni

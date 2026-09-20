@@ -1,5 +1,5 @@
 Attribute VB_Name = "M33_List_PLANES_Anulados"
-'2026-01-12
+' Last Rev. 2026-09-20 14:39
 '- M33_Listar_PLANES_Anulados --------------------------------------------------------------------------------------------------------------
 Option Explicit
 '==================================================================================================================================
@@ -44,7 +44,7 @@ Sub RuT_Listar_Planes_Anul()
 
 With Lo_TitPH.DataBodyRange
     '- Tratando el 1º Recibo
-    Do While .Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0
+    Do While ContIni <= Lo_TitPH.ListRows.Count And (.Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0)
         ContIni = ContIni + 1
     Loop
     Cont = ContIni
@@ -73,7 +73,7 @@ With Lo_TitPH.DataBodyRange
     ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
     For Cont = 2 To Lo_TitPH.ListRows.Count
         If .Cells(Cont, BD_Tipo_Rec) = "Deleted" Then GoTo Reg_Siguiente
-        If Cells(ContIni, BD_ImpAdm) < 0 Then GoTo Reg_Siguiente
+        If .Cells(Cont, BD_ImpAdm) < 0 Then GoTo Reg_Siguiente
         If .Cells(Cont, BD_Plan) <> Cod_Plan Then
             Cod_Plan = .Cells(Cont, BD_Plan)
             Cont_Plan = Cont_Plan + 1

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M40_Inf_Contab_Recibos"
-'Rev.: 2026-02-15
+' Last Rev. 2026-09-20 14:39
 Option Explicit
 
 '- Genera la Tabla Informe_Contable_de_Recibos
@@ -167,7 +167,7 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
     Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.Count + 2
 
     Application.ScreenUpdating = False
-    Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
+    Dim Sw_Calculation      As XlCalculation:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
     Application.DisplayAlerts = False
 
     H_Inicio = Timer                ' Para Saber el tiempo de proceso

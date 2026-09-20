@@ -2,8 +2,10 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (21 corregidos, 6 desactivados/aparcados, 1 descartado).
+**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (28 corregidos, 6 desactivados/aparcados, 1 descartado).
 
+> **Actualización 2026-09-20 (6ª):** corregidos **B8** (`M33_List_PLANES_Anulados.bas`: falta de cualificación `.` + variable de bucle equivocada), **B9** (`M40_Inf_Contab_Recibos.bas`: única ocurrencia activa, `Sw_Calculation` pasa de `Boolean` a `XlCalculation`), **B10** (`M38x_Export_Cierre_Contable.bas` y `M22_Inf_EPs_para_UXXI_NEW.bas`: `"_Cierre_2025"` hardcodeado sustituido por `"_Cierre_" & Prog__APP.Range("APP_AñoCont")`) y **B14** (cota superior `ContIni <= Lo_BD/Lo_TitPH.ListRows.Count` añadida al `Do While` de `M31`/`M32`/`M33`). **B11** resuelto eliminando `M22_Inf_EPs_para_UXXI.bas` (`Rut_Informe_EPs_para_UXXI_OLD`): auditado por las 4 vías (grep VBA, macros de shapes, `Tb_Tareas`, `sharedStrings` del `.xlsm`) sin ninguna invocación viva — el único `Rut_Informe_EPs_para_UXXI` (NEW) referenciado en el libro es una llamada externa a otro fichero (`V2.6.xlsm`), no a este módulo. **B13** resuelto eliminando `Wk_Lista_Panes1.cls` (hoja ya borrada del `.xlsm` por el usuario). **B12** resuelto en `M71_Restituir_BDatos_EP_Work.bas`: valida el nombre del fichero elegido contra los 4 posibles (`EFP`/`CFCyAFC` × `APP_C_Acad_Ant`/`APP_C_Acad_Pos`, con la versión de app `App_VersiónApp`), aborta con `MsgBox` si no coincide con ninguno, y pide confirmación explícita del fichero detectado antes de sobrescribir `Prog__APP`/`Prog_BD`.
+>
 > **Actualización 2026-09-19 (5ª):** revisión de higiene del informe, sin tocar código: todos los bugs que caen enteramente sobre un módulo ya comentado/desactivado pasan a ⏸️ Desactivado/aparcado, para no volver a evaluarlos hasta que se decida reactivar ese módulo. **B7** (`M21_Resumen_Tit_Propios_UNO.bas`, mismo módulo que B19) y **B9** (parcialmente: las ocurrencias en `M41`/`M42`, mismos módulos que B3 — la ocurrencia en `M40_Inf_Contab_Recibos.bas`, que sigue activo, queda ○ pendiente).
 >
 > **Actualización 2026-09-19 (4ª):** corregido **A8** (switches de la app cualificados de forma inconsistente): pasan a `Prog__APP_Switch.Range("Sw_xxxx")` (hoja `SwitchsAPP`), tanto en el código VBA como en el renombrado ya hecho en los rangos con nombre del `.xlsm`. Limpieza adicional en la misma sesión: eliminada `Public SW_Cancelado` (variable sin ningún uso) de `M00_Ini_Var_APP.bas`, y eliminado `Rut__Right_Click_VBA.bas` completo (menú contextual custom huérfano — auditado por las 4 vías: grep VBA, macros de shapes, `Tb_Tareas` y Ribbon), junto con las 2 llamadas `Run(...)` inertes que quedaban en `M00_Ini_APP.bas`. Esto deja también resuelta la sospecha de **C10** (asimetría Private/Public en `DelMenúRightClickCell`/`List`): el módulo entero ya no existe.
@@ -40,13 +42,13 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - ⏸️ B5 · Variable de objeto `Lo_AE4x1` no declarada — módulo desactivado
   - ⏸️ B6 · `Lo_AE4x1` usado sin inicializar — módulo desactivado
   - ⏸️ B7 · Límite de filas hardcodeado a 5000 — módulo desactivado
-  - ○ B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
-  - ○ B9 · `Application.Calculation` guardado en variable `Boolean` (parcial: M41/M42 desactivados, M40 sigue activo)
-  - ○ B10 · Año "2025" hardcodeado en nombres de fichero exportado
-  - ○ B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)
-  - ○ B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
-  - ○ B13 · `Wk_Lista_Panes1.cls` sin ninguna referencia en el código (a verificar)
-  - ○ B14 · Bucle `Do While` sin cota superior en M31/M32/M33
+  - ✅ B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
+  - ✅ B9 · `Application.Calculation` guardado en variable `Boolean` (parcial: M41/M42 desactivados, M40 corregido)
+  - ✅ B10 · Año "2025" hardcodeado en nombres de fichero exportado
+  - ✅ B11 · Módulo M22 OLD eliminado (código muerto, sin invocación por ninguna de las 4 vías)
+  - ✅ B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
+  - ✅ B13 · `Wk_Lista_Panes1.cls` eliminado (hoja ya borrada del `.xlsm` por el usuario)
+  - ✅ B14 · Bucle `Do While` sin cota superior en M31/M32/M33
   - ○ B15 · Contraseña de correo en texto plano
   - ✅ B16 · Cuatro rutinas de otro libro en `M90_Rutinas_X.bas` (hallazgo posterior)
   - ✅ B17 · `ActivForm` usada en 6 módulos y declarada en ninguno
@@ -404,7 +406,7 @@ El bucle está limitado a 5000 iteraciones fijas en vez de usar `Lo_TPH.ListRows
 **Módulo desactivado (2026-09-19):** `M21_Resumen_Tit_Propios_UNO.bas` es el mismo módulo que comenta B19 por completo (`Cod_Plan` sin declarar, decisión de diseño pendiente). Mientras siga comentado, este bug queda aparcado junto con el de fondo — no aporta corregirlo aislado.
 
 ### B8 · Filtro roto por referencia sin cualificar y variable de bucle equivocada
-**Severidad:** Alto · **Fichero:** `M33_List_PLANES_Anulados.bas` — líneas 74-77
+**Severidad:** Alto · **Fichero:** `M33_List_PLANES_Anulados.bas` — líneas 74-77 · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
     For Cont = 2 To Lo_TitPH.ListRows.Count
@@ -420,7 +422,7 @@ La línea 76 debería ser `.Cells(Cont, BD_ImpAdm)` — cualificada con el `.` d
 **Arreglo:** `If .Cells(Cont, BD_ImpAdm) < 0 Then GoTo Reg_Siguiente`.
 
 ### B9 · `Application.Calculation` guardado en variable `Boolean`
-**Severidad:** Alto · **Ficheros:** `M40_Inf_Contab_Recibos.bas:170,601`, `M41_Añadir_Núm_JIs_al_Inf.bas:27,228`, `M42_Añadir_Núm_JIs_a_BDatos.bas:27,91`
+**Severidad:** Alto · **Ficheros:** `M40_Inf_Contab_Recibos.bas:170,601`, `M41_Añadir_Núm_JIs_al_Inf.bas:27,228`, `M42_Añadir_Núm_JIs_a_BDatos.bas:27,91` · **Estado:** ✅ Corregido en la ocurrencia activa (2026-09-20); las de M41/M42 quedan ⏸️ con el módulo desactivado
 
 ```vba
     Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
@@ -432,10 +434,12 @@ La línea 76 debería ser `.Cells(Cont, BD_ImpAdm)` — cualificada con el `.` d
 
 **Arreglo:** `Dim Sw_Calculation As XlCalculation` (o `Long`).
 
-**Parcialmente aparcado (2026-09-19):** `M41_Añadir_Núm_JIs_al_Inf.bas` y `M42_Añadir_Núm_JIs_a_BDatos.bas` están desactivados por completo (ver B3) — las ocurrencias ahí quedan ⏸️, sin urgencia mientras el módulo siga comentado. La de `M40_Inf_Contab_Recibos.bas` **sigue activa** y el bug persiste en ese fichero; queda ○ pendiente solo para ese caso.
+**Parcialmente aparcado (2026-09-19):** `M41_Añadir_Núm_JIs_al_Inf.bas` y `M42_Añadir_Núm_JIs_a_BDatos.bas` están desactivados por completo (ver B3) — las ocurrencias ahí quedan ⏸️, sin urgencia mientras el módulo siga comentado.
+
+**Arreglo aplicado (2026-09-20):** en `M40_Inf_Contab_Recibos.bas` (línea 170, única ocurrencia activa) se cambió `Dim Sw_Calculation As Boolean` por `Dim Sw_Calculation As XlCalculation`. La restauración (línea 601, `Application.Calculation = Sw_Calculation`) no necesitó cambios: ya escribía el valor guardado, solo estaba mal tipado.
 
 ### B10 · Año "2025" hardcodeado en nombres de fichero exportado
-**Severidad:** Medio · **Ficheros:** `M38x_Export_Cierre_Contable.bas:21-22`, y de forma idéntica `M22_Inf_EPs_para_UXXI_NEW.bas:489-490`
+**Severidad:** Medio · **Ficheros:** `M38x_Export_Cierre_Contable.bas:21-22`, y de forma idéntica `M22_Inf_EPs_para_UXXI_NEW.bas:489-490` · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
     FichName = "NUEVO_" & TipoEP & Prog__APP.Range("APP_CursAcad") _
@@ -444,15 +448,25 @@ La línea 76 debería ser `.Cells(Cont, BD_ImpAdm)` — cualificada con el `.` d
 
 El "2025" no depende de `APP_CursAcad`/`APP_AñoCont`; en cursos posteriores el fichero exportado seguirá llamándose "..._Cierre_2025..." aunque se genere en otro año contable.
 
-**Arreglo:** sustituir el literal `"_Cierre_2025"` por `"_Cierre_" & Prog__APP.Range("APP_AñoCont")`.
+**Arreglo aplicado (2026-09-20):** sustituido el literal `"_Cierre_2025"` por `"_Cierre_" & Prog__APP.Range("APP_AñoCont") & " "` en ambos ficheros (`M38x_Export_Cierre_Contable.bas:22`, `M22_Inf_EPs_para_UXXI_NEW.bas:490`).
 
-### B11 · Módulos M22 OLD/NEW con agrupación distinta sobre la misma hoja destino (a verificar)
-**Severidad:** Medio, a verificar · **Ficheros:** `M22_Inf_EPs_para_UXXI.bas` (`Rut_Informe_EPs_para_UXXI_OLD`) y `M22_Inf_EPs_para_UXXI_NEW.bas` (`Rut_Informe_EPs_para_UXXI`)
+### B11 · Módulo M22 OLD eliminado — código muerto sin invocación
+**Severidad:** Medio · **Fichero:** `M22_Inf_EPs_para_UXXI.bas` (`Rut_Informe_EPs_para_UXXI_OLD`) · **Estado:** ✅ Corregido (2026-09-20) — módulo eliminado
 
-No colisionan en compilación (nombres de Sub distintos), pero ambas escriben en la misma hoja destino `Sht__Inf_EPs_UXXI`, y la agrupación cambió: la versión OLD agrupa por `Plan & Curso_Acad_Ant & Año_Emi_Ant` (tres claves), la NEW agrupa solo por `Cod_Plan & Año_Emi` (dos claves — se eliminó `Curso_Acad`), y los `SumIfs` que siguen tampoco filtran ya por `BD_C_Acad`. Si el mismo código de Plan se reutiliza en dos ediciones (Curso_Acad) distintas que comparten año contable de emisión, la versión NEW fusionaría en una sola fila-resumen datos que la OLD mantenía separados. No se ha confirmado si los códigos de Plan son siempre únicos por Curso_Acad en los datos reales, ni si `_OLD` sigue invocándose desde algún botón/Ribbon no auditado en este trabajo (por grep no aparece ninguna llamada en el código exportado).
+No colisionaba en compilación con `M22_Inf_EPs_para_UXXI_NEW.bas` (nombres de Sub distintos: `Rut_Informe_EPs_para_UXXI_OLD` vs `Rut_Informe_EPs_para_UXXI`), pero ambas escribían en la misma hoja destino `Sht__Inf_EPs_UXXI` con una agrupación distinta: la versión OLD agrupaba por `Plan & Curso_Acad_Ant & Año_Emi_Ant` (tres claves), la NEW agrupa solo por `Cod_Plan & Año_Emi` (dos claves). El riesgo de inconsistencia entre ambas versiones quedaba condicionado a si `_OLD` seguía invocándose desde algún sitio no visible en el código VBA.
+
+**Auditoría por las 4 vías (2026-09-20):**
+1. **Código VBA** — `Rut_Informe_EPs_para_UXXI_OLD` no aparece en ningún otro `.bas`/`.cls` del proyecto (grep global).
+2. **Macros de shapes** (`xl/drawings/*.xml`) — ninguna referencia a `UXXI_OLD`.
+3. **Tabla `Tb_Tareas`** (`sharedStrings.xml`) — solo aparece `Rut_Informe_EPs_para_UXXI` (la NEW, sin `_OLD`), y como referencia **externa** a otro libro (`EP_202x-2x_BaseDatos-LIQ _V2.6.xlsm`), no a este módulo.
+4. **Resto del XML** — el libro no tiene Ribbon custom (`customUI14.xml`); sin más apariciones.
+
+El único `Sub` del fichero (405 líneas) era `Rut_Informe_EPs_para_UXXI_OLD`, así que no quedaba nada más que rescatar.
+
+**Arreglo aplicado:** eliminado `M22_Inf_EPs_para_UXXI.bas` de `VBA_Moduls/`. `M22_Inf_EPs_para_UXXI_NEW.bas` (la versión activa) no se ha tocado salvo el arreglo de B10.
 
 ### B12 · `M71_Restituir` sobrescribe datos y parámetros sin validar ni confirmar
-**Severidad:** Medio · **Fichero:** `M71_Restituir_BDatos_EP_Work.bas` — líneas 28-44, 56-65, 109
+**Severidad:** Medio · **Fichero:** `M71_Restituir_BDatos_EP_Work.bas` — líneas 28-44, 56-65, 109 · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
         .Filters.Add "Sólo Ficheros Excel", "*.xls?", 1
@@ -471,15 +485,22 @@ A diferencia de `M51` (que valida que el fichero elegido empiece por el nombre e
 
 **Impacto:** elegir por error el fichero equivocado cambia silenciosamente el Año Contable/Curso Académico activos de la aplicación y sustituye los datos de trabajo, sin posibilidad de cancelar tras verlo.
 
-**Arreglo:** validar el nombre del fichero elegido (como hace M51) y pedir confirmación explícita antes de sobrescribir `Prog__APP`/`Prog_BD`.
+**Arreglo aplicado (2026-09-20):** tras cerrar el `With Application.FileDialog` (antes de abrir el fichero con `Workbooks.Open`), se construyen los 4 nombres posibles a partir del patrón real de `M79_Crear_WB_EP_CAcad.bas` (`TipoEP & CursoAcad & "_BaseDatos_Liq_" & Versión & ".xlsm"`, combinando `EFP`/`CFCyAFC` × `Prog__APP.Range("APP_C_Acad_Ant")`/`Prog__APP.Range("APP_C_Acad_Pos")`, con `Prog__APP.Range("App_VersiónApp")`):
 
-### B13 · `Wk_Lista_Panes1.cls` sin ninguna referencia en el código (a verificar)
-**Severidad:** Bajo, a verificar · **Fichero:** `Wk_Lista_Panes1.cls`
+- Si el nombre elegido (`Nom_NewArch`) no coincide con ninguno de los 4 (comparación insensible a mayúsculas), se muestra un `MsgBox` crítico listando los 4 nombres esperados y el elegido, y el proceso se aborta (`GoTo Restablecer_Valores`) **antes** de tocar `Prog__APP`/`Prog_BD`.
+- Si coincide con uno, se pide confirmación explícita (`MsgBox` Sí/No) indicando cuál de los 4 se ha detectado; si el usuario responde que no, el proceso se cancela igualmente antes de abrir el fichero.
 
-Solo `Wk_Lista_Panes` se usa (`M31_List_PLANES.bas:29`); `Wk_Lista_Panes1` (hoja vacía, sin código propio) no aparece en ningún otro `.bas`/`.cls` del proyecto. Probable hoja duplicada/huérfana, candidata a limpieza — pero esta tarea no ha auditado macros asignadas a shapes ni el XML del Ribbon, así que un grep negativo en el código no es prueba suficiente de "huérfano" (ver la nota ya recogida en el `CLAUDE.md` global sobre este mismo riesgo).
+Solo entonces continúa el flujo original (`Workbooks.Open`, sobrescritura de parámetros y de `Prog_BD`).
+
+### B13 · `Wk_Lista_Panes1.cls` eliminado
+**Severidad:** Bajo · **Fichero:** `Wk_Lista_Panes1.cls` · **Estado:** ✅ Corregido (2026-09-20) — fichero eliminado
+
+Solo `Wk_Lista_Panes` se usa (`M31_List_PLANES.bas:29`); `Wk_Lista_Panes1` (hoja vacía, sin código propio) no aparecía en ningún otro `.bas`/`.cls` del proyecto.
+
+**Confirmado por el usuario:** la hoja `Wk_Lista_Panes1` ya se había eliminado del `.xlsm` directamente. Eliminado el fichero `Wk_Lista_Panes1.cls` de `VBA_Moduls/` para mantener la exportación en sincronía con el libro real.
 
 ### B14 · Bucle `Do While` sin cota superior en M31/M32/M33
-**Severidad:** Bajo · **Ficheros:** `M31_List_PLANES.bas:59-61`, `M32_List_PLANES_Devoluc.bas:40-42`, `M33_List_PLANES_Anulados.bas:47-49` (mismo patrón en los tres)
+**Severidad:** Bajo · **Ficheros:** `M31_List_PLANES.bas:59-61`, `M32_List_PLANES_Devoluc.bas:40-42`, `M33_List_PLANES_Anulados.bas:47-49` (mismo patrón en los tres) · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
     Do While .Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0
@@ -490,6 +511,16 @@ Solo `Wk_Lista_Panes` se usa (`M31_List_PLANES.bas:29`); `Wk_Lista_Panes1` (hoja
 ```
 
 Si todas las filas de `Prog_BD` cumplieran la condición de salto, `ContIni` superaría `Lo_TitPH.ListRows.Count` y la siguiente lectura fallaría con un error de ejecución en vez de un mensaje claro tipo "no hay datos". Caso límite, baja probabilidad en uso real.
+
+**Arreglo aplicado:** añadida la cota superior a la condición del bucle, cortando en cuanto `ContIni` alcanza el número de filas de la tabla:
+
+```vba
+    Do While ContIni <= Lo_BD.ListRows.Count And (.Cells(ContIni, BD_Tipo_Rec) = "Deleted" Or .Cells(ContIni, BD_ImpAdm) < 0)
+        ContIni = ContIni + 1
+    Loop
+```
+
+(`Lo_BD` en `M31_List_PLANES.bas`, `Lo_TitPH` en `M32_List_PLANES_Devoluc.bas` y `M33_List_PLANES_Anulados.bas`, según la tabla que recorre cada `With` respectivo). No se ha añadido gestión adicional para el caso límite en que `ContIni` termine excediendo la tabla (todas las filas cumplen la condición de salto): el bucle ahora corta sin error de ejecución, pero la lectura posterior (`Cod_Plan = .Cells(Cont, BD_Plan)`) seguiría leyendo una celda vacía en ese escenario extremo — fuera del alcance mínimo pedido para este hallazgo.
 
 ### B15 · Contraseña de correo en texto plano
 **Severidad:** Bajo · **Fichero:** `M80_Mandar_Correo.bas` — línea 126 y `Rut_Cambiar_Contraseña_Email` (líneas 142-151)

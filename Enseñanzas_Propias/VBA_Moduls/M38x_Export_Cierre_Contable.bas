@@ -1,5 +1,5 @@
 Attribute VB_Name = "M38x_Export_Cierre_Contable"
-'2026-02-02
+' Last Rev. 2026-09-20 14:39
 Option Explicit
 
 '===================================================================================================================================
@@ -19,7 +19,7 @@ Sub Rut_WrkSht_Export_Cierre_Contable_AñoCont()
     
     ' Nombre sugerido: Archiv + resto
     FichName = "NUEVO_" & TipoEP & Prog__APP.Range("APP_CursAcad") _
-               & "_Cierre_2025 " & Format(Now, "(yyyy-mm-dd_hhmm)") & ".xlsx"
+               & "_Cierre_" & Prog__APP.Range("APP_AñoCont") & " " & Format(Now, "(yyyy-mm-dd_hhmm)") & ".xlsx"
 
     Call Rut_WrkSheet_Export_To_xlsx(ActiveSheet, FichName)
 

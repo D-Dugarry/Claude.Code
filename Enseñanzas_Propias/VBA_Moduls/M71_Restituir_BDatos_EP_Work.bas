@@ -1,5 +1,5 @@
 Attribute VB_Name = "M71_Restituir_BDatos_EP_Work"
-'2026-02-16
+' Last Rev. 2026-09-20 14:39
 '- M71_Restituir_BDatos_EP_Work -----------------------------------------------------------------------------------------------------
 
 Option Explicit
@@ -42,6 +42,34 @@ Rut_Off_Functions
             Path_NewArch = Left(Arch__EP_New, InStrRev(Arch__EP_New, "\"))
         End If
     End With
+
+    '- Validar que el fichero elegido es uno de los 4 posibles (EFP/CFCyAFC x Curso Acad. Ant/Pos) -----------------------------
+    Dim Vers_App        As String:      Vers_App = Prog__APP.Range("App_VersiónApp")
+    Dim FichNom_EFP_Ant  As String:     FichNom_EFP_Ant = "EFP_" & Prog__APP.Range("APP_C_Acad_Ant") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
+    Dim FichNom_EFP_Pos  As String:     FichNom_EFP_Pos = "EFP_" & Prog__APP.Range("APP_C_Acad_Pos") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
+    Dim FichNom_CFC_Ant  As String:     FichNom_CFC_Ant = "CFCyAFC_" & Prog__APP.Range("APP_C_Acad_Ant") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
+    Dim FichNom_CFC_Pos  As String:     FichNom_CFC_Pos = "CFCyAFC_" & Prog__APP.Range("APP_C_Acad_Pos") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
+    Dim FichNom_Detectado   As String
+    Select Case UCase(Nom_NewArch)
+        Case UCase(FichNom_EFP_Ant):    FichNom_Detectado = FichNom_EFP_Ant
+        Case UCase(FichNom_EFP_Pos):    FichNom_Detectado = FichNom_EFP_Pos
+        Case UCase(FichNom_CFC_Ant):    FichNom_Detectado = FichNom_CFC_Ant
+        Case UCase(FichNom_CFC_Pos):    FichNom_Detectado = FichNom_CFC_Pos
+        Case Else
+            MsgBox "El fichero seleccionado NO es ninguno de los 4 ficheros de trabajo esperados:" & vbCrLf & vbCrLf & _
+                   FichNom_EFP_Ant & vbCrLf & FichNom_EFP_Pos & vbCrLf & FichNom_CFC_Ant & vbCrLf & FichNom_CFC_Pos & vbCrLf & vbCrLf & _
+                   "Seleccionado: " & Nom_NewArch & vbCrLf & vbCrLf & "Proceso Abortado.", vbCritical, "Rutinas"
+            Form_Menu.TB_Informe = "Proceso Abortado: fichero no reconocido (" & Nom_NewArch & ") - " & Now() & vbLf
+            GoTo Restablecer_Valores
+    End Select
+
+    Respuesta = MsgBox("Se va a Restituir BDatos desde el siguiente fichero:" & vbCrLf & vbCrLf & _
+                       FichNom_Detectado & vbCrLf & vbCrLf & _
+                       "¿Confirma que es el fichero correcto?", vbExclamation + vbYesNo, "Proceso: Restituir BDatos de EP")
+    If Respuesta = vbNo Then
+        Form_Menu.TB_Informe = "Proceso Cancelado por el usuario: " & Now() & vbLf
+        GoTo Restablecer_Valores
+    End If
     '- Importar en ClsBook (RAM)   --------------------------------------------------------------
     Dim ClsBk       As Workbook:        Set ClsBk = Workbooks.Open(Arch__EP_New, ReadOnly:=True)
     Dim Ws_ClsBk    As Worksheet:       Set Ws_ClsBk = ClsBk.Sheets("BDatos")

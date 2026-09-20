@@ -1,5 +1,5 @@
 Attribute VB_Name = "M22_Inf_EPs_para_UXXI_NEW"
-'2026-02-05
+' Last Rev. 2026-09-20 14:39
 Option Explicit
 
     Const BdUx_Cod_Plan                   As Integer = 1    ' col: a
@@ -487,7 +487,7 @@ Sub Rut_WrkSht_Export_Inf_para_UXXI()
     
     ' Nombre sugerido: Archiv + resto
     FichName = "InfpaUXXI_" & TipoEP & Prog__APP.Range("APP_CursAcad") _
-               & "_Cierre_2025 " & Format(Now, "(yyyy-mm-dd_hhmm)") & ".xlsx"
+               & "_Cierre_" & Prog__APP.Range("APP_AñoCont") & " " & Format(Now, "(yyyy-mm-dd_hhmm)") & ".xlsx"
 
         Application.ScreenUpdating = False
         Application.DisplayAlerts = False
