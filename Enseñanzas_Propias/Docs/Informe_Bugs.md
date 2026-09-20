@@ -2,8 +2,10 @@
 
 Auditoría del código VBA exportado en `VBA_Moduls/` (Enseñanzas Propias — Liquidación de Títulos Propios, Universidad de Alicante). Generado el 14/09/2026 mediante lectura íntegra de los 133 módulos exportados, con verificación cruzada de los hallazgos más graves contra el fichero real.
 
-**Resumen:** 10 Críticos · 11 Altos · 10 Medios · 7 Bajos — 39 hallazgos (28 corregidos, 6 desactivados/aparcados, 1 descartado).
+**Resumen:** 15 Críticos · 11 Altos · 10 Medios · 6 Bajos — 42 hallazgos (34 corregidos, 6 desactivados/aparcados, 3 descartados, **1 pendiente, ignorado a petición del usuario: B15**). *(Recuento verificado el 2026-09-20 contando línea a línea el índice y las secciones de detalle — el total y el desglose por severidad llevaban desactualizados desde que se añadieron C10-C14 en una sesión anterior.)*
 
+> **Actualización 2026-09-20 (7ª):** revisado **C1** a petición del usuario ("algo no cuadra") y descartado: el código citado (`Sub Rut_Lo_Filtro` con typo `Lo_Tb`/`LoTb`) no existe en `Rut_Lo.bas` ni en ningún módulo del proyecto — es una fusión errónea entre dos rutinas reales y distintas (`Rut_x_Filtro_LoTb` en `M90_Rutinas_X.bas`, sin typo, y `Rut_Lo_Filtros_Quitar` en `Rut_Lo.bas`, tampoco con typo). No hay error de compilación real en ese punto. Corregido **C2** (verificado, sí era un bug real y el único caso en el proyecto): `.calcMode = .Calculation` dentro de un `With Application` se interpretaba como `Application.calcMode` (miembro inexistente) → quitado el punto inicial. Corregido **C5** (verificado contra el fichero real): `Rut_WrkSheet_ReducirPeso` operaba sobre la hoja activa en vez de la recibida por parámetro (`Range`/`ActiveCell`/`Cells` sin cualificar) → sustituido el `.Select`/`ActiveCell` por una variable `Range` propia y cualificados los accesos con `.`; de paso, `Sw_Calculation` pasa de `Boolean` a `XlCalculation`. Corregido **C6** (`M0999_Modif_Cols_BDatos.bas`, `Reorganizar_ListObject_Solo`): el bloque "Mover cols 55-57 AL FINAL" encadenaba 3 `.Copy` seguidos, perdiendo el portapapeles de las 2 primeras columnas → reescrito para copiar/borrar/recrear/pegar cada columna de una en una (mismo patrón ya usado en el paso 3 del propio módulo). Corregido **C7**, a petición explícita del usuario: el módulo `M0999_Busca_Planes_ImpAdmERR.bas` completo (valor mágico `-0.86` sin confirmación ni idempotencia sobre `Prog_BD`) queda comentado en su totalidad, sin invocación alguna en el proyecto. Corregido **C8** (`Rut_WS.bas`, `Rut_WrkSheet_Vaciar`): el `For Each tbl In .ListObjects` operaba siempre sobre `.ListObjects(1)` en vez de `tbl` → sustituidas las dos referencias. Descartado **C9** a petición del usuario ("Módulo3 ya no existe"): confirmado, `Módulo3.bas` no está en `VBA_Moduls/`, y tampoco sus "hermanos" `Módulo1/4/5.bas` — el `CLAUDE.md` del proyecto queda pendiente de actualizar en ese mismo punto. **Recuento del informe corregido**: el resumen de cabecera decía "39 hallazgos (10 Crít./11 Alto/10 Medio/7 Bajo)", desactualizado desde que se añadieron C10-C14 en una sesión anterior; el recuento real, verificado línea a línea contra el índice y las 42 secciones de detalle, es **42 hallazgos (15 Crít./11 Alto/10 Medio/6 Bajo)**. De esos 42: 33 corregidos, 6 desactivados/aparcados (módulos comentados, decisión de diseño pendiente), 3 descartados (A9, C1, C9) y 2 pendientes en ese momento (B15, C11). Corregido **C11** (`Rut_Wb_CopSegTimed_USB_HD.bas`): el fallback hardcodeado `F:\__CopSeg Versiones Programas\` cuando falta el `Range("APP_CopSeg_Usb_Path")` se sustituye por un `FileDialog(msoFileDialogFolderPicker)` que pide la carpeta al usuario (con salida limpia si cancela); no se persiste como `Name` nuevo por no conocer el layout real de `Prog__APP` (dato no visible en el `.bas` exportado). **B15 queda ignorado a petición explícita del usuario** — no se ha tocado ni evaluado más.
+>
 > **Actualización 2026-09-20 (6ª):** corregidos **B8** (`M33_List_PLANES_Anulados.bas`: falta de cualificación `.` + variable de bucle equivocada), **B9** (`M40_Inf_Contab_Recibos.bas`: única ocurrencia activa, `Sw_Calculation` pasa de `Boolean` a `XlCalculation`), **B10** (`M38x_Export_Cierre_Contable.bas` y `M22_Inf_EPs_para_UXXI_NEW.bas`: `"_Cierre_2025"` hardcodeado sustituido por `"_Cierre_" & Prog__APP.Range("APP_AñoCont")`) y **B14** (cota superior `ContIni <= Lo_BD/Lo_TitPH.ListRows.Count` añadida al `Do While` de `M31`/`M32`/`M33`). **B11** resuelto eliminando `M22_Inf_EPs_para_UXXI.bas` (`Rut_Informe_EPs_para_UXXI_OLD`): auditado por las 4 vías (grep VBA, macros de shapes, `Tb_Tareas`, `sharedStrings` del `.xlsm`) sin ninguna invocación viva — el único `Rut_Informe_EPs_para_UXXI` (NEW) referenciado en el libro es una llamada externa a otro fichero (`V2.6.xlsm`), no a este módulo. **B13** resuelto eliminando `Wk_Lista_Panes1.cls` (hoja ya borrada del `.xlsm` por el usuario). **B12** resuelto en `M71_Restituir_BDatos_EP_Work.bas`: valida el nombre del fichero elegido contra los 4 posibles (`EFP`/`CFCyAFC` × `APP_C_Acad_Ant`/`APP_C_Acad_Pos`, con la versión de app `App_VersiónApp`), aborta con `MsgBox` si no coincide con ninguno, y pide confirmación explícita del fichero detectado antes de sobrescribir `Prog__APP`/`Prog_BD`.
 >
 > **Actualización 2026-09-19 (5ª):** revisión de higiene del informe, sin tocar código: todos los bugs que caen enteramente sobre un módulo ya comentado/desactivado pasan a ⏸️ Desactivado/aparcado, para no volver a evaluarlos hasta que se decida reactivar ese módulo. **B7** (`M21_Resumen_Tit_Propios_UNO.bas`, mismo módulo que B19) y **B9** (parcialmente: las ocurrencias en `M41`/`M42`, mismos módulos que B3 — la ocurrencia en `M40_Inf_Contab_Recibos.bas`, que sigue activo, queda ○ pendiente).
@@ -55,17 +57,17 @@ Los 8 hallazgos Críticos de este informe son, cada uno por separado, un error d
   - ✅ B18 · `AñoContAnt` sin declarar en `M20_Resumen_Tit_Propios.bas`
   - ⏸️ B19 · `Cod_Plan` sin declarar y vaciado antes de usarse (`M21_Resumen_Tit_Propios_UNO.bas`) — módulo desactivado
 - **Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios**
-  - ○ C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
-  - ○ C2 · `.calcMode` no es un miembro de `Application`
+  - ❌ C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`) — descartado
+  - ✅ C2 · `.calcMode` no es un miembro de `Application`
   - ✅ C3 · `String` pasado donde se espera `Worksheet` por referencia (ruta en producción)
   - ✅ C4 · Llamada a una rutina que no existe: `Rut_Actualizar_1_LS_VAL`
-  - ○ C5 · `Rut_WrkSheet_ReducirPeso` opera sobre la hoja activa, no sobre la recibida
-  - ○ C6 · Pérdida de datos en `M0999_Modif_Cols_BDatos.bas` si se reejecuta
-  - ○ C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
-  - ○ C8 · `For Each` que ignora la variable de iteración
-  - ○ C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas
+  - ✅ C5 · `Rut_WrkSheet_ReducirPeso` opera sobre la hoja activa, no sobre la recibida
+  - ✅ C6 · Pérdida de datos en `M0999_Modif_Cols_BDatos.bas` si se reejecuta
+  - ✅ C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
+  - ✅ C8 · `For Each` que ignora la variable de iteración
+  - ❌ C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas — descartado
   - ✅ C10 · Asimetría Private/Public en rutinas invocadas por nombre (resuelto: módulo eliminado)
-  - ○ C11 · Ruta de disco hardcodeada como fallback silencioso
+  - ✅ C11 · Ruta de disco hardcodeada como fallback silencioso
   - ✅ C12 · `.UsedRange` como instrucción suelta — propiedad usada como si fuera un método
   - ✅ C13 · `Dictionary` ambiguo entre Scripting Runtime y Word Object Library
   - ✅ C14 · `ListColumns.Add` con un argumento `Name:=` que no existe
@@ -655,8 +657,8 @@ Los `Range("TP_Cod_Plan")` **sin cualificar** de las líneas 94-95 resuelven por
 ## Bloque C — Librería transversal `Rut_*`/`Prog_*` y formularios
 *Ficheros: `Rut_Lo`, `Rut_WB`, `Rut_WS`, `Form_*`, `M0999_*`, `Módulo*`. (`Rut__Right_Click_VBA.bas` eliminado en la 4ª sesión, ver C10 y el apéndice.)*
 
-### C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`)
-**Severidad:** Crítico · **Fichero:** `Rut_Lo.bas` — línea 136 (`Option Explicit` activo)
+### C1 · Variable no declarada `LoTb` (typo de `Lo_Tb`) — descartado
+**Severidad:** Crítico · **Fichero:** `Rut_Lo.bas` — línea 136 · **Estado:** ❌ Descartado (2026-09-20) — no es un bug, el código citado no existe
 
 ```vba
 Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, columna As Integer, Criterio As String, Optional SW_Clear As Boolean = False)
@@ -665,12 +667,15 @@ Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, columna As Integer, Criterio As Str
 End Sub
 ```
 
-El parámetro se llama `Lo_Tb`, pero la línea usa `LoTb` (sin guion bajo), no declarada en ningún sitio del proyecto (confirmado con grep global). Con `Option Explicit`, "Variable no definida" en compilación. Esta `Sub` en concreto no la llama nadie (existe un duplicado correcto y sí usado, `Rut_x_Filtro_LoTb` en `M90_Rutinas_X.bas`, consistente con `LoTb`), pero el error de compilación afecta igualmente a todo el proyecto.
+**Revisado a petición del usuario, no cuadraba con el código real.** Esta `Sub Rut_Lo_Filtro` no existe en `Rut_Lo.bas` ni en ningún otro módulo del proyecto (confirmado con lectura completa del fichero: la línea 136 real es `Call Rut_Lo_Sort(...)`, dentro de `Rut_Lo_DataBodyRange_Filter_y_DEL`). El fragmento citado es una mezcla de dos rutinas reales y distintas:
 
-**Arreglo:** cambiar `LoTb` por `Lo_Tb` (o borrar la Sub, ya que está duplicada y sin uso).
+- `Rut_x_Filtro_LoTb`, en `M90_Rutinas_X.bas:33-36` — ahí el parámetro se llama `LoTb` (sin guion bajo) y las tres referencias internas usan también `LoTb`, de forma consistente. No hay ningún typo.
+- `Rut_Lo_Filtros_Quitar`, en `Rut_Lo.bas:105` — esta sí vive en `Rut_Lo.bas` y su parámetro se llama `Lo_Tb` (con guion bajo), también usado de forma consistente.
+
+Al parecer el informe fusionó el nombre de una rutina con la firma de la otra, generando una inconsistencia `Lo_Tb`/`LoTb` que no existe en ninguna de las dos por separado. No hay error de compilación real aquí.
 
 ### C2 · `.calcMode` no es un miembro de `Application`
-**Severidad:** Crítico · **Fichero:** `Rut_Lo_Export_XlsX.bas` — línea 44 (`Rut_Lo_Export_to_New_WB`)
+**Severidad:** Crítico · **Fichero:** `Rut_Lo_Export_XlsX.bas` — línea 45 (`Rut_Lo_Export_to_New_WB`) · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
     Dim calcMode    As XlCalculation
@@ -688,9 +693,9 @@ El parámetro se llama `Lo_Tb`, pero la línea usa `LoTb` (sin guion bajo), no d
     End With
 ```
 
-`calcMode` se declara como variable local (línea 20) para guardar el modo de cálculo y restaurarlo después (eso sí, correcto al final). Pero dentro del `With Application`, `.calcMode = .Calculation` lleva el punto delante de `calcMode`, así que VBA lo interpreta como `Application.calcMode` — propiedad que no existe → "Método o miembro de datos no encontrado" en compilación. El patrón correcto (`calcMode = .Calculation`, sin punto inicial) sí se usa de forma consistente 4 veces en `Rut__Right_Click_VBA.bas`.
+`calcMode` se declara como variable local (línea 21) para guardar el modo de cálculo y restaurarlo después (eso sí, correcto al final). Pero dentro del `With Application`, `.calcMode = .Calculation` lleva el punto delante de `calcMode`, así que VBA lo interpreta como `Application.calcMode` — propiedad que no existe → "Método o miembro de datos no encontrado" en compilación. Verificado con grep: es la única ocurrencia de `calcMode` en todo el proyecto (el patrón correcto que se citaba antes en `Rut__Right_Click_VBA.bas` ya no aplica — ese módulo se eliminó por completo en la 4ª sesión, ver C10 y el apéndice).
 
-**Arreglo:** quitar el punto inicial → `calcMode = .Calculation`.
+**Arreglo aplicado:** quitar el punto inicial → `calcMode = .Calculation`.
 
 ### C3 · `String` pasado donde se espera `Worksheet` por referencia (ruta en producción)
 **Severidad:** Crítico · **Fichero:** `Rut_WS.bas` — líneas 42-49, 58-70 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
@@ -759,7 +764,7 @@ Verificado tras el borrado que no queda ninguna referencia colgando. Ojo con un 
 **⚠️ Pendiente en el `.xlsm`:** el componente sigue dentro del libro. Hay que quitarlo a mano en el editor VBA — clic derecho sobre `Mensaje` en el árbol del proyecto → *Quitar Mensaje…* → *No* cuando pregunte si exportar. Reimportar los módulos no lo elimina solo.
 
 ### C5 · `Rut_WrkSheet_ReducirPeso` opera sobre la hoja activa, no sobre la recibida
-**Severidad:** Alto · **Fichero:** `Rut_WS.bas` — líneas 20-38
+**Severidad:** Alto · **Fichero:** `Rut_WS.bas` — líneas 20-38 · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
 Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRange As Boolean = False)
@@ -776,14 +781,14 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
         .Range(ActiveCell.Address & ":" & Cells(1, Columns.Count).Address).EntireColumn.Delete
 ```
 
-`Range(...)`, `ActiveCell` y `Cells(...)` van sin cualificar: aunque están dentro de `With ws`/`With Lo.Range`, al no llevar el punto delante actúan sobre la hoja **activa** en ese momento, no sobre `ws` (la hoja recibida por parámetro). Además, el mismo defecto de C9/B9 se repite aquí: `Sw_Calculation` guarda `Application.Calculation` (un `XlCalculation`) en una variable `Boolean`.
+`Range(...)`, `ActiveCell` y `Cells(...)` van sin cualificar: aunque están dentro de `With ws`/`With Lo.Range`, al no llevar el punto delante actúan sobre la hoja **activa** en ese momento, no sobre `ws` (la hoja recibida por parámetro). Además, el mismo defecto de C9/B9 se repite aquí: `Sw_Calculation` guarda `Application.Calculation` (un `XlCalculation`) en una variable `Boolean`. Verificado contra el fichero real: el código citado coincide exactamente, y las dos llamadas activas (`M71_Restituir_BDatos_EP_Work.bas` sobre `Prog_BD`, `M07_Actualiz_BDatos_con_LsGes04.bas` sobre `Prog_LsGes04`) pasan hojas `Prog_*` que no tienen por qué coincidir con la hoja activa en ese punto del pipeline.
 
 **Impacto:** si en el momento de la llamada la hoja activa es distinta de `WrkSht`, el `.Select`/`EntireRow.Delete`/`EntireColumn.Delete` borraría filas/columnas de la hoja equivocada.
 
-**Arreglo:** cualificar todo con `ws.` (`ws.Range(...)`, sustituyendo `ActiveCell` por una variable `Range` propia calculada dentro del `With Lo.Range`); y declarar `Sw_Calculation As XlCalculation`.
+**Arreglo aplicado:** sustituido el `.Select`/`ActiveCell` por una variable `RgIni As Range` calculada dentro del `With Lo.Range` (`Set RgIni = .Cells(.Rows.Count, .Columns.Count).Offset(1, 1)`), y cualificados con `.` (dependientes del `With ws` exterior) los `Cells(Rows.Count, 1)`/`Cells(1, Columns.Count)` de las dos líneas de borrado. Cambiado también `Sw_Calculation` de `Boolean` a `XlCalculation`.
 
 ### C6 · Pérdida de datos en `M0999_Modif_Cols_BDatos.bas` si se reejecuta
-**Severidad:** Alto · **Fichero:** `M0999_Modif_Cols_BDatos.bas` — líneas 97-102 (`Reorganizar_ListObject_Solo`)
+**Severidad:** Alto · **Fichero:** `M0999_Modif_Cols_BDatos.bas` — líneas 97-102 (`Reorganizar_ListObject_Solo`) · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
     Lo.ListColumns("Col_55").DataBodyRange.Copy
@@ -794,26 +799,26 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
     Lo.ListColumns("Col_55").DataBodyRange.PasteSpecial xlPasteValues
 ```
 
-Cada `.Copy` sobrescribe el portapapeles del anterior: al llegar al `PasteSpecial` solo sobrevive la copia de `Col_57`, y ni siquiera se pega en `Col_57` sino en `Col_55`. Se borran las 3 columnas y solo se "recupera" un pegado, y el equivocado. Es una migración "de un solo uso" (nombrada por fecha, como sus hermanas `Reorganizar_Lo_BDatos_Cambio_Ene_26`/`_Nov_2025`), que además usa `ActiveWorkbook`/`Worksheets(...)` sin cualificar por libro.
+Cada `.Copy` sobrescribe el portapapeles del anterior: al llegar al `PasteSpecial` solo sobrevive la copia de `Col_57`, y ni siquiera se pega en `Col_57` sino en `Col_55`. Se borran las 3 columnas y solo se "recupera" un pegado, y el equivocado. Es una migración "de un solo uso" (nombrada por fecha, como sus hermanas `Reorganizar_Lo_BDatos_Cambio_Ene_26`/`_Nov_2025`), que además usa `ActiveWorkbook`/`Worksheets(...)` sin cualificar por libro. Verificado contra el fichero real: el código citado coincide exactamente, y el `Sub` no lo invoca nadie por código (solo relanzable a mano vía Alt+F8).
 
 **Impacto:** si alguien vuelve a lanzar este módulo por error (Alt+F8) sobre `Prog_BD` real, puede corromper o perder columnas de la base de datos.
 
-**Sugerencia:** cualificar con `ThisWorkbook.Worksheets(...)`, y pegar cada columna justo después de copiarla, no encadenar 3 `.Copy` seguidos; o retirar el módulo del libro de producción si el cambio ya se aplicó.
+**Arreglo aplicado:** copiar/borrar/recrear/pegar cada columna de una en una (mismo patrón ya usado en el paso 3 del propio módulo, "Mover col 50 ANTES de col 40"), sin encadenar varios `.Copy` seguidos. Primer intento descartado antes de escribir la versión final: guardar `Range` a cada `DataBodyRange` antes de los 3 `.Delete` — inválido, porque una referencia `Range` a celdas ya borradas no es fiable en VBA. No se ha tocado el resto del módulo (cualificación `ActiveWorkbook`/`Worksheets` de las otras dos Subs), al ser migraciones de un solo uso ya aplicadas, no parte del pipeline regular.
 
 ### C7 · Valor mágico `-0.86` escrito sobre datos reales sin confirmación
-**Severidad:** Alto · **Fichero:** `M0999_Busca_Planes_ImpAdmERR.bas` — líneas 56-57
+**Severidad:** Alto · **Fichero:** `M0999_Busca_Planes_ImpAdmERR.bas` — líneas 56-57 · **Estado:** ✅ Corregido (2026-09-20) — módulo comentado en su totalidad
 
 ```vba
                     RowData.Range(BD_Rec_Imp_INSS) = RowData.Range(BD_Rec_Imp_Adm)
                     RowData.Range(BD_Rec_Imp_Adm) = -0.86
 ```
 
-Sin `MsgBox` de confirmación previa y sin comprobar si la fila ya fue "arreglada" antes: no es idempotente — si se ejecuta dos veces, la segunda sobrescribiría de nuevo con `-0.86` filas que ya tuvieran ese valor por otro motivo. Opera directamente sobre `Prog_BD.ListObjects(1)`, la tabla de producción.
+Sin `MsgBox` de confirmación previa y sin comprobar si la fila ya fue "arreglada" antes: no es idempotente — si se ejecuta dos veces, la segunda sobrescribiría de nuevo con `-0.86` filas que ya tuvieran ese valor por otro motivo. Opera directamente sobre `Prog_BD.ListObjects(1)`, la tabla de producción. Verificado con grep global: `Rut_Ajuste_BD_Rec_Imp_Adm` no la invoca nadie en el proyecto, solo relanzable a mano (Alt+F8).
 
-**Sugerencia:** añadir una comprobación de "ya aplicado" y una confirmación explícita antes de escribir, o mover el módulo fuera del libro de producción si ya cumplió su propósito puntual.
+**Arreglo aplicado, a petición explícita del usuario ("deja comentado todo el módulo"):** todo el módulo `M0999_Busca_Planes_ImpAdmERR.bas` (el `Sub Rut_Ajuste_BD_Rec_Imp_Adm` completo) queda comentado línea a línea, con una cabecera explicando por qué y qué haría falta para reactivarlo (confirmación + comprobación de "ya aplicado"). `Option Explicit` se mantiene activo. A diferencia de C6, aquí no se ha corregido la lógica de fondo (no hacía falta, al quedar inerte): si algún día se necesita reactivar esta herramienta puntual, hay que abordar primero la falta de idempotencia y de confirmación antes de descomentarla.
 
 ### C8 · `For Each` que ignora la variable de iteración
-**Severidad:** Medio · **Fichero:** `Rut_WS.bas` — líneas 72-75 (dentro de `Rut_WrkSheet_Vaciar`)
+**Severidad:** Medio · **Fichero:** `Rut_WS.bas` — dentro de `Rut_WrkSheet_Vaciar` · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
         Dim tbl As ListObject
@@ -822,16 +827,16 @@ Sin `MsgBox` de confirmación previa y sin comprobar si la fila ya fue "arreglad
         Next tbl
 ```
 
-El bucle recorre `tbl`, pero el cuerpo siempre opera sobre `.ListObjects(1)` (la primera tabla), nunca sobre `tbl`. En una hoja con una sola tabla no se nota; en una con varias, solo se le quita el filtro a la primera, tantas veces como tablas haya.
+El bucle recorre `tbl`, pero el cuerpo siempre opera sobre `.ListObjects(1)` (la primera tabla), nunca sobre `tbl`. En una hoja con una sola tabla no se nota; en una con varias, solo se le quita el filtro a la primera, tantas veces como tablas haya. Verificado contra el fichero real: el código citado coincide (con la salvedad de que el número de línea se desplazó tras la corrección de C5 en el mismo módulo).
 
-**Arreglo:** sustituir `.ListObjects(1)` por `tbl` dentro del bucle.
+**Arreglo aplicado:** sustituido `.ListObjects(1)` por `tbl` en las dos referencias dentro del bucle (`tbl.ShowAutoFilter`, `tbl.AutoFilter.ShowAllData`).
 
 ### C9 · `Módulo3.bas` sin `Option Explicit`, con variables casi homónimas
-**Severidad:** Medio · **Fichero:** `Módulo3.bas` (sin línea `Option Explicit` tras el `Attribute VB_Name`)
+**Severidad:** Medio · **Fichero:** `Módulo3.bas` · **Estado:** ❌ Descartado (2026-09-20) — el módulo ya no existe
 
-El fichero declara a nivel de módulo unas 80 variables acumuladoras del resumen contable de planes (`Imp_Emis`, `Imp__ADx`, `TImpADxAdm`...) y redeclara localmente variantes muy parecidas dentro de `RuT_Estadística_Contable_Planes_CAcad_Pos` (p. ej. `Imp_ADx` frente a `Imp__ADx`, con y sin doble guion bajo, conviviendo en el mismo fichero). Sin `Option Explicit`, un typo futuro en cualquiera de esos nombres tan parecidos no daría error de compilación: crearía silenciosamente una `Variant` nueva (siempre 0/vacía), y el total contable saldría mal sin aviso. Es el único módulo de "prueba" revisado sin `Option Explicit` — todos sus hermanos (`M0999_*`, `Módulo_Filtro_Avanzado_Prueba`, `Módulo1/4/5`) sí lo tienen.
+El fichero declaraba a nivel de módulo unas 80 variables acumuladoras del resumen contable de planes (`Imp_Emis`, `Imp__ADx`, `TImpADxAdm`...) y redeclaraba localmente variantes muy parecidas dentro de `RuT_Estadística_Contable_Planes_CAcad_Pos` (p. ej. `Imp_ADx` frente a `Imp__ADx`, con y sin doble guion bajo, conviviendo en el mismo fichero). Sin `Option Explicit`, un typo futuro en cualquiera de esos nombres tan parecidos no daría error de compilación.
 
-**Arreglo:** añadir `Option Explicit` y compilar para detectar cualquier variable ya mal escrita.
+**Revisado a petición del usuario ("Módulo3 ya no existe"), confirmado:** `Módulo3.bas` no está en `VBA_Moduls/`, y tampoco `Módulo1.bas`, `Módulo4.bas` ni `Módulo5.bas` (sus "hermanos" citados más abajo) — solo sigue existiendo `Módulo_Filtro_Avanzado_Prueba.bas` y `Hoja1.cls`. Como la exportación (`Rut_VBA_Export_Moduls`) vuelca lo que hay en el `.xlsm` real, lo más probable es que el usuario ya los eliminara del proyecto VBA en algún momento y no se actualizara el informe. No hay nada que corregir: el bug desapareció junto con el fichero. **Pendiente:** el `CLAUDE.md` del proyecto también los cita todavía como existentes (línea con "residuales/plantilla por defecto de Excel... `Módulo1.bas`, `Módulo3.bas`, `Módulo4.bas`, `Módulo5.bas`") — conviene corregirlo en otra pasada para no arrastrar la misma desactualización.
 
 ### C10 · Asimetría Private/Public en rutinas invocadas por nombre
 **Severidad:** Medio · **Fichero:** `Rut__Right_Click_VBA.bas` (eliminado) · **Estado:** ✅ Resuelto (2026-09-19, 4ª sesión) — módulo completo eliminado por huérfano
@@ -852,7 +857,7 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
 **Resuelto de raíz, no parcheado:** al auditar `Rut__Right_Click_VBA.bas` completo por las 4 vías (grep VBA, macros de shapes en `xl/drawings/*.xml`, `Tb_Tareas`, Ribbon — este libro no tiene `customUI14.xml`) se confirmó que **nada llamaba de verdad** a `NewMenúRightClickCell`/`NewMenúRightClickList`/`Rut_Context_Buttons_Hide`/`Rut_Context_Buttons_Restore`; solo `M00_Ini_APP.bas` invocaba (vía `Run(...)`) las dos rutinas de borrado, que nunca llegaban a crear nada porque las `New*` estaban comentadas. El módulo usaba además `Prog__APP.Range("SW_RightClickMenú_Restricted")`, un nombre que nunca existió como `definedName` real (ver [[A8]]). Se eliminó el módulo entero y las 2 llamadas `Run(...)` inertes en `M00_Ini_APP.bas`; la asimetría Private/Public deja de ser relevante porque ya no hay ninguna llamada por nombre a resolver.
 
 ### C11 · Ruta de disco hardcodeada como fallback silencioso
-**Severidad:** Bajo · **Fichero:** `Rut_Wb_CopSegTimed_USB_HD.bas` — líneas 192-194
+**Severidad:** Bajo · **Fichero:** `Rut_Wb_CopSegTimed_USB_HD.bas` — líneas 192-194 · **Estado:** ✅ Corregido (2026-09-20)
 
 ```vba
         If Not Fnc_Range_Exist("APP_CopSeg_Usb_Path") Then
@@ -860,9 +865,9 @@ Sub DelMenúRightClickList()              ' Rut__Right_Click_VBA.bas:283  (públ
             FichPath = "F:\__CopSeg Versiones Programas\" & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
 ```
 
-Solo se usa si falta el rango con nombre `APP_CopSeg_Usb_Path` (si existe, se usa ese en su lugar), pero el fallback da por hecho que en la máquina donde se ejecute existe `F:\__CopSeg Versiones Programas\`. Dado que este libro se usa entre varios ordenadores, si el rango de configuración se pierde en una copia del libro, el fallback podría apuntar a una ruta que no existe en esa máquina — al menos hay un `MsgBox` previo que avisa de la falta del Range.
+Solo se usa si falta el rango con nombre `APP_CopSeg_Usb_Path` (si existe, se usa ese en su lugar), pero el fallback da por hecho que en la máquina donde se ejecute existe `F:\__CopSeg Versiones Programas\`. Dado que este libro se usa entre varios ordenadores, si el rango de configuración se pierde en una copia del libro, el fallback podría apuntar a una ruta que no existe en esa máquina. Verificado contra el fichero real: el código citado coincide, y justo después (línea ~211 tras el arreglo) la rutina ya llamaba a `Application.GetSaveAsFilename` con `FichPath` como sugerencia — es decir, el usuario podía corregir la ruta a mano en ese diálogo, pero solo si se daba cuenta de que la propuesta por defecto no existía en su máquina.
 
-**Sugerencia:** si el rango no existe, pedir la ruta con `Application.GetSaveAsFilename`/`FileDialog` en vez de asumir una ruta fija.
+**Arreglo aplicado:** si falta el `Range`, en vez de asumir la ruta fija se abre un `Application.FileDialog(msoFileDialogFolderPicker)` para que el usuario elija la carpeta de destino explícitamente; si cancela, la rutina sale limpiamente con `Exit Sub`. **Limitación consciente, no resuelta:** la carpeta elegida no se persiste como `Name` nuevo (`ThisWorkbook.Names.Add("APP_CopSeg_Usb_Path", ...)`) porque exigiría decidir en qué celda de `Prog__APP` crearlo — un dato de layout de la hoja real que no es visible en el `.bas` exportado y que no se debe adivinar (ver la nota de "pide la verdad real" del `CLAUDE.md` global). Si se quiere persistir, el propio usuario puede crear el `Name` a mano (Fórmulas → Administrador de Nombres) apuntando a la celda que prefiera; a partir de ahí la rama `Else` ya existente se ocupa de detectar cambios de ruta y ofrecer actualizarlo.
 
 ### C12 · `.UsedRange` como instrucción suelta — propiedad usada como si fuera un método
 **Severidad:** Crítico · **Fichero:** `Rut_WS.bas` — líneas 30 y 64 (antes del arreglo) · **Estado:** ✅ Corregido (2026-09-18)
@@ -1001,3 +1006,5 @@ Confirmado huérfano y borrado del repo y del `.xlsm` real: ver [[C10]] (que doc
 ---
 
 *Auditoría realizada mediante lectura completa de los 133 módulos exportados (no solo búsqueda de patrones), con verificación cruzada directa contra el fichero real de los 6 hallazgos más críticos (B1, B2, B4, C1, C3, A3) antes de incluirlos en este informe. Los hallazgos marcados "a verificar" señalan sospechas razonables que no se han podido confirmar por completo con el código en texto plano — antes de invertir tiempo en corregirlos, confírmalos contra el `.xlsm` real.*
+
+*Nota (2026-09-20): pese a esa verificación cruzada declarada, C1 resultó ser un falso positivo (código citado inexistente, fusión de dos rutinas distintas) — ver el detalle en el propio hallazgo. Dato a tener en cuenta: la "verificación cruzada" de esta lista no fue infalible.*
