@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'2025-12-26
+' Last Rev. 2026-09-20 14:11
 '- M02_Importar_LSGES04_GE - Modif: 2025-10-08
 Option Explicit
 
@@ -180,6 +180,8 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     Else
         Me.Frm_CursoAcad.Enabled = False
         Me.Frm_TP_o_CR.Enabled = False
+        Me.Frm_Switches.Visible = False
+        Me.Frm_Switches.Enabled = False
     End If
     
     Me.Tbx_UserName = Range("Usuario_Name")
