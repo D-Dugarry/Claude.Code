@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_WS"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 19:05
 Option Explicit
 
 ' ==================================================================================================
@@ -15,7 +15,11 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
 ' ==================================================================================================
         Dim ws      As Worksheet:       Set ws = Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht)
         Dim Lo      As ListObject:      Set Lo = ws.ListObjects(1)
-        Dim RgIni   As Range            '- Primera celda a borrar (esquina siguiente a la Tabla)
+        Dim FilIni  As Long             '- Primera FILA a borrar (la siguiente a la Tabla)
+        Dim ColIni  As Long             '- Primera COLUMNA a borrar (la siguiente a la Tabla)
+        '- Ojo: se guardan como numero, NO como Range. Un objeto Range que apunte a la primera
+        '-  fila tras la tabla queda INVALIDADO al borrar esa fila, y leer su .Address da
+        '-  Error 424. Pasa cuando la tabla esta casi vacia (Sw_Del_DataBodyRange:=True).
         Dim Dummy_UsedRange As String   '- Solo para forzar la lectura de UsedRange (ver mas abajo)
         Dim Sw_Calculation  As XlCalculation:  Sw_Calculation = Application.Calculation:   Application.Calculation = xlManual
     With ws
@@ -24,10 +28,13 @@ Sub Rut_WrkSheet_ReducirPeso(ByVal WrkSht As String, Optional Sw_Del_DataBodyRan
         Call Rut_Lo_Filtros_Quitar(Lo)          ' Deshacer Filtros
         If Sw_Del_DataBodyRange And Not Lo.DataBodyRange Is Nothing Then Lo.DataBodyRange.Delete
         With Lo.Range                           ' Borra la filas de abajo y columnas de la derecha del la Tabla .ListObjects(1)
-            Set RgIni = .Cells(.Rows.Count, .Columns.Count).Offset(1, 1)   ' Primera celda tras la ultima de la tabla
+            FilIni = .Row + .Rows.Count         ' Primera fila tras la ultima de la tabla
+            ColIni = .Column + .Columns.Count   ' Primera columna tras la ultima de la tabla
         End With
-        .Range(RgIni.Address & ":" & .Cells(.Rows.Count, 1).Address).EntireRow.Delete
-        .Range(RgIni.Address & ":" & .Cells(1, .Columns.Count).Address).EntireColumn.Delete
+        If FilIni <= .Rows.Count Then _
+            .Range(.Cells(FilIni, 1), .Cells(.Rows.Count, 1)).EntireRow.Delete
+        If ColIni <= .Columns.Count Then _
+            .Range(.Cells(1, ColIni), .Cells(1, .Columns.Count)).EntireColumn.Delete
         Dummy_UsedRange = .UsedRange.Address        ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)
     End With
     Application.Calculation = Sw_Calculation

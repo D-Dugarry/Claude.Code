@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Wb_State_Manager"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 13:54
 '===================================================================================================
 ' Rut_Wb_State_Manager
 '
@@ -22,6 +22,7 @@ Attribute VB_Name = "Rut_Wb_State_Manager"
 ' SUBS/FUNCTIONS PÚBLICAS:
 '   Rut_Off_Functions   -> Desactiva pantalla/cálculo/eventos (en el nivel 0)
 '   Rut_On_Functions    -> Reactiva (solo en el nivel 0)
+'   Rut_Reset_NestLevel -> Fuerza el nivel a 0 y restaura (para manejadores de error)
 '
 '===================================================================================================
 Option Explicit
@@ -68,6 +69,30 @@ Public Sub Rut_On_Functions()
         Application.DisplayAlerts = True
         Prog__APP_Switch.Range("Sw_EnableEvents") = m_PrevEvents    ' Mantiene sincronizados los guards de hoja
     End If
+End Sub
+
+'---------------------------------------------------------------------------------------------------
+' Rut_Reset_NestLevel
+'   Fuerza el contador de anidamiento a 0 y restaura el estado de Excel.
+'
+'   PARA QUE SIRVE: un error no controlado aborta las rutinas SIN pasar por
+'   Rut_On_Functions, dejando m_NestLevel > 0 de forma permanente. A partir de
+'   ese momento Rut_On_Functions ya NUNCA restaura nada (nunca vuelve a 0) y la
+'   sesion se queda con la pantalla congelada y el calculo en manual.
+'   Llamar SOLO desde manejadores de error.
+'---------------------------------------------------------------------------------------------------
+Public Sub Rut_Reset_NestLevel()
+    m_NestLevel = 0
+
+    On Error Resume Next        ' nunca debe fallar: es la rutina de rescate
+    If m_PrevCalc = 0 Then m_PrevCalc = xlCalculationAutomatic   ' nunca se llamo a Off_Functions
+    Application.Calculation = m_PrevCalc
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Application.DisplayStatusBar = True
+    Application.DisplayAlerts = True
+    Prog__APP_Switch.Range("Sw_EnableEvents") = True
+    On Error GoTo 0
 End Sub
 
 '---------------------------------------------------------------------------------------------------

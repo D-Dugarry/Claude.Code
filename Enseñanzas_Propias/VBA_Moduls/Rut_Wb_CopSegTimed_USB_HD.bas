@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 19:05
 Option Explicit
 
 ' ==================================================================================================
@@ -237,6 +237,48 @@ Debug.Print "Rut_WrkBook_CopSegTimed_USB,   Tipo: " & Tipo
 '    ThisWorkbook.Close savechanges:=True
 Finalizar:
 End Sub
+' --------------------------------------------------------------------------------------------------
+
+' ==================================================================================================
+Function Fnc_CopSeg_Previa_Importacion(ByVal Proceso As String) As String   '- Copia de seguridad previa
+' ==================================================================================================
+'-  Guarda una copia del libro ANTES de un proceso que reescribe datos masivamente (p.ej. la
+'-  importacion de LSGES04, que actualiza ~8.400 registros de Prog_BD de una tacada).
+'-  Si el proceso falla a medias, esta copia es la via de vuelta atras (ver M71 Restituir).
+'-
+'-  NO se usa Rut_WrkBooK_CopSegTimed_WB_HD porque esa rutina machaca Form_Menu.TB_Informe
+'-  (borraria el informe del proceso en curso) y actualiza APP_CopSeg_HD_Date (falsearia el
+'-  ciclo de copia semanal de Workbook_Open).
+'-
+'-  Devuelve la ruta de la copia, o "" si no se pudo hacer (el proceso NO debe abortar por esto).
+    Fnc_CopSeg_Previa_Importacion = ""
+
+    Dim FichNom     As String
+    Dim FichExt     As String
+    Dim FPath       As String
+    Dim RutaCopia   As String
+
+    On Error GoTo GestError_CopPrev      '- Una copia fallida no puede impedir el proceso
+    FichNom = Left(ThisWorkbook.Name, InStrRev(ThisWorkbook.Name, ".") - 1)
+    FichExt = Right(ThisWorkbook.Name, Len(ThisWorkbook.Name) - InStrRev(ThisWorkbook.Name, ".") + 1)
+    FPath = Fnc_Format_Ruta(ThisWorkbook.Path & "/CopiaSeguridad/")
+
+    '- Marca _Pre_<Proceso> para distinguirla de las copias periodicas
+    RutaCopia = FPath & FichNom & " - " & Format(Now, "(yymmdd_hhmm)") & "_Pre_" & Proceso & FichExt
+
+    Application.DisplayAlerts = False
+    ThisWorkbook.SaveCopyAs Filename:=RutaCopia
+    Application.DisplayAlerts = True
+    On Error GoTo 0
+
+    Fnc_CopSeg_Previa_Importacion = RutaCopia
+    Exit Function
+
+GestError_CopPrev:
+    Application.DisplayAlerts = True
+    Debug.Print "Fnc_CopSeg_Previa_Importacion FALLO: " & Err.Number & " - " & Err.Description
+    Fnc_CopSeg_Previa_Importacion = ""
+End Function    ' Fnc_CopSeg_Previa_Importacion
 ' --------------------------------------------------------------------------------------------------
 
 ' ==================================================================================================
