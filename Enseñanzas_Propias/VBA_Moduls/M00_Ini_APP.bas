@@ -1,5 +1,5 @@
 Attribute VB_Name = "M00_Ini_APP"
-' Last Rev. 2026-09-19 21:08
+' Last Rev. 2026-09-21 06:44
 '2026-01-09
 '- M00_Ini_APP
 
@@ -124,29 +124,9 @@ End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 ' ==================================================================================================================================
-Sub Rut_Off_Functions()
-    Application.Calculation = xlCalculationManual
-    Application.ScreenUpdating = False
-    If Prog__APP_Switch.Range("Sw_EnableEvents") Then Application.EnableEvents = False:     Prog__APP_Switch.Range("Sw_EnableEvents") = False               ' DesHABILITA LOS EVENTOS
-End Sub
-' ==================================================================================================================================
-Sub Rut_On_Functions()
-    If Prog__APP_Switch.Range("Sw_Calculation") Then
-        Application.Calculation = xlCalculationAutomatic
-    Else
-         Application.Calculation = xlCalculationManual
-    End If
-    Application.DisplayAlerts = True
-    Application.ScreenUpdating = True
-
-    If Prog__APP_Switch.Range("Sw_EnableEvents") Then
-        Application.EnableEvents = True
-    Else
-        Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-        Prog__APP_Switch.Range("Sw_EnableEvents") = True
-    End If
-
-End Sub
+' Rut_Off_Functions / Rut_On_Functions -> movidas a Rut_Wb_State_Manager.bas (excel-state-manager)
+'   Mismo nombre publico, misma firma (sin argumentos): las llamadas existentes no cambian.
+'   Anadido soporte de reentrancia (contador de anidamiento) que esta implementacion no tenia.
 ' ==================================================================================================================================
 
 ' ======================================================================================================
