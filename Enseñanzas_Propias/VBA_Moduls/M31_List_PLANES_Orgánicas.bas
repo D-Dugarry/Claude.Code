@@ -1,10 +1,11 @@
 Attribute VB_Name = "M31_List_PLANES_Orgánicas"
+' Last Rev. 2026-09-21 12:12
 '2026-02-06
 '- M31_Listar_PLANES
 Option Explicit
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Listar_Planes_y_sus_Orgánicas()
-'==================================================================================================================================
+'===================================================================================================
     Dim Cont                As Integer
     Dim i                   As Long
     Dim Txt_Cabecera        As String
@@ -30,13 +31,13 @@ Sub RuT_Listar_Planes_y_sus_Orgánicas()
     ' Inicio Listado en Tabla excel
     Txt_Cabecera = "Planes de " & Range("APP_EFP_o_CFC") & "_" & Range("APP_CursAcad") & String(10, " ") & Now & vbCrLf & vbCrLf
     
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = Txt_Cabecera
     Txt_Cabecera = "    Plan  Coef.Ret.VRI y Orgánicas"
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Txt_Cabecera & vbLf
         
-    ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
+    ' Recorro toda la Tabla ------------------------------------------------------------------------
     With Lo_RetVRI.DataBodyRange
     For i = 3 To Lo_RetVRI.ListRows.Count
         Txt_Orgánicas = Replace(.Cells(i, CoefVRI_Orgánica), vbLf, ", ")
@@ -62,9 +63,9 @@ Sub RuT_Listar_Planes_y_sus_Orgánicas()
     End With
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & "Fin listado."
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 
 
 

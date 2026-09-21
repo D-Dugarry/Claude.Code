@@ -1,11 +1,12 @@
 Attribute VB_Name = "M38_Cierre_Contable_PLANES"
+' Last Rev. 2026-09-21 12:12
 '2026-01-27
 '- M31_Cierre_Contable_PLANES
 Option Explicit
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Cierre_Contable_AñoCont()
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_CursAcad")
     Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
@@ -90,17 +91,17 @@ Salir:
     Application.Calculation = xlCalculationAutomatic
     Call Rut_EnableEvents_Status_Reset
     Application.Speech.Speak "Proceso Terminado"
-End Sub '------------------------------------------------------------------------------------------------------------------------
+End Sub '-------------------------------------------------------------------------------------------
 
 
 
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String, _
                                          Ws_Lista As Worksheet)
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
@@ -245,7 +246,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCobAdm).Value = "Pdte_Cob" & vbLf & "1303.00 " & vbLf & "Adm.'" & Right(AñoCont, 2)
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCobAcad).Value = "Pdte_Cob" & vbLf & "1311.00 " & vbLf & "Acad.'" & Right(AñoCont, 2)
 
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = Txt_Cabecera & vbCrLf & vbCrLf
     Txt_Cabecera = String(27, " ") & "Cob-" & AñoCont & String(18, " ") & "Cob-" & AñoCont & String(6, " ") & "ADxAplz" & String(6, " ") & "ADxAplz" & String(7, " ") & AñoCont & vbLf & _
@@ -259,7 +260,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
     For Each Cod_Plan In Collection_Planes
 
 
-'- Importe Recibos Emi_AñoCont -----------------------------------------------------------------------------------------------------------------
+'- Importe Recibos Emi_AñoCont ---------------------------------------------------------------------
             Imp_Emis = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -279,7 +280,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                           .Columns(BD_ACont_Emi), AñoCont)
             RowNew.Range(Lst_RegsEmis) = RegsEmis
 
-            '- Importe Recibos Emi_Adm -----------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos Emi_Adm -------------------------------------------------------------
             Imp_EmisAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -287,30 +288,30 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_EmisAdm) = Imp_EmisAdm
             TImpEmisAdm = TImpEmisAdm + Imp_EmisAdm
             
-            '- Importe Recibos Emi_Acad -----------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos Emi_Acad ------------------------------------------------------------
             Imp_EmisAcad = Imp_Emis - Imp_EmisAdm
             RowNew.Range(Lst_Imp_EmisAcad) = Imp_EmisAcad
             TImpEmisAcad = TImpEmisAcad + Imp_EmisAcad
             
-'- Importe Anul --------------------------------------------------------------------------------------------------------------------
+'- Importe Anul ------------------------------------------------------------------------------------
             Imp_Anul = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), "<0", _
                                           .Columns(BD_Plan), Cod_Plan)
             RowNew.Range(Lst_Imp_Anul) = Imp_Anul
             TImpAnul = TImpAnul + Imp_Anul
             If Imp_Anul <> 0 Then
-                '- Importe-Adm ADxAplz --------------------------------------------------------------------------------------------------------------------
+                '- Importe-Adm ADxAplz -------------------------------------------------------------
                 Imp_AnulAdm = 0
                 RowNew.Range(Lst_Imp_AnulAdm) = "?"
                 TImpAnulAdm = TImpAnulAdm + Imp_AnulAdm
     
-                '- Importe Acad ADxAplz -----------------------------------------------------------------------------------------------------------------
+                '- Importe Acad ADxAplz ------------------------------------------------------------
                 Imp_AnulAcad = 0
                 RowNew.Range(Lst_Imp_AnulAcad) = "?"
                 TImpAnulAcad = TImpAnulAcad + Imp_AnulAcad
             End If
             
-'- Importe Cob_AñoCont, Emi_AñoCont --------------------------------------------------------------------------------------------------------------------
+'- Importe Cob_AñoCont, Emi_AñoCont ----------------------------------------------------------------
             Imp_Cobr = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -319,7 +320,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_Cobr) = Imp_Cobr
             TImpCobr = TImpCobr + Imp_Cobr
             
-            '- Importe Emitido y Cob_AñoCont, Emi_AñoCont -------- ¡¡¡ Para detectar Diferencias entre Emitido y Cobrado ------------------------------------------------------------------------------------------------------------
+            '- Importe Emitido y Cob_AñoCont, Emi_AñoCont -------- ¡¡¡ Para detectar Diferencias entre Emitido y Cobrado
             Imp_Emi_VS_Cobr = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -328,7 +329,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_Emi_VS_Cobr) = Imp_Emi_VS_Cobr - Imp_Cobr
             TImpEmi_VS_Cobr = TImpEmi_VS_Cobr + Imp_Emi_VS_Cobr - Imp_Cobr
             
-            '- Importe Adm Cob_AñoCont, Emi_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Cob_AñoCont, Emi_AñoCont ------------------------------------------------
             Imp_CobrAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -337,13 +338,13 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_CobrAdm) = Imp_CobrAdm
             TImpCobrAdm = TImpCobrAdm + Imp_CobrAdm
             
-            '- Importe Acad Cob_AñoCont, Emi_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Cob_AñoCont, Emi_AñoCont -----------------------------------------------
             Imp_CobrAcad = Imp_Cobr - Imp_CobrAdm
             RowNew.Range(Lst_Imp_CobrAcad) = Imp_CobrAcad
             TImpCobrAcad = TImpCobrAcad + Imp_CobrAcad
             
             
-'- Importe RDT Cob_AñoCont, Emi_AñoCont --------------------------------------------------------------------------------------------------------------------
+'- Importe RDT Cob_AñoCont, Emi_AñoCont ------------------------------------------------------------
             Imp__RDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -353,7 +354,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp__RDT) = Imp__RDT
             TImp_RDT = TImp_RDT + Imp__RDT
 
-            '- Importe Adm RDT Cob_AñoCont, Emi_AñoCont --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm RDT Cob_AñoCont, Emi_AñoCont --------------------------------------------
             Imp__RDTAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -362,12 +363,12 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                           .Columns(BD_ACont_Emi), AñoCont)
             RowNew.Range(Lst_Imp__RDTAdm) = Imp__RDTAdm
             TImp_RDTAdm = TImp_RDTAdm + Imp__RDTAdm
-            '- Importe Adm RDT Cob_AñoCont, Emi_AñoCont --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm RDT Cob_AñoCont, Emi_AñoCont --------------------------------------------
             Imp__RDTAcad = Imp__RDT - Imp__RDTAdm
             RowNew.Range(Lst_Imp__RDTAcad) = Imp__RDTAcad
             TImpCobrAcad = TImpCobrAcad + Imp__RDTAcad
 
-'- Importe Pdte_RDT --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_RDT --------------------------------------------------------------------------------
             Imp_SRDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -377,7 +378,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_RDTpdt) = Imp_SRDT
             TImpSRDT = TImpSRDT + Imp_SRDT
 
-            '- Importe Adm Pdte_RDT --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_RDT ----------------------------------------------------------------
             Imp_SRDTAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -386,12 +387,12 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                           .Columns(BD_ACont_Emi), AñoCont)
             RowNew.Range(Lst_Imp_RDTpdtAdm) = Imp_SRDTAdm
             TImpSRDTAdm = TImpSRDTAdm + Imp_SRDTAdm
-            '- Importe Acad Pdte_RDT --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_RDT ---------------------------------------------------------------
             Imp_SRDTAcad = Imp_SRDT - Imp_SRDTAdm
             RowNew.Range(Lst_Imp_RDTpdtAcad) = Imp_SRDTAcad
             TImpSRDTAcad = TImpSRDTAcad + Imp_SRDTAcad
 
-'- Importe ADxADxAplz --------------------------------------------------------------------------------------------------------------------
+'- Importe ADxADxAplz ------------------------------------------------------------------------------
             Imp__ADx = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -407,7 +408,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp__ADx) = Imp__ADx
             TImp_ADx = TImp_ADx + Imp__ADx
 
-            '- Importe ADxAplzAdm --------------------------------------------------------------------------------------------------------------------
+            '- Importe ADxAplzAdm ------------------------------------------------------------------
             Imp_ADxAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -423,13 +424,13 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp__ADxAdm) = Imp_ADxAdm
             TImpADxAdm = TImpADxAdm + Imp_ADxAdm
 
-            '- Importe ADxAplzAcad --------------------------------------------------------------------------------------------------------------------
+            '- Importe ADxAplzAcad -----------------------------------------------------------------
             Imp_ADxAcad = Imp__ADx - Imp_ADxAdm
             RowNew.Range(Lst_Imp__ADxAcad) = Imp_ADxAcad
             TImpADxAcad = TImpADxAcad + Imp_ADxAcad
 
 
-'- Importe Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_Cob --------------------------------------------------------------------------------
             Imp_PdtCob = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -445,7 +446,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_PdtCob) = Imp_PdtCob
             TimpPdtCob = TimpPdtCob + Imp_PdtCob
 
-            '- Importe Adm Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_Cob ----------------------------------------------------------------
             Imp_PdtCobAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -461,14 +462,14 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_PdtCobAdm) = Imp_PdtCobAdm
             TimpPdtCobAdm = TimpPdtCobAdm + Imp_PdtCobAdm
             
-            '- Importe Acad Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_Cob ---------------------------------------------------------------
             Imp_PdtCobAcad = Imp_PdtCob - Imp_PdtCobAdm
             RowNew.Range(Lst_Imp_PdtCobAcad) = Imp_PdtCobAcad
             TimpPdtCobAcad = TimpPdtCobAcad + Imp_PdtCobAcad
             
 
 
-            '-- Informe --------------------------------------------------------------------------------------------------------------------------
+            '-- Informe ----------------------------------------------------------------------------
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Plan, "00") & "º " & Cod_Plan & " " & _
                 Right(String(12, " ") & Format(Imp_Emis, "#,##0.00"), 13) & _
                 IIf(Imp_Cobr > 0, " " & Right(String(12, "·") & Format(Imp_Cobr, "#,##0.00"), 13), "  ¡Sin Cobros!") & _
@@ -506,26 +507,26 @@ Siguiente_Plan:
                 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "¡ No hay planes sin Cobros !"
             End If
 
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & _
                                                 "¡¡¡ Proceso concluido !!! día: " & Now() & _
                                                 " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 'End With    '- Lo_BD.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 ''''Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String, _
                                          Ws_Lista As Worksheet)
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
@@ -689,7 +690,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Emi_y_Cob).Value = "Imp.Rec.Emi" & vbLf & "y Cob." & vbLf & CursoAcad
 
 
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = Txt_Cabecera & vbCrLf & vbCrLf
     Txt_Cabecera = String(16, " ") & AñoCont - 1 & String(11, " ") & AñoCont & String(11, " ") & AñoCont & "         Cob." & AñoCont & "       Cob." & AñoCont & vbLf & _
@@ -707,7 +708,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Orden) = Cont_Plan
             RowNew.Range(Lst_Plan) = Cod_Plan
     
-'- Importe Emi -----------------------------------------------------------------------------------------------------------------
+'- Importe Emi -------------------------------------------------------------------------------------
             Imp_Emis = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan)
@@ -718,7 +719,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
                                           .Columns(BD_Plan), Cod_Plan)
             RowNew.Range(Lst_RegsEmis) = RegsEmis
     
-'- Importe EmiAnt_AñoCont-1 -----------------------------------------------------------------------------------------------------------------
+'- Importe EmiAnt_AñoCont-1 ------------------------------------------------------------------------
             Imp_EmisAnt = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -726,25 +727,25 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_EmisAnt) = Imp_EmisAnt
             TImpEmisAnt = TImpEmisAnt + Imp_EmisAnt
     
-'- Importe Anul --------------------------------------------------------------------------------------------------------------------
+'- Importe Anul ------------------------------------------------------------------------------------
             Imp_Anul = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), "<0", _
                                           .Columns(BD_Plan), Cod_Plan)
             RowNew.Range(Lst_ImpAnul) = Imp_Anul
             TImpAnul = TImpAnul + Imp_Anul
             If Imp_Anul <> 0 Then
-                '- Importe-Adm ADxAplz --------------------------------------------------------------------------------------------------------------------
+                '- Importe-Adm ADxAplz -------------------------------------------------------------
                 Imp_AnulAdm = 0
                 RowNew.Range(Lst_ImpAnulAdm) = "?"
                 TImpAnulAdm = TImpAnulAdm + Imp_AnulAdm
     
-                '- Importe Acad ADxAplz -----------------------------------------------------------------------------------------------------------------
+                '- Importe Acad ADxAplz ------------------------------------------------------------
                 Imp_AnulAcad = 0
                 RowNew.Range(Lst_ImpAnulAcad) = "?"
                 TImpAnulAcad = TImpAnulAcad + Imp_AnulAcad
             End If
             
-'- Importe ADxAplz --------------------------------------------------------------------------------------------------------------------
+'- Importe ADxAplz ---------------------------------------------------------------------------------
             Imp__ADx = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -754,7 +755,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_ADx) = Imp__ADx
             TImp_ADx = TImp_ADx + Imp__ADx
 
-            '- Importe-Adm ADxAplz --------------------------------------------------------------------------------------------------------------------
+            '- Importe-Adm ADxAplz -----------------------------------------------------------------
             Imp__ADxAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -764,12 +765,12 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_ADxAdm) = Imp__ADxAdm
             TImp_ADxAdm = TImp_ADxAdm + Imp__ADxAdm
 
-            '- Importe Acad ADxAplz -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad ADxAplz ----------------------------------------------------------------
             Imp__ADxAcad = Imp__ADx - Imp__ADxAdm
             RowNew.Range(Lst_Imp_ADxAcad) = Imp__ADxAcad
             TImp_ADxAcad = TImp_ADxAcad + Imp__ADxAcad
             
-'- Importe Aplazado (ADxAplz el AñoCont -1 ----------------------------------------------------------------------------------------------------------------
+'- Importe Aplazado (ADxAplz el AñoCont -1 ---------------------------------------------------------
             Imp_Aplz = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -779,7 +780,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_Aplz) = Imp_Aplz
             TImpAplz = TImpAplz + Imp_Aplz
 
-'- Importe EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
+'- Importe EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ------------------------------
             I_EjeAnt = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -789,7 +790,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_ImpEjeAnt) = I_EjeAnt
             T_EjeAnt = T_EjeAnt + I_EjeAnt
 
-'- Importe EmiPos_AñoCont -----------------------------------------------------------------------------------------------------------------
+'- Importe EmiPos_AñoCont --------------------------------------------------------------------------
             Imp_EmisPos = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -797,7 +798,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_EmisPos) = Imp_EmisPos
             TImpEmisPos = TImpEmisPos + Imp_EmisPos
     
-            '- Importe  EmiPosAdm_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe  EmiPosAdm_AñoCont ----------------------------------------------------------
             Imp_EmisPosAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -805,12 +806,12 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_EmisPosAdm) = Imp_EmisPosAdm
             TImpEmisPosAdm = TImpEmisPosAdm + Imp_EmisPosAdm
     
-            '- Importe  EmiPosAdm_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe  EmiPosAdm_AñoCont ----------------------------------------------------------
             Imp_EmisPosAcad = Imp_EmisPos - Imp_EmisPosAdm
             RowNew.Range(Lst_Imp_EmisPosAcad) = Imp_EmisPosAcad
             TImpEmisPosAcad = TImpEmisPosAcad + Imp_EmisPosAcad
 
-'- Importe CobrAnt Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+'- Importe CobrAnt Cob_AñoCont ---------------------------------------------------------------------
             Imp_CobrAnt = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -818,7 +819,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_CobrAnt) = Imp_CobrAnt
             TImpCobrAnt = TImpCobrAnt + Imp_CobrAnt
     
-'- Importe CobrPos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+'- Importe CobrPos Cob_AñoCont ---------------------------------------------------------------------
             Imp_CobrPos = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -826,7 +827,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_CobrPos) = Imp_CobrPos
             TImpCobrPos = TImpCobrPos + Imp_CobrPos
     
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             Imp_CobrPosAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -834,12 +835,12 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_CobrPosAdm) = Imp_CobrPosAdm
             TImpCobrPosAdm = TImpCobrPosAdm + Imp_CobrPosAdm
     
-            '- Importe Acad Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoCont ----------------------------------------------------
             Imp_CobrPosAcad = Imp_CobrPos - Imp_CobrPosAdm
             RowNew.Range(Lst_Imp_CobrPosAcad) = Imp_CobrPosAcad
             TImpCobrPosAcad = TImpCobrPosAcad + Imp_CobrPosAcad
             
-'- Importe Recibos RDT -----------------------------------------------------------------------------------------------------------------
+'- Importe Recibos RDT -----------------------------------------------------------------------------
             Imp__RDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -847,7 +848,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp__RDT) = Imp__RDT
             TImp_RDT = TImp_RDT + Imp__RDT
 
-'- Importe Sin_RDT --------------------------------------------------------------------------------------------------------------------
+'- Importe Sin_RDT ---------------------------------------------------------------------------------
             Imp_SRDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -855,7 +856,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_RDTpdt) = Imp_SRDT
             TImpSRDT = TImpSRDT + Imp_SRDT
 
-'- Importe Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_Cob --------------------------------------------------------------------------------
             Imp_PdtCob = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
@@ -863,26 +864,26 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_PdtCob) = Imp_PdtCob
             TimpPdtCob = TimpPdtCob + Imp_PdtCob
     
-            '- Importe Adm Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_Cob ----------------------------------------------------------------
             Imp_PdtCobAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
                                           .Columns(BD_ACont_Cob), "=")
             RowNew.Range(Lst_Imp_PdtCobAdm) = Imp_PdtCobAdm
             TimpPdtCobAdm = TimpPdtCobAdm + Imp_PdtCobAdm
-            '- Importe Acad Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_Cob ---------------------------------------------------------------
             Imp_PdtCobAcad = Imp_PdtCob - Imp_PdtCobAdm
             RowNew.Range(Lst_Imp_PdtCobAcad) = Imp_PdtCobAcad
             TimpPdtCobAcad = TimpPdtCobAcad + Imp_PdtCobAcad
     
-'- Importe Cob_C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Cob_C_Acad ------------------------------------------------------------------------------
             Imp_Cob_C_Acad = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan)
             RowNew.Range(Lst_Imp_Cob_C_Acad) = Imp_Cob_C_Acad
             TImpCob_C_Acad = TImpCob_C_Acad + Imp_Cob_C_Acad
     
-            '- Importe Emitido y Cob_AñoCont, Emi_AñoCont -------- ¡¡¡ Para detectar Diferencias entre Emitido y Cobrado ------------------------------------------------------------------------------------------------------------
+            '- Importe Emitido y Cob_AñoCont, Emi_AñoCont -------- ¡¡¡ Para detectar Diferencias entre Emitido y Cobrado
             Imp_Emi_Y_Cobr = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan)
@@ -890,7 +891,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_Emi_VS_Cobr) = Imp_Emi_Y_Cobr - Imp_Cob_C_Acad
             TImpEmi_VS_Cobr = TImpEmi_VS_Cobr + Imp_Emi_Y_Cobr - Imp_Cob_C_Acad
             
-''''- Informe --------------------------------------------------------------------------------------------------------------------
+''''- Informe --------------------------------------------------------------------------------------
 '''            Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Plan, "00") & "º " & Cod_Plan & " " & _
 '''                Right(String(12, " ") & Format(Imp_EmisAnt, "#,##0.00"), 14) & _
 '''                IIf(Imp_Cobr > 0, " " & Right(String(12, "·") & Format(Imp_EmisPos, "#,##0.00"), 14), "  No hay Cobros") & _
@@ -924,16 +925,16 @@ Siguiente_Plan:
                 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "¡ No hay planes sin Cobros !"
             End If
     
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & _
                                                 "¡¡¡ Proceso concluido !!! día: " & Now() & _
                                                 " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 'End With    '- Lo_BD.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 '''Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================

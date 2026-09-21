@@ -1,12 +1,12 @@
 Attribute VB_Name = "M20_Inf_EP_UXXI"
-' Last Rev. 2026-09-19 08:28
+' Last Rev. 2026-09-21 12:12
 '2026-01-30
 '-M20_Inf_EP_Resumen_1
 Option Explicit
 
-' ==================================================================================================================================
-Sub Rut_EP_Resumen_1()    ' ===============================================================================================
-' ==================================================================================================================================
+' ==================================================================================================
+Sub Rut_EP_Resumen_1()    ' ========================================================================
+' ==================================================================================================
 '--- Tabla ShWrk  Tit.Propios-Resumen ----------------------
     Dim CursoAcad       As String:     CursoAcad = Prog__APP.Range("APP_CursAcad") '- Curso Académico
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")    '- Año Contable
@@ -118,8 +118,8 @@ Rut_Off_Functions
     '- Vacío la Tabla de Tit.Prop.  =====================================
     Lo_TPResum.AutoFilter.ShowAllData
     If Not Lo_TPResum.DataBodyRange Is Nothing Then Lo_TPResum.DataBodyRange.Delete
-    ' ==================================================================================================================================
-    ' ###############################  Genero la Tabla de Planes de DR  #####################################
+    ' ==============================================================================================
+    ' ###############################  Genero la Tabla de Planes de DR  ############################
     Plan_Ant = "":   Curso_Acad_Ant = "":   Año_Emi_Ant = 0: Cont_Tot_Reg = 0:
     Range("TP_Cod_Plan") = ""
     Range("TP_Cod_Plan").Select
@@ -127,8 +127,8 @@ Rut_Off_Functions
     ActiveCell.Offset(0, 1).Select
     ActiveCell.Offset(0, 1) = " Última actualización: " & Now()
     ActiveCell.Offset(0, 1).Select
-    ' ##################################################################################################################
-    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  =====================================
+    ' ##############################################################################################
+    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  ======
 Dim RwPH        As ListRow
 Dim RwTP        As ListRow
 Dim ContRec26   As Long
@@ -149,7 +149,7 @@ Dim ContRec26   As Long
         Cont_Reg_Proc = Cont_Reg_Proc + 1
         Cont_Tot_Reg = Cont_Tot_Reg + 1
         ' --------------=============  Tratamiento de los Datos  ==================
-        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
+        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico
             ' Añadir JI si no está -------------------
             If RwPH.Range(BD_JI_Emi_Acad) <> "" Then
                 If InStr(RwTP.Range(CtTP_Ref_JI), RwPH.Range(BD_JI_Emi_Acad)) = 0 Then
@@ -196,7 +196,7 @@ Dim ContRec26   As Long
 '''If RwPH.Range(BD_Plan) = "GI37" Then Debug.Print "Detall:", RwPH.Range(BD_Ref) & " - " & RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy"), _
 '''                                            RwTP.Range(CtTP_Cob_Total), RwPH.Range(BD_ImpCob), RwTP.Range(CtTP_Cob_Tadm)
 
-        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes ---------------------------------------------------------
+        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes --------
         
 
             Set RwTP = Nothing
@@ -255,7 +255,7 @@ Dim ContRec26   As Long
 '            RwTP.Range (CtTP_Descripción)="LIQ-TitProp_"  &RwPH.Range(BD_Plan ) & "-N Curso" & RwPH.Range(BD_C_Acad) &"_AñoCont_20"&DERECHA([@plan];2)&" - " & RwPH.Range(BD_NomPlan)
             
             ' =====================================================================================
-            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ==================
+            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ===========
             If F_Plan > 1 Then
                     F_Ant = F_Plan - 1
                 
@@ -311,7 +311,7 @@ Siguiente_Fila:
 
     Next Fila_DR
              
-            ' ---------------------------=============  Cálculos Redistribución  de la última Fila ==================
+            ' ---------------------------===========  Cálculos Redistribución  de la última Fila ===
             If F_Plan > 1 Then
                     F_Ant = F_Plan
 
@@ -363,11 +363,11 @@ Form_Menu.TB_Informe = "¡¡¡ Proceso concluido con éxito !!!   He tardado: " & Ro
         "En la Nueva Consulta hay:  " & "  -  Tot.Reg. " & Cont_Tot_Reg & "    Planes: " & F_Plan & vbCrLf & Now()
 Debug.Print ContRec26
 Rut_On_Functions
-End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
+End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
             
 
 

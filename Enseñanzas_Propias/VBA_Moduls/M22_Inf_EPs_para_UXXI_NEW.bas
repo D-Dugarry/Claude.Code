@@ -1,5 +1,5 @@
 Attribute VB_Name = "M22_Inf_EPs_para_UXXI_NEW"
-' Last Rev. 2026-09-20 14:39
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
     Const BdUx_Cod_Plan                   As Integer = 1    ' col: a
@@ -51,9 +51,9 @@ Option Explicit
     Const BdUx_Pdt_SinOrg                 As Integer = 47   ' col: au
     Const BdUx_Descripción                As Integer = 48   ' col: av
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Informe_EPs_para_UXXI()
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_CursAcad")
     Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
@@ -116,14 +116,14 @@ Salir:
     Application.Calculation = xlCalculationAutomatic
     Call Rut_EnableEvents_Status_Reset
     Application.Speech.Speak "Proceso Terminado"
-End Sub '------------------------------------------------------------------------------------------------------------------------
+End Sub '-------------------------------------------------------------------------------------------
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Informe_EPs_para_UXXI_Rellena_Tabla(Lo_BD As ListObject, _
                                             CursoAcad As String, _
                                             TipoCurso As String, _
                                             Ws_Lista As Worksheet)
-' ==================================================================================================================================
+' ==================================================================================================
 '--- Tabla Sht__Inf_EPs_UXXI  EPs-Resumen ----------------------
     'Dim CursoAcad       As String:     CursoAcad = Prog__APP.Range("APP_CursAcad") '- Curso Académico
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")    '- Año Contable
@@ -195,8 +195,8 @@ Sub Rut_Informe_EPs_para_UXXI_Rellena_Tabla(Lo_BD As ListObject, _
     '- Vacío la Tabla de Tit.Prop.  =====================================
     Lo_Lst.AutoFilter.ShowAllData
     If Not Lo_Lst.DataBodyRange Is Nothing Then Lo_Lst.DataBodyRange.Delete
-    ' ==================================================================================================================================
-    ' ###############################  Genero la Tabla de Planes de BDatos  #####################################
+    ' ==============================================================================================
+    ' ###############################  Genero la Tabla de Planes de BDatos  ########################
     Cod_Plan = "":   Curso_Acad_Ant = "":   Año_Emi = 0: Cont_Tot_Reg = 0:
     Range("TP_Cod_Plan") = ""
     Range("TP_Cod_Plan").Select
@@ -217,8 +217,8 @@ Sub Rut_Informe_EPs_para_UXXI_Rellena_Tabla(Lo_BD As ListObject, _
             
             
     Debug.Print ""
-    ' ##################################################################################################################
-    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  =====================================
+    ' ##############################################################################################
+    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  ======
 Dim RwBD        As ListRow
 Dim RwUxi        As ListRow
 
@@ -231,10 +231,10 @@ Dim RwUxi        As ListRow
         Cont_Reg_Proc = Cont_Reg_Proc + 1
         Cont_Tot_Reg = Cont_Tot_Reg + 1
         ' --------------=============  Tratamiento de los Datos  ==================
-        'If Cod_Plan & Curso_Acad_Ant & Año_Emi = RwBD.Range(BD_Plan) & RwBD.Range(BD_C_Acad) & Format(RwBD.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
-        If Cod_Plan & Año_Emi = RwBD.Range(BD_Plan) & RwBD.Range(BD_ACont_Emi) Then GoTo Siguiente_Fila    ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
+        'If Cod_Plan & Curso_Acad_Ant & Año_Emi = RwBD.Range(BD_Plan) & RwBD.Range(BD_C_Acad) & Format(RwBD.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico
+        If Cod_Plan & Año_Emi = RwBD.Range(BD_Plan) & RwBD.Range(BD_ACont_Emi) Then GoTo Siguiente_Fila    ' ------- Control cambio de Plan de estudio y de Curso Académico
            
-        '------ Es el primero de una serie y tengo que introducir los datos comunes ---------------------------------------------------------
+        '------ Es el primero de una serie y tengo que introducir los datos comunes ----------------
 
         Set RwUxi = Nothing
         Set RwUxi = Lo_Lst.ListRows.Add
@@ -260,11 +260,11 @@ Dim RwUxi        As ListRow
         
 Dim Imp_Acad        As Currency
 
-'- Importe Emis C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Emis C_Acad -----------------------------------------------------------------------------
         RwUxi.Range(BdUx_Emi_Total) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                          .Columns(BD_ACont_Emi), "=" & Año_Emi, _
                                                          .Columns(BD_Plan), Cod_Plan)
-        '- Importe-EmisAdm --------------------------------------------------------------------------------------------------------------------
+        '- Importe-EmisAdm -------------------------------------------------------------------------
         RwUxi.Range(BdUx_Emi_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                         .Columns(BD_ACont_Emi), "=" & Año_Emi, _
                                                         .Columns(BD_Plan), Cod_Plan)
@@ -274,21 +274,21 @@ Dim Imp_Acad        As Currency
         RwUxi.Range(BdUx_Emi_Org) = Imp_Acad - RwUxi.Range(BdUx_Emi_VRI)
         If RwUxi.Range(BdUx_Orgánica) = "" Then RwUxi.Range(BdUx_Emi_SinOrg) = RwUxi.Range(BdUx_Emi_Total) + RwUxi.Range(BdUx_Emi_Tadm)
                     
-'- Importe Cobr C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Cobr C_Acad -----------------------------------------------------------------------------
         RwUxi.Range(BdUx_Cob_C_ACad) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                           .Columns(BD_ACont_Cob), "<>", _
                                                           .Columns(BD_Plan), Cod_Plan)
-        '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+        '- Importe Adm Recibos Cob_AñoCont ---------------------------------------------------------
         RwUxi.Range(BdUx_Cob_C_Acad_Adm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                           .Columns(BD_ACont_Cob), "<>", _
                                                           .Columns(BD_Plan), Cod_Plan)
 
-'- Importe Cobr AñoCont -----------------------------------------------------------------------------------------------------------------
+'- Importe Cobr AñoCont ----------------------------------------------------------------------------
         If Año_Emi = AñoContPos Then
             RwUxi.Range(BdUx_Cob_ACont) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContPos, _
                                                               .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             RwUxi.Range(BdUx_Cob_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContPos, _
                                                               .Columns(BD_Plan), Cod_Plan)
@@ -303,7 +303,7 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_Cob_ACont) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContAnt, _
                                                               .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             RwUxi.Range(BdUx_Cob_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContAnt, _
                                                               .Columns(BD_Plan), Cod_Plan)
@@ -314,12 +314,12 @@ Dim Imp_Acad        As Currency
             If RwUxi.Range(BdUx_Orgánica) = "" Then RwUxi.Range(BdUx_Cob_SinOrg) = RwUxi.Range(BdUx_Cob_ACont) + RwUxi.Range(BdUx_Cob_Tadm)
         End If
     
-'- Importe RDT -----------------------------------------------------------------------------------------------------------------
+'- Importe RDT -------------------------------------------------------------------------------------
         If AñoCont = AñoContPos And Año_Emi = AñoContPos Or AñoCont = AñoContAnt And Año_Emi = AñoContAnt Then
             RwUxi.Range(BdUx_RDT_Total) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                              .Columns(BD_RDT), "<>", _
                                                              .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm RDT -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm RDT ---------------------------------------------------------------------
             RwUxi.Range(BdUx_RDT_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                               .Columns(BD_RDT), "<>", _
                                                               .Columns(BD_Plan), Cod_Plan)
@@ -329,13 +329,13 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_RDT_Org) = Imp_Acad - RwUxi.Range(BdUx_RDT_VRI)
         End If
     
-'- Importe Pdte RDT -----------------------------------------------------------------------------------------------------------------
+'- Importe Pdte RDT --------------------------------------------------------------------------------
         If AñoCont = AñoContPos And Año_Emi = AñoContPos Or AñoCont = AñoContAnt And Año_Emi = AñoContAnt Then
             RwUxi.Range(BdUx_PdteRDT_Total) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                                  .Columns(BD_ACont_Cob), "<>", _
                                                                  .Columns(BD_Plan), Cod_Plan)
             RwUxi.Range(BdUx_PdteRDT_Total) = RwUxi.Range(BdUx_PdteRDT_Total) - RwUxi.Range(BdUx_RDT_Total)
-            '- Importe Adm Pdte_RDT -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_RDT ----------------------------------------------------------------
             RwUxi.Range(BdUx_PdteRDT_TAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ACont_Cob), "<>", _
                                                                 .Columns(BD_Plan), Cod_Plan)
@@ -345,14 +345,14 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_PdteRDT_VRI) = Application.Round(Imp_Acad * RwUxi.Range(BdUx_Coef_VRI) / 100, 2)
             RwUxi.Range(BdUx_PdteRDT_Org) = Imp_Acad - RwUxi.Range(BdUx_PdteRDT_VRI)
         End If
-'- Importe ADxAplz -----------------------------------------------------------------------------------------------------------------
+'- Importe ADxAplz ---------------------------------------------------------------------------------
         If Año_Emi = AñoContAnt Then
             RwUxi.Range(BdUx_ADx_Total) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                              .Columns(BD_ACont_Cob), "<>" & AñoContAnt, _
                                                              .Columns(BD_ACont_Emi), "=" & AñoContAnt, _
                                                              .Columns(BD_ACont_Vto), ">" & AñoContAnt, _
                                                              .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm ADxAplz -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm ADxAplz -----------------------------------------------------------------
             RwUxi.Range(BdUx_ADx_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                              .Columns(BD_ACont_Cob), "<>" & AñoContAnt, _
                                                              .Columns(BD_ACont_Emi), "=" & AñoContAnt, _
@@ -368,13 +368,13 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_ADx_Org) = Imp_Acad - RwUxi.Range(BdUx_ADx_VRI)
         End If
     
-''- Importe ADxAplz -----------------------------------------------------------------------------------------------------------------
+''- Importe ADxAplz --------------------------------------------------------------------------------
 '            RwUxi.Range(BdUx_ADx_Total) = Application.SumIfs(.Columns(BD_ImpRec), _
 '                                                             .Columns(BD_ACont_Cob), "<>" & AñoContAnt, _
 '                                                             .Columns(BD_ACont_Emi), "=" & Año_Emi, _
 '                                                             .Columns(BD_ACont_Vto), ">" & Año_Emi, _
 '                                                             .Columns(BD_Plan), Cod_Plan)
-'            '- Importe Adm ADxAplz -----------------------------------------------------------------------------------------------------------------
+'            '- Importe Adm ADxAplz ----------------------------------------------------------------
 '            RwUxi.Range(BdUx_ADx_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
 '                                                            .Columns(BD_ACont_Cob), "<>" & AñoContAnt, _
 '                                                            .Columns(BD_ACont_Emi), "=" & Año_Emi, _
@@ -385,14 +385,14 @@ Dim Imp_Acad        As Currency
 '            RwUxi.Range(BdUx_ADx_VRI) = Application.Round(Imp_Acad * RwUxi.Range(BdUx_Coef_VRI) / 100, 2)
 '            RwUxi.Range(BdUx_ADx_Org) = Imp_Acad - RwUxi.Range(BdUx_ADx_VRI)
 
-'- Importe Aplazado -----------------------------------------------------------------------------------------------------------------
+'- Importe Aplazado --------------------------------------------------------------------------------
         If Año_Emi = AñoContPos Then
            RwUxi.Range(BdUx_Aplz_Total) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContPos, _
                                                               .Columns(BD_ACont_Emi), "=" & AñoContAnt, _
                                                               .Columns(BD_ACont_Vto), ">" & AñoContAnt, _
                                                               .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm Aplazado -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Aplazado ----------------------------------------------------------------
             RwUxi.Range(BdUx_Aplz_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                               .Columns(BD_ACont_Cob), "=" & AñoContPos, _
                                                               .Columns(BD_ACont_Emi), "=" & AñoContAnt, _
@@ -404,7 +404,7 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_Aplz_Org) = Imp_Acad - RwUxi.Range(BdUx_Aplz_VRI)
         End If
     
-'- Importe Pdte_Cob C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_Cob C_Acad -------------------------------------------------------------------------
 '        If Año_Emi = AñoContPos Then
         If AñoCont = AñoContPos And Año_Emi = AñoContPos Or AñoCont = AñoContAnt And Año_Emi = AñoContAnt Then
             RwUxi.Range(BdUx_Pdt_Total) = Application.SumIfs(.Columns(BD_ImpRec), _
@@ -412,7 +412,7 @@ Dim Imp_Acad        As Currency
             RwUxi.Range(BdUx_Pdt_Total) = RwUxi.Range(BdUx_Pdt_Total) - Application.SumIfs(.Columns(BD_ImpCob), _
                                                                                            .Columns(BD_ACont_Cob), "<>", _
                                                                                            .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_Cob ----------------------------------------------------------------
             RwUxi.Range(BdUx_Pdt_Tadm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                             .Columns(BD_Plan), Cod_Plan)
             RwUxi.Range(BdUx_Pdt_Tadm) = RwUxi.Range(BdUx_Pdt_Tadm) - Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
@@ -462,17 +462,17 @@ Rut_On_Functions
     Application.ScreenUpdating = True
     Call Rut_EnableEvents_Status_Reset
 '    Application.Speech.Speak "Proceso completado."
-End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
+End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
             
 
 '2026-02-02
-'===================================================================================================================================
-'- Guarda Copia de la ActiveSheet ==================================================================================================
-'===================================================================================================================================
+'===================================================================================================
+'- Guarda Copia de la ActiveSheet ==================================================================
+'===================================================================================================
 Sub Rut_WrkSht_Export_Inf_para_UXXI()
     Debug.Print "Rut_WrkSht_Export_Cierre_Contable_AñoCont"
     Dim TipoEP          As String
@@ -498,7 +498,7 @@ Sub Rut_WrkSht_Export_Inf_para_UXXI()
     
 '    Call Rut_EnableEvents_Status_Reset
 End Sub
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 

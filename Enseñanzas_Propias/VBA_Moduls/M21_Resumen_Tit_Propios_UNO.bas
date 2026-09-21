@@ -1,5 +1,6 @@
 Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
-' ==================================================================================================================
+' Last Rev. 2026-09-21 12:12
+' ==================================================================================================
 ' *** MODULO COMPLETO DESACTIVADO (comentado) el 2026-09-19 00:27 ***
 '
 ' Motivo: no compila. 'Cod_Plan' (el filtro por plan de la linea 106) no se
@@ -14,12 +15,12 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 ' Tit.Propio'. Mientras el modulo este comentado, esa entrada del menu fallara
 ' al pulsarla (Form_Menu la lanza con Application.Run y no encontrara la macro).
 ' Conviene quitar o marcar esa fila en Tb_Tareas mientras tanto.
-' ==================================================================================================================
+' ==================================================================================================
 'Option Explicit
 
-' ==================================================================================================================================
-'Sub Rut_Resumen_Tab_TitPropios_UNO()    ' ===============================================================================================
-' ==================================================================================================================================
+' ==================================================================================================
+'Sub Rut_Resumen_Tab_TitPropios_UNO()    ' =========================================================
+' ==================================================================================================
 '--- Tabla Wk_TitP_UNO  Tit.Propios-Resumen ----------------------
 ' Const CtTP_Cod_Plan          As Integer = 1
 ' Const CtTP_Curso_Acad        As Integer = 2
@@ -104,13 +105,13 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '    Lo_TPResum.AutoFilter.ShowAllData
 '    If Not Lo_TPResum.DataBodyRange Is Nothing Then Lo_TPResum.DataBodyRange.Delete
 'GoTo Restablecer_Valores
-    ' ==================================================================================================================================
-    ' ###############################  Genero la Tabla de Planes de DR  #####################################
+    ' ==============================================================================================
+    ' ###############################  Genero la Tabla de Planes de DR  ############################
 '    Plan_Ant = "":   Curso_Acad_Ant = "":   Año_Emi_Ant = 0: Cont_Tot_Reg = 0:
 '    Range("TP_Cod_Plan") = ""
 '    Range("TP_Cod_Plan").Offset(0, 1) = Range("APP_CursAcad")
-    ' ##################################################################################################################
-    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  =====================================
+    ' ##############################################################################################
+    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  ======
 'Dim RwPH        As ListRow
 'Dim RwTP        As ListRow
 
@@ -129,7 +130,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '        Cont_Tot_Reg = Cont_Tot_Reg + 1
 '''GoTo Siguiente_Fila
         ' --------------=============  Tratamiento de los Datos  ==================
-'        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
+'        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico
             ' Añadir JI si no está -------------------
 '            If RwPH.Range(BD_JI_Emi_Acad) <> "" Then
 '                If InStr(RwTP.Range(CtTP_Ref_JI), RwPH.Range(BD_JI_Emi_Acad)) = 0 Then
@@ -149,7 +150,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '            If RwPH.Range(BD_ImpCob) > 0 Then
 '                RwTP.Range(CtTP_Cob_Total) = RwTP.Range(CtTP_Cob_Total) + RwPH.Range(BD_ImpCob)
 '                RwTP.Range(CtTP_Cob_Tadm) = RwTP.Range(CtTP_Cob_Tadm) + RwPH.Range(BD_Rec_Imp_Adm)
-                '--- Importes Redistribuidos --------=====================================================================================
+                '--- Importes Redistribuidos --------===============================================
 '                If RwPH.Range(BD_Liquidado) <> "" Then
 '                    RwTP.Range(CtTP_RDT_Total) = RwTP.Range(CtTP_RDT_Total) + RwPH.Range(BD_ImpCob)
 '                    RwTP.Range(CtTP_RDT_Tadm) = RwTP.Range(CtTP_RDT_Tadm) + RwPH.Range(BD_Rec_Imp_Adm)
@@ -158,7 +159,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
             
 '            RwTP.Range(CtTP_Cant_Reg) = RwTP.Range(CtTP_Cant_Reg) + 1
 
-'        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes ---------------------------------------------------------
+'        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes -------
         
 '            Set RwTP = Nothing
 '            Set RwTP = Lo_TPResum.ListRows.Add
@@ -188,7 +189,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '            If RwPH.Range(BD_ImpCob) > 0 Then
 '                RwTP.Range(CtTP_Cob_Total) = RwPH.Range(BD_ImpCob)
 '                RwTP.Range(CtTP_Cob_Tadm) = RwPH.Range(BD_Rec_Imp_Adm)
-                '--- Importes Redistribuidos --------=====================================================================================
+                '--- Importes Redistribuidos --------===============================================
 '                If RwPH.Range(BD_Liquidado) <> "" Then
 '                    RwTP.Range(CtTP_RDT_Total) = RwPH.Range(BD_ImpCob)
 '                    RwTP.Range(CtTP_RDT_Tadm) = RwPH.Range(BD_Rec_Imp_Adm)
@@ -196,7 +197,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '            End If
             
             ' =====================================================================================
-            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ==================
+            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ===========
 '            If F_Plan > 1 Then
 '                    F_Ant = F_Plan - 1
                 
@@ -246,7 +247,7 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 
 '    Next Fila_DR
              
-            ' ---------------------------=============  Cálculos Redistribución  de la última Fila ==================
+            ' ---------------------------===========  Cálculos Redistribución  de la última Fila ===
 '            If F_Plan > 1 Then
 '                    F_Ant = F_Plan
 
@@ -291,11 +292,11 @@ Attribute VB_Name = "M21_Resumen_Tit_Propios_UNO"
 '        "En la Nueva Consulta hay:  " & "  -  Tot.Reg. " & Cont_Tot_Reg & "    Planes: " & F_Plan & vbCrLf & Now()
         
 'Rut_On_Functions
-'End Sub     ' Rut_Resumen_Tab_TitPropios_UNO  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
+'End Sub     ' Rut_Resumen_Tab_TitPropios_UNO  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
             
 
 

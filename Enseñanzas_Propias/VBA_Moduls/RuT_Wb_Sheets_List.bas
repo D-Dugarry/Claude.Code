@@ -1,17 +1,18 @@
 Attribute VB_Name = "RuT_Wb_Sheets_List"
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
 
-' ==================================================================================================================================
-    Sub RuT_WrkBook_Sheets_List()    ' Manejo interno, Hace la lista de todas las hojas de este libro       =============================
-' ==================================================================================================================================
+' ==================================================================================================
+    Sub RuT_WrkBook_Sheets_List()    ' Manejo interno, Hace la lista de todas las hojas de este libro
+' ==================================================================================================
 Dim WrkSht      As Worksheet
 Dim NomHoja     As String
 Dim NewRow      As ListRow
 Application.ScreenUpdating = False
 With Prog_HojasName
     .Unprotect
-        ' --------------------------------=============  Preparar Tabla de DR_Unificada ==================
+        ' --------------------------------=============  Preparar Tabla de DR_Unificada ============
         .Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
         .Rows.EntireRow.Hidden = False              ' Mostrar todas las Filas
         If .FilterMode Then .ShowAllData            ' Deshacer Filtros
@@ -42,7 +43,7 @@ With Prog_HojasName
 End With ' Prog_HojasName
 Application.ScreenUpdating = True
 End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
+' --------------------------------------------------------------------------------------------------
 
 
 

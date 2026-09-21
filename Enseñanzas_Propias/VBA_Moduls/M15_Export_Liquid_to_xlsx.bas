@@ -1,13 +1,14 @@
 Attribute VB_Name = "M15_Export_Liquid_to_xlsx"
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Exportar_La_Liquidación()   '- Copia una Sheet concreta
-' ==================================================================================================================================
+' ==================================================================================================
 Rut_Off_Functions
 Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
-    '- Copio la Sheet entera y esto es lo que voy a grabar. -----------------------------------------
+    '- Copio la Sheet entera y esto es lo que voy a grabar. ----------------------------------------
     Wk_TitP_Liquid.Copy
     '- Indicar Nombre del Archivo y Ruta para almacenar --------------
     Dim IntialName As String
@@ -21,7 +22,7 @@ Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
             Application.DisplayAlerts = True
             On Error GoTo 0
         End If
-    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla ------------
+    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla
         ActiveWorkbook.ActiveSheet.Unprotect
         ActiveWorkbook.ActiveSheet.Shapes.SelectAll:   Selection.Delete
         ActiveWorkbook.ActiveSheet.UsedRange.ClearComments
@@ -43,7 +44,7 @@ Salir_Sub:
 Call Rut_EnableEvents_Status_Reset
 Rut_On_Functions
 End Sub     ' Rut_Exportar_La_Liquidación
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 

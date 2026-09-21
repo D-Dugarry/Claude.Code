@@ -1,11 +1,12 @@
 Attribute VB_Name = "M80_Mandar_Correo"
-'###################################################################################################################################
+' Last Rev. 2026-09-21 12:12
+'###################################################################################################
 '   Nota Importante: Tenemos que Activar en este libro de Excel en Herramientas->Referencias->Microsoft CDO for Windows 2000 library
-'###################################################################################################################################
+'###################################################################################################
 Option Explicit
 
-'===================================================================================================================================
-Sub Rut_Email_Confirmar_Redistribucion_Hecha() ' ==================================================================================
+'===================================================================================================
+Sub Rut_Email_Confirmar_Redistribucion_Hecha() ' ===================================================
 Dim Respuesta   As Integer
 Dim DirMail     As String
 
@@ -32,8 +33,8 @@ Dim DirMail     As String
         
 End Sub     ' Rut_Email_Confirmar_Solicitud_Enviada_Bco --------------------------
 
-'===================================================================================================================================
-Sub Rut_Email_SinRDT_Motivo_Descripción() ' ==================================================================================
+'===================================================================================================
+Sub Rut_Email_SinRDT_Motivo_Descripción() ' ========================================================
 Dim Pos_Ini     As Long
 Dim Pos_Fin     As Long
 Dim Motivo      As String
@@ -78,15 +79,15 @@ Dim DirMail     As String
 End Sub     ' Rut_Email_Confirmar_Solicitud_Enviada_Bco --------------------------
 
 
-'=================================================================================================================
-'=================================================================================================================
+'===================================================================================================
+'===================================================================================================
 Sub Enviar_Email(ByVal MailDestinatario As String, ByVal MailAsunto As String, Optional ByVal FicheroAdjunto As String, Optional ByVal MailCuerpo As String)
-'=================================================================================================================
+'===================================================================================================
 Dim Correo                  As CDO.Message
 Dim Configuracion_Correo    As CDO.Configuration
 Dim Campos                  As Variant
 Dim FirmaCorreo             As String
-    FirmaCorreo = Replace(Range("APP_MailFirm"), "ext. ____", "ext. " & Range("Usuario_Ext"))    '- Pongo la Extención correspondiente ------
+    FirmaCorreo = Replace(Range("APP_MailFirm"), "ext. ____", "ext. " & Range("Usuario_Ext"))    '- Pongo la Extención correspondiente
 
     Set Correo = New CDO.Message
     Set Configuracion_Correo = New CDO.Configuration
@@ -98,11 +99,11 @@ Dim FirmaCorreo             As String
     With Correo
         .From = Range("APP_MailCta")               ' Emisor
         .Subject = MailAsunto               ' Asunto del correo
-            If Prog__APP_Switch.Range("Sw_Probando") Then                 ' Destinatario  -----------------------------------
-                .To = "dugarry@gcloud.ua.es"        ' Destinatario  En Prueba -------------------------
-            Else                                    ' Destinatario  -----------------------------------
-                .To = MailDestinatario              ' Destinatario  -----------------------------------
-            End If                                  ' Destinatario  -----------------------------------
+            If Prog__APP_Switch.Range("Sw_Probando") Then                 ' Destinatario  ----------
+                .To = "dugarry@gcloud.ua.es"        ' Destinatario  En Prueba ----------------------
+            Else                                    ' Destinatario  --------------------------------
+                .To = MailDestinatario              ' Destinatario  --------------------------------
+            End If                                  ' Destinatario  --------------------------------
         .Cc = ""
         .BCC = ""
         .HTMLBody = MailCuerpo & vbCrLf & "<b>Saludos, " & Range("Usuario_Name") & "</b><br><br>" & FirmaCorreo
@@ -135,10 +136,10 @@ Dim FirmaCorreo             As String
 Set Correo = Nothing
 Set Configuracion_Correo = Nothing
 
-End Sub     ' Enviar_Email ---------------------------------------------------------------------------------------
-'=================================================================================================================
+End Sub     ' Enviar_Email -------------------------------------------------------------------------
+'===================================================================================================
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Cambiar_Contraseña_Email()
 Dim NuevaClau   As String
     NuevaClau = InputBox("La Contraseña Actual es:   " & Range("APP_MailClau") & vbCrLf & vbCrLf & "Introduce la nueva Contraseña: ", "Actualizar Contraseña E-mail")
@@ -148,7 +149,7 @@ Dim NuevaClau   As String
     Else
         Form_Menu.TB_Informe = "La Contraseña Actual es:   " & Range("APP_MailClau") & "   - No se ha cambiado." & vbCrLf & vbCrLf & "Operación fue Anulada."
     End If
-End Sub     ' Rut_Cambiar_Contraseña_Email    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+End Sub     ' Rut_Cambiar_Contraseña_Email    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 

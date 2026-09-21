@@ -1,5 +1,5 @@
 Attribute VB_Name = "M05_Asign_Tipo_Recibo"
-' Last Rev. 2026-09-18 19:19
+' Last Rev. 2026-09-21 12:12
 '2026-01-06
 Option Explicit
 
@@ -8,9 +8,9 @@ Option Explicit
                 Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
                 Call RuT_Determinar_Tipo_Recibo
             End Sub
-'- ----------------------------------------------------------------------------------------------------------------------------
-'- Clasificar Recibos en Emitidos, Remesados, EjeAnt, ADxAplz, Añejas ---------------------------------------------------------------------------
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
+'- Clasificar Recibos en Emitidos, Remesados, EjeAnt, ADxAplz, Añejas ------------------------------
+'- -------------------------------------------------------------------------------------------------
 Sub RuT_Determinar_Tipo_Recibo()
 Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     Dim rowfind         As Variant
@@ -26,7 +26,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     Lo_G04.ShowTotals = False
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
     
-        '- Visualizo el progreso ---------------------------------------------------------------------------------------
+        '- Visualizo el progreso -------------------------------------------------------------------
         'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificación de Recibos, Estadística:", 0, , , , , , 2)
     With Lo_G04
     
@@ -40,7 +40,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
 
         TxtProgreso = TxtProgreso & vbCrLf & String(8, " ") & " Tipificado de Recibos. " & String(8, "_")
         
-        '-Filtra Recibos ErrDate - -----------------------------------------------------------------------------------
+        '-Filtra Recibos ErrDate - -----------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, BD_FEmi, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")
@@ -51,7 +51,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros con errores de fechas."
     
-        '-Filtra Recibos Emitidos -------------------------------------------------------------------------------
+        '-Filtra Recibos Emitidos ------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .AutoFilter.ShowAllData            ' Elimina los filtros
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Emitido")
@@ -63,7 +63,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros Emitidos."
 
-        '-Filtra Recibos EjeAnt -------------------------------------------------------------------------------
+        '-Filtra Recibos EjeAnt --------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_EjeAnt")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
@@ -75,7 +75,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
                     " Registros del Ejercicio Anterior. " & APP_AñoCont - 1
     
-        '-Filtra Recibos Añejos -------------------------------------------------------------------------------
+        '-Filtra Recibos Añejos --------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Añeja")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
@@ -86,7 +86,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
                     " Registros Añejos, anteriores a " & APP_AñoCont - 1
     
-        '-Filtra Recibos Aplazado -------------------------------------------------------------------------------
+        '-Filtra Recibos Aplazado ------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aplazado")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
@@ -97,7 +97,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
                     " Registros Aplazados, Anulados por Aplazamiento en " & APP_AñoCont - 1
     
-        '-Filtra Recibos ADxAplz -------------------------------------------------------------------------------
+        '-Filtra Recibos ADxAplz -------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ADxAplz")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
@@ -108,7 +108,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & _
                     " Registros ADxAplz, Anulados por Aplazamiento en " & APP_AñoCont & ", a cobrar en " & APP_AñoCont + 1
         
-'        '-Filtra Recibos ADxAplz_SinCob -------------------------------------------------------------------------------
+'        '-Filtra Recibos ADxAplz_SinCob -----------------------------------------------------------
 '        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ADxAplz_SinCob")
 '        RowFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
 '        If RowFind > 0 Then
@@ -120,10 +120,10 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
 '                    " Registros ADxAplz_SinCob, Anulados por Aplazamiento en " & APP_AñoCont - 1 & "  y  ¡¡¡ SIN Cobrar en " & APP_AñoCont & " !!!"
         
         
-        '---------------------------------------------------------------------------------------------------------
-        '---------------------------------------------------------------------------------------------------------
-        '---------------------------------------------------------------------------------------------------------
-        '-Filtra Recibos Devolución - ----------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-Filtra Recibos Devolución - --------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="<0"
@@ -133,10 +133,10 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros de devolución."
         
-        '---------------------------------------------------------------------------------------------------------
-        '-_Contab_Ant_--------------------------------------------------------------------------------------------
-        '------------------ Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
-        '---------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-_Contab_Ant_------------------------------------------------------------------------------
+        '------------------ Filtra Cobradas en Años anteriores al de Emisión -----------------------
+        '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="<" & APP_AñoCont
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
@@ -145,10 +145,10 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros _Contab_Ant_, Cobrados anteriormente y por lo tanto, ya Contabilizado."
         
-        '---------------------------------------------------------------------------------------------------------
-        '-_Ajust_Matríc_------------------------------------------------------------------------------------------
-        '------------------ Filtra Ajustes de Matrícula (ImpAdm negativo) ----------------------------------------
-        '---------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-_Ajust_Matríc_----------------------------------------------------------------------------
+        '------------------ Filtra Ajustes de Matrícula (ImpAdm negativo) --------------------------
+        '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AutoFilter Field:=BD_ImpAdm, Criteria1:="<0"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
@@ -157,9 +157,9 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros _Ajust_Matríc_, Ajustes de Matrícula (Imp. Admin. negativo)."
         
-        '--------------------------------------------------------------------------------------------------------
-        '-Filtra Recibos Sin Tipo ---------------------------------------------------------------------------------
-        '--------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-Filtra Recibos Sin Tipo ------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         RegsSinTipo = Application.WorksheetFunction.CountIf(.DataBodyRange.Columns(BD_Tipo_Rec), "")
 
@@ -167,7 +167,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "=") & " " & Format(Lo_G04.ListRows.Count, "#,##0"), 8) & " Total Registros, Tipificados: " & RegsCanTot & "reg." & vbLf
 
 
-        '---------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         '-Filtra Recibos Anul - -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, BD_Anul, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
@@ -178,9 +178,9 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         End If
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Registros Anulados."
     
-        '--------------------------------------------------------------------------------------------------------
-        '-Filtra Recibos Sin Tipo ---------------------------------------------------------------------------------
-        '--------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-Filtra Recibos Sin Tipo ------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         rowfind = Application.WorksheetFunction.CountIf(.DataBodyRange.Columns(BD_Tipo_Rec), "")
         If rowfind > 0 Then

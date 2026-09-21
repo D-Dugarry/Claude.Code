@@ -1,9 +1,10 @@
 Attribute VB_Name = "Rut_NEXE"
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
-' ==================================================================================================================================
-Function Fnc_Format_Ruta(Ruta_Red As String) As String       ' Cambia la Ruta de la Red Nexe a Unidades de disco Local -------
-' ==================================================================================================================================
+' ==================================================================================================
+Function Fnc_Format_Ruta(Ruta_Red As String) As String       ' Cambia la Ruta de la Red Nexe a Unidades de disco Local
+' ==================================================================================================
 
     If Left(ActiveWorkbook.Path, 18) = "https://nexe.ua.es" Then
         Debug.Print "Red"
@@ -20,12 +21,12 @@ Function Fnc_Format_Ruta(Ruta_Red As String) As String       ' Cambia la Ruta de
 Debug.Print Fnc_Format_Ruta
 Debug.Print Fnc_Format_Ruta
 End Function        ' Fnc_Format_Referencia
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
-'###################################################################################################################################
+'###################################################################################################
         'call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem, [NomFich], [PathFich])
 Sub Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem As String, Optional NomFich As String = "", Optional RutaFich As String = "")
-' ==================================================================================================================================
+' ==================================================================================================
     Debug.Print "Rut_ArchFullName_SeparaEn_NameFile_y_PathFile: " & Fich_SelectedItem
     If InStr(Fich_SelectedItem, "/") > 0 Then
         NomFich = Right(Fich_SelectedItem, Len(Fich_SelectedItem) - InStrRev(Fich_SelectedItem, "/"))   '- ¡¡ Funciona con NEXE !!

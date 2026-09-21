@@ -1,5 +1,5 @@
 Attribute VB_Name = "M09_Importar_Sol_Liq"
-' Last Rev. 2026-09-18 23:14
+' Last Rev. 2026-09-21 12:12
 '- M04_Importar_Sol_Liq
 Option Explicit
 
@@ -31,13 +31,13 @@ Public Const CSol_Flist            As Integer = 23       ' col: w
 Dim Finalizar_Proceso           As Boolean
 Dim AñoCont                     As String           ' Para Controlar el cambio de años el en número de orden que genero
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Import_Sol_Liquid()
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 
 Rut_Off_Functions
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
-    '   Averigua el Número de Liquidación   ----------------------------------------------------------------------------------------
+    '   Averigua el Número de Liquidación   --------------------------------------------------------
     Dim Pos_Ini     As Long
     Dim Pos_Fin     As Long
     Dim NumeLiquida      As String
@@ -50,7 +50,7 @@ Rut_Off_Functions
     End If
     NumeLiquida = Mid(NumeLiquida, Pos_Ini + 2, Pos_Fin - Pos_Ini - 2)    '---extraigo la NumeLiquida
     
-    '   Seleccionar fichero     ---------------------------------------------------------------------------------------------------
+    '   Seleccionar fichero     --------------------------------------------------------------------
     Dim Arch_Select         As String
     With Application.FileDialog(msoFileDialogFilePicker)
         .InitialFileName = Application.Workbooks(ThisWorkbook.Name).Path & "\"
@@ -69,24 +69,24 @@ Rut_Off_Functions
             'Nom_NewArch = Dir(Arch__EP_New)
         End If
     End With
-            '- Visualizo el progreso ---------------------------------------------------------------------------------------
+            '- Visualizo el progreso ---------------------------------------------------------------
             Form_Menu.TB_Informe = "Importando Excel de Solicitud: " & Arch_Select & vbCrLf & Format(Now, "hh:mm:ss")
             Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
-    '   Borrar el contenido de la hoja Prog_Sol_Liq    ------------------------------------------------------------
+    '   Borrar el contenido de la hoja Prog_Sol_Liq    ---------------------------------------------
     Prog_Sol_Liq.Visible = xlSheetVisible
     Call Rut_WrkSheet_Vaciar(Prog_Sol_Liq)
-    '   Copio el excel    ------------------------------------------------------------------------------------------
+    '   Copio el excel    --------------------------------------------------------------------------
     Dim ClsBk          As Variant
     Set ClsBk = Workbooks.Open(Arch_Select)
     ClsBk.Sheets(1).ListObjects(1).Range.Copy ThisWorkbook.Sheets(Prog_Sol_Liq.Name).Range("A1")
     Application.CutCopyMode = False
     ClsBk.Close SaveChanges:=False
     Set ClsBk = Nothing
-    '   Si no viene con Tabla la Creo       ------------------------------------------------------------------------
+    '   Si no viene con Tabla la Creo       --------------------------------------------------------
     If Prog_Sol_Liq.ListObjects.Count = 0 Then
        Prog_Sol_Liq.ListObjects.Add(xlSrcRange, Sheets(Prog_Sol_Liq.Name).UsedRange, , xlYes).Name = "Tb_Sol_Liq"
     End If
-            '- Visualizo el progreso ---------------------------------------------------------------------------------------
+            '- Visualizo el progreso ---------------------------------------------------------------
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & "Importado Excel:       " & Format(Now, "hh:mm:ss")
             Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
     '----------------------------------------------------------
@@ -101,23 +101,23 @@ Rut_Off_Functions
     Prog_Sol_Liq.Select
     Prog_Sol_Liq.Unprotect
     Call Rut_Lo_Filtros_Quitar(Lo_Sol)
-    '- Formatear Columnas ------------------------------------------------------------------------------------------
+    '- Formatear Columnas --------------------------------------------------------------------------
     With Lo_Sol
 '        .ShowTotals = False
         '- -----------------------------------------------------------------------------
-'        .DataBodyRange.Columns(CSol_F_Emi).Select     '- Datos - Texto en Columnas PARA Números --------
+'        .DataBodyRange.Columns(CSol_F_Emi).Select     '- Datos - Texto en Columnas PARA Números ---
 '        Selection.TextToColumns Destination:=.DataBodyRange.Columns(CSol_F_Emi), DataType:=xlDelimited, _
 '            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
 '            Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
 '            :=Array(1, 4), TrailingMinusNumbers:=True
-        .DataBodyRange.Columns(CSol_Ref).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS --------
+        .DataBodyRange.Columns(CSol_Ref).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS
         Selection.TextToColumns DataType:=xlDelimited, Space:=False, Other:=False, FieldInfo:=Array(1, 1)
             Selection.NumberFormat = "0000 000000000"
             Selection.Value = Selection.Value
         .DataBodyRange.Columns(CSol_ImpCob).Select
         Selection.TextToColumns DataType:=xlDelimited, Space:=False, Other:=False, FieldInfo:=Array(1, 1)
     End With
-            '- Visualizo el progreso ---------------------------------------------------------------------------------------
+            '- Visualizo el progreso ---------------------------------------------------------------
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & "Formateado Excel:      " & Format(Now, "hh:mm:ss")
             Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
     
@@ -166,16 +166,16 @@ Rut_Off_Functions
 Next_Lin:
         Next LinSol
     End With    ' Lo_Liq.DataBodyRange
-    'Filtrar Liquidación -----------------------------------------------------------------------------------------------
+    'Filtrar Liquidación ---------------------------------------------------------------------------
     Call Rut_Lo_Sort(Lo_Liq, CLiq_Nombre, xlAscending, True)
     Lo_Liq.Range.AutoFilter Field:=CLiq_NumLiquid, Criteria1:="=" & NumeLiquida
     Lo_Liq.Range.Cells(1, 1).Select
     ActiveCell.Offset(1, 1).Select
-            '- Visualizo el progreso ---------------------------------------------------------------------------------------
+            '- Visualizo el progreso ---------------------------------------------------------------
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & "Filtrado Excel:        " & Format(Now, "hh:mm:ss")
             Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
 
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 Form_Menu.TB_Informe = "¡¡¡ Proceso concluido con éxito !!! día: " & Now() & " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & vbCrLf & _
         "Del Excel:  " & Mid(Arch_Select, InStrRev(Arch_Select, "\") + 1) & vbCrLf & vbCrLf & _
         "Ruta:  " & Left(Arch_Select, InStrRev(Arch_Select, "\")) & vbCrLf & vbCrLf & _
@@ -193,7 +193,7 @@ Rut_On_Functions
 '    Prog_N43_TxT.Visible = xlSheetVeryHidden
 '    Prog_N43_CTA.Visible = xlSheetVeryHidden
 End Sub     '- Extraer_Norma43
-' ==================================================================================================================================
+' ==================================================================================================
 
 
 

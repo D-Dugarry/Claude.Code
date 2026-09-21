@@ -2,16 +2,16 @@ Attribute VB_Name = "M42_Añadir_Núm_JIs_a_BDatos"
 '2026-02-14
 Option Explicit
 
-' Last Rev. 2026-09-19 17:38
+' Last Rev. 2026-09-21 12:12
 ' MODULO COMENTADO COMPLETO: pendiente de adaptar desde otra app.
 ' Referencia a Sht_Inf_Recibos_TIO no existe como CodeName en este libro.
 ' No tocar/descomentar sin revisar antes cual es la hoja real. (Confirmado por el usuario 2026-09-19)
 
-'- Añadir los Números de JI's a BDatos, tomándolos de la Tabla Informe_Recibos. ------------------------
+'- Añadir los Números de JI's a BDatos, tomándolos de la Tabla Informe_Recibos. --------------------
 
-' ==================================================================================================================================
+' ==================================================================================================
 'Sub Rut_Añadir_a_BDatos_JIs_de_Inf_Recibos()
-' ==================================================================================================================================
+' ==================================================================================================
 'Debug.Print "Rut_Añadir_a_BDatos_JIs_de_Inf_Recibos"
 
         'Dim Nom_Inf         As String:          Nom_Inf = "Inf_Recibos"
@@ -40,7 +40,7 @@ Option Explicit
     'Sht_Inf.Select
     'Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     '
-    '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------------------
+    '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico ----------------------
     'Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     'Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     'Lo_BD.ShowTotals = False
@@ -51,15 +51,15 @@ Option Explicit
     'Call Rut_Lo_Sort(Lo_Inf, InfRec_TipRec, xlAscending, True)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
     'Call Rut_Lo_Sort(Lo_Inf, InfRec_ConcptEco, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
     '
-    '-------------- Leo la Tabla de JI's de Tasas por Tipo y por Concepto ------------------------------------
-    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
+    '-------------- Leo la Tabla de JI's de Tasas por Tipo y por Concepto --------------------------
+    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. ----------------------
     'For F_Inf = 1 To Lo_Inf.ListRows.Count
         'Set RwJI = Lo_Inf.ListRows(F_Inf)
         'Tp_Rec = RwJI.Range(InfRec_TipRec)
         'Concept = "1" & RwJI.Range(InfRec_ConcptEco)
         'If Left(Concept, 4) = "1311" Then GoTo Siguiente_Concepto                                       '- ¡¡ No podemos hacer de Enseñanzas Propias !!
         'If Application.CountA(RwJI.Range(InfRec_JI_Emi_Adm).Resize(, 4)) = 0 Then GoTo Siguiente_Concepto  '- No hay JI's ¡¡ En ninguna columna !!
-        '---------------------------------------------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         '- Filtrar Tipo_Rec y Concepto
         'Call Rut_Lo_Filtros_Quitar(Lo_BD)
         'Lo_BD.Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="=" & Tp_Rec
@@ -81,7 +81,7 @@ Option Explicit
 'Finalizar:
     'Call Rut_Lo_Filtros_Quitar(Lo_BD)
     '
-'    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+'    '- Visualizo el progreso ----------------------------------------------------------------------
 '    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla BDatos actualizada." & vbCrLf & _
 '        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
 '    MsgBox MenúAux_Msg
@@ -97,7 +97,7 @@ Option Explicit
     'Application.DisplayAlerts = True
     'Application.Speech.Speak "Proceso completado puede verificar el resultado.", True
 'End Sub
-'--------------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 

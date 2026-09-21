@@ -1,11 +1,12 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
+' Last Rev. 2026-09-21 12:12
 '2026-01-11
 'M_112_Manage_Duplicates
 Option Explicit
 
-'=========================================================================================================================================
-'- Gestionar Duplicados ------------------------------------------------------------------------------------------------------------------
-'=========================================================================================================================================
+'===================================================================================================
+'- Gestionar Duplicados ----------------------------------------------------------------------------
+'===================================================================================================
 Sub RuT_Duplicates_Search(Lo_Data As ListObject, _
                           Lo_DefCol As ListObject, _
                           Lo_Duplic As ListObject, _
@@ -35,9 +36,9 @@ Debug.Print ">>> RuT_Duplicates_Search"
     
     Application.DisplayAlerts = False
 
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
-    '- Gestionar Duplicados 1ª Parte: Los Identifica y Marca las Diferencias ------------------------------------------------------------------
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Gestionar Duplicados 1ª Parte: Los Identifica y Marca las Diferencias -----------------------
+    '- ---------------------------------------------------------------------------------------------
     Call Rut_Lo_Sort(Lo_Data, Colref, xlAscending, True)    '- Ordenar primero accelera un montón el borrado
     With Lo_Data.DataBodyRange
         .Columns(ColIncidencia).ClearContents   '- Se supone que está vacía...
@@ -80,13 +81,13 @@ Debug.Print ">>> RuT_Duplicates_Search"
         End With
     '- FIN, Visualizo el progreso --------
 
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
-    '- Gestionar Duplicados 2 Parte: Borra en Bdatos y deja en BD_Dpl los relevantes ----------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Gestionar Duplicados 2 Parte: Borra en Bdatos y deja en BD_Dpl los relevantes ---------------
     '-      Borro de BDatos Rec. Repes NO Finalistas (el último de cada serie de repeticiones de referencia)
     '-      Copio los Repes Finalistas de BDatos a Lo_Duplic (Se añaden a los de otras ejecuciones)
     '-      Borro de Lo_Duplic, los Repes que ya estan repetidos "RpIdem" porque se juntan los repes de esta tanda con los de tandas anteriores
     '-      Borro de Lo_Duplic, los Repes que aun siendo repes, no han sufrido cambios "(en 0 Cols)"
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     With Lo_Data
         '- Borrar Registros Repes en Lo_Data excepto el último --- OJO, PORQUE NO TENEMOS CRITERIO PARA SABER CUAL ES MEJOR QUEDARSE.
         .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=Rp*"
@@ -170,9 +171,9 @@ Restaurar_Valores:
     Application.DisplayAlerts = True
 Debug.Print "<<< RuT_Duplicates_Search"
 End Sub     ' RuT_Duplicates_Search
-'-----------------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
-'=========================================================================================================================================
+'===================================================================================================
 '- Marca los duplicados con "_Duplicati_1/2_" y añade en incidencia el valor del otro registro
 Sub RuT_Duplicates_Search_Mark_DIFF(Lo_Data As ListObject, _
                                     Lo_DefCol As ListObject, _
@@ -220,7 +221,7 @@ Debug.Print ">>> RuT_Duplicates_Search_Mark_DIFF"
     End With
     
 End Sub     ' RuT_Duplicates_Search_Mark_DIFF
-'-----------------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 

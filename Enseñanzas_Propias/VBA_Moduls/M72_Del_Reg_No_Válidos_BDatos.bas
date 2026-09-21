@@ -1,4 +1,5 @@
 Attribute VB_Name = "M72_Del_Reg_No_Válidos_BDatos"
+' Last Rev. 2026-09-21 12:12
 '2026-01-11
 Option Explicit
 
@@ -14,9 +15,9 @@ Option Explicit
                 Prog_BD.Unprotect
                 Call RuT_Del_Reg_NO_Válidos_Bdatos(Prog_BD.ListObjects(1))
             End Sub
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 '- Borrar Rec. NO Válidos: otros C_Acad, Matrícula=N, AE<>4, Matrícula Coste Cero--------
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 Sub RuT_Del_Reg_NO_Válidos_Bdatos(Lo_Data As ListObject)
 Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
     Dim rowfind         As Variant
@@ -29,7 +30,7 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
     With Lo_Data
         .ShowTotals = False
         
-        '- Borra los que son de otro Curso_Acad -------------------------------------------------------------------------------
+        '- Borra los que son de otro Curso_Acad ----------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="<>" & Curso_Acad   '- Elimino los que son de otro curso
@@ -49,7 +50,7 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & "No hay Recibos de Curso-Acad " & ChrW(&H2260) & " " & Curso_Acad
         End If
         
-        '- Borra los que BD_Matricula = "N" ----------------------------------------------------------------------------------
+        '- Borra los que BD_Matricula = "N" --------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_Matricula, xlAscending, True)    '- Ordenar primero accelera un montón el borrado --
         .Range.AutoFilter Field:=BD_Matricula, Criteria1:="=N"                          '- Elimino las NO Martrículas
@@ -64,9 +65,9 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & "No hay Recibos con Matrícula = N. "
         End If
         
-        '- Borra los que BD_ActivEco <> 4 (Enseñanzas Propias) ---------------------------------------------------------------
+        '- Borra los que BD_ActivEco <> 4 (Enseñanzas Propias) -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        .DataBodyRange.Columns(BD_ActivEco).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS ---------------
+        .DataBodyRange.Columns(BD_ActivEco).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS
         Selection.TextToColumns DataType:=xlDelimited, Space:=False, Other:=False, FieldInfo:=Array(1, 1)
         Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---
         .Range.AutoFilter Field:=BD_ActivEco, Criteria1:="<>4", Operator:=xlAnd, Criteria2:="<>300"        '- Elimino las NO Títulos Propios
@@ -81,7 +82,7 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "No hay Recibos con AE " & ChrW(&H2260) & " 4."
         End If
         
-        '-Filtra y Borrar Recibos de Matrículas de coste CERO - ImpMatCero - Recibos Matrícula de Actividad Académica a Coste CERO. ------------------
+        '-Filtra y Borrar Recibos de Matrículas de coste CERO - ImpMatCero - Recibos Matrícula de Actividad Académica a Coste CERO.
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_ImpDto, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
@@ -97,7 +98,7 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "No hay Recibos de Matrícula de Actividad Académica a Coste CERO."
         End If
         
-        '-Filtra y Borrar Recibos Importe CERO - Subvencionado- Imp_Acad <= Imp_Dto ------------------
+        '-Filtra y Borrar Recibos Importe CERO - Subvencionado- Imp_Acad <= Imp_Dto ----------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0,00"
@@ -125,7 +126,7 @@ Restablecer_Valores:
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
     Application.DisplayAlerts = True
 End Sub
-'- -----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 
 
 

@@ -1,10 +1,10 @@
 Attribute VB_Name = "M31_List_PLANES"
-' Last Rev. 2026-09-20 14:39
+' Last Rev. 2026-09-21 12:12
 '- M31_Listar_PLANES
 Option Explicit
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Listar_Planes()
-'==================================================================================================================================
+'===================================================================================================
     Dim Cont                As Long
     Dim ContIni             As Long:        ContIni = 1
     Dim Cod_Plan            As String
@@ -77,18 +77,18 @@ With Lo_BD.DataBodyRange
     Ws_Lista.Range("c2") = Txt_Cabecera
     Set RowNew = Lo_Lst.ListRows.Add:       RowNew.Range(Lst_Orden) = Cont_Plan:        RowNew.Range(Lst_Plan) = Cod_Plan
     
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = Txt_Cabecera
     Txt_Cabecera = "    Plan    Imp_Rec   r.  -  Imp_Cob   r. =  Pdte.Cob   r."
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Txt_Cabecera & vbLf
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Plan, "00") & "º " & Cod_Plan & " "
         
-    ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
+    ' Recorro toda la Tabla ------------------------------------------------------------------------
     For Cont = ContIni + 1 To Lo_BD.ListRows.Count
         If .Cells(Cont, BD_Tipo_Rec) = "Deleted" Then GoTo Reg_Siguiente
         If .Cells(Cont, BD_ImpAdm) < 0 Then GoTo Reg_Siguiente              '- Ajustes de Matrícula que distorcionan la Contabilidad !!!
-        '- <<<<<  PLAN NUEVO  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        '- <<<<<  PLAN NUEVO  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         If .Cells(Cont, BD_Plan) <> Cod_Plan Then
             Cod_Plan = .Cells(Cont, BD_Plan)
             Cont_Plan = Cont_Plan + 1
@@ -119,7 +119,7 @@ With Lo_BD.DataBodyRange
                 Regs_Dev = 0:       Imp_Devo = 0:       RDev_Pag = 0:       IDev_Pag = 0
                 RegsEmis = 0:       Imp_Emis = 0:       RegsCobr = 0:       Imp_Cobr = 0
         End If
-        '- <<<<<  Acumulado en PLAN  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        '- <<<<<  Acumulado en PLAN  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         If .Cells(Cont, BD_ImpRec) < 0 Then                             ' recibos Negativos de Devolución (a pagar) / Ajuste Matrícula
                                                     Regs_Dev = Regs_Dev + 1:     Imp_Devo = Imp_Devo + .Cells(Cont, BD_ImpRec)
             If .Cells(Cont, BD_ImpCob) < 0 Then                         ' recibos Negativos de Devolución Pagados
@@ -163,18 +163,18 @@ Reg_Siguiente:
                 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & "¡ No hay planes sin Cobros !"
             End If
     
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & _
                                                 "¡¡¡ Proceso concluido !!! día: " & Now() & _
                                                 " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 End With    '- Lo_BD.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 
 

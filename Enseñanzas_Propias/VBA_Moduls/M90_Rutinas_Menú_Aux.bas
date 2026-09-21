@@ -1,37 +1,38 @@
 Attribute VB_Name = "M90_Rutinas_Menú_Aux"
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Activar_Programación()
 '    RuT_Al_Abrir_WorkBook
     Call Rut_Sheets_Show
     Form_Menu.TB_Informe = "Estado de Programación Activado"
     Unload Form_Menu
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 Sub Rut_Reset_App()
     Call RuT_Al_Abrir_WorkBook
     Form_Menu.TB_Informe = "App Reset"
     Unload Form_Menu
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 Sub Rut_Btn_Menú_Aux()
         Form_Menu.Show
         Application.ScreenUpdating = True
         DoEvents
 End Sub
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Cerrar_Menú()
     Unload Form_Menu
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Chg_Usuario()
         Form_Usuario.Show
         Application.ScreenUpdating = True
         DoEvents
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_OnOff_SW_VerRecNeg()
     Prog__APP_Switch.Range("Sw_VerRecNeg") = Not Prog__APP_Switch.Range("Sw_VerRecNeg")
     'If Prog__APP_Switch.Range("Sw_VerRecNeg") Then Range("Liquid_Sw_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_Sw_VerRecNeg") = "Ver Rec.Neg."
@@ -47,7 +48,7 @@ Sub Rut_OnOff_SW_VerRecNeg()
     Call Rut_00_Liquid_TitProp(UCase(Range("Liquid_Plan")), Range("Liquid_Curso_Acad"))
     Form_Menu.TB_Informe = "Visualizar registros negativos: Sw_VerRecNeg = " & Prog__APP_Switch.Range("Sw_VerRecNeg")
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_OnOff_SW_VerRecNoCob()
     Prog__APP_Switch.Range("Sw_VerRecNoCob") = Not Prog__APP_Switch.Range("Sw_VerRecNoCob")
     If Prog__APP_Switch.Range("Sw_VerRecNoCob") Then
@@ -73,16 +74,16 @@ End Sub
 '        Form_Menu.TB_Informe = "SW_Probando Activado"
 '    End If
 'End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Show_All_Columns()
         ActiveSheet.Unprotect
     Columns.EntireColumn.Hidden = False
-'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------------------------------------
-    ActiveSheet.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------
+    ActiveSheet.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
     Form_Menu.TB_Informe = "All columns are visible"
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-'Sub Rut_Mostrar_Col_Ocultas()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+'Sub Rut_Mostrar_Col_Ocultas()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 'Dim Cont_Col As Integer
 ''Solicitudes.Unprotect
 'Application.ScreenUpdating = False
@@ -92,8 +93,8 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 'Application.ScreenUpdating = True
 'Solicitudes.Protect
 'Form_Menu.TB_Informe = "Columnas Ocultas al Usuario Visibles"
-'End Sub     ' RuT_Mostrar_Ocultar_Col     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-' ==================================================================================================================================
+'End Sub     ' RuT_Mostrar_Ocultar_Col     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+' ==================================================================================================
 Sub Rut_ProtectUnProtect_ActivSheet()
     If ActiveSheet.ProtectContents Then
         ActiveSheet.Unprotect
@@ -102,8 +103,8 @@ Sub Rut_ProtectUnProtect_ActivSheet()
         ActiveSheet.Protect
         Form_Menu.TB_Informe = "ActiveSheet.Protect"
     End If
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 Sub Rut_Sheets_Show()
 Dim WrkSht          As Worksheet
     For Each WrkSht In Worksheets
@@ -111,8 +112,8 @@ Dim WrkSht          As Worksheet
     Next
     Call Rut_Reset_ToolsBar
     Form_Menu.TB_Informe = "All sheets Visible"
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 Sub Rut_Sheets_Hide()
 Dim WrkSht          As Worksheet
 
@@ -124,10 +125,10 @@ Dim WrkSht          As Worksheet
     Next
     
     Form_Menu.TB_Informe = "All sheets Hide"
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ======================================================================================================
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Tiempo_Transcurrido()
     Dim Hora_Inicio                  As Single
     Hora_Inicio = Now()                ' Para Saber el tiempo de proceso
@@ -139,9 +140,9 @@ End Sub
 
 
 
-'    ' ============================  Para mostrar u ocultar Columnas según Lista [[lista]]   ============================================
-'    ' ==================================================================================================================================
-'    Sub Rut_Mostrar_Columnas_Lista()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'    ' ============================  Para mostrar u ocultar Columnas según Lista [[lista]]   =======
+'    ' =============================================================================================
+'    Sub Rut_Mostrar_Columnas_Lista()       ' CuadroTextoVistaColmns    <<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '    Dim Pos_Ini     As Integer
 '    Dim Pos_Fin     As Integer
 '    Dim Cont            As Integer
@@ -198,7 +199,7 @@ End Sub
 '
 '        LO_Tb_LS_CAS.DataBodyRange.SpecialCells(xlCellTypeVisible).Cells(1).Select        '  Me sitúo en la segunda celda del rango DataBodyRange de las celdas visibles que será la segunda celda de las primera fila visible.
 '
-'    End Sub     ' Rut_Mostrar_Columnas_Lista     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'    '==================================================================================================================================
+'    End Sub     ' Rut_Mostrar_Columnas_Lista     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'    '==============================================================================================
 '
 

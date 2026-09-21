@@ -1,7 +1,7 @@
 Attribute VB_Name = "Rut_Ranges"
-' Last Rev. 2026-09-18 19:20
+' Last Rev. 2026-09-21 12:12
 Option Explicit
-' ==================================================================================================================================
+' ==================================================================================================
 Function Fnc_Range_Exist(RngName As String) As Boolean
     Dim Rng As Range
     On Error Resume Next
@@ -9,7 +9,7 @@ Function Fnc_Range_Exist(RngName As String) As Boolean
     On Error GoTo 0
     Fnc_Range_Exist = Not Rng Is Nothing
 End Function
-' ==================================================================================================================================
+' ==================================================================================================
 'Sub Rut_Ranges_List_ALL()
 '' ----------------------------------------------------------------
 '    Dim ws As Worksheet
@@ -56,9 +56,9 @@ End Function
 'End Sub
 
 
-' ==================================================================================================================================
-' ============= Método 1.           Copia un rango especificado pero sólo las celdas visibles     ==================================
-' ==================================================================================================================================
+' ==================================================================================================
+' ============ Método 1.           Copia un rango especificado pero sólo las celdas visibles     ===
+' ==================================================================================================
 'Sub RuT_UsedRange_Save_New_WorkBook_Liq_TPV()
 '    Dim Lo_Liq      As ListObject:      Set Lo_Liq = H_Liq_TPV.ListObjects(1)
 '
@@ -67,7 +67,7 @@ End Function
 '    Dim Rng As Range
 '    On Error Resume Next
 '        Set Rng = ActiveSheet.Range(Cells(1, 1), Cells(Lo_Liq.TotalsRowRange.Row, Lo_Liq.Range.Columns(C_TPV_Liq_Obs).Column))
-'        Set Rng = Rng.SpecialCells(xlCellTypeVisible)   '- Copio sólo las celdas visibles ----------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'        Set Rng = Rng.SpecialCells(xlCellTypeVisible)   '- Copio sólo las celdas visibles ---------
 '    Dim Wb_new      As Workbook:        Set Wb_new = Workbooks.Add
 '    With Rng.Copy
 '        Wb_new.ActiveSheet.Range("A1").PasteSpecial Paste:=xlPasteColumnWidths, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
@@ -96,9 +96,9 @@ End Function
 '    Wb_new.Close SaveChanges:=False
 'End Sub     ' RuT_UsedRange_Save_New_WorkBook_Liq_TPV
 
-' ==================================================================================================================================
-' ============= Método 2.           Copia un rango especificado pero sólo las celdas visibles     ==================================
-' ==================================================================================================================================
+' ==================================================================================================
+' ============ Método 2.           Copia un rango especificado pero sólo las celdas visibles     ===
+' ==================================================================================================
 'Sub RuT_UsedRange2_Save_New_WorkBook_Liq_TPV()
 '    Dim Lo_Liq      As ListObject:      Set Lo_Liq = H_Liq_TPV.ListObjects(1)
 '
@@ -112,7 +112,7 @@ End Function
 '            .PasteSpecial xlPasteFormats
 '        End With
 '        Application.CutCopyMode = False
-'    '- Borro líneas ocultas.  ---------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'    '- Borro líneas ocultas.  ---------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '    Dim Lin     As Integer
 '    For Lin = 1 To Lo_Liq.TotalsRowRange.Row
 '        If H_Liq_TPV.Rows(Lin).EntireRow.Hidden Then Wb_new.ActiveSheet.Rows(Lin).EntireRow.Hidden = True
@@ -141,9 +141,9 @@ End Function
 '    Wb_new.Close SaveChanges:=False
 'End Sub     ' RuT_UsedRange2_Save_New_WorkBook_Liq_TPV
 
-' ==================================================================================================================================
-' ============= Método 3.           Copia un rango que seleccionamos pero sólo las celdas visibles     ==================================
-' ==================================================================================================================================
+' ==================================================================================================
+' ======= Método 3.           Copia un rango que seleccionamos pero sólo las celdas visibles     ===
+' ==================================================================================================
 'Sub RuT_Range_Save_New_WorkBook_Liq_TPV()
 '    Dim FPath           As String:    FPath = Fnc_NEXE_RutaAPP() & "\"
 ''   Copy and Save a Selected Range in a New WorkBook -----------------------------
@@ -185,9 +185,9 @@ End Function
 '    ActiveWorkbook.Close SaveChanges:=False
 'End Sub     ' RuT_Range_Save_New_WorkBook_Liq_TPV
 
-' ==================================================================================================================================
-' ============= Método 3.           Copia un rango que seleccionamos pero sólo las celdas visibles     ==================================
-' ==================================================================================================================================
+' ==================================================================================================
+' ======= Método 3.           Copia un rango que seleccionamos pero sólo las celdas visibles     ===
+' ==================================================================================================
 'Sub RuT_Range1_Save_Liquidación_New_WorkBook()
 '    Dim FPath           As String
 '

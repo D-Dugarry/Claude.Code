@@ -1,4 +1,5 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
+' Last Rev. 2026-09-21 12:12
 '2026-01-14
 '- M02_Importar_LSGES04_GE
 Option Explicit
@@ -25,9 +26,9 @@ Function Func_Informe(Tx1 As String, Optional Tx2 As String = "", Optional Tx3 A
     Func_Informe = Texto & Right(String(25, "·") & "·" & Tx3, 25)
 End Function
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Mod_Importar_LSGES04_GE()   '- Importar Última Consulta de LSGES04_GE, para Actualizar registros existentes y Añadir Nuevos.
-'==================================================================================================================================
+'===================================================================================================
 Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
 Dim Curso_Acad      As String:      Curso_Acad = Prog__APP.Range("APP_CursAcad")
 Dim TxT_Progreso        As String
@@ -47,7 +48,7 @@ Call Rut_Off_Functions
     Call Rut_Lo_WrkSht_Preparar(Prog_BD)
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
     
-    '- Seleccionar fichero Excel LSGES04 e importar en ClsBook (RAM) ------------------------------------------------------------------------
+    '- Seleccionar fichero Excel LSGES04 e importar en ClsBook (RAM) -------------------------------
         Dim Arch__EP_New        As String
         Dim Nom_NewArch         As String
     With Application.FileDialog(msoFileDialogFilePicker)
@@ -94,7 +95,7 @@ Call Rut_Off_Functions
     Call Rut_Borrar_Rec_EFP_o_CFCyAFC(Lo_ClsBk)
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf
 
-    '- Borrar Recibos NO Válidos:  otros C_Acad, Matrícula=N, AE<>4 ---------------------------------------------
+    '- Borrar Recibos NO Válidos:  otros C_Acad, Matrícula=N, AE<>4 --------------------------------
     Call RuT_Del_Reg_NO_Válidos(Lo_ClsBk)
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf
     If Lo_ClsBk.DataBodyRange Is Nothing Then
@@ -104,11 +105,11 @@ Call Rut_Off_Functions
         GoTo Restablecer_Valores
     End If
     
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     '- Copy ClsBk:
     '-            1º vaciar BD_LSGes04
     '-            2º Copiar Lo_ClsBk en Lo_Ges04.
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     Prog_LsGes04.Visible = xlSheetVisible
     Prog_LsGes04.Unprotect
     
@@ -123,7 +124,7 @@ Call Rut_Off_Functions
         Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
     Prog_LsGes04.Select
         
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     '- Process Lo_LSGes04:
     '        - Formatear Lo_Ges04
     '        - M02_Manage_Duplicates
@@ -132,13 +133,13 @@ Call Rut_Off_Functions
     '        - Asignar Código Concepto-Eco y Tipo_Ensañanza: 1310.00, 1311.03... EFP, CFC, TNCT, UPUA...
     '        - Asignar Tipo de Recibo: Emitido, EjeAnt, Añejo, ADxAplz o Aplazado
     '-
-    '- --------------------------------------------------------------------------------------------------------------
-    '- Formatear la Tabla de Lo_Ges04 ---------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Formatear la Tabla de Lo_Ges04 --------------------------------------------------------------
     Call Rut_X_Format_LoData_LoDefCol(Lo_Ges04, Lo_Ges04_DefCol)
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & " Formateado Lo_Ges04." & vbLf
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
 
-    '- M02_Manage_Duplicates -------------------------------------------------------------------------------------------------------
+    '- M02_Manage_Duplicates -----------------------------------------------------------------------
     Dim Lo_BD_Dupl      As ListObject:      Set Lo_BD_Dupl = Prog_BD_Dupl.ListObjects(1)
     Dim Lo_DefCol_BD    As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
             Prog_BD_Dupl.Visible = xlSheetVisible
@@ -148,9 +149,9 @@ Call Rut_Off_Functions
     Call RuT_Duplicates_Search(Lo_Ges04, Lo_DefCol_BD, Lo_BD_Dupl, BD_Ref, BD_Incidencias, BD_H_Incidencias)
         Set Lo_BD_Dupl = Nothing
     
-    '- ¡¡¡ Modifico El ACont_Cob si ACont_Emi > ACont_Cob  ==>>  ACont_Cob = ACont_Emi !!! ----------------------------------------
-    '- y Asignar Año de Vencimiento Rec. en ACont_Vto -----------------------------------------------------------------------------
-    '----- Si el AñoVto no es correcto falla en Asignar Tipo de Recibo (Emitido, Aplazado...) -------------------------------------
+    '- ¡¡¡ Modifico El ACont_Cob si ACont_Emi > ACont_Cob  ==>>  ACont_Cob = ACont_Emi !!! ---------
+    '- y Asignar Año de Vencimiento Rec. en ACont_Vto ----------------------------------------------
+    '----- Si el AñoVto no es correcto falla en Asignar Tipo de Recibo (Emitido, Aplazado...) ------
     Dim i As Long
     Dim Cont    As Long
     With Lo_Ges04.DataBodyRange
@@ -168,38 +169,38 @@ Call Rut_Off_Functions
         Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & " Modificado ACont_Cob = Acont_Emi, porque ¡¡¡  ACont_Cob < ACont_Emi !!!  en " & Cont & "reg." & vbCrLf
     End If
     
-    '- Asignar Col Cta_Ingreso con nº Cta. correspondiente ----------------------------------------------------------------------
+    '- Asignar Col Cta_Ingreso con nº Cta. correspondiente -----------------------------------------
     Call RuT_Determinar_Cta_Ingreso(Lo_Ges04, BD_Ref, BD_CtaPag, BD_Cta_Ing)
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & " Añadidas Cta. de ingreso." & vbCrLf
     
-    '- Asignar Código Concepto-Eco y Tipo_Ensañanza: 1310.00, 1311.03... EFP, CFC, TNCT, UPUA... --------------------------------
+    '- Asignar Código Concepto-Eco y Tipo_Ensañanza: 1310.00, 1311.03... EFP, CFC, TNCT, UPUA... ---
     Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Lo_Ges04, BD_Ref, BD_Concepto, BD_Tipo_EP, BD_ActivEco, BD_TipoCurso, BD_Plan)
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & Format(Now, "hh:mm:ss") & _
                                     " Añadido Concepto Económico y Tipo de Enseñanza." & vbCrLf
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
 
-    '- Asignar Tipo de Recibo: Emitido, EjeAnt, Añejo, ADxAplz o Aplazado -------------------------------------------------------
+    '- Asignar Tipo de Recibo: Emitido, EjeAnt, Añejo, ADxAplz o Aplazado --------------------------
     Call RuT_Determinar_Tipo_Recibo
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
     
-    '- Identificar del C_Acad, los 1º Rec. de c/matrícula para obtener la T-Adm -------------------------------------------------
+    '- Identificar del C_Acad, los 1º Rec. de c/matrícula para obtener la T-Adm --------------------
     Call Rut_Assign_Imp_AdmAcad_C_Acad
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
     
 saltar_Aqui:
     
-    '- -------------------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     '- Process Lo_BDatos:
-    '- -------------------------------------------------------------------------------------------------------------------------
-    '- Actualizar BDatos con LsGes04 -------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Actualizar BDatos con LsGes04 ---------------------------------------------------------------
     Call RuT_Actualizar_BDatos_con_LsGes04
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
 
-    '- Actualiza la Tabla de Referencia de los Coeficientes de Retención para el VRI ---------------------------------------
+    '- Actualiza la Tabla de Referencia de los Coeficientes de Retención para el VRI ---------------
     Call RuT_Lo_Coef_VRI_Actualizar
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
@@ -216,7 +217,7 @@ GoTo Restablecer_Valores
 '''
 '''
 '''
-'''    '- Recorro toda la Tabla Prog_LsGes04 para actualizar Prog_BD (BD_HIST) ----------------------------------------------------------
+'''    '- Recorro toda la Tabla Prog_LsGes04 para actualizar Prog_BD (BD_HIST) ---------------------
 '''        '   Añado Todos los registros nuevos y marco los registros eliminados
 '''    Dim F_Actualiz      As String:  F_Actualiz = Now()
 '''    Dim Incidencia      As String
@@ -235,7 +236,7 @@ GoTo Restablecer_Valores
 '''    Dim Chg_ImpCob      As Long:    Chg_ImpCob = 0
 '''    Dim Chg_ImpAdm      As Long:    Chg_ImpAdm = 0
 '''
-'''    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+'''    '- Visualizo el progreso --------------------------------------------------------------------
 '''    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & _
 '''            "¡¡¡ Proceso concluido con éxito !!! día: " & Now() & " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & _
 '''            "En la Anterior Consulta habían:  " & Right("__________" & TRows_TitPH, 8) & "  Reg." & vbCrLf & _
@@ -250,30 +251,30 @@ GoTo Restablecer_Valores
 '''            "Hay activos ahora un Total de:  " & Lo_BD.DataBodyRange.Rows.Count & "  Reg."
 '''
         
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '    Wk_TitP_Liquid.Select
 '    Call Rut_Lo_Filtros_Quitar(Lo_BD)
     Call Rut_EnableEvents_Status_Reset
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-'Prog_BD.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-'Prog_LsGes04.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+'Prog_BD.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+'Prog_LsGes04.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 'Prog_BD.Visible = xlSheetVeryHidden
 'Prog_LsGes04.Visible = xlSheetVeryHidden
     Application.Speech.Speak "Proceso completado."
 
 Rut_On_Functions
-End Sub     ' RuT_Importar_LSGES04_GE   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Importar_LSGES04_GE   ------------------------------------------------------------
+'===================================================================================================
 
-'''' ==================================================================================================================================
+'''' ===============================================================================================
 '''Sub Rut_Incorporar_Coef_VRI(ByRef Plan As String)
-'''' ==================================================================================================================================
+'''' ===============================================================================================
 '''Dim RowFind            As Variant
 '''Dim Lo_Tb_Ret_VRI        As ListObject
 '''Set Lo_Tb_Ret_VRI = Prog_Coef_Ret_VRI.ListObjects(1)
-'''    ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
+'''    ' -----------------=============  Buscar Tipo Plan  ==================-----------------------
 '''    RowFind = Application.Match(Plan, Lo_Tb_Ret_VRI.DataBodyRange.Columns(1), 0)
-'''    If Not IsError(RowFind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES ------------------------
+'''    If Not IsError(RowFind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES ----
 '''        Coef_VRI = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(RowFind)
 '''    Else                            ' NO ENCONTRADO
 '''        If IsNumeric(Left(Plan, 1)) Then
@@ -282,22 +283,22 @@ End Sub     ' RuT_Importar_LSGES04_GE   ----------------------------------------
 '''            Coef_VRI = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(1)
 '''        End If
 '''    End If
-'''    '---------------------------------------------------------------------------------------------------------------------------------------
-'''End Sub     '      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-'''' ==================================================================================================================================
+'''    '--------------------------------------------------------------------------------------------
+'''End Sub     '      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'''' ===============================================================================================
 
 
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'---------------------------- Rut de trabajo interno, a eliminar ------------------------------------------------------------------
-'---------------------------- Rut de trabajo interno, a eliminar ------------------------------------------------------------------
-'---------------------------- Rut de trabajo interno, a eliminar ------------------------------------------------------------------
-'---------------------------- Rut de trabajo interno, a eliminar ------------------------------------------------------------------
-'==================================================================================================================================
-'==================================================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'---------------------------- Rut de trabajo interno, a eliminar -----------------------------------
+'---------------------------- Rut de trabajo interno, a eliminar -----------------------------------
+'---------------------------- Rut de trabajo interno, a eliminar -----------------------------------
+'---------------------------- Rut de trabajo interno, a eliminar -----------------------------------
+'===================================================================================================
+'===================================================================================================
 Sub RuT_Actualizar_Repetidos()   '- Aparecieron registros repetidos.
-'==================================================================================================================================
+'===================================================================================================
 
 Dim TxT_Progreso        As String
 Dim Lo_TitPH            As ListObject
@@ -410,23 +411,23 @@ Dim TRows_TitPH      As Long: TRows_TitPH = Lo_TitPH.ListRows.Count
     Next
 Debug.Print ContFila
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Debug.Print ContFilDup, ContFilDatos
 Rut_On_Functions
-End Sub     ' RuT_Actualizar_Repetidos   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
-'==================================================================================================================================
+End Sub     ' RuT_Actualizar_Repetidos   -----------------------------------------------------------
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
+'===================================================================================================
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Marcar_Repetidos()   '- Aparecieron registros repetidos.
-'==================================================================================================================================
+'===================================================================================================
 Dim LstObj              As ListObject
 Dim RowAnt              As ListRow
 Dim RowNow              As ListRow
@@ -440,7 +441,7 @@ Rut_Off_Functions
 Set LstObj = Prog_BD.ListObjects(1)
     TRows_Lo = LstObj.ListRows.Count
 
-'   Recorro toda la Tabla Tip-Hist para localizar nombres de Usuarios ----------------------------------------------------------
+'   Recorro toda la Tabla Tip-Hist para localizar nombres de Usuarios ------------------------------
 
     Sheets(Prog_BD.Name).Select
     Prog_BD.Unprotect
@@ -480,12 +481,12 @@ Set LstObj = Prog_BD.ListObjects(1)
 
 Restablecer_Valores:
 Rut_On_Functions
-End Sub     ' RuT_Marcar_Repetidos   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Marcar_Repetidos   ---------------------------------------------------------------
+'===================================================================================================
 
-''==================================================================================================================================
+''==================================================================================================
 'Sub RuT_Añadir_AD_0010()   '- Voy a añadir manualmente los números de AD-0010.
-''==================================================================================================================================
+''==================================================================================================
 'Dim RowNow              As ListRow
 'Dim F_Lo                As Long
 'Dim Plan                As Integer:      Plan = 0
@@ -517,7 +518,7 @@ End Sub     ' RuT_Marcar_Repetidos   -------------------------------------------
 '        If RowNow.Range(BD_ACont_Cob) = "2023" Then GoTo Sig_Fila
 '        If Plan <> RowNow.Range(BD_Plan) Then
 '            Plan = RowNow.Range(BD_Plan)
-'             ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
+'             ' -----------------=============  Buscar Tipo Plan  ==================----------------
 '            rowfind = Application.Match(Plan, Lo_Plazos.DataBodyRange.Columns(1), 0)
 '            If IsError(rowfind) Then Debug.Print "Plan no encontrado: " & Plan:     GoTo Sig_Fila
 '        Else
@@ -532,12 +533,12 @@ End Sub     ' RuT_Marcar_Repetidos   -------------------------------------------
 ''        End If
 'Sig_Fila:
 '    Next
-'    '---------------------------------------------------------------------------------------------------------------------------------------
+'    '----------------------------------------------------------------------------------------------
 'Debug.Print "Finalizado"
 'Restablecer_Valores:
 'Rut_On_Functions
-'End Sub     ' RuT_Añadir_AD_0010   --------------------------------------------------------------------------------------------
-''===================================================================================================================================
+'End Sub     ' RuT_Añadir_AD_0010   ----------------------------------------------------------------
+''==================================================================================================
 
 
 

@@ -1,12 +1,12 @@
 Attribute VB_Name = "M71_Restituir_BDatos_EP_Work"
-' Last Rev. 2026-09-20 14:39
-'- M71_Restituir_BDatos_EP_Work -----------------------------------------------------------------------------------------------------
+' Last Rev. 2026-09-21 12:12
+'- M71_Restituir_BDatos_EP_Work --------------------------------------------------------------------
 
 Option Explicit
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Mod_Restituir_Tabla_Prog_BD()
-'==================================================================================================================================
+'===================================================================================================
 Rut_Off_Functions
     Dim Respuesta   As Integer
     Dim TipoEP      As String
@@ -21,7 +21,7 @@ Rut_Off_Functions
 
     Form_Menu.TB_Informe = "Proceso para Restituir BDatos de otro Excel AE4." & vbLf
     
-    '- Seleccionar fichero     -------------------------------------------------------------------------------------------------------
+    '- Seleccionar fichero     ---------------------------------------------------------------------
     Dim Arch__EP_New        As String
     Dim Nom_NewArch         As String
     Dim Path_NewArch        As String
@@ -43,7 +43,7 @@ Rut_Off_Functions
         End If
     End With
 
-    '- Validar que el fichero elegido es uno de los 4 posibles (EFP/CFCyAFC x Curso Acad. Ant/Pos) -----------------------------
+    '- Validar que el fichero elegido es uno de los 4 posibles (EFP/CFCyAFC x Curso Acad. Ant/Pos) -
     Dim Vers_App        As String:      Vers_App = Prog__APP.Range("App_VersiónApp")
     Dim FichNom_EFP_Ant  As String:     FichNom_EFP_Ant = "EFP_" & Prog__APP.Range("APP_C_Acad_Ant") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
     Dim FichNom_EFP_Pos  As String:     FichNom_EFP_Pos = "EFP_" & Prog__APP.Range("APP_C_Acad_Pos") & "_BaseDatos_Liq_" & Vers_App & ".xlsm"
@@ -123,11 +123,11 @@ Rut_Off_Functions
     '''    '--- 1) Insertar 1 columnas VACÍAS a la derecha de "Col_45"
     '''    Lo_ClsBk.ListColumns.Add Position:=45
     
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     '- Copy ClsBk:
     '-            1º vaciar BDatos
     '-            2º Copiar Lo_ClsBk en Lo_BD.
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     
     '- Borrar Lo_BD y Copiar Lo_ClsBk en Lo_BD. ---------------------
     Prog_BD.Visible = xlSheetVisible
@@ -156,7 +156,7 @@ Rut_Off_Functions
     Set Lo_ClsBk = Nothing
     Set Lo_Target = Nothing
     
-    '- Borrar Lo_BD_Duplic de ClsBook y Copiar Lo_ClsBk_BD_Duplic en Lo_BD_Duplic. ---------------------
+    '- Borrar Lo_BD_Duplic de ClsBook y Copiar Lo_ClsBk_BD_Duplic en Lo_BD_Duplic. -----------------
     Set Ws_ClsBk = ClsBk.Sheets("BD_Duplic")                               '- ¡poner la WorkSheet que corresponda del CloseBook!
     Set Ws_Target = Prog_BD_Dupl       '- ¡poner la WorkSheet que corresponda del WorkSheet.CodeName!
     Set Lo_Target = Ws_Target.ListObjects(1)
@@ -226,20 +226,20 @@ Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "¡¡¡ Proceso concluido con 
         "Del Archivo: " & Nom_NewArch & vbLf & _
         "de: " & Path_NewArch & vbLf
         
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '''    Application.EnableEvents = False
     Debug.Print "Sw_EnableEvents = " & Prog__APP_Switch.Range("Sw_EnableEvents")
     Call Rut_EnableEvents_Status_Reset
     Wk_TitP_Liquid.Select
 
 Rut_Off_Functions
-End Sub     ' Mod_Restituir_Tabla_Prog_BD   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-'===================================================================================================================================
+End Sub     ' Mod_Restituir_Tabla_Prog_BD   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'===================================================================================================
 
 
-'    '- Copiar Todos los Registros Deleted en Lo_Deleted y los BORRA de Lo_Data --------------------------------------------------------------
+'    '- Copiar Todos los Registros Deleted en Lo_Deleted y los BORRA de Lo_Data --------------------
 '    Dim Lo_Deleted      As ListObject:      Set Lo_Deleted = Prog_BD_Deleted.ListObjects(1)
 '    Call Rut_Lo_Sort(Lo_BD, BD_EP_GestReg, xlAscending, True)
 '    Lo_BD.Range.AutoFilter Field:=BD_EP_GestReg, Criteria1:="=*Deleted *"

@@ -1,10 +1,10 @@
 Attribute VB_Name = "M33_List_PLANES_Anulados"
-' Last Rev. 2026-09-20 14:39
-'- M33_Listar_PLANES_Anulados --------------------------------------------------------------------------------------------------------------
+' Last Rev. 2026-09-21 12:12
+'- M33_Listar_PLANES_Anulados ----------------------------------------------------------------------
 Option Explicit
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Listar_Planes_Anul()
-'==================================================================================================================================
+'===================================================================================================
     Dim Cont                As Long
     Dim ContIni             As Long:        ContIni = 1
     Dim Cod_Plan            As String
@@ -63,14 +63,14 @@ With Lo_TitPH.DataBodyRange
             End If
         End If
     End If
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = "Planes de " & Range("APP_EFP_o_CFC") & "_" & Range("APP_CursAcad") & " que tienen recibos Anulados. (Dev. Matrícula)       " & Now & vbCrLf & vbCrLf
     Txt_Cabecera = "    Plan    Imp_Rec  r. -  Imp_Cob  r.  =   Pdte.  r.    Imp_Dev  r.     Pagado  r.   Pde. Pago r."
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Txt_Cabecera & vbLf
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Plan, "00") & "º " & Cod_Plan & " "
     
-    ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
+    ' Recorro toda la Tabla ------------------------------------------------------------------------
     For Cont = 2 To Lo_TitPH.ListRows.Count
         If .Cells(Cont, BD_Tipo_Rec) = "Deleted" Then GoTo Reg_Siguiente
         If .Cells(Cont, BD_ImpAdm) < 0 Then GoTo Reg_Siguiente
@@ -153,17 +153,17 @@ Reg_Siguiente:
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & "¡ No hay planes anulados !"
         End If
     
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & _
                                                 "¡¡¡ Proceso concluido !!! día: " & Now() & _
                                                 " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 End With    '- Lo_TitPH.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 

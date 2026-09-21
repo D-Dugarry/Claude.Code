@@ -1,12 +1,12 @@
 Attribute VB_Name = "M08_Actualizar_Tb_Coef_VRI"
-' Last Rev. 2026-09-18 19:19
+' Last Rev. 2026-09-21 12:12
 '2026-02-06
 '- M31_Listar_PLANES
 Option Explicit
 '- Actualiza la Tabla de Referencia de los Coeficientes de Retención para el VRI
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Lo_Coef_VRI_Actualizar()
-'==================================================================================================================================
+'===================================================================================================
     Dim Cont                As Long
     Dim ContIni             As Long:        ContIni = 1
     Dim Coef_VRI            As Integer
@@ -51,7 +51,7 @@ Sub RuT_Lo_Coef_VRI_Actualizar()
 
 
 With Lo_BD.DataBodyRange
-    ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
+    ' Recorro toda la Tabla ------------------------------------------------------------------------
     For Cont = 1 To Lo_BD.ListRows.Count
         If .Cells(Cont, BD_Plan) <> Cod_Plan Then       '- <<<<<  Cambio PLAN BDatos NUEVO  >>>>
             Cod_Plan = .Cells(Cont, BD_Plan)
@@ -101,15 +101,15 @@ With Lo_BD.DataBodyRange
                         " Actualizada la Tabla de Referencia de los Coef_VRI." & vbCrLf
 End With    '- Lo_BD.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
 Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_ORden, xlAscending, True)
 Call Rut_Lo_Sort(Lo_RetVRI, CoefVRI_Plan, xlAscending, False)
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 'Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
 End Sub     ' RuT_Lo_Coef_VRI_Actualizar
-'===================================================================================================================================
+'===================================================================================================
 
 
 

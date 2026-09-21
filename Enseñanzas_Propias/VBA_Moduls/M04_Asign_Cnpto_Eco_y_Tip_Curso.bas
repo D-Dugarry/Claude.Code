@@ -1,4 +1,5 @@
 Attribute VB_Name = "M04_Asign_Cnpto_Eco_y_Tip_Curso"
+' Last Rev. 2026-09-21 12:12
 '2025-12-23  ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
 
@@ -7,9 +8,9 @@ Option Explicit
 '                Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
                 Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Prog_LsGes04.ListObjects(1), BD_Ref, BD_Concepto, BD_Tipo_EP, BD_ActivEco, BD_TipoCurso, BD_Plan)
             End Sub
-'- ----------------------------------------------------------------------------------------------------------------------------
-'- Asignar Código Concepto-Eco y Tipo_Ensañanza -------------------------------------------------------------------------------
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
+'- Asignar Código Concepto-Eco y Tipo_Ensañanza ----------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 Sub RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Lo_Data As ListObject, _
                                                 Col_Ref As Integer, _
                                                 Col_Concepto As Integer, _
@@ -34,9 +35,9 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                         " TNCT_M013: Seminario Orientación Pruebas > 25 años (Secret. de Acceso)" & vbLf & _
                         " TNCT_PNB1: Prueba de competencias idioma extranjero. (C.Sup. Idiomas)" & vbLf
 
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
-    '- Determinar Concepto Económico y Tipo de Enseñanza TIO-EP -------------------------------------------------------------------------------
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Determinar Concepto Económico y Tipo de Enseñanza TIO-EP ------------------------------------
+    '- ---------------------------------------------------------------------------------------------
     'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Asignación Concepto Económico y Tipo Ensañanza.", 0, , , , , , 2)
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
     Call Rut_Lo_Sort(Lo_Data, Col_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
@@ -62,7 +63,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '==================================================================
             '=== TipoCurso = CFCyAFC ==========================================
             '==================================================================
-            '-Filtra Recibos Cod_Activ = 80 - Pruebas de aptitud para acceso a la Universidad -----------------------------------------------------------------------
+            '-Filtra Recibos Cod_Activ = 80 - Pruebas de aptitud para acceso a la Universidad ------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AutoFilter Field:=Col_ActivEco, Criteria1:=80
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -73,7 +74,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                 'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " '1315.00'    Reg. Pruebas Acceso Univ.", 0)
             End If
             
-            '-Filtra Recibos - CFC - Cursos de Formación Contínua -------------------------------------------------------
+            '-Filtra Recibos - CFC - Cursos de Formación Contínua ----------------------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_CFC")
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -84,7 +85,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                 'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " '1311.03'    Reg. CFC: Cursos de Formación Contínua", 0)
             End If
     
-            '-Filtra Recibos - CFC-TUP - Cursos de Formación Contínua (TUP) -------------------------------------------------------
+            '-Filtra Recibos - CFC-TUP - Cursos de Formación Contínua (TUP) ------------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TUP")
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -95,7 +96,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                 'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " '1312.02'    Reg. CFC_UPUA (TUP): Programa Univ. para Mayores de la UA. (Univ. Permanente)", 0)
             End If
     
-            '-Filtra Recibos - AFC - Actividades de Formación Complementaria -------------------------------------------------------
+            '-Filtra Recibos - AFC - Actividades de Formación Complementaria -----------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_AFC")
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -106,7 +107,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                 'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " '1311.03'    Reg. AFC: Actividades de Formación Complementaria", 0)
             End If
     
-            '-Filtra Recibos - TNCT-M013 - Cursos NO Contabilizables como Títulos Propios Universidad (M013) -------------------------------------------------------
+            '-Filtra Recibos - TNCT-M013 - Cursos NO Contabilizables como Títulos Propios Universidad (M013)
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_M013")
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -117,7 +118,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
                 'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " '1311.03'    Reg. TNCT_M013: Seminario Orientación Pruebas > 25 años (Secretaría de Acceso)", 0)
             End If
             
-            '-Filtra Recibos - TNCT-PNB1 - Cursos NO Contabilizables como Títulos Propios Universidad (PNB1) -------------------------------------------------------
+            '-Filtra Recibos - TNCT-PNB1 - Cursos NO Contabilizables como Títulos Propios Universidad (PNB1)
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_PNB1")
             rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
@@ -130,10 +131,10 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             
         End If  ' If TipoCurso = "EFP"
 
-        '---------------------------------------------------------------------------------------------------------------------
-        '---------------------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         
-        '-Filtra Recibos Sin Concepto o Tipo ---------------------------------------------------------------------------------
+        '-Filtra Recibos Sin Concepto o Tipo -------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         rowfind = Application.WorksheetFunction.CountIf(.DataBodyRange.Columns(Col_Concepto), "")
         If rowfind > 0 Then
@@ -148,7 +149,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             Right(String(8, "=") & " " & Format(Lo_Data.ListRows.Count, "#,##0"), 8) & " Reg. en BDatos."
     End With    '- Lo_Data.DataBodyRange
         
-        '- Visualizo el progreso ----------------------------------------------------------------------------------------
+        '- Visualizo el progreso -------------------------------------------------------------------
         Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & TxT_Progreso
         'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", TxT_Progreso, 0)
 

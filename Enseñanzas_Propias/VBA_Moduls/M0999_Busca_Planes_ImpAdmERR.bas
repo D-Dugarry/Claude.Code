@@ -1,5 +1,5 @@
 Attribute VB_Name = "M0999_Busca_Planes_ImpAdmERR"
-' Last Rev. 2026-09-20 23:21
+' Last Rev. 2026-09-21 12:12
 ' Modulo comentado en su totalidad (2026-09-20): C7 del Informe_Bugs - RowData.Range(BD_Rec_Imp_Adm) = -0.86
 ' escrito sobre Prog_BD (produccion) sin confirmacion ni idempotencia. Sub sin ninguna llamada en el proyecto
 ' (verificado con grep global); si se necesita reactivar, anadir antes un MsgBox de confirmacion y una
@@ -7,9 +7,9 @@ Attribute VB_Name = "M0999_Busca_Planes_ImpAdmERR"
 '2025-01-14
 Option Explicit
 
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 '- Identificar Planes que tienen Más de un BD_Rec_Imp_Adm de un Plan de un mismo DNI
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 'Sub Rut_Ajuste_BD_Rec_Imp_Adm()
 
 'Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
@@ -78,8 +78,8 @@ Option Explicit
     'Next
         'Debug.Print "-FIN-   Repes y Diff = " & contador
         'Debug.Print "Planes: " & Planes2Adm
-'End Sub     ' -------------------------------------------------------------------------------------------------------------------------<<<
-' ========================================================================================================================================
+'End Sub     ' -------------------------------------------------------------------------------------
+' ==================================================================================================
 
 
 

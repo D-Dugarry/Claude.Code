@@ -7,17 +7,18 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-09-21 12:12
 Option Explicit
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Sub Worksheet_Change(ByVal Target As Range) '>>>>>>>>>>>> SI CAMBIA EL CONTENIDO DE LA CELDA SE ACTIVA (aunque acabe teniendo el mismo dato)
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
     
-    ' ============ Cambiar Plan  ==========================================================================
+    ' ============ Cambiar Plan  ===================================================================
     If Not Application.Intersect(Target, Range("TP_Cod_Plan")) Is Nothing Then
     Dim Criterio As String
         Application.ScreenUpdating = False
@@ -41,9 +42,9 @@ If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
         Application.ScreenUpdating = True
         ActiveSheet.Protect
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-'    ' ============ Filtra DNI's en Tb_Tasas ==========================================================================
+'    ' ============ Filtra DNI's en Tb_Tasas =======================================================
 '
 '    If Not Application.Intersect(Target, Range(Cells(1, C_Liquid_T_Tasas_ColIni + BD_DNI - 1).Address)) Is Nothing Then
 '        With Prog_LiquidTyC.ListObjects("Tb_Tasas")
@@ -62,22 +63,22 @@ If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 '        Range(Cells(2, C_Liquid_T_Tasas_ColIni + BD_DNI - 1).Address).Select
 '        ActiveCell.Offset(1, 0).Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 
 End Sub
 
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 'Sub Worksheet_SelectionChange(ByVal Target As Range)    '>>>>>>>>>>>>>>>>>>>>>>>> SÓLO CLICANDO EN LA CELDA SE ACTIVA
-''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+''>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '
 'If not Prog__APP_Switch.Range("Sw_EnableEvents")  Then Exit Sub
 '
-'    ' ============ Form_Intro_Num_ExpAdm_JI_RDT  ==========================================================================
+'    ' ============ Form_Intro_Num_ExpAdm_JI_RDT  ==================================================
 '    If Not Application.Intersect(Target, _
 '            Range("a" & Plan_Lin_JI & ", a" & Plan_Lin_ExpAdm & ", a" & Plan_Lin_RDT & ", a" & Plan_Lin_IR & _
 '                  ",b" & Plan_Lin_JI & ", b" & Plan_Lin_ExpAdm & ", b" & Plan_Lin_RDT & ", b" & Plan_Lin_IR)) Is Nothing Then
@@ -85,17 +86,17 @@ End Sub
 '        Form_Intro_Num_ExpAdm_JI_RDT.Show
 '        Range("f4").Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Cargar_Datos_Plan_de_DR  ==========================================================================
+'    ' ============ RuT_Cargar_Datos_Plan_de_DR  ===================================================
 '    If Not Application.Intersect(Target, Range("c1:d1,d" & Plan_Lin_JI)) Is Nothing Then
 '        Range("f4").Select
 '        Form_Select_Plan.Show
 '        Range("f4").Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Incorporar_Tasas_Adm_en_Tb_Tasas  ==========================================================================
+'    ' ============ RuT_Incorporar_Tasas_Adm_en_Tb_Tasas  ==========================================
 '    If Not Application.Intersect(Target, Range("d" & Plan_Lin_T_Adm)) Is Nothing And IsNumeric(Left(Plan_Código, 1)) Then
 '        ' ========== Si es un TÍTULO PROPIO - MASTER, ESPECIALISTA Y EXPERTO, el Plan empieza por Número.
 '        Range("c" & Plan_Lin_T_Adm - 1).Select
@@ -105,9 +106,9 @@ End Sub
 '        RuT_Cargar_Datos_Plan_de_DR     ' Para Actualizar las Tablas
 '        Range("c" & Plan_Lin_T_Adm - 1).Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Incorporar_Datos_Tb_Tasas_en_DR  ==========================================================================
+'    ' ============ RuT_Incorporar_Datos_Tb_Tasas_en_DR  ===========================================
 '    If Not Application.Intersect(Target, Range(Cells(1, C_Liquid_T_Tasas_ColIni + BD_JI_Emi_Acad - 1).Address)) Is Nothing Then
 '        ' ========== Si es un TÍTULO PROPIO - MASTER, ESPECIALISTA Y EXPERTO, el Plan empieza por Número.
 '        Range(Cells(2, C_Liquid_T_Tasas_ColIni + BD_JI_Emi_Acad - 1).Address).Select
@@ -117,18 +118,18 @@ End Sub
 '        Range(Cells(2, C_Liquid_T_Tasas_ColIni + BD_JI_Emi_Acad - 1).Address).Select
 '        MsgBox "¡Hecho!", , "Módulo de Liquidaciones de Tasas"
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Elegir_Liquidación  ==========================================================================
+'    ' ============ RuT_Elegir_Liquidación  ========================================================
 '    If Not Prog_LiquidTyC.ListObjects("Tb_Plan").DataBodyRange Is Nothing Then
 '        With Prog_LiquidTyC.ListObjects("Tb_Plan").DataBodyRange
 '            If Not Application.Intersect(Target, Range("f" & .Cells(1, 1).Row & ":f" & .Cells(0, 1).Row + .Rows.Count)) Is Nothing Then
-'                    ' ---------------------- Cambiar Color Celda y Texto -------------------------------
+'                    ' ---------------------- Cambiar Color Celda y Texto --------------------------
 '                    Range("f" & .Cells(1, 1).Row & ":f" & .Cells(0, 1).Row + .Rows.Count).Interior.Color = RGB(ColFar, ColFag, ColFab)
 '                    Range("f" & .Cells(1, 1).Row & ":f" & .Cells(0, 1).Row + .Rows.Count).Font.Color = RGB(ColTar, ColTag, ColTab)
 '                    ActiveCell.Interior.Color = RGB(ColFbr, ColFbg, ColFbb)
 '                    ActiveCell.Font.Color = RGB(ColTbr, ColTbg, ColTbb)
-'                    ' ----------------------------------------------------------------------------------
+'                    ' -----------------------------------------------------------------------------
 '                Plan_Fila_Num_Liquid = ActiveCell.Row - .Cells(0, 1).Row ' ------ Calcula el Número de Liquidación
 '                Plan_TipoExp = ActiveCell.Offset(0, 1)
 '                If Plan_TipoExp = """ Sin Liquidar """ Then Plan_Num_Liquid = 0 Else Plan_Num_Liquid = Plan_Fila_Num_Liquid
@@ -139,9 +140,9 @@ End Sub
 '                Exit Sub
 '            End If
 '        End With
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Guardar_Liquidación  ==========================================================================
+'    ' ============ RuT_Guardar_Liquidación  =======================================================
 '    If Not Application.Intersect(Target, Range("f1:g1")) Is Nothing Then
 '        Range("f4").Select
 '        Application.ScreenUpdating = False
@@ -149,33 +150,33 @@ End Sub
 '        Application.ScreenUpdating = True
 '        Range("f4").Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ Incorporar_Nums_ExpAdm_JI_RDT_de_Liquidación_en_DR  ==========================================================================
+'    ' ============ Incorporar_Nums_ExpAdm_JI_RDT_de_Liquidación_en_DR  ============================
 '    If Not Application.Intersect(Target, Range("k1:l1")) Is Nothing Then
 '        Range("f4").Select
 '        RuT_Incorporar_Datos_Tb_Tasas_en_DR
 '        Range("f4").Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Mostrar_Ocultar_Col_Tabla_Tasas_Emitidas_Cobradas  ==========================================================================
+'    ' ============ RuT_Mostrar_Ocultar_Col_Tabla_Tasas_Emitidas_Cobradas  =========================
 '    If Not Application.Intersect(Target, Range(Cells(1, C_Liquid_Col_Tb_Recaudación - 1).Address)) Is Nothing Then
 '        Application.ScreenUpdating = False
 '            RuT_Mostrar_Ocultar_Col_Tabla_Tasas_Emitidas_Cobradas
 '        Application.ScreenUpdating = True
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ RuT_Mostrar_Ocultar_Col_Tasas_Liquid  ==========================================================================
+'    ' ============ RuT_Mostrar_Ocultar_Col_Tasas_Liquid  ==========================================
 '    If Not Application.Intersect(Target, Range(Cells(1, C_Liquid_T_Tasas_ColIni).Address & "," & Cells(1, C_Liquid_T_Tasas_ColIni + BD_ImpCob - 1).Address)) Is Nothing Then
 '        Application.ScreenUpdating = False
 '            RuT_Mostrar_Ocultar_Col_Tasas_Liquid
 '        Application.ScreenUpdating = True
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
-'    ' ============ Quitar Filtros Tb_Tasas ==========================================================================
+'    ' ============ Quitar Filtros Tb_Tasas ========================================================
 '    If Not Application.Intersect(Target, Range(Cells(1, C_Liquid_T_Tasas_ColIni + BD_Liquidación - 1).Address)) Is Nothing Then
 '        With Prog_LiquidTyC.ListObjects("Tb_Tasas")
 '            Range(Cells(1, C_Liquid_T_Tasas_ColIni + BD_Liquidación - 1).Address) = "¿ D.N.I. ?"
@@ -184,7 +185,7 @@ End Sub
 '        Range(Cells(2, C_Liquid_T_Tasas_ColIni + BD_Liquidación - 1).Address).Select
 '        ActiveCell.Offset(1, 0).Select
 '        Exit Sub
-'    End If  ' -----------------------------------------------------------------------------------------------
+'    End If  ' -------------------------------------------------------------------------------------
 '
 '
 'End Sub     ' Worksheet_SelectionChange

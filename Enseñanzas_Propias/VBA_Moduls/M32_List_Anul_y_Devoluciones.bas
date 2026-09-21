@@ -1,12 +1,12 @@
 Attribute VB_Name = "M32_List_Anul_y_Devoluciones"
-' Last Rev. 2026-09-19 08:28
+' Last Rev. 2026-09-21 12:12
 '2026-01-31
 '- M31_Cierre_Contable_PLANES
 Option Explicit
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Inf_Anulaciones_y_Devoluciones()
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_CursAcad")
     Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
@@ -65,15 +65,15 @@ Salir:
     Application.Calculation = xlCalculationAutomatic
     Call Rut_EnableEvents_Status_Reset
     Application.Speech.Speak "Proceso Terminado"
-End Sub '------------------------------------------------------------------------------------------------------------------------
+End Sub '-------------------------------------------------------------------------------------------
 
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Lista_Anulaciones(Lo_BD As ListObject, _
                             CursoAcad As String, _
                             TipoCurso As String, _
                             Ws_Lista As Worksheet)
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim AñoContAnt      As Integer:     AñoContAnt = Left(CursoAcad, 4)
     Dim AñoContPos      As Integer:     AñoContPos = "20" & Right(CursoAcad, 2)
@@ -144,18 +144,18 @@ With Lo_BD.DataBodyRange
     Txt_Cabecera = "Planes de " & Range("APP_EFP_o_CFC") & "_" & Range("APP_CursAcad") & String(10, " ") & Now
     Ws_Lista.Range("c2") = Txt_Cabecera
     
-    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+    '- Visualizo el progreso -----------------------------------------------------------------------
     Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TB_Informe = Txt_Cabecera
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Txt_Cabecera & vbLf & vbLf
     Txt_Cabecera = "    Plan  Nombre  (dni)"
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & Txt_Cabecera
         
-    ' Recorro toda la Tabla ---------------------------------------------------------------------------------------
+    ' Recorro toda la Tabla ------------------------------------------------------------------------
     For Cont = 1 To Lo_BD.ListRows.Count
         'If .Cells(Cont, BD_Tipo_Rec) = "Deleted" Then GoTo Reg_Siguiente
         ClaveNew = .Cells(Cont, BD_Plan) & "_" & .Cells(Cont, BD_DNI)
-        '- <<<<<  PLAN NUEVO  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        '- <<<<<  PLAN NUEVO  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         If ClaveAnt <> ClaveNew Then
             
             If Cont_Anul = 0 Then GoTo Nueva_Fila
@@ -178,7 +178,7 @@ With Lo_BD.DataBodyRange
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Anul, "00") & "º " & Cod_Plan & " " & _
                                    .Cells(Cont, BD_Nom) & "  ( " & RowNew.Range(Lst_DNI) & " )" & vbLf & _
                                    String(15, " ") & "Obs.: "" " & RowNew.Range(Lst_Obs) & " """ & vbLf
-            '- Detalle del Informe ---------------------------------------------------------------------------
+            '- Detalle del Informe -----------------------------------------------------------------
             If RowNew.Range(Lst_ImpNeg) < 0 Then
                 Form_Menu.TB_Informe = Form_Menu.TB_Informe & String(15, " ") & _
                     Left("Emitido Recibo Negativo de devolución " & String(45, "·"), 45) & Right(String(15, " ") & _
@@ -214,8 +214,8 @@ With Lo_BD.DataBodyRange
                 String(85, " ") & " Imp.Acad" & Right(String(15, " ") & Format(RowNew.Range(Lst_ImpAcad), "#,##0.00;-#,##0.00;"), 9) & " " & vbLf & _
                 String(85, " ") & " Imp.Adm" & Right(String(15, " ") & Format(RowNew.Range(Lst_ImpAdm), "#,##0.00;-#,##0.00;"), 10) & " " & vbLf
 
-'            ¡¡¡¡¡  Programación mucho más corta, pero enfarragosa de leer !!!!!! ------------------------------------------------------------------------------------------
-'            - Detalle del Informe -----------------------------------------------------------------------------------------------------------------------------------------
+'            ¡¡¡¡¡  Programación mucho más corta, pero enfarragosa de leer !!!!!! ------------------
+'            - Detalle del Informe -----------------------------------------------------------------
 '            Form_Menu.TB_Informe = Form_Menu.TB_Informe & _
 '                IIf(RowNew.Range(Lst_ImpNeg) < 0, String(15, " ") & Left("Emitido Recibo Negativo de devolución " & String(45, "·"), 45) & Right(String(15, " ") & Format(RowNew.Range(Lst_ImpNeg), "#,##0.00 €;-#,##0.00 €;"), 15) & vbLf & _
 '                String(15, " ") & IIf(RowNew.Range(Lst_ImpNegPago) < 0, Left("Tranferencia hecha " & String(45, "·"), 45), Left("Tranferencia pendiente" & String(45, "·"), 45)) & Right(String(15, " ") & Format(RowNew.Range(Lst_ImpNegPago) * 1, "#,##0.00 €;-#,##0.00 €;0.00 €"), 15) & vbLf, "") & _
@@ -239,7 +239,7 @@ Nueva_Fila:
             
         End If
         
-        '- <<<<<  Acumulado en PLAN  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        '- <<<<<  Acumulado en PLAN  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         If .Cells(Cont, BD_ImpRec) < 0 Then                             ' recibos Negativos de Devolución (a pagar) / Ajuste Matrícula
                                         RowNew.Range(Lst_RegsNeg) = RowNew.Range(Lst_RegsNeg) + 1
                                         RowNew.Range(Lst_ImpNeg) = RowNew.Range(Lst_ImpNeg) + .Cells(Cont, BD_ImpRec)
@@ -280,7 +280,7 @@ Reg_Siguiente:
             End If
             
     
-'- Visualizo el progreso ---------------------------------------------------------------------------------------
+'- Visualizo el progreso ---------------------------------------------------------------------------
 
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & _
                 "¡¡¡ Los Recibos con Anulado de parte matrícula NO emitida, deberían menguar el monto Emitido de Matrícula en la contabilidad !!!"
@@ -290,13 +290,13 @@ Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & _
                                                 " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 End With    '- Lo_BD.DataBodyRange
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 
 
 

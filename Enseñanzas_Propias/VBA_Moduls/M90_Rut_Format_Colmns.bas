@@ -1,14 +1,15 @@
 Attribute VB_Name = "M90_Rut_Format_Colmns"
+' Last Rev. 2026-09-21 12:12
 '- M90_Rut_Format_Colmns - Modif: 2025-10-08
 Option Explicit
 
-        Sub Rut_X_Format_LoData_LoDefCol_ByHand()  '--- Solo hace falta cambiar las variables de la Rutina -----------------------
+        Sub Rut_X_Format_LoData_LoDefCol_ByHand()  '--- Solo hace falta cambiar las variables de la Rutina
             Call Rut_X_Format_LoData_LoDefCol(Prog_LsGes04.ListObjects(1), Prog_DefCol_BD.ListObjects(1))
 '            Call Rut_X_Format_LoData_LoDefCol(Prog_BD.ListObjects(1), Prog_DefCol_BD.ListObjects(1))
         End Sub
-' ==================================================================================================================================
-Sub Rut_X_Format_LoData_LoDefCol(ByRef LoData As ListObject, ByRef LoDefCol As ListObject)  '###################################################################################################
-' ==================================================================================================================================
+' ==================================================================================================
+Sub Rut_X_Format_LoData_LoDefCol(ByRef LoData As ListObject, ByRef LoDefCol As ListObject)  '#######
+' ==================================================================================================
 Dim Ccol    As Integer
 
     If LoData.DataBodyRange Is Nothing Then
@@ -42,12 +43,12 @@ Dim Ccol    As Integer
         .TintAndShade = 0
         .PatternTintAndShade = 0
     End With
-    '--- Formatear las Columnas --------------------------------------------------------------------------------------
+    '--- Formatear las Columnas --------------------------------------------------------------------
     Dim MaxCol  As Integer
     MaxCol = Application.Min(LoData.Range.Columns.Count, LoDefCol.ListRows.Count)
     For Ccol = 1 To MaxCol
         If Not LoDefCol.DataBodyRange.Cells(Ccol, DefC_FormatCol) Then GoTo NextCol    '- Sólo si se desea formatear la Col.
-'            '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
+'            '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------
 '            CantFormatCol = CantFormatCol + 1
 '            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "___________________ Formateando Col. " & Ccol & " (" & CantFormatCol & "ª.), de " & TotCantFormatCol & " Col.", 0, , , TxT_Prog, , , 2)
         Select Case LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar)
@@ -86,13 +87,13 @@ Dim Ccol    As Integer
                With LoData.DataBodyRange
                     .Columns(Ccol).Select
                     If WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
-                        '- Convierto a números, texto con formato punto de millares y coma decimal. -------------------------------
+                        '- Convierto a números, texto con formato punto de millares y coma decimal.
                         Selection.TextToColumns Destination:=Range(.Cells(1, Ccol).Address(False, False)), DataType:=xlDelimited, _
                             TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
                             Semicolon:=False, Comma:=False, Space:=False, Other:=False, _
                             FieldInfo:=Array(1, 1), TrailingMinusNumbers:=True
                     End If
-'                    Dim Rc As Range '--- Si es un número muy grande lo muestra como 99999E+12, con el For-Next lo quitamos ------
+'                    Dim Rc As Range '--- Si es un número muy grande lo muestra como 99999E+12, con el For-Next lo quitamos
 '                    For Each Rc In .Columns(1)
 '                        With Rc.Cells(1)
 '                            If IsNumeric(.Value2) And .Text Like "*E+*" Then
@@ -115,5 +116,5 @@ Next
         
 Debug.Print "<<< Rut_Lo_Format_LoData_LoDefCol"
 End Sub     ' Rut_X_Format_LoData_LoDefCol
-' ==================================================================================================================================
+' ==================================================================================================
 

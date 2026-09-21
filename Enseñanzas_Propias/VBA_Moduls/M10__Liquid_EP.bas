@@ -1,6 +1,6 @@
 Attribute VB_Name = "M10__Liquid_EP"
 '- M10_Liquid_EP - Modif: 2025-10-15
-' Last Rev. 2026-09-18 18:06
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
 Public Sw_Cmb        As Boolean
@@ -21,9 +21,9 @@ Const ColRDT_Coef_VRI   As Integer = 16
 
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_00_Liquid_TitProp(Liq_Plan As String, CursAcad As String)
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Liq               As Long
 Dim Rec_Count           As Long:    Rec_Count = 0
 Dim RowLiq          As ListRow
@@ -213,7 +213,7 @@ Sig_Fila:
     Lo_Liq.ListColumns(CLiq_F_Emi).DataBodyRange.NumberFormat = "d-m-yyyy"
     Lo_Liq.ListColumns(CLiq_F_Cobro).DataBodyRange.NumberFormat = "d-m-yyyy"
     
-'   Genera la Tabla de Resumen de las distintas Liquidaciones que ha tenido este Plan --------------------------------------------
+'   Genera la Tabla de Resumen de las distintas Liquidaciones que ha tenido este Plan --------------
     Call Rut_01_Generar_Tabla_RDT_x_NumLiquid(Lo_Liq)
     Call Rut_Calc_SubTotales
 '    Call Rut_02_Generar_Tabla_RDT_x_NumRDT(Lo_Liq)   ' ==>>>> Esta opción se implementa como opción clicando en una celda de la hoja.
@@ -221,18 +221,18 @@ Sig_Fila:
 Restablecer_Valores:
     Call Rut_On_Functions
     Call Rut_EnableEvents_Status_Reset
-'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------------------------------------
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-End Sub     ' RuT_00_Generar_Tabla_Rut_00_Liquid_TitProp     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+End Sub     ' RuT_00_Generar_Tabla_Rut_00_Liquid_TitProp     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 
     
-'==================================================================================================================================
+'===================================================================================================
 '=============== Generar la Tabla de RDT
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_01_Generar_Tabla_RDT_x_NumLiquid(ByRef Lo_TPLiquid As ListObject)
-'==================================================================================================================================
+'===================================================================================================
 
 Dim F_Liq           As Integer
 Dim F_Tb_RDT_N1     As Long:   F_Tb_RDT_N1 = 3
@@ -288,7 +288,7 @@ With Lo_TPLiquid.DataBodyRange
     For F_Liq = 1 To .Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
         
         If NumLiq_Ant <> .Cells(F_Liq, CLiq_NumLiquid) Then
-            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             NumLiq_Ant = .Cells(F_Liq, CLiq_NumLiquid)
             Rows(F_Tb_RDT).Insert
             
@@ -342,17 +342,17 @@ With Lo_TPLiquid.DataBodyRange
             Rg_Org = Rg_T_Acad - Rg_VRI
         Else
             
-            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Exp_Adm, .Cells(F_Liq, CLiq_ExpAdm), 1) = 0 Then ' Si tiene varias ExpAdm/s...
                 Rg_Exp_Adm = Rg_Exp_Adm & "-" & .Cells(F_Liq, CLiq_ExpAdm)
             End If
 
-            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Orgánica, .Cells(F_Liq, CLiq_Orgánica), 1) = 0 Then ' Si tiene varias Orgánica/s...
                 Rg_Orgánica = Rg_Orgánica & "-" & .Cells(F_Liq, CLiq_Orgánica)
             End If
 
-            '--- RDT/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- RDT/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_RDT, .Cells(F_Liq, CLiq_RDT), 1) = 0 Then ' Si tiene varias RDT/s...
                 Rg_RDT = Rg_RDT & "-" & .Cells(F_Liq, CLiq_RDT)
             End If
@@ -362,7 +362,7 @@ With Lo_TPLiquid.DataBodyRange
                 Rg_JI = Rg_JI & "-" & .Cells(F_Liq, CLiq_JI_Emi)
             End If
 
-            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Num_Liq, .Cells(F_Liq, CLiq_NumLiquid), 1) = 0 Then ' Si tiene varias liquidaciones...
                 Rg_Num_Liq = Rg_Num_Liq & "-" & .Cells(F_Liq, CLiq_NumLiquid)
             End If
@@ -391,13 +391,13 @@ End With
     Call Rut_Lo_Sort(Lo_TPLiquid, CLiq_Nombre, xlAscending, True)
     
 Rut_On_Functions
-End Sub     ' Rut_01_Generar_Tabla_RDT_x_NumLiquid     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' Rut_01_Generar_Tabla_RDT_x_NumLiquid     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 
 
-'==================================================================================================================================
+'===================================================================================================
 '=============== Generar la Tabla de RDT
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_02_Generar_Tabla_RDT_x_NumRDT(ByRef Lo_TPLiquid As ListObject)
 
 Dim F_Liq           As Integer
@@ -454,7 +454,7 @@ With Lo_TPLiquid.DataBodyRange
     For F_Liq = 1 To .Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
         
         If RDT_Ant <> .Cells(F_Liq, CLiq_RDT) Then
-            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             RDT_Ant = .Cells(F_Liq, CLiq_RDT)
             Rows(F_Tb_RDT).Insert
             
@@ -505,12 +505,12 @@ With Lo_TPLiquid.DataBodyRange
             Rg_Org = Rg_T_Acad - Rg_VRI
         Else
             
-            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Exp_Adm, .Cells(F_Liq, CLiq_ExpAdm), 1) = 0 Then ' Si tiene varias ExpAdm/s...
                 Rg_Exp_Adm = Rg_Exp_Adm & "-" & .Cells(F_Liq, CLiq_ExpAdm)
             End If
 
-            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Orgánica, .Cells(F_Liq, CLiq_Orgánica), 1) = 0 Then ' Si tiene varias Orgánica/s...
                 Rg_Orgánica = Rg_Orgánica & "-" & .Cells(F_Liq, CLiq_Orgánica)
             End If
@@ -520,7 +520,7 @@ With Lo_TPLiquid.DataBodyRange
                 Rg_JI = Rg_JI & "-" & .Cells(F_Liq, CLiq_JI_Emi)
             End If
 
-            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Num_Liq, .Cells(F_Liq, CLiq_NumLiquid), 1) = 0 Then ' Si tiene varias Acumula RDT...
                 Rg_Num_Liq = Rg_Num_Liq & "-" & .Cells(F_Liq, CLiq_NumLiquid)
             End If
@@ -547,14 +547,14 @@ End With
     Call Rut_Lo_Sort(Lo_TPLiquid, CLiq_Nombre, xlAscending, True)
     
 Rut_On_Functions
-End Sub     ' Rut_02_Generar_Tabla_RDT_x_NumRDT     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' Rut_02_Generar_Tabla_RDT_x_NumRDT     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 
-'==================================================================================================================================
+'===================================================================================================
 '=============== Generar la Tabla_RDT_x_NumLiquid_Con_Devoluciones
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones(ByRef Lo_TPLiquid As ListObject)
-'==================================================================================================================================
+'===================================================================================================
 
 Dim F_Liq           As Integer
 Dim F_Tb_RDT_N1     As Long:   F_Tb_RDT_N1 = 3
@@ -610,7 +610,7 @@ With Lo_TPLiquid.DataBodyRange
     For F_Liq = 1 To .Rows.Count   '--- Bucle para recorrer todas la filas de la Liquidación
         
         If NumLiq_Ant <> .Cells(F_Liq, CLiq_NumLiquid) Then
-            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- New RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             NumLiq_Ant = .Cells(F_Liq, CLiq_NumLiquid)
             Rows(F_Tb_RDT).Insert
             
@@ -663,17 +663,17 @@ With Lo_TPLiquid.DataBodyRange
             Rg_Org = Rg_T_Acad - Rg_VRI
         Else
             
-            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- ExpAdm/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Exp_Adm, .Cells(F_Liq, CLiq_ExpAdm), 1) = 0 Then ' Si tiene varias ExpAdm/s...
                 Rg_Exp_Adm = Rg_Exp_Adm & "-" & .Cells(F_Liq, CLiq_ExpAdm)
             End If
 
-            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Orgánica/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Orgánica, .Cells(F_Liq, CLiq_Orgánica), 1) = 0 Then ' Si tiene varias Orgánica/s...
                 Rg_Orgánica = Rg_Orgánica & "-" & .Cells(F_Liq, CLiq_Orgánica)
             End If
 
-            '--- RDT/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- RDT/s   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_RDT, .Cells(F_Liq, CLiq_RDT), 1) = 0 Then ' Si tiene varias RDT/s...
                 Rg_RDT = Rg_RDT & "-" & .Cells(F_Liq, CLiq_RDT)
             End If
@@ -683,7 +683,7 @@ With Lo_TPLiquid.DataBodyRange
                 Rg_JI = Rg_JI & "-" & .Cells(F_Liq, CLiq_JI_Emi)
             End If
 
-            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Acumula RDT   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             If InStr(1, Rg_Num_Liq, .Cells(F_Liq, CLiq_NumLiquid), 1) = 0 Then ' Si tiene varias liquidaciones...
                 Rg_Num_Liq = Rg_Num_Liq & "-" & .Cells(F_Liq, CLiq_NumLiquid)
             End If
@@ -714,14 +714,14 @@ End With
     Call Rut_Lo_Sort(Lo_TPLiquid, CLiq_Nombre, xlAscending, True)
     
 Rut_On_Functions
-End Sub     ' Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
+End Sub     ' Rut_03_Generar_Tabla_RDT_x_NumLiquid_Con_Devoluciones     <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
 
 
-'-----   Actualiza los Datos de la Tabla de Histórico con los nuevos aportados en la tabla de Liquidación   ------------------------
-' ==================================================================================================================================
+'---   Actualiza los Datos de la Tabla de Histórico con los nuevos aportados en la tabla de Liquidación
+' ==================================================================================================
 Sub Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid()
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_TitPH              As Long:   F_TitPH = 1
 Dim N_TitPH              As Long
 Dim Reg_NoEmparejados    As Long
@@ -760,10 +760,10 @@ With Lo_TitPHist.DataBodyRange
 
         Select Case Lo_TPLiquid.DataBodyRange.Cells(F_Liquid, CLiq_Ref)
         
-            '--- Saltar al siguiente Lo_TitPHist   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- Saltar al siguiente Lo_TitPHist   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             Case Is > .Cells(F_TitPH, BD_Ref)
                 F_Liquid = F_Liquid - 1
-            '--- ACTUALIZAR CON Datos de la Liquidación <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            '--- ACTUALIZAR CON Datos de la Liquidación <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             Case Is = .Cells(F_TitPH, BD_Ref)
             
                 Set RowLiq = Lo_TPLiquid.ListRows(F_Liquid)
@@ -785,7 +785,7 @@ With Lo_TitPHist.DataBodyRange
                     RowDat.Range(BD_Rec_Imp_Adm) = RowLiq.Range(CLiq_Ajst_Tadm)
                 End If
                 
-            '--- Ref de la Liquidacion MENOR que la del Historico: no existe en Prog_BD  <<<<<<<<<<<<<<
+            '--- Ref de la Liquidacion MENOR que la del Historico: no existe en Prog_BD  <<<<<<<<<<<
             '    (no deberia ocurrir: la Liquidacion sale del Historico). Se anota y se sigue.
             Case Else
                 Reg_NoEmparejados = Reg_NoEmparejados + 1
@@ -827,12 +827,12 @@ MsgBox "¡¡¡ Hecho !!!" & vbCrLf & vbCrLf & "Ya están los datos de Tasa Adm. y Nº
                         vbOKOnly, "Proceso: Liquidación de Títulos Propios"
 Rut_On_Functions
 End Sub     ' Rut_2_Actualizar_Dat_TitPropHist_con_Dat_Liquid
-' ==================================================================================================================================
+' ==================================================================================================
 
-'--------  Añade el Dato introducido en una celda a todas las líneas visibles (¡¡filtradas!!)  -----------------
-' ==================================================================================================================================
+'--------  Añade el Dato introducido en una celda a todas las líneas visibles (¡¡filtradas!!)  -----
+' ==================================================================================================
 Sub Rut_3_Añadir_Datos_Liquid_TitProp(CtLq_Col As Integer, ByRef valor As String)
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Liquid               As Long
 'Rut_Off_Functions
 Application.ScreenUpdating = False
@@ -856,12 +856,12 @@ Restablecer_Valores:
 'Rut_On_Functions
 Application.ScreenUpdating = True
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 
 
-'''    ' ==================================================================================================================================
-'''    ' =============================     RuT_Guardar_Liquidación     =======================================================================
-'''    ' ==================================================================================================================================
+'''    ' ===========================================================================================
+'''    ' =============================     RuT_Guardar_Liquidación     =============================
+'''    ' ===========================================================================================
 '''    Sub Rut_5_Guardar_Liquidación()
 '''    Rut_Off_Functions
 '''
@@ -905,9 +905,9 @@ End Sub
 
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_x_Help_ShowHide(ByRef WkS_Help As Worksheet)
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Help  As Integer
 Dim Nombre  As String
 Dim Rng     As Range
@@ -935,9 +935,9 @@ End Sub
 
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Calc_SubTotales()
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Liq           As Long
 Dim Pago_X_Alu      As Double
 Dim Rec_Emi         As Double
@@ -996,15 +996,15 @@ Rut_Off_Functions
     
 Restablecer_Valores:
 Rut_On_Functions
-'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------------------------------------
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-End Sub     ' Rut_Calc_SubTotales     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ----------------------------------------------------------------------------------------------------------------------------------
+'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+End Sub     ' Rut_Calc_SubTotales     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Copy_Liquid_PDF()
-' ==================================================================================================================================
+' ==================================================================================================
 Dim Lo_TPLiquid        As ListObject
 Set Lo_TPLiquid = Wk_TitP_Liquid.ListObjects(1)
 Dim Lo_TPLiquidPDF     As ListObject
@@ -1022,18 +1022,18 @@ Set Lo_TPLiquidPDF = Wk_TitP_LiqPDF.ListObjects(1)
     End With
     
 End Sub
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Detectar_Microcredencial(C_Acad As String, Plan As String)
-' ==================================================================================================================================
+' ==================================================================================================
 Dim rowfind            As Variant
 Dim Lo_Data        As ListObject
 Set Lo_Data = Prog_MicroCred.ListObjects(1)
-    ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
+    ' -----------------=============  Buscar Tipo Plan  ==================--------------------------
     rowfind = Application.Match(C_Acad & " " & Plan, Lo_Data.DataBodyRange.Columns(1), 0)
-    If Not IsError(rowfind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES ------------------------
+    If Not IsError(rowfind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES -------
         Range("APP_PlanMicroCred") = Lo_Data.ListColumns("Cod_Dto").DataBodyRange(rowfind)
             MsgBx_Msg = "Plan: " & Plan & ", Curso Académico: " & C_Acad & vbLf & vbLf & _
                         Lo_Data.ListColumns("Nombre Dto").DataBodyRange(rowfind) & ", Cod.Dto.: " & Lo_Data.ListColumns("Cod_Dto").DataBodyRange(rowfind) & vbLf & vbLf & _
@@ -1044,7 +1044,7 @@ Set Lo_Data = Prog_MicroCred.ListObjects(1)
     Else
         Range("APP_PlanMicroCred") = ""
     End If
-End Sub     '      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ----------------------------------------------------------------------------------------------------------------------------------
+End Sub     '      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 
 

@@ -2,16 +2,16 @@ Attribute VB_Name = "M41_Añadir_Núm_JIs_al_Inf"
 '2026-02-14
 Option Explicit
 
-' Last Rev. 2026-09-19 17:38
+' Last Rev. 2026-09-21 12:12
 ' MODULO COMENTADO COMPLETO: pendiente de adaptar desde otra app.
 ' Referencia a Sht_Inf_Recibos_TIO no existe como CodeName en este libro.
 ' No tocar/descomentar sin revisar antes cual es la hoja real. (Confirmado por el usuario 2026-09-19)
 
-'- Rellena la Tabla Informe_Recibos con todos los Números de JI's de BDatos. ------------------------
+'- Rellena la Tabla Informe_Recibos con todos los Números de JI's de BDatos. -----------------------
 
-' ==================================================================================================================================
+' ==================================================================================================
 'Sub Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos()
-' ==================================================================================================================================
+' ==================================================================================================
 'Debug.Print "Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos"
 
         'Dim Nom_Inf         As String:          Nom_Inf = "Inf_Recibos"
@@ -47,7 +47,7 @@ Option Explicit
     'Lo_Inf.DataBodyRange.Columns(InfRec_JI_443_Adm).ClearContents
     'Lo_Inf.DataBodyRange.Columns(InfRec_JI_443_Acad).ClearContents
     '
-    '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------------------
+    '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico ----------------------
     'Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     'Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     'Lo_BD.ShowTotals = False
@@ -58,7 +58,7 @@ Option Explicit
     'Call Rut_Lo_Sort(Lo_Inf, InfRec_TipRec, xlAscending, True)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
     'Call Rut_Lo_Sort(Lo_Inf, InfRec_ConcptEco, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
     '
-    '- Preguntar si quiero los nº de JI's de EFP y CFCyAFC ------------------------------------------------------------
+    '- Preguntar si quiero los nº de JI's de EFP y CFCyAFC -----------------------------------------
     'Dim Sw_VerJIsEP As Boolean
     'Dim EFP_JIs     As VbMsgBoxResult
         'EFP_JIs = MsgBox("¿ Quieres los Ji's de las Enseñanzas Propias: EFP y CFCyAFC ?", _
@@ -66,8 +66,8 @@ Option Explicit
         'If EFP_JIs = vbYes Then Sw_VerJIsEP = True Else Sw_VerJIsEP = False
     '
     '
-    '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto ------------------------------------
-    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
+    '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto -----------------------
+    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. ----------------------
     'For F_Inf = 1 To Lo_Inf.ListRows.Count
         'Set RwJI = Lo_Inf.ListRows(F_Inf)
         'Tp_Rec = RwJI.Range(InfRec_TipRec)
@@ -76,7 +76,7 @@ Option Explicit
             'RwJI.Range(InfRec_JI_Emi_Adm) = "No requerido"
             'GoTo Sigiente_Concepto
         'End If
-        '---------------------------------------------------------------------------------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         '- Filtrar Tipo_Rec y Concepto
         'Call Rut_Lo_Filtros_Quitar(Lo_BD)
         'Lo_BD.Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="=" & Tp_Rec
@@ -85,7 +85,7 @@ Option Explicit
                                         'Debug.Print Tp_Rec, Concept, RowFind & " reg."
         'If rowfind > 0 Then
             'Dim DiccJIs     As Object
-            '---------------------------------------------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
             '- Identificar Todos los JI's de cada Tipo_Rec y Concepto, Crea Dictionary para valores únicos (eficiente para grandes datos)
             '
             '1º-BD_JI_Emi_Adm-------------------- InfRec_JI_Emi_Adm
@@ -218,7 +218,7 @@ Option Explicit
 'Finalizar:
     'Call Rut_Lo_Filtros_Quitar(Lo_BD)
     '
-'    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+'    '- Visualizo el progreso ----------------------------------------------------------------------
 '    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
 '        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
 '    MsgBox MenúAux_Msg

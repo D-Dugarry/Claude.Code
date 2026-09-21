@@ -1,16 +1,16 @@
 Attribute VB_Name = "M40_Inf_Contab_Recibos"
-' Last Rev. 2026-09-20 14:39
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
 '- Genera la Tabla Informe_Contable_de_Recibos
     '- Borrado Tabla explicativa de Tipos de Recibos: Emitido, ADxAplz, Aplazado, EjeAnt y Añejo.
-    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ----------------------------------------------
+    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ---------------------------------
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
 
-'==================================================================================================================================
+'===================================================================================================
 Sub Rut_Generar_Tabla_Inf_Contable_de_Recibos()
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_CursAcad")
     Dim AñoCont_1_CAcad As Integer:     AñoCont_1_CAcad = Left(CursoAcad, 4)
@@ -112,12 +112,12 @@ Salir:
     Application.Calculation = xlCalculationAutomatic
     Call Rut_EnableEvents_Status_Reset
     Application.Speech.Speak "Proceso Terminado"
-End Sub '------------------------------------------------------------------------------------------------------------------------
+End Sub '-------------------------------------------------------------------------------------------
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Rellenar_Tabla_Inf_Contable_de_Recibos(Lo_BD As ListObject, _
                                                Sht_Inf As Worksheet)
-' ==================================================================================================================================
+' ==================================================================================================
 Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
 
     Dim ImpEmiCursAnt           As Currency
@@ -180,10 +180,10 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
     Prog_TipoRec.Visible = xlSheetHidden
     Sht_Inf.Visible = xlSheetVisible
     Sht_Inf.Select
-    '- Borrado Tabla explicativa de Tipos de Recibos: Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. --------------------------
+    '- Borrado Tabla explicativa de Tipos de Recibos: Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. --
     Sht_Inf.Range(Cells(UltFila, 1), Cells(UltFila + TRows_LoTipoRec + 20, 1)).EntireRow.Delete
     
-    '------------ Preparo Sht_BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------------------
+    '------------ Preparo Sht_BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------
 '    Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     Call Rut_Lo_WrkSht_Preparar(Sht_BD)
@@ -194,10 +194,10 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
     Sht_Inf.Select
     Lo_Inf.ShowTotals = False
     
-    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ----------------------------------------------
+    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ---------------------------------
     If Not Lo_Inf.DataBodyRange Is Nothing Then Lo_Inf.DataBodyRange.Delete
 
-    '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto ------------------------------------
+    '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto -----------------------
     With Lo_Inf.HeaderRowRange
         .Cells(InfRec_JI_Emi_Adm) = "JI-" & APP_AñoCont - 1 & " o JI-" & APP_AñoCont & vbLf & "1303.00" & vbLf & "Adm."
         .Cells(InfRec_JI_Emi_Acad) = "JI-" & APP_AñoCont - 1 & " o JI-" & APP_AñoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
@@ -219,13 +219,13 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
         .Cells(InfRec_Aplazado) = "AD'" & APP_ACont - 1 & " Cob.'" & APP_ACont & vbLf & "JI-" & APP_AñoCont & vbLf & "A la 4430"
     End With
         
-    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
+    '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. ----------------------
     For F_Tp_Rec = 1 To Lo_Tipo_Rec.ListRows.Count
         
         Tp_Rec = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 1)
         DescripciónA = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 2)
         
-        '- Para cada Concepto Económico= Tipo de Enseñanza; 1310.00, 1310.01, 1311.00, 1303.00 .. (TIO, EFP, CFC/AF y ADM.) -----------------------------
+        '- Para cada Concepto Económico= Tipo de Enseñanza; 1310.00, 1310.01, 1311.00, 1303.00 .. (TIO, EFP, CFC/AF y ADM.)
         For F_Concept = 1 To Lo_Concept.ListRows.Count
             
             Concept = Lo_Concept.DataBodyRange.Cells(F_Concept, 1)
@@ -243,94 +243,94 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
             RwInf.Range(InfRec_ConcptNom) = DescripciónB
             
             With Sht_BD.ListObjects(1).DataBodyRange
-            '-----------------------------------------------------------------------------------------------------------------------
-            '----- Primeras 12 columnas de la Tabla; Imp_Rec, Imp_INSS, Imp_Adm e Imp_Acad -----------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '- de cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. ------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '----- Primeras 12 columnas de la Tabla; Imp_Rec, Imp_INSS, Imp_Adm e Imp_Acad ---------
+            '---------------------------------------------------------------------------------------
+            '- de cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. ----------------
+            '---------------------------------------------------------------------------------------
             
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Recibos Emitidos: Acad. + Adm. ----------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '- Importe Recibos Emitidos --------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Recibos Emitidos: Acad. + Adm. --------------
+            '---------------------------------------------------------------------------------------
+            '- Importe Recibos Emitidos ------------------------------------------------------------
             RwInf.Range(InfRec_Tot_Emi) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                     .Columns(BD_ImpRec), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Importe Recibos Emitidos Cobrado ------------------------------------------------------------------------------------
+            '- Importe Recibos Emitidos Cobrado ----------------------------------------------------
             RwInf.Range(InfRec_Tot_Cob) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                     .Columns(BD_ImpCob), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FCob), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Saldo Recibos Emitidos Pendiente ----------------------------------------------------------------------------------
+            '- Saldo Recibos Emitidos Pendiente ----------------------------------------------------
             RwInf.Range(InfRec_Tot_Pdte) = RwInf.Range(InfRec_Tot_Emi) - RwInf.Range(InfRec_Tot_Cob)
 
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Adm.: Seg.Obl. INSS ---------------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '- Importe INSS ---------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Adm.: Seg.Obl. INSS -------------------------
+            '---------------------------------------------------------------------------------------
+            '- Importe INSS ------------------------------------------------------------------------
             RwInf.Range(InfRec_Adm_INSS_Emi) = Application.SumIfs(.Columns(BD_Rec_Imp_INSS), _
                                                     .Columns(BD_ImpRec), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Importe INSS. Cobrado ------------------------------------------------------------------------------------------------
+            '- Importe INSS. Cobrado ---------------------------------------------------------------
             RwInf.Range(InfRec_Adm_INSS_Cob) = Application.SumIfs(.Columns(BD_Rec_Imp_INSS), _
                                                     .Columns(BD_ImpCob), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FCob), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Saldo INSS. Pendiente ----------------------------------------------------------------------------------------------
+            '- Saldo INSS. Pendiente ---------------------------------------------------------------
             RwInf.Range(InfRec_Adm_INSS_Pdte) = RwInf.Range(InfRec_Adm_INSS_Emi) - RwInf.Range(InfRec_Adm_INSS_Cob)
 
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Adm. SIN Imp.INSS -----------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '- Importe Adm. SIN INSS -----------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Adm. SIN Imp.INSS ---------------------------
+            '---------------------------------------------------------------------------------------
+            '- Importe Adm. SIN INSS ---------------------------------------------------------------
             RwInf.Range(InfRec_Adm_Emi) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                     .Columns(BD_ImpRec), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
             RwInf.Range(InfRec_Adm_Emi) = RwInf.Range(InfRec_Adm_Emi) - RwInf.Range(InfRec_Adm_INSS_Emi)
-            '- Importe Adm. Cobrado ------------------------------------------------------------------------------------------------
+            '- Importe Adm. Cobrado ----------------------------------------------------------------
             RwInf.Range(InfRec_Adm_Cob) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                     .Columns(BD_ImpCob), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_FCob), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
             RwInf.Range(InfRec_Adm_Cob) = RwInf.Range(InfRec_Adm_Cob) - RwInf.Range(InfRec_Adm_INSS_Cob)
-            '- Saldo Imp. Adm. SIN INSS --------------------------------------------------------------------------------------------
+            '- Saldo Imp. Adm. SIN INSS ------------------------------------------------------------
             RwInf.Range(InfRec_Adm_Pdte) = RwInf.Range(InfRec_Adm_Emi) - RwInf.Range(InfRec_Adm_Cob)
            
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Académicos SIN Adm. y SIN INSS ----------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Académicos SIN Adm. y SIN INSS --------------
+            '---------------------------------------------------------------------------------------
             If RwInf.Range(InfRec_Enseñanza) <> "ADM" And RwInf.Range(InfRec_Enseñanza) <> "TNCT" Then
-                '- Imp. Acad. ------------------------------------------------------------------------------------------------------
+                '- Imp. Acad. ----------------------------------------------------------------------
                 RwInf.Range(InfRec_Acad_Emi) = RwInf.Range(InfRec_Tot_Emi) - RwInf.Range(InfRec_Adm_Emi) - RwInf.Range(InfRec_Adm_INSS_Emi)
-                '- Imp. Acad. Cobrado ----------------------------------------------------------------------------------------------
+                '- Imp. Acad. Cobrado --------------------------------------------------------------
                 RwInf.Range(InfRec_Acad_Cob) = RwInf.Range(InfRec_Tot_Cob) - RwInf.Range(InfRec_Adm_Cob) - RwInf.Range(InfRec_Adm_INSS_Cob)
-                '- Saldo Imp. Acad. ------------------------------------------------------------------------------------------------
+                '- Saldo Imp. Acad. ----------------------------------------------------------------
                 RwInf.Range(InfRec_Acad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - RwInf.Range(InfRec_Acad_Cob)
             Else
-                '- Imp. Acad. ------------------------------------------------------------------------------------------------------
+                '- Imp. Acad. ----------------------------------------------------------------------
                 RwInf.Range(InfRec_Adm_Emi) = RwInf.Range(InfRec_Tot_Emi)
-                '- Imp. Acad. Cobrado ----------------------------------------------------------------------------------------------
+                '- Imp. Acad. Cobrado --------------------------------------------------------------
                 RwInf.Range(InfRec_Adm_Cob) = RwInf.Range(InfRec_Tot_Cob)
-                '- Saldo Imp. Acad. ------------------------------------------------------------------------------------------------
+                '- Saldo Imp. Acad. ----------------------------------------------------------------
                 RwInf.Range(InfRec_Adm_Pdte) = RwInf.Range(InfRec_Tot_Pdte)
                 
 '''                GoTo Sigiente_Concepto
                 
             End If
             
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Académicos por Curso_Acad ---------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '- Importe Recibos Emitidos x Curso_Acad Ant / Pos ----------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Académicos por Curso_Acad -------------------
+            '---------------------------------------------------------------------------------------
+            '- Importe Recibos Emitidos x Curso_Acad Ant / Pos -------------------------------------
             ImpEmiCursAnt = Application.SumIfs(.Columns(BD_ImpRec), _
                                                     .Columns(BD_ImpRec), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
@@ -343,7 +343,7 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
                                                     .Columns(BD_C_Acad), "=" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Importe Adm. x Curso_Acad Ant / Pos -------------------------------------------------------------------------
+            '- Importe Adm. x Curso_Acad Ant / Pos -------------------------------------------------
             ImpAdmCursAnt = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                     .Columns(BD_ImpRec), ">0", _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
@@ -359,7 +359,7 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
             ImpAcadCursAnt = ImpEmiCursAnt - ImpAdmCursAnt
             ImpAcadCursPos = ImpEmiCursPos - ImpAdmCursPos
             
-            '- Importe Recibos Cobrados x Curso_Acad Ant / Pos ----------------------------------------------------------------------
+            '- Importe Recibos Cobrados x Curso_Acad Ant / Pos -------------------------------------
             ImpCobCursAnt = Application.SumIfs(.Columns(BD_ImpCob), _
                                                     .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
@@ -372,7 +372,7 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
                                                     .Columns(BD_C_Acad), "=" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
-            '- Importe Adm. Cobrados  x Curso_Acad Ant / Pos -------------------------------------------------------------------------
+            '- Importe Adm. Cobrados  x Curso_Acad Ant / Pos ---------------------------------------
             ImpCobCursAdmAnt = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                     .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
@@ -387,18 +387,18 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
                                                     .Columns(BD_Concepto), Concept)
             ImpCobCursAcadAnt = ImpCobCursAnt - ImpCobCursAdmAnt
             ImpCobCursAcadPos = ImpCobCursPos - ImpCobCursAdmPos
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-------------------------------- Importes Académicos SIN Adm. y SIN INSS ----------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '-------------------------------- Importes Académicos SIN Adm. y SIN INSS --------------
+            '---------------------------------------------------------------------------------------
             If RwInf.Range(InfRec_Enseñanza) <> "ADM" And RwInf.Range(InfRec_Enseñanza) <> "TNCT" Then
-                '- Imp. Acad. ------------------------------------------------------------------------------------------------------
+                '- Imp. Acad. ----------------------------------------------------------------------
                 RwInf.Range(InfRec_ImpAcad_Crs_Ant) = ImpAcadCursAnt
                 RwInf.Range(InfRec_ImpAcad_Crs_Pos) = ImpAcadCursPos
                 RwInf.Range(InfRec_ImpAcad_Cob_AcadAnt) = ImpCobCursAcadAnt
                 RwInf.Range(InfRec_ImpAcad_Cob_AcadPos) = ImpCobCursAcadPos
                 RwInf.Range(InfRec_ImpAcad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - ImpCobCursAcadAnt - ImpCobCursAcadPos
             Else
-'                '- Imp. Acad. ------------------------------------------------------------------------------------------------------
+'                '- Imp. Acad. ---------------------------------------------------------------------
 '                RwInf.Range(InfRec_ImpAcad_Crs_Ant) = ImpEmiCursAnt
 '                RwInf.Range(InfRec_ImpAcad_Crs_Pos) = ImpEmiCursPos
                 
@@ -406,40 +406,40 @@ Debug.Print "Rut_Rellenar_Tabla_Inf_Contable_de_Recibos"
             
             End If
                 
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '----- Resto columnas de la Tabla (Exclusivas de Inf_Peter) ------------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
-            '-----------------------------------------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '----- Resto columnas de la Tabla (Exclusivas de Inf_Peter) ----------------------------
+            '---------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
+            '---------------------------------------------------------------------------------------
             
-            '- Importe Recibos Emitido ---------------------------------------------------------------------------------------------
+            '- Importe Recibos Emitido -------------------------------------------------------------
             If RwInf.Range(InfRec_TipRec) = "Emitido" Then
 
-                '- Opto por copiar de las Columnas anteriores para reducir el tiempo de ejecución -----------------------------
+                '- Opto por copiar de las Columnas anteriores para reducir el tiempo de ejecución --
                 RwInf.Range(InfRec_ImpAcad_Emi) = RwInf.Range(InfRec_Acad_Emi)
 '                RwInf.Range(InfRec_ImpAcad_Cob_AcadAnt) = RwInf.Range(InfRec_Acad_Cob)
 '                RwInf.Range(InfRec_ImpAcad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - ImpCobCursAnt - ImpCobCursPos
             
             End If
 
-            '- Importe Recibos EjeAnt --------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos EjeAnt --------------------------------------------------------------
             If RwInf.Range(InfRec_TipRec) = "EjeAnt" Then
                 RwInf.Range(InfRec_ImpAcad_EmiAnt) = RwInf.Range(InfRec_Acad_Emi)
 '                RwInf.Range(InfRec_ImpAcad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - ImpCobCursAnt - ImpCobCursPos
             End If
-            '- Importe Recibos Añejo --------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos Añejo ---------------------------------------------------------------
             If RwInf.Range(InfRec_TipRec) = "Añejo" Then
                 RwInf.Range(InfRec_ImpAcad_Emi) = RwInf.Range(InfRec_Acad_Emi)
 '                RwInf.Range(InfRec_ImpAcad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - ImpCobCursAnt - ImpCobCursPos
             End If
-            '- Importe Recibos Aplazado --------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos Aplazado ------------------------------------------------------------
             If RwInf.Range(InfRec_TipRec) = "Aplazado" Then
                 RwInf.Range(InfRec_ImpAcad_Emi) = RwInf.Range(InfRec_Acad_Emi)
 '                RwInf.Range(InfRec_ImpAcad_Pdte) = RwInf.Range(InfRec_Acad_Emi) - ImpCobCursAnt - ImpCobCursPos
                 RwInf.Range(InfRec_Aplazado) = RwInf.Range(InfRec_Acad_Cob)
             End If
-            '- Importe Recibos ADxAplz --------------------------------------------------------------------------------------------------------------
+            '- Importe Recibos ADxAplz -------------------------------------------------------------
             If RwInf.Range(InfRec_TipRec) = "ADxAplz" Then
                 RwInf.Range(InfRec_ImpAcad_Emi) = RwInf.Range(InfRec_Acad_Emi)
                 RwInf.Range(InfRec_ADxAplz) = RwInf.Range(InfRec_Acad_Emi)
@@ -602,12 +602,12 @@ Finalizar:
     Application.DisplayAlerts = True
 '    Application.Speech.Speak "Proceso completado", True
     
-''    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+''    '- Visualizo el progreso ---------------------------------------------------------------------
 ''    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
 ''        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
 ''    MsgBox MenúAux_Msg
 End Sub     '- Rut_Rellenar_Tabla_Inf_Contable_de_Recibos
-' ==================================================================================================================================
+' ==================================================================================================
 'Sub Ejemplo_Selcción_Múltiple()
 '    Union(Cells(44 + 4, 4), Range(Cells(44 + 5, 3), Cells(44 + 3 + 5, 11))).Select
 'End Sub

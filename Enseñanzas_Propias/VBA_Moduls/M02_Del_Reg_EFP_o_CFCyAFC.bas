@@ -1,11 +1,12 @@
 Attribute VB_Name = "M02_Del_Reg_EFP_o_CFCyAFC"
+' Last Rev. 2026-09-21 12:12
 '20265-01-11
 Option Explicit
 
-' ==================================================================================================================================
-'- -----------------------------------------------------------------------------------------------------------------------------
-'- Borrar Tipo de Enseñanza EFP o CFCyAFC (EFP, CFC, AFC, TNCT) No Deseados ---------------------------------
-'- -----------------------------------------------------------------------------------------------------------------------------
+' ==================================================================================================
+'- -------------------------------------------------------------------------------------------------
+'- Borrar Tipo de Enseñanza EFP o CFCyAFC (EFP, CFC, AFC, TNCT) No Deseados ------------------------
+'- -------------------------------------------------------------------------------------------------
 Sub Rut_Borrar_Rec_EFP_o_CFCyAFC(Lo_Data As ListObject)
 Debug.Print ">>> Rut_Borrar_Rec_EFP_o_CFCyAFC"
     
@@ -25,7 +26,7 @@ Debug.Print ">>> Rut_Borrar_Rec_EFP_o_CFCyAFC"
         .ShowTotals = False
         .Range(BD_TipoCurso) = "TipoCurso"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
         .Range(BD_ActivEco) = "Activ_Eco"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
-        '-Filtra Recibos - EFP - Estudios de Formación Permanente: Máster, Especialista, Experto. -------------------
+        '-Filtra Recibos - EFP - Estudios de Formación Permanente: Máster, Especialista, Experto. --
         .Range.AdvancedFilter xlFilterInPlace, Prog_Filtros_Concepto.Range("Tb_CriT_EFP")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then     '- hay rec. de EFP
@@ -58,7 +59,7 @@ FinRut:
     End With    '-  Lo_Data
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
     Application.DisplayAlerts = True
-End Sub     '- Rut_Incorporar_Concept_Eco_y_Tipo_Enseñanza -------------------------------------------------------------------------
+End Sub     '- Rut_Incorporar_Concept_Eco_y_Tipo_Enseñanza -----------------------------------------
 
 
 

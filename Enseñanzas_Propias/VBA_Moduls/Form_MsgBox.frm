@@ -13,10 +13,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Last Rev. 2026-09-21 12:12
 
 Option Explicit
 
-'- Necesitamos poner estas 4 declaraciones y definir la constante GWL_Style, para poder quitar la barra de menú de la ventana de este UserForm. --------------------
+'- Necesitamos poner estas 4 declaraciones y definir la constante GWL_Style, para poder quitar la barra de menú de la ventana de este UserForm.
 Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As LongPtr) As Long
 Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long) As Long
 Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
@@ -26,7 +27,7 @@ Private Const GWL_Style = (-16)
 'Public MsgBx_TitleBar    As Boolean
 'Public MsgBx_Msg         As String
 'Public MsgBx_Answer      As Integer
-' ==================================================================================================================================
+' ==================================================================================================
 Private Sub UserForm_Initialize()
     '- Situa la ventana en el centro de la pantalla -----------
     With Application
@@ -46,13 +47,13 @@ Private Sub UserForm_Initialize()
     End If
     MsgBx_Answer = 0
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
     'Cancel if the user press Alt-F4
     Cancel = CloseMode = vbFormControlMenu
 End Sub
-' ==================================================================================================================================
-' ==================== Put this code on the module where you need use. =============================================================
+' ==================================================================================================
+' ==================== Put this code on the module where you need use. =============================
     '''        MsgBx_Msg = "Hello Baby!!" & vbLf & "Esto es un ejemplo de como quedaría el mensaje con un salto de línea y texto más largo que una línea del cuadro de mensaje."
     '''        MsgBx_Title = "Título de la ventana de mensaje"
     '''        Load Form_MsgBox: Call Form_MsgBox.SetParameter(16, True, "OK+Cancel+Stop", 2, "Ask"): Form_MsgBox.Show  '- ([Font-Size]=16, [Red-Border]=False, [Buttons]="Ok", [Default-Button]=1, [Image]="Msg")
@@ -65,14 +66,14 @@ End Sub
     '''            Case Else
     '''              Debug.Print "botón3"
     '''        End Select
-' ==================================================================================================================================
-'- Esto permite utilizar el UserForm y pasar parámetros para definir su visualización ----------------------------------------------
+' ==================================================================================================
+'- Esto permite utilizar el UserForm y pasar parámetros para definir su visualización --------------
 Public Sub SetParameter(Optional TamanoFont As Integer = 16, _
                         Optional MarcoRojo As Boolean = False, _
                         Optional Btns As String = "Ok", _
                         Optional BtnSelect As Integer = 1, _
                         Optional Img As String = "Msg")
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 Dim Cant_Btn    As Integer: Cant_Btn = 0
 Dim Btn_N       As Integer: Btn_N = 0
 Dim Btn_Width   As Integer: Btn_Width = 0
@@ -144,20 +145,20 @@ Dim BtnName     As MSForms.control
     Me.Height = Fondo_Msg_Rojo.Top + Fondo_Msg_Rojo.Height + 30 + Btn_1.Height + 20 + (-MsgBx_TitleBar * 25)
     '- --------------------------------------------------------
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Private Sub Btn_1_Click()
     MsgBx_Answer = 1
     Unload Me
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Private Sub Btn_2_Click()
     MsgBx_Answer = 2
     Unload Me
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 Private Sub Btn_3_Click()
     MsgBx_Answer = 3
     Unload Me
 End Sub
-' ==================================================================================================================================
+' ==================================================================================================
 

@@ -1,11 +1,12 @@
 Attribute VB_Name = "M39_Resumen_Planes_C_Acad"
+' Last Rev. 2026-09-21 12:12
 '2026-02-05
 '- M31_Cierre_Contable_PLANES
 Option Explicit
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Resumen_Planes_C_Acad()
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
     Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_CursAcad")
     Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
@@ -66,15 +67,15 @@ Salir:
     Application.Calculation = xlCalculationAutomatic
     Call Rut_EnableEvents_Status_Reset
     Application.Speech.Speak "Proceso Terminado"
-End Sub '------------------------------------------------------------------------------------------------------------------------
+End Sub '-------------------------------------------------------------------------------------------
 
 
-'==================================================================================================================================
+'===================================================================================================
 Sub RuT_Resumen_Planes(Lo_BD As ListObject, _
                                     CursoAcad As String, _
                                     TipoCurso As String, _
                                     Ws_Lista As Worksheet)
-'==================================================================================================================================
+'===================================================================================================
     Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")    '- Año Contable
     Dim ACont           As Integer:     ACont = Right(AñoCont, 2)
     Dim AñoContAnt      As Integer:     AñoContAnt = Left(CursoAcad, 4)             '- El 1º Año de Curso
@@ -229,7 +230,7 @@ Sub RuT_Resumen_Planes(Lo_BD As ListObject, _
     Dim L1      As Integer:     L1 = L0 + 1
     Dim C0      As Integer:     C0 = Lo_Rsm.Range.Column - 1
     
-    '- Cabecera Tabla ------------------------------------------------------------------------------------------
+    '- Cabecera Tabla ------------------------------------------------------------------------------
     Cells(L0, C0 + Rsm_Imp_Emis) = "Emitido C_Acad " & CursoAcad
         Cells(L1, C0 + Rsm_Imp_Emis) = "Conta'" & ACont & vbLf & "Emitido" & vbLf & CursoAcad
         Cells(L1, C0 + Rsm_Imp_EmisAdm) = "Emitido" & vbLf & CursoAcad & vbLf & "Imp. Adm."
@@ -337,7 +338,7 @@ Sub RuT_Resumen_Planes(Lo_BD As ListObject, _
             Selection.Font.Color = RGB(192, 0, 0)    '-Rojo oscuro
     End With
 
-'    '- Visualizo el progreso ---------------------------------------------------------------------------------------
+'    '- Visualizo el progreso ----------------------------------------------------------------------
 '    Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
 '    Form_Menu.TB_Informe = Txt_Cabecera & vbCrLf & vbCrLf
 '    Txt_Cabecera = String(16, " ") & AñoCont - 1 & String(11, " ") & AñoCont & String(11, " ") & AñoCont & "         Cob." & AñoCont & "       Cob." & AñoCont & vbLf & _
@@ -369,50 +370,50 @@ Sub RuT_Resumen_Planes(Lo_BD As ListObject, _
             End If
         End If
             
-'- Importe Emis C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Emis C_Acad -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_Emis) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan)
             RowNew.Range(Rsm_RegsEmis) = Application.CountIfs( _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan)
-            '- Importe-EmisAdm --------------------------------------------------------------------------------------------------------------------
+            '- Importe-EmisAdm ---------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan)
 
             '- ¡¡ NO se puede hacer un SumIfs porque falla debido a la manipulación del Imp.Acad que utilizan con Imp. Negativos para ajustes de Matrículas !! ----
-            '- Importe EmisAcad  ----------------------------------------------------------------------------------------------------------------
+            '- Importe EmisAcad  -------------------------------------------------------------------
             If RowNew.Range(Rsm_Imp_Emis) = 0 Then GoTo Siguiente_Plan    '- Si todo está cobrado en año anterior
             RowNew.Range(Rsm_Imp_EmisAcad) = RowNew.Range(Rsm_Imp_Emis) - RowNew.Range(Rsm_Imp_EmisAdm)
             
-'- Importe Emis_AñoContAnt -----------------------------------------------------------------------------------------------------------------
+'- Importe Emis_AñoContAnt -------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisAnt) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContAnt)
-            '- Importe-EmisAntAdm --------------------------------------------------------------------------------------------------------------------
+            '- Importe-EmisAntAdm ------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisAntAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_Rec_Imp_Adm), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContAnt)
-            '- Importe EmisAntAcad  -----------------------------------------------------------------------------------------------------------------
+            '- Importe EmisAntAcad  ----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisAntAcad) = RowNew.Range(Rsm_Imp_EmisAnt) - RowNew.Range(Rsm_Imp_EmisAntAdm)
 
-'- Importe Emis_AñoContPos -----------------------------------------------------------------------------------------------------------------
+'- Importe Emis_AñoContPos -------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisPos) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContPos)
-            '- Importe-EmisPosAdm --------------------------------------------------------------------------------------------------------------------
+            '- Importe-EmisPosAdm ------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisPosAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_Rec_Imp_Adm), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContPos)
-            '- Importe EmisPosAcad  -----------------------------------------------------------------------------------------------------------------
+            '- Importe EmisPosAcad  ----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_EmisPosAcad) = RowNew.Range(Rsm_Imp_EmisPos) - RowNew.Range(Rsm_Imp_EmisPosAdm)
 
-'- Importe Anul C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Anul C_Acad -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_Anul) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                             .Columns(BD_ImpRec), "<0", _
                                                             .Columns(BD_Plan), Cod_Plan)
@@ -421,184 +422,184 @@ Sub RuT_Resumen_Planes(Lo_BD As ListObject, _
                 RowNew.Range(Rsm_Imp_AnulAcad) = "?"
             End If
 
-'- Importe Cobr C_Acad -----------------------------------------------------------------------------------------------------------------
+'- Importe Cobr C_Acad -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_Cobr) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan)
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ImpCob), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan)
-            '- Importe Acad Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoCont ----------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrAcad) = RowNew.Range(Rsm_Imp_Cobr) - RowNew.Range(Rsm_Imp_CobrAdm)
 
-'- Importe Cobr AñoContAnt -----------------------------------------------------------------------------------------------------------------
+'- Importe Cobr AñoContAnt -------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrAnt) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                                 .Columns(BD_ImpCob), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Cob), AñoContAnt)
-            '- Importe Adm Recibos Cob_AñoContAnt -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoContAnt --------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrAntAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpCob), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Cob), AñoContAnt)
-            '- Importe Acad Recibos Cob_AñoContAnt -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoContAnt -------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrAntAcad) = RowNew.Range(Rsm_Imp_CobrAnt) - RowNew.Range(Rsm_Imp_CobrAntAdm)
 
-'- Importe Cobr AñoContPos -----------------------------------------------------------------------------------------------------------------
+'- Importe Cobr AñoContPos -------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrPos) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                                 .Columns(BD_ImpCob), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Cob), AñoContPos)
-            '- Importe Adm Recibos Cob_AñoContPos -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoContPos --------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrPosAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpCob), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Cob), AñoContPos)
-            '- Importe Acad Recibos Cob_AñoContPos -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoContPos -------------------------------------------------
             RowNew.Range(Rsm_Imp_CobrPosAcad) = RowNew.Range(Rsm_Imp_CobrPos) - RowNew.Range(Rsm_Imp_CobrPosAdm)
 
-'- Importe Recibos RDT -----------------------------------------------------------------------------------------------------------------
+'- Importe Recibos RDT -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_RDT) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_RDT), "<>")
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             RowNew.Range(Rsm_Imp_RDTAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpCob), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_RDT), "<>")
-            '- Importe Acad Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoCont ----------------------------------------------------
             RowNew.Range(Rsm_Imp_RDTAcad) = RowNew.Range(Rsm_Imp_RDT) - RowNew.Range(Rsm_Imp_RDTAdm)
 
-'- Importe Sin_RDTpdt --------------------------------------------------------------------------------------------------------------------
+'- Importe Sin_RDTpdt ------------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_RDTpdt) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_RDT), "=")
-            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Recibos Cob_AñoCont -----------------------------------------------------
             RowNew.Range(Rsm_Imp_RDTpdtAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_RDT), "=")
-            '- Importe Acad Recibos Cob_AñoCont -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Recibos Cob_AñoCont ----------------------------------------------------
             RowNew.Range(Rsm_Imp_RDTpdtAcad) = RowNew.Range(Rsm_Imp_RDTpdt) - RowNew.Range(Rsm_Imp_RDTpdtAdm)
 
-'- Importe ADxAplz --------------------------------------------------------------------------------------------------------------------
+'- Importe ADxAplz ---------------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_ADx) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_ACont_Vto), AñoCont, _
                                                             .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
                                                             .Columns(BD_ACont_Emi), AñoCont - 1)
-            '- Importe-Adm ADxAplz --------------------------------------------------------------------------------------------------------------------
+            '- Importe-Adm ADxAplz -----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_ADxAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Vto), AñoCont, _
                                                                 .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
                                                                 .Columns(BD_ACont_Emi), AñoCont - 1)
-            '- Importe Acad ADxAplz -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad ADxAplz ----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_ADxAcad) = RowNew.Range(Rsm_Imp_ADx) - RowNew.Range(Rsm_Imp_ADxAdm)
 
-'- Importe Aplazado (ADxAplz el AñoCont -1 ----------------------------------------------------------------------------------------------------------------
+'- Importe Aplazado (ADxAplz el AñoCont -1 ---------------------------------------------------------
             RowNew.Range(Rsm_Imp_Aplz) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_ACont_Vto), AñoCont, _
                                                             .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
                                                             .Columns(BD_ACont_Emi), AñoCont - 1)
-            '- Importe-Adm ADxAplz --------------------------------------------------------------------------------------------------------------------
+            '- Importe-Adm ADxAplz -----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_AplzAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Plan), Cod_Plan, _
                                                             .Columns(BD_ACont_Vto), AñoCont, _
                                                             .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
                                                             .Columns(BD_ACont_Emi), AñoCont - 1)
-            '- Importe Acad ADxAplz -----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad ADxAplz ----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_AplzAcad) = RowNew.Range(Rsm_Imp_Aplz) - RowNew.Range(Rsm_Imp_AplzAdm)
 
-'- Importe EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
+'- Importe EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ------------------------------
             RowNew.Range(Rsm_Imp_EjeAnt) = Application.SumIfs(.Columns(BD_ImpCob), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                 .Columns(BD_ACont_Vto), AñoContAnt, _
                                                                 .Columns(BD_ACont_Cob), "=" & AñoContPos)
-            '- Importe Adm EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
+            '- Importe Adm EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont --------------
             RowNew.Range(Rsm_Imp_EjeAntAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                 .Columns(BD_ACont_Vto), AñoContAnt, _
                                                                 .Columns(BD_ACont_Cob), "=" & AñoContPos)
-            '- Importe Acad EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
+            '- Importe Acad EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont -------------
             RowNew.Range(Rsm_Imp_EjeAntAcad) = RowNew.Range(Rsm_Imp_EjeAnt) - RowNew.Range(Rsm_Imp_EjeAntAdm)
 
-'- Importe Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_Cob --------------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCob) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Cob), "=")
-            '- Importe Adm Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_Cob ----------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpRec), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Cob), "=")
-            '- Importe Acad Pdte_Cob --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_Cob ---------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobAcad) = RowNew.Range(Rsm_Imp_PdtCob) - RowNew.Range(Rsm_Imp_PdtCobAdm)
     
-'- Importe Pdte_CobAnt --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_CobAnt -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobAnt) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                     .Columns(BD_ImpRec), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                     .Columns(BD_ACont_Vto), AñoContAnt, _
                                                                     .Columns(BD_ACont_Cob), "=")
-            '- Importe Adm Pdte_CobAnt --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_CobAnt -------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobAntAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpRec), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                     .Columns(BD_ACont_Vto), AñoContAnt, _
                                                                     .Columns(BD_ACont_Cob), "=")
-            '- Importe Acad Pdte_CobAnt --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_CobAnt ------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobAntAcad) = RowNew.Range(Rsm_Imp_PdtCobAnt) - RowNew.Range(Rsm_Imp_PdtCobAntAdm)
     
-'- Importe Pdte_CobPos --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_CobPos -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobPos) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                     .Columns(BD_ImpRec), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContPos, _
                                                                     .Columns(BD_ACont_Cob), "=")
-            '- Importe Adm Pdte_CobPos --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_CobPos -------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobPosAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                     .Columns(BD_ImpRec), ">0", _
                                                                     .Columns(BD_Plan), Cod_Plan, _
                                                                     .Columns(BD_ACont_Emi), AñoContPos, _
                                                                     .Columns(BD_ACont_Cob), "=")
-            '- Importe Acad Pdte_CobPos --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_CobPos ------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobPosAcad) = RowNew.Range(Rsm_Imp_PdtCobPos) - RowNew.Range(Rsm_Imp_PdtCobPosAdm)
     
-'- Importe Pdte_CobADx --------------------------------------------------------------------------------------------------------------------
+'- Importe Pdte_CobADx -----------------------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobADx) = Application.SumIfs(.Columns(BD_ImpRec), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                 .Columns(BD_ACont_Vto), AñoContPos, _
                                                                 .Columns(BD_ACont_Cob), "=")
-            '- Importe Adm Pdte_CobADx --------------------------------------------------------------------------------------------------------------------
+            '- Importe Adm Pdte_CobADx -------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobADxAdm) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                                 .Columns(BD_ImpRec), ">0", _
                                                                 .Columns(BD_Plan), Cod_Plan, _
                                                                 .Columns(BD_ACont_Emi), AñoContAnt, _
                                                                 .Columns(BD_ACont_Vto), AñoContPos, _
                                                                 .Columns(BD_ACont_Cob), "=")
-            '- Importe Acad Pdte_CobADx --------------------------------------------------------------------------------------------------------------------
+            '- Importe Acad Pdte_CobADx ------------------------------------------------------------
             RowNew.Range(Rsm_Imp_PdtCobADxAcad) = RowNew.Range(Rsm_Imp_PdtCobADx) - RowNew.Range(Rsm_Imp_PdtCobADxAdm)
     
     
-''- Informe --------------------------------------------------------------------------------------------------------------------
+''- Informe ----------------------------------------------------------------------------------------
 '            Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Cont_Plan, "00") & "º " & Cod_Plan & " " & _
 '                Right(String(12, " ") & Format(Imp_EmisAnt, "#,##0.00"), 14) & _
 '                IIf(Imp_Cobr > 0, " " & Right(String(12, "·") & Format(Imp_EmisPos, "#,##0.00"), 14), "  No hay Cobros") & _
@@ -647,18 +648,18 @@ Siguiente_Plan:
 '                Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & "¡ No hay planes sin Cobros !"
 '            End If
 '
-''- Visualizo el progreso ---------------------------------------------------------------------------------------
+''- Visualizo el progreso --------------------------------------------------------------------------
 'Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & _
 '                                                "¡¡¡ Proceso concluido !!! día: " & Now() & _
 '                                                " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg."
 
-Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 '''Prog_BD.Visible = xlSheetVeryHidden
 Rut_On_Functions
-End Sub     ' RuT_Listar_Planes   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+End Sub     ' RuT_Listar_Planes   ------------------------------------------------------------------
+'===================================================================================================
 
 
 

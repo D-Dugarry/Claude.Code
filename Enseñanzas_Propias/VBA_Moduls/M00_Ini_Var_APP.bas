@@ -1,6 +1,6 @@
 Attribute VB_Name = "M00_Ini_Var_APP"
 ' Last Rev. 2026-09-19 20:52
-'- M00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
+'- M00_Ini_Var_APP ---------------------------------------------------------------------------------
 Option Explicit
 
 '--- Tabla Prog_BD  EFP y CFCyAFC -----------------------------------------------
@@ -247,7 +247,7 @@ Public Const Task_SheetsButton       As Integer = 10      ' col: j
     Public MsgBx_Answer         As Integer  '- Variable para el Formulario del MsgBox, Botón pulsado
 
 
-    Public ActivForm           As Object      '- Identificamos que Formulario esta Activo. ----------
+    Public ActivForm           As Object      '- Identificamos que Formulario esta Activo. ---------
     Public Lo_Tareas           As ListObject
     
 Public CantChanges   As Integer

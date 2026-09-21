@@ -1,4 +1,5 @@
 Attribute VB_Name = "M01__________________"
+' Last Rev. 2026-09-21 12:12
 '2026-01-14
 Option Explicit
 
@@ -40,11 +41,11 @@ Option Explicit
 
 
 
-'################################################################################################################
+'###################################################################################################
 ' - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME -
 ' - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME -
 ' - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME - INFORME -
-'################################################################################################################
+'###################################################################################################
 
 '    LSGES04_GE_SinDtos_Curso_2024-25_Plan_AE4_(2026-01-06).xlsx
 '    09/01/2026 21:48:27 Importado Excel: 18.311reg.

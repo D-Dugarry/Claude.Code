@@ -1,5 +1,6 @@
 Attribute VB_Name = "M50_Inf_Cont_AE4x4"
-' ==================================================================================================================
+' Last Rev. 2026-09-21 12:12
+' ==================================================================================================
 ' *** MODULO COMPLETO DESACTIVADO (comentado) el 2026-09-18 23:49 ***
 '
 ' Motivo: el flujo AE4x4/AE4x1 no compila. Bugs pendientes del Informe_Bugs:
@@ -11,15 +12,15 @@ Attribute VB_Name = "M50_Inf_Cont_AE4x4"
 ' Verificado antes de desactivarlo: ninguna invocacion viva por las 4 vias
 ' (codigo VBA, macros asignadas a shapes, tabla Tb_Tareas del menu auxiliar,
 ' resto del XML del libro). Reactivar exige resolver antes B5/B6.
-' ==================================================================================================================
+' ==================================================================================================
 '2026-02-16
-'- M_410_Update_Lo_AE4 -----------------------------------------------------------------------------------------------------------
+'- M_410_Update_Lo_AE4 -----------------------------------------------------------------------------
 
 'Option Explicit
 
-'==================================================================================================================================
+'===================================================================================================
 'Sub RuT_Inf_Contable_Recibos_AE4x4()  '- Importar los 4 WB: EFP y CFC de AñoCon_Ant/Pos
-'==================================================================================================================================
+'===================================================================================================
 'Debug.Print "------------------------- >>> RuT_Update_AE4x4()"
 '    Dim TimeLap2        As Single
 '    Dim ContRecibos     As Long
@@ -34,7 +35,7 @@ Attribute VB_Name = "M50_Inf_Cont_AE4x4"
 '    Dim Rng_Informe     As Range:       Set Rng_Informe = Sht__BD_AE4x4.Range("g5")
 '    Dim Lo_DefCol_BD    As ListObject:  Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
     
-'    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+'    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.
 '    Application.ScreenUpdating = False
     
 '    Dim WsBuffer As Worksheet: Set WsBuffer = ThisWorkbook.Worksheets("Sheet_Buffer")  'hoja fija/oculta
@@ -87,10 +88,10 @@ Attribute VB_Name = "M50_Inf_Cont_AE4x4"
 '    Lo_AE4.ShowTotals = True
 '    Sht__BD_AE4x4.Calculate
 
-'Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-'Sht__BD_AE4x4.Protect , allowFiltering:=True, allowSorting:=True, DrawingObjects:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-'Sht__BD_AE4x4.Protect , allowFiltering:=True, allowSorting:=True, DrawingObjects:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+'Sht__BD_AE4x4.Protect , allowFiltering:=True, allowSorting:=True, DrawingObjects:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+'Sht__BD_AE4x4.Protect , allowFiltering:=True, allowSorting:=True, DrawingObjects:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
 'Sht__BD_AE4x4.Visible = xlSheetVeryHidden
 'Sht__BD_AE4x4.Visible = xlSheetVeryHidden
 'Lo_AE4.ShowTotals = True
@@ -101,8 +102,8 @@ Attribute VB_Name = "M50_Inf_Cont_AE4x4"
 '    Set ActivForm = Nothing
 'Application.Speech.Speak "Proceso completado."
 'Debug.Print "------------------------- <<< Sub RuT_Update_LSGES04_IAdm_CAcadAnt()"
-'End Sub     ' RuT_Update_AE4x4   --------------------------------------------------------------------------------------------
-'===================================================================================================================================
+'End Sub     ' RuT_Update_AE4x4   ------------------------------------------------------------------
+'===================================================================================================
 
 
 

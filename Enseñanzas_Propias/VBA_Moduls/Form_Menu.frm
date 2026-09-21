@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-09-20 14:11
+' Last Rev. 2026-09-21 12:12
 '- M02_Importar_LSGES04_GE - Modif: 2025-10-08
 Option Explicit
 
@@ -25,47 +25,47 @@ Private Sub Btn_Eixir_Click()
     Unload Me
 End Sub
 
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub OpBtn_CAcadAnt_Click()
     Range("APP_CursAcad") = Me.OpBtn_CAcadAnt.Caption
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub OpBtn_CAcadPos_Click()
     Range("APP_CursAcad") = Me.OpBtn_CAcadPos.Caption
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub OpBt_TP_Click()
     Range("APP_EFP_o_CFC") = "EFP"
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub OpBt_CR_Click()
     Range("APP_EFP_o_CFC") = "CFC"
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub ChBx_Prueba_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
     Prog__APP_Switch.Range("Sw_Probando") = Not Prog__APP_Switch.Range("Sw_Probando")
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Private Sub ChBx_DisplayAlerts_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
     Prog__APP_Switch.Range("Sw_DisplayAlerts") = Not Prog__APP_Switch.Range("Sw_DisplayAlerts")
     Application.DisplayAlerts = Prog__APP_Switch.Range("Sw_EnableEvents")
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Private Sub ChBx_EnableEvents_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
     Prog__APP_Switch.Range("Sw_EnableEvents") = Not Prog__APP_Switch.Range("Sw_EnableEvents")
     Application.EnableEvents = Prog__APP_Switch.Range("Sw_EnableEvents")
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Private Sub ChBx_WB_Deactivate_Click()
     If Ws_Saltar_Al_Activar Then Exit Sub
     Prog__APP_Switch.Range("Sw_WB_Deactivate") = Not Prog__APP_Switch.Range("Sw_WB_Deactivate")
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub Tbx_AñoContable_AfterUpdate()
     If Me.Tbx_AñoContable >= 2022 Then
         Range("APP_AñoCont") = Me.Tbx_AñoContable
@@ -81,16 +81,16 @@ Sub Tbx_AñoContable_AfterUpdate()
         Me.Tbx_AñoContable.SetFocus
     End If
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
     Wk_TitP_Liquid.Unprotect
         Wk_TitP_Liquid.Range("Liquid_Curso_Acad") = Range("APP_CursAcad")
-    Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
+    Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
     Application.ScreenUpdating = True
     DoEvents
 End Sub
-' ------------------------------------------------------------------------------------------------------
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
  Sub UserForm_Initialize()       ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     
 Debug.Print "Sub UserForm_Initialize() - Form_menu"
@@ -141,8 +141,8 @@ Debug.Print "Sub UserForm_Initialize() - Form_menu"
     If Lo_Tareas Is Nothing Then Set Lo_Tareas = Prog__Menú_Aux.ListObjects(1)
     Call Rut_Lo_Sort(Lo_Tareas, 1, xlAscending, True)
 
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
  Sub UserForm_Activate()
 
     Me.Tbx_AñoContable = Prog__APP.Range("APP_AñoCont")
@@ -195,8 +195,8 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     
     Call Mostrar_Tareas(Range("Usuario_ID"))
         
-End Sub     ' UserForm_Activate    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' UserForm_Activate    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 Sub Mostrar_Tareas(Usuario As String)
 Dim Cont_Row        As Integer
 Dim Cant_Tot_Tareas     As Integer
@@ -234,8 +234,8 @@ Dim Nombre_Rut      As String
      
      Me.LBx_Tareas.Visible = True
 
-End Sub     ' Mostrar_Tareas    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' Mostrar_Tareas    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 Sub Btn_Ejec_Tarea_Click()
 Dim Pos_Delimitador     As Integer
 Dim Rutinas_Name        As String
@@ -288,13 +288,13 @@ Dim ImagenName        As String
 Nombre_Rutina_NO_Encontrado:
     MsgBox "¡¡ Nombre de rutina NO encontrado !!", vbOKOnly, "Proceso de Selección de Rutina."
     On Error GoTo 0
-End Sub     ' Btn_Ejec_Tarea_Click   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' Btn_Ejec_Tarea_Click   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 Sub LBx_Tareas_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     Index_Tarea = Idx_Tarea
     Btn_Ejec_Tarea_Click
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 Sub LBx_Tareas_Click()
 '    Idx_Tarea = Application.Match(Me.LBx_Tareas, Lo_Tareas.DataBodyRange.Columns(1), 0)
     Idx_Tarea = Application.Match(Me.LBx_Tareas, Lo_Tareas.DataBodyRange.Columns(1), 0)
@@ -309,15 +309,15 @@ Sub LBx_Tareas_Click()
     Me.Lb_Tit_Informe.Caption = "Resultado Última Tarea realizada :" & Lo_Tareas.DataBodyRange.Cells(Idx_Tarea, 1)
     Me.TB_Informe = Lo_Tareas.DataBodyRange.Cells(Idx_Tarea, 5)
         Call Rut_EnableEvents_Status_Reset
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' --------------------------------------------------------------------------------------------------
 Sub TBx_Descripción_Change()
             Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
         Lo_Tareas.DataBodyRange.Cells(Idx_Tarea, 4) = Me.TBx_Descripción
         Call Mostrar_Tareas(Range("Usuario_ID"))
         Call Rut_EnableEvents_Status_Reset
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Private Sub TBx_Tarea_Name_AfterUpdate()
             Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
         Lo_Tareas.DataBodyRange.Cells(Idx_Tarea, 1) = Me.TBx_Tarea_Name
@@ -326,7 +326,7 @@ Private Sub TBx_Tarea_Name_AfterUpdate()
         Call Mostrar_Tareas(Range("Usuario_ID"))
             Call Rut_EnableEvents_Status_Reset
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Private Sub TBx_Rutina_Name_AfterUpdate()
             Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
         Lo_Tareas.DataBodyRange.Cells(Idx_Tarea, 3) = Me.TBx_Rutina_Name

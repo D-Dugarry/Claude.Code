@@ -1,9 +1,9 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-18 19:19
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
 
-'###################################################################################################################################
+'###################################################################################################
 ' Copia el DataBodyRange de TabSource en TabTarget,      Opcional: Borrar primero contenido de TabTarget
     Sub Rut_Lo_DataBodyRange_Copy(Lo_Source As ListObject, _
                               Lo_Target As ListObject, _
@@ -19,14 +19,14 @@ Option Explicit
     End If
     Application.CutCopyMode = False
 End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
-'###################################################################################################################################
+' --------------------------------------------------------------------------------------------------
+'###################################################################################################
 ' Copia el DataBodyRange FILTRADO de Lo_Source en Lo_Target,      Opcional: Borrar primero contenido de Lo_Target y Borrar los registros filtrados de Lo_Source
 Sub Rut_Lo_DataBodyRange_Filtered_Copy(Lo_Source As ListObject, _
                                        Lo_Target As ListObject, _
                                        Optional DelFirstLoTarget As Boolean = False, _
                                        Optional DelLoSourceFilteredRows As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 Debug.Print "Rut_Lo_DataBodyRange_Filtered_Copy"
     Dim ws As Worksheet
     Set ws = Lo_Target.Parent
@@ -66,25 +66,25 @@ Debug.Print "Rut_Lo_DataBodyRange_Filtered_Copy"
     Lo_Target.ShowTotals = Sw_ShowTotals
     Application.DisplayAlerts = Sw_DisplayAlerts
 End Sub
-' ----------------------------------------------------------------------------------------------------------------------------------
-'###################################################################################################################################
-'###################################################################################################################################
+' --------------------------------------------------------------------------------------------------
+'###################################################################################################
+'###################################################################################################
 ' Copia el DataBodyRange FILTRADO de Lo_Source en Lo_Target,      Opcional: Borrar primero contenido de Lo_Target y Borrar los registros filtrados de Lo_Source
-' ----------------------------------------------------------------------------------------------------------------------------------
-'###################################################################################################################################
+' --------------------------------------------------------------------------------------------------
+'###################################################################################################
 Sub Rut_Lo_WrkSht_Preparar(WrkSht As Worksheet)
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
     With WrkSht
         .Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
         .Rows.EntireRow.Hidden = False              ' Mostrar todas las Filas
         Call Rut_Lo_Filtros_Quitar(.ListObjects(1))
     End With
 End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
+' --------------------------------------------------------------------------------------------------
 
-'###################################################################################################################################
+'###################################################################################################
 Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, columna As Integer, VarOrden As String, Optional SW_Clear As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
     With Lo_Tb.Sort
         If SW_Clear Then .sortFields.Clear
         .sortFields.Add Key:=Lo_Tb.ListColumns(columna).Range, SortOn:=xlSortOnValues, Order:=VarOrden, DataOption:=xlSortNormal
@@ -95,28 +95,28 @@ Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, columna As Integer, VarOrden As Strin
         .Apply
     End With
 End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
+' --------------------------------------------------------------------------------------------------
 
-                            '#######################################################################################################
-                            Sub Rut_Filtros_Quitar_ActivSheet_LstObj()      ' Muestra Todas las Solicitudes y Activar Filtros >>>>>>
+                            '#######################################################################
+                            Sub Rut_Filtros_Quitar_ActivSheet_LstObj()      ' Muestra Todas las Solicitudes y Activar Filtros
                                     Call Rut_Lo_Filtros_Quitar(ActiveSheet.ListObjects(1))
-                            End Sub     ' ---------------------------------------------------------------------------------------<<<
-'###################################################################################################################################
-Sub Rut_Lo_Filtros_Quitar(ByRef Lo_Tb As ListObject)      ' Muestra Todas las Solicitudes y Activar Filtros >>>>>>>>>>>>>>>>>>>>
-' ----------------------------------------------------------------------------------------------------------------------------------
+                            End Sub     ' ----------------------------------------------------------
+'###################################################################################################
+Sub Rut_Lo_Filtros_Quitar(ByRef Lo_Tb As ListObject)      ' Muestra Todas las Solicitudes y Activar Filtros
+' --------------------------------------------------------------------------------------------------
     With Lo_Tb
-        If .ShowAutoFilter Then                         '--- Compruebo que la Tabla tiene los Filtros Activos --------
+        If .ShowAutoFilter Then                         '--- Compruebo que la Tabla tiene los Filtros Activos
             With .AutoFilter
                  If .FilterMode Then .ShowAllData
             End With
-        Else                                            '--- Si NO tiene los Filtros Activos, los Activo -------------
+        Else                                            '--- Si NO tiene los Filtros Activos, los Activo
             .ShowAutoFilter = True
         End If
     End With
 End Sub
 
 
-'###################################################################################################################################
+'###################################################################################################
     ' Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, ColSearch1, Criterio1)    ¡¡¡ QUITA FILTROS SI HAY  !!!
 Sub Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data As ListObject, _
                                          ColSearch1 As Integer, _
@@ -146,7 +146,7 @@ Sub Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data As ListObject, _
     Lo_Data.ShowTotals = Sw_ShowTotals
 Debug.Print "Rut_Lo_DataBodyRange_Filter_y_DEL: ColSearch1: " & ColSearch1 & ", Criterio1: _" & Criterio1 & ", Criterio2: _" & Criterio2 & "_ RowsFind: _" & RowsFind & " reg."
 End Sub
-'###################################################################################################################################
+'###################################################################################################
 
 
 

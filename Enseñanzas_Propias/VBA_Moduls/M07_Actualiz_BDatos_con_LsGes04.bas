@@ -1,4 +1,5 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
+' Last Rev. 2026-09-21 12:12
 '2026-01-09
 Option Explicit
 
@@ -9,9 +10,9 @@ Option Explicit
 '            --- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO   <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
 '            - Copiar Todos los Registros "Deleted" en Lo_Deleted y Borrarlos de BDatos
 
-'- ----------------------------------------------------------------------------------------------------------------------------
-'- Actualizar BDatos con Lo_Ges04 ---------------------------------------------------------------------------------------------
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
+'- Actualizar BDatos con Lo_Ges04 ------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 Sub RuT_Actualizar_BDatos_con_LsGes04()
 Debug.Print ">>> RuT_Actualizar_BDatos_con_LsGes04"
     Dim F_Actualiz          As String:  F_Actualiz = Now()
@@ -60,13 +61,13 @@ Call Rut_Off_Functions
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & vbLf & vbLf
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
-    '- Actualizar BDatos con LsGes04 ----------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
+    '- Actualizar BDatos con LsGes04 ---------------------------------------------------------------
     '        - Recorro toda LsGes04 para actualizar BDatos
     '        --- Referencias IGUALES                            <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios
     '        --- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO     <<<<  AÑADO UN NUEVO REGISTRO a BDatos
     '        --- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO   <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
-    '- ----------------------------------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
         
         If Not Lo_BD.DataBodyRange Is Nothing Then
             Lo_BD.ListColumns(BD_Incidencias).DataBodyRange.ClearContents    '- ClearContents -----
@@ -89,25 +90,25 @@ Call Rut_Off_Functions
             End If
         Set RwDB = Lo_BD.ListRows(F_BD)
         
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <<<<<<<<<<<<<<<<<<
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <<<<<<<<<<<<<<<<<<
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <<<<<<<<<<<<<<<<<<
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <<<<<<<<<<<<<<<<<<
-        If Val(RwDB.Range(BD_Ref)) = Val(RwG4.Range(BD_Ref)) Then   '- YA EXISTE, LO ACTUALIZO ----------------------------------------
-            '- Compruebo posibles INCIDENCIAS -------------------------------------------------------------
-            If RwDB.Range(BD_ImpRec) <> RwG4.Range(BD_ImpRec) * 1 Then                '- Cambio en el Imp. Recibo ----------------
+    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
+    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
+    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
+    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
+        If Val(RwDB.Range(BD_Ref)) = Val(RwG4.Range(BD_Ref)) Then   '- YA EXISTE, LO ACTUALIZO -----
+            '- Compruebo posibles INCIDENCIAS ------------------------------------------------------
+            If RwDB.Range(BD_ImpRec) <> RwG4.Range(BD_ImpRec) * 1 Then                '- Cambio en el Imp. Recibo
                 Incidencia = "Chg:PH_ImpRec=[" & RwDB.Range(BD_ImpRec) & "]_#_"
                 RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
                 RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
                 Chg_ImpRec = Chg_ImpRec + 1
                 End If
-            If RwDB.Range(BD_ImpCob) > 0 And RwDB.Range(BD_ImpCob) <> RwG4.Range(BD_ImpCob) * 1 Then     '- Cambio en el Imp. Cobrado ----------------
+            If RwDB.Range(BD_ImpCob) > 0 And RwDB.Range(BD_ImpCob) <> RwG4.Range(BD_ImpCob) * 1 Then     '- Cambio en el Imp. Cobrado
                 Incidencia = "Chg:PH_ImpCob=[" & RwDB.Range(BD_ImpCob) & "]_#_"
                 RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
                 RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
                 Chg_ImpCob = Chg_ImpCob + 1
                 End If
-            If RwDB.Range(BD_ImpAdm) > 0 And RwDB.Range(BD_ImpAdm) <> RwG4.Range(BD_ImpAdm) * 1 Then     '- Cambio en el Imp. Adm. ----------------
+            If RwDB.Range(BD_ImpAdm) > 0 And RwDB.Range(BD_ImpAdm) <> RwG4.Range(BD_ImpAdm) * 1 Then     '- Cambio en el Imp. Adm.
                 Incidencia = "Chg:PH_ImpAdm=[" & RwDB.Range(BD_ImpAdm) & "]_#_"
                 RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
                 RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
@@ -118,11 +119,11 @@ Call Rut_Off_Functions
                 Cont_Mat_Anul = Cont_Mat_Anul + 1
                 End If
             
-            '- Actualizo Todos los datos Nuevos  de Ges04 a BDatos -----------------------------------------------------------
+            '- Actualizo Todos los datos Nuevos  de Ges04 a BDatos ---------------------------------
             Set RngG4 = RwG4.Range.Cells(1, 1).Resize(1, BD_InfRegulariz)
             Set RngPH = RwDB.Range.Cells(1, 1).Resize(1, BD_InfRegulariz)
             RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            '- Actualizo Todos los datos Asignados  en Ges04 a BDatos -----------------------------------------------------------
+            '- Actualizo Todos los datos Asignados  en Ges04 a BDatos ------------------------------
             Set RngG4 = RwG4.Range.Cells(1, BD_ACont_Vto).Resize(1, BD_Cta_Ing - BD_Concepto + 1)
             Set RngPH = RwDB.Range.Cells(1, BD_ACont_Vto).Resize(1, BD_Cta_Ing - BD_Concepto + 1)
             RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
@@ -145,18 +146,18 @@ Call Rut_Off_Functions
             F_G4 = F_G4 + 1
             Ref_Ant = RwG4.Range(BD_Ref)
             
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<<<<<<<<<<<<<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<<<<<<<<<<<<<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<<<<<<<<<<<<<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<<<<<<<<<<<<<<
-        ElseIf Val(RwDB.Range(BD_Ref)) > Val(RwG4.Range(BD_Ref)) Or F_BD >= TRows_BD Then        '- NO EXISTE, AÑADO REGISTRO --------------
+        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
+        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
+        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
+        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
+        ElseIf Val(RwDB.Range(BD_Ref)) > Val(RwG4.Range(BD_Ref)) Or F_BD >= TRows_BD Then        '- NO EXISTE, AÑADO REGISTRO
             '--- Añado Registro -------------------------------------------------------------------
             Set RwDB = Lo_BD.ListRows.Add
-            '- Actualizo Todos los datos Nuevos y Añadidos en Ges04 a BDatos -----------------------------------------------------------
+            '- Actualizo Todos los datos Nuevos y Añadidos en Ges04 a BDatos -----------------------
             Set RngG4 = RwG4.Range.Cells(1, 1).Resize(1, BD_EP_GestReg)
             Set RngPH = RwDB.Range.Cells(1, 1).Resize(1, BD_EP_GestReg)
             RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            ' -----------------=============  Buscar Tipo Plan  ==================--------------------------------------------------------------
+            ' -----------------=============  Buscar Tipo Plan  ==================------------------
             rowfind = Application.Match(RwDB.Range(BD_Plan), Lo_Tb_Ret_VRI.DataBodyRange.Columns(1), 0)
             If Not IsError(rowfind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES
                 RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(rowfind)
@@ -177,10 +178,10 @@ Call Rut_Off_Functions
             F_G4 = F_G4 + 1
             Ref_Ant = RwG4.Range(BD_Ref)
             
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos <<<<<<<
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos <<<<<<<
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos <<<<<<<
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos <<<<<<<
+        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
+        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
+        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
+        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
         Else
             If RwDB.Range(BD_JI_Emi_Acad) = "" Then
                 If InStr(RwDB.Range(BD_EP_GestReg), "Deleted") = 0 Then
@@ -197,14 +198,14 @@ Call Rut_Off_Functions
             End If
             If F_BD < TRows_BD Then F_BD = F_BD + 1
         End If
-                '- Visualizo el progreso ---------------------------------------------------------------------------------------
+                '- Visualizo el progreso -----------------------------------------------------------
                 If F_G4 Mod 500 = 0 Then
                     Form_Menu.TB_Informe = TxT_Progreso & "Incorporando LSGES04:  " & Format(F_G4, "#,##0") & " de " & Format(TRows_Ges04, "#,##0") & " reg."
 '                    Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
                 End If
 Siguiente_Reg:
     Loop
-    '- Si quedan recibos en BDatos, NO EXISTE EN LsGes04 y quiere decir que <<<<< ES UN REGISTRO ELIMINADO <<<<<<<<<<<<<<<<<<<<<<<
+    '- Si quedan recibos en BDatos, NO EXISTE EN LsGes04 y quiere decir que <<<<< ES UN REGISTRO ELIMINADO
     Do While F_BD <= TRows_BD
         Set RwDB = Lo_BD.ListRows(F_BD)
         If RwDB.Range(BD_JI_Emi_Acad) = "" Then
@@ -223,7 +224,7 @@ Siguiente_Reg:
         If F_BD <= TRows_BD Then F_BD = F_BD + 1
     Loop
     
-    '-Filtra Recibos Actualizar de BDatos ---------------------------------------------------------------------------------
+    '-Filtra Recibos Actualizar de BDatos ----------------------------------------------------------
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
     rowfind = Application.WorksheetFunction.CountIf(Lo_BD.DataBodyRange.Columns(BD_EP_GestReg), "")
     If rowfind > 0 Then
@@ -253,7 +254,7 @@ Siguiente_Reg:
                 vbOKOnly + vbExclamation, "Proceso: Actualizar BDatos con LsGes04"
     End If
     
-    '- Copiar Todos los Registros "Deleted" en Lo_Deleted y Borrarlos de BDatos --------------------------------------------------------------
+    '- Copiar Todos los Registros "Deleted" en Lo_Deleted y Borrarlos de BDatos --------------------
     Dim Lo_Deleted      As ListObject:      Set Lo_Deleted = Prog_BD_Deleted.ListObjects(1)
     Call Rut_Lo_Sort(Lo_BD, BD_EP_GestReg, xlAscending, True)
     Lo_BD.Range.AutoFilter Field:=BD_EP_GestReg, Criteria1:="=*Deleted *"

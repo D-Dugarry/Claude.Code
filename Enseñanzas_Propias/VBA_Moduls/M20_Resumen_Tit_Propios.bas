@@ -1,10 +1,10 @@
 Attribute VB_Name = "M20_Resumen_Tit_Propios"
-' Last Rev. 2026-09-19 08:28
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
-' ==================================================================================================================================
-Sub Rut_Resumen_Tab_TitPropios()    ' ===============================================================================================
-' ==================================================================================================================================
+' ==================================================================================================
+Sub Rut_Resumen_Tab_TitPropios()    ' ==============================================================
+' ==================================================================================================
 '--- Tabla Sht__Inf_EPs_UXXI  Tit.Propios-Resumen ----------------------
  Dim AñoCont                As String:          AñoCont = Prog__APP.Range("APP_AñoCont")
  Dim CursAcad               As String:          CursAcad = Prog__APP.Range("APP_CursAcad")
@@ -112,8 +112,8 @@ Application.EnableEvents = False
     '- Vacío la Tabla de Tit.Prop.  =====================================
     Lo_TPResum.AutoFilter.ShowAllData
     If Not Lo_TPResum.DataBodyRange Is Nothing Then Lo_TPResum.DataBodyRange.Delete
-    ' ==================================================================================================================================
-    ' ###############################  Genero la Tabla de Planes de BDatos  #####################################
+    ' ==============================================================================================
+    ' ###############################  Genero la Tabla de Planes de BDatos  ########################
     Plan_Ant = "":   Curso_Acad_Ant = "":   Año_Emi_Ant = 0: Cont_Tot_Reg = 0:
     Range("TP_Cod_Plan") = ""
     Range("TP_Cod_Plan").Select
@@ -121,8 +121,8 @@ Application.EnableEvents = False
     ActiveCell.Offset(0, -1) = "Enseñanzas de:  " & Range("APP_EFP_o_CFC")
     ActiveCell.Offset(0, 2) = " Última actualización: " & Now()
     ActiveCell.Offset(0, 1).Select
-    ' ##################################################################################################################
-    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  =====================================
+    ' ##############################################################################################
+    ' =============  Recorrer todos los Registros filtrados y Crear la Tabla de Planes de DR  ======
 Dim RwPH        As ListRow
 Dim RwTP        As ListRow
 
@@ -140,7 +140,7 @@ Dim RwTP        As ListRow
         Cont_Reg_Proc = Cont_Reg_Proc + 1
         Cont_Tot_Reg = Cont_Tot_Reg + 1
         ' --------------=============  Tratamiento de los Datos  ==================
-        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
+        If Plan_Ant & Curso_Acad_Ant & Año_Emi_Ant = RwPH.Range(BD_Plan) & RwPH.Range(BD_C_Acad) & Format(RwPH.Range(BD_FEmi), "yyyy") Then    ' ------- Control cambio de Plan de estudio y de Curso Académico
             ' Añadir JI si no está -------------------
             If RwPH.Range(BD_JI_Emi_Acad) <> "" Then
                 If InStr(RwTP.Range(CtTP_Ref_JI), RwPH.Range(BD_JI_Emi_Acad)) = 0 Then
@@ -197,7 +197,7 @@ Dim RwTP        As ListRow
             
             RwTP.Range(CtTP_Cant_Reg) = RwTP.Range(CtTP_Cant_Reg) + 1
 
-        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes ---------------------------------------------------------
+        Else    '------ Es el primero de una serie y tengo que introducir los datos comunes --------
 
             Set RwTP = Nothing
             Set RwTP = Lo_TPResum.ListRows.Add
@@ -272,7 +272,7 @@ Dim RwTP        As ListRow
             End If
             
             ' =====================================================================================
-            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ==================
+            ' ---------------=============  Cálculos Redistribución de la Fila Anterior  ===========
             If F_Plan > 1 Then
                     F_Ant = F_Plan - 1
                 
@@ -326,7 +326,7 @@ Siguiente_Fila:
 
     Next Fila_DR
              
-            ' ---------------------------=============  Cálculos Redistribución  de la última Fila ==================
+            ' ---------------------------===========  Cálculos Redistribución  de la última Fila ===
             If F_Plan > 1 Then
                     F_Ant = F_Plan
 
@@ -380,10 +380,10 @@ Form_Menu.TB_Informe = "¡¡¡ Proceso concluido con éxito !!!   He tardado: " & Ro
         
 Rut_On_Functions
     Call Rut_EnableEvents_Status_Reset
-End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
-' ==================================================================================================================================
+End Sub     ' Rut_Resumen_Tab_TitPropios  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
+' ==================================================================================================
             
 

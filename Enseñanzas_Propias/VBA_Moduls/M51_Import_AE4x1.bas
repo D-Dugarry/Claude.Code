@@ -1,6 +1,6 @@
 Attribute VB_Name = "M51_Import_AE4x1"
-' Last Rev. 2026-09-18 23:49
-' ==================================================================================================================
+' Last Rev. 2026-09-21 12:12
+' ==================================================================================================
 ' *** MODULO COMPLETO DESACTIVADO (comentado) el 2026-09-18 23:49 ***
 '
 ' Motivo: el flujo AE4x4/AE4x1 no compila. Bugs pendientes del Informe_Bugs:
@@ -12,13 +12,13 @@ Attribute VB_Name = "M51_Import_AE4x1"
 ' Verificado antes de desactivarlo: ninguna invocacion viva por las 4 vias
 ' (codigo VBA, macros asignadas a shapes, tabla Tb_Tareas del menu auxiliar,
 ' resto del XML del libro). Reactivar exige resolver antes B5/B6.
-' ==================================================================================================================
+' ==================================================================================================
 '2026-01-25
 'Option Explicit
 
-'- ----------------------------------------------------------------------------------------------------------------------------
-'- Seleccionar Excel pero no lo importa, sólo lo abre -------------------------------------------------------------------------
-'- ----------------------------------------------------------------------------------------------------------------------------
+'- -------------------------------------------------------------------------------------------------
+'- Seleccionar Excel pero no lo importa, sólo lo abre ----------------------------------------------
+'- -------------------------------------------------------------------------------------------------
 'Sub Rut_Lo_Import_AE4x1(Ws_AE4x1 As Worksheet, _
 '                                  Arch_New_Name As String, _
 '                                  SheetNom As String, _
@@ -44,7 +44,7 @@ Attribute VB_Name = "M51_Import_AE4x1"
 '    H_Inicio = Timer                '- Para saber el tiempo de proceso
 '    LastTimeLap = Timer             '- Para saber tiempos intermedios
         
-    '- Select File -------------------------------------------------------------------------------------
+    '- Select File ---------------------------------------------------------------------------------
 '    Call Rut_File_Select_V2("Seleccionar el Fichero Excel " & Arch_New_Name & ": ", Arch_New_Name, "Excel", "*.xlsm")
 '    Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NameFileAE4, PathFileAE4)
 '    If Arch_New_Name = "Cancel" Then
@@ -73,7 +73,7 @@ Attribute VB_Name = "M51_Import_AE4x1"
 '        TxT_Progreso = ActivForm.Controls("TBx_Informe")
 '        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excel Seleccionado: " & NameFileAE4, LastTimeLap, , , TxT_Progreso)
     
-    '- --------------------------------------------------------------------------------------------------------------
+    '- ---------------------------------------------------------------------------------------------
 '    Prog__APP.Range("SW_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
 '    Dim ClosedBook      As Workbook:        Set ClosedBook = Workbooks.Open(Arch_New_Name, ReadOnly:=True)
 '    Dim Ws_ClsBk        As Worksheet:       Set Ws_ClsBk = ClosedBook.Sheets(SheetNom)
@@ -121,6 +121,6 @@ Attribute VB_Name = "M51_Import_AE4x1"
 '    Set ClosedBook = Nothing
 '    Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
 'End Sub
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 

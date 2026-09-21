@@ -1,9 +1,10 @@
 Attribute VB_Name = "M79_Crear_WB_EP_CAcad"
+' Last Rev. 2026-09-21 12:12
 '2026-02-01
 Option Explicit
 
-'- Guarda Copia de Este Excel Para convertirlo en Original =========================================================================
-'===================================================================================================================================
+'- Guarda Copia de Este Excel Para convertirlo en Original =========================================
+'===================================================================================================
 Sub Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos(Optional FichPath As String = "")
     Debug.Print "Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos"
     Dim FichNom     As String
@@ -33,6 +34,6 @@ Sub Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos(Optional FichPath As String = 
 Finalizar:
     Application.Speech.Speak "Proceso completado."
 End Sub     '-  "Rut_Crear_WB_EFP_o_CFCyAFC_de_CAcad_Ant_o_Pos"
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 
 

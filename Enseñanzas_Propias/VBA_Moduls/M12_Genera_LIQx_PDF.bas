@@ -1,10 +1,10 @@
 Attribute VB_Name = "M12_Genera_LIQx_PDF"
-' Last Rev. 2026-09-18 23:14
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Genero_LIQx_PDF_V2()    ' Genera el Listado de Todos los Recibos del Plan, hayan sido liquidados o NO.
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Liq           As Integer:     F_Liq = 1
 Dim F_Inform        As Integer:     F_Inform = 5
 Dim T_Alu_Rectif    As Double
@@ -139,7 +139,7 @@ Rut_Off_Functions
                 If .Range(CLiq_Imp_Adm) <> "" Then
                     T_Adm_Accu = T_Adm_Accu - .Range(CLiq_Imp_Adm)
                     T_Alu_Rectif = T_Alu_Rectif - .Range(CLiq_Imp_Adm)
-                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -----------------------
+                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -------------------
                     If .Range(CLiq_T_Adm_Neg) <> "" Then
                         Anulación_Mat = Anulación_Mat + .Range(CLiq_T_Adm_Neg)
                     End If
@@ -158,7 +158,7 @@ Rut_Off_Functions
                     Cells(F_Inform, 7).Font.Color = vbRed
                     F_Inform = F_Inform + 1
                 Else
-                    '- Imprimo una línea de Tasa Adm. Si hay del Alumno Anterio ----------------------
+                    '- Imprimo una línea de Tasa Adm. Si hay del Alumno Anterio --------------------
                     If T_Adm_Accu <> 0 Then
                         Cells(F_Inform, 5) = "Importe Adm.:"
                         Cells(F_Inform, 5).HorizontalAlignment = xlRight
@@ -188,7 +188,7 @@ Rut_Off_Functions
                 '- Si tiene Tasa Adm. -----------------------
                 If .Range(CLiq_Imp_Adm) <> "" Then
                     T_Adm_Accu = -.Range(CLiq_Imp_Adm)
-                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -----------------------
+                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -------------------
                 End If
                 If .Range(CLiq_T_Adm_Neg) <> "" Then
                     Anulación_Mat = .Range(CLiq_T_Adm_Neg)
@@ -276,14 +276,14 @@ Rut_Exportar_La_LIQx_PDF
     
 Restablecer_Valores:
 Rut_On_Functions
-'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------------------------------------
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-End Sub     ' Rut_Genero_Liquid_PDF     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+End Sub     ' Rut_Genero_Liquid_PDF     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Genero_LIQx_PDF()    ' Genera el Listado de Todos los Recibos del Plan que tienen Liquidación. "If .Range(CLiq_NumLiquid) = "" Then GoTo SiguienteFila"
-' ==================================================================================================================================
+' ==================================================================================================
 Dim F_Liq           As Integer:     F_Liq = 1
 Dim F_Inform        As Integer:     F_Inform = 5
 Dim T_Alu_Rectif    As Double
@@ -418,7 +418,7 @@ Rut_Off_Functions
                 If .Range(CLiq_Imp_Adm) <> "" Then
                     T_Adm_Accu = T_Adm_Accu - .Range(CLiq_Imp_Adm)
                     T_Alu_Rectif = T_Alu_Rectif - .Range(CLiq_Imp_Adm)
-                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -----------------------
+                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -------------------
                     If .Range(CLiq_T_Adm_Neg) <> "" Then
                         Anulación_Mat = Anulación_Mat + .Range(CLiq_T_Adm_Neg)
                     End If
@@ -437,7 +437,7 @@ Rut_Off_Functions
                     Cells(F_Inform, 7).Font.Color = vbRed
                     F_Inform = F_Inform + 1
                 Else
-                    '- Imprimo una línea de Tasa Adm. Si hay del Alumno Anterio ----------------------
+                    '- Imprimo una línea de Tasa Adm. Si hay del Alumno Anterio --------------------
                     If T_Adm_Accu <> 0 Then
                         Cells(F_Inform, 5) = "Importe Adm.:"
                         Cells(F_Inform, 5).HorizontalAlignment = xlRight
@@ -467,7 +467,7 @@ Rut_Off_Functions
                 '- Si tiene Tasa Adm. -----------------------
                 If .Range(CLiq_Imp_Adm) <> "" Then
                     T_Adm_Accu = -.Range(CLiq_Imp_Adm)
-                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -----------------------
+                    '- Si tiene Anulación de Matrícula, la Tasa Adm. es Negativa -------------------
                 End If
                 If .Range(CLiq_T_Adm_Neg) <> "" Then
                     Anulación_Mat = .Range(CLiq_T_Adm_Neg)
@@ -555,18 +555,18 @@ Rut_Exportar_La_LIQx_PDF
     
 Restablecer_Valores:
 Rut_On_Functions
-'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------------------------------------
-Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-End Sub     ' Rut_Genero_Liquid_PDF     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-' ==================================================================================================================================
+'    IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ------------------------
+Prog_BD.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+Wk_TitP_Liquid.Protect , allowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
+End Sub     ' Rut_Genero_Liquid_PDF     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+' ==================================================================================================
 Sub Rut_Exportar_La_LIQx_PDF()   '- Copia una Sheet concreta
-' ==================================================================================================================================
+' ==================================================================================================
 Rut_Off_Functions
 Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
-    '- Copio la Sheet entera y esto es lo que voy a grabar. -----------------------------------------
+    '- Copio la Sheet entera y esto es lo que voy a grabar. ----------------------------------------
     Wk_TitP_LIQx_PDF.Copy
     '- Indicar Nombre del Archivo y Ruta para almacenar --------------
     Dim IntialName  As String
@@ -582,7 +582,7 @@ Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
             Application.DisplayAlerts = True
             On Error GoTo 0
         End If
-    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla ------------
+    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla
         ActiveWorkbook.ActiveSheet.Unprotect
 '        ActiveWorkbook.ActiveSheet.Shapes.SelectAll:   Selection.Delete
         ActiveWorkbook.ActiveSheet.UsedRange.ClearComments
@@ -604,13 +604,13 @@ Salir_Sub:
 Call Rut_EnableEvents_Status_Reset
 Rut_On_Functions
 End Sub     ' Rut_Exportar_La_Liquidación
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 
-' ==================================================================================================================================
+' ==================================================================================================
 Sub Rut_Exportar_La_LIQxn_PDF()   '- Copia una Sheet concreta
-' ==================================================================================================================================
+' ==================================================================================================
 Rut_Off_Functions
 Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
@@ -630,7 +630,7 @@ Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
     Application.DisplayAlerts = True
     On Error GoTo 0
     
-    '- Copio la Sheet entera y esto es lo que voy a grabar. -----------------------------------------
+    '- Copio la Sheet entera y esto es lo que voy a grabar. ----------------------------------------
     Wk_TitP_Liquid.Copy
     '- Indicar Nombre del Archivo y Ruta para almacenar --------------
     Dim IntialName As String
@@ -644,7 +644,7 @@ Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
             Application.DisplayAlerts = True
             On Error GoTo 0
         End If
-    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla ------------
+    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla
         ActiveWorkbook.ActiveSheet.Unprotect
         ActiveWorkbook.ActiveSheet.Shapes.SelectAll:   Selection.Delete
         ActiveWorkbook.ActiveSheet.UsedRange.ClearComments
@@ -669,7 +669,7 @@ End With
 Call Rut_EnableEvents_Status_Reset
 Rut_On_Functions
 End Sub     ' Rut_Exportar_La_LIQxn_PDF
-'-----------------------------------------------------------------------------------------------------------------------------------
+'---------------------------------------------------------------------------------------------------
 
 
 
@@ -677,13 +677,13 @@ End Sub     ' Rut_Exportar_La_LIQxn_PDF
 
 
 
-'' ==================================================================================================================================
+'' =================================================================================================
 'Sub Rut_Exportar_La_LIQx_PDF()   '- Copia una Sheet concreta
-'' ==================================================================================================================================
+'' =================================================================================================
 'Rut_Off_Functions
 'Dim FPath           As String:          FPath = ThisWorkbook.Path & "\"
 '    H_Inicio = timer                ' Para Saber el tiempo de proceso
-'    '- Copio la Sheet entera y esto es lo que voy a grabar. -----------------------------------------
+'    '- Copio la Sheet entera y esto es lo que voy a grabar. ---------------------------------------
 '    Wk_TitP_Liquid.Copy
 '    '- Indicar Nombre del Archivo y Ruta para almacenar --------------
 '    Dim IntialName As String
@@ -697,7 +697,7 @@ End Sub     ' Rut_Exportar_La_LIQxn_PDF
 '            Application.DisplayAlerts = True
 '            On Error GoTo 0
 '        End If
-'    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla ------------
+'    '- Quito los Elementos: Botones (Shapes), Comentarios de Celdas y Borro la Fila de Filtrado (la de arriba de los títulos de la Tabla
 '        ActiveWorkbook.ActiveSheet.Unprotect
 '        ActiveWorkbook.ActiveSheet.Shapes.SelectAll:   Selection.Delete
 '        ActiveWorkbook.ActiveSheet.UsedRange.ClearComments
@@ -718,4 +718,4 @@ End Sub     ' Rut_Exportar_La_LIQxn_PDF
 'Salir_Sub:
 'Rut_On_Functions
 'End Sub     ' Rut_Exportar_La_LIQx_PDF
-''-----------------------------------------------------------------------------------------------------------------------------------
+''--------------------------------------------------------------------------------------------------

@@ -1,8 +1,9 @@
 Attribute VB_Name = "M90_CopSeg_USB_HD"
+' Last Rev. 2026-09-21 12:12
 Option Explicit
 
-'' ==================================================================================================================================
-'Sub CopSegTimed_WorckBook_USB()  '- Guarda Copia de Este Excel con marca de tiempo en el nombre del archivo. ----------
+'' =================================================================================================
+'Sub CopSegTimed_WorckBook_USB()  '- Guarda Copia de Este Excel con marca de tiempo en el nombre del archivo.
 '
 '    Dim FichNom                             As String
 '        FichNom = Left(ThisWorkbook.Name, InStrRev(ThisWorkbook.Name, ".") - 1)
@@ -28,9 +29,9 @@ Option Explicit
 ''    ThisWorkbook.Close savechanges:=True
 'Finalizar:
 'End Sub
-'' ==================================================================================================================================
+'' =================================================================================================
 '
-' ----------------------------------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
 
 
 

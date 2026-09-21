@@ -7,25 +7,26 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-09-21 12:12
 '2026-01-09
 Option Explicit
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   SÓLO CLICANDO EN LA CELDA SE ACTIVA   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-Sub Worksheet_SelectionChange(ByVal Target As Range)    '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   SÓLO CLICANDO EN LA CELDA SE ACTIVA   >>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sub Worksheet_SelectionChange(ByVal Target As Range)    '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 Debug.Print "CantSelectionChange", CantSelectionChange, ActiveCell.Address
 CantSelectionChange = CantSelectionChange + 1
-    ' ============ Quitar Todos los filtros de la Liquidación  ===========================================================
+    ' ============ Quitar Todos los filtros de la Liquidación  =====================================
     If Not Application.Intersect(Target, Range("Liquid_Del_Filtro")) Is Nothing Then
     
         With ActiveSheet.ListObjects(1)     '>>>>>>>>>>>>>>>>>>>>
-            If .ShowAutoFilter Then                         '--- Compruebo que la Tabla tiene los Filtros Activos --------
+            If .ShowAutoFilter Then                         '--- Compruebo que la Tabla tiene los Filtros Activos
                 With .AutoFilter
                      If .FilterMode Then .ShowAllData
                 End With
-            Else                                            '--- Si NO tiene los Filtros Activos, los Activo -------------
+            Else                                            '--- Si NO tiene los Filtros Activos, los Activo
                 .ShowAutoFilter = True
             End If
         End With                            '<<<<<<<<<<<<<<<<<<<<
@@ -40,9 +41,9 @@ CantSelectionChange = CantSelectionChange + 1
             Call Rut_EnableEvents_Status_Reset
         
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Mostrar u Ocultar los comentarios de toda la hoja  =======================================
+    ' ============ Mostrar u Ocultar los comentarios de toda la hoja  ==============================
     If Not Application.Intersect(Target, Range("Liquid_Help")) Is Nothing Then
     
     ThisWorkbook.ActiveSheet.Unprotect
@@ -61,7 +62,7 @@ CantSelectionChange = CantSelectionChange + 1
             
         ActiveCell.Offset(6, 0).Select
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
     ' ============ Mostrar u Ocultar Recibos Negativos  =======================================
     If Not Application.Intersect(Target, Range("Liquid_Sw_VerRecNeg")) Is Nothing Then
@@ -70,7 +71,7 @@ CantSelectionChange = CantSelectionChange + 1
         DoEvents
         ActiveCell.Offset(1, 0).Select
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
     ' ============ Mostrar u Ocultar Recibos NO_Cobrados  =======================================
     If Not Application.Intersect(Target, Range("Liquid_Sw_VerRecNOCob")) Is Nothing Then
@@ -79,9 +80,9 @@ CantSelectionChange = CantSelectionChange + 1
         DoEvents
         ActiveCell.Offset(2, 0).Select
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ======= Alternar Vista de la Tabla RDT: Clasificado x Núm-RDT o x Núm-Liquidación  ====================
+    ' ======= Alternar Vista de la Tabla RDT: Clasificado x Núm-RDT o x Núm-Liquidación  ===========
     If Not Application.Intersect(Target, Range("Liquid_RDT_Totales")) Is Nothing Then
     
         Select Case Range("Liquid_RDT_Totales")
@@ -95,22 +96,22 @@ CantSelectionChange = CantSelectionChange + 1
             
         ActiveCell.Offset(0, -1).Select
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
 
 End Sub     ' Worksheet_SelectionChange
 
 
-'>>>>>>>>>> SI CAMBIA EL CONTENIDO DE LA CELDA SE ACTIVA (aunque acabe teniendo el mismo dato)   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-Sub Worksheet_Change(ByVal Target As Range)     '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>> SI CAMBIA EL CONTENIDO DE LA CELDA SE ACTIVA (aunque acabe teniendo el mismo dato)   >>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sub Worksheet_Change(ByVal Target As Range)     '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 If Not Prog__APP_Switch.Range("Sw_EnableEvents") Then Exit Sub
 Debug.Print "CantChanges", CantChanges, ActiveCell.Address
 CantChanges = CantChanges + 1
-    ' ============ Cambiar Liquidación  ==========================================================================
+    ' ============ Cambiar Liquidación  ============================================================
     If Not Application.Intersect(Target, Range("Liquid_Plan")) Is Nothing Then
         
         If Sw_Cmb Then
@@ -130,9 +131,9 @@ CantChanges = CantChanges + 1
         Range("Liquid_Plan").Offset(2, 0).Select
         Call Rut_EnableEvents_Status_Reset
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir Núm JI a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir Núm JI a los Registros visibles de la Liquidación  =======================
     If Not Application.Intersect(Target, Range("Liquid_Num_JI_Emi")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_JI_Emi, Range("Liquid_Num_JI_Emi"))
@@ -140,9 +141,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir Núm AD a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir Núm AD a los Registros visibles de la Liquidación  =======================
     If Not Application.Intersect(Target, Range("Liquid_Num_AD_0010")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_AD_0010, Range("Liquid_Num_AD_0010"))
@@ -150,9 +151,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir Núm JI a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir Núm JI a los Registros visibles de la Liquidación  =======================
     If Not Application.Intersect(Target, Range("Liquid_Num_JI_443")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_JI_443, Range("Liquid_Num_JI_443"))
@@ -160,9 +161,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir ExpAdm a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir ExpAdm a los Registros visibles de la Liquidación  =======================
     If Not Application.Intersect(Target, Range("Liquid_Num_ExpAdm")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_ExpAdm, Range("Liquid_Num_ExpAdm"))
@@ -170,9 +171,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir RDT a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir RDT a los Registros visibles de la Liquidación  ==========================
     If Not Application.Intersect(Target, Range("Liquid_Num_RDT")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_RDT, Range("Liquid_Num_RDT"))
@@ -180,9 +181,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir Coef_VRI a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir Coef_VRI a los Registros visibles de la Liquidación  =====================
     If Not Application.Intersect(Target, Range("Liquid_Coef_VRI")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_Coef_VRI, Range("Liquid_Coef_VRI"))
@@ -190,9 +191,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Añadir Orgánica a los Registros visibles de la Liquidación  ================================
+    ' ============ Añadir Orgánica a los Registros visibles de la Liquidación  =====================
     If Not Application.Intersect(Target, Range("Liquid_Orgánica")) Is Nothing Then
         Application.EnableEvents = False
         Call Rut_3_Añadir_Datos_Liquid_TitProp(CLiq_Orgánica, Range("Liquid_Orgánica"))
@@ -200,9 +201,9 @@ CantChanges = CantChanges + 1
         Call Rut_EnableEvents_Status_Reset
         Sw_Cmb = True
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Filtrar Número de Liquidación  ===========================================================
+    ' ============ Filtrar Número de Liquidación  ==================================================
     If Not Application.Intersect(Target, Range("Liquid_Filtro_N_Liquid")) Is Nothing Then
         If Range("Liquid_Filtro_N_Liquid") = "" Then
             ActiveSheet.ListObjects(1).Range.AutoFilter Field:=CLiq_NumLiquid
@@ -210,9 +211,9 @@ CantChanges = CantChanges + 1
             Call Rut_x_Filtro_LoTb(ActiveSheet.ListObjects(1), CLiq_NumLiquid, Range("Liquid_Filtro_N_Liquid"))
         End If
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Filtrar Número de Recibo (Plazo) =========================================================
+    ' ============ Filtrar Número de Recibo (Plazo) ================================================
     If Not Application.Intersect(Target, Range("Liquid_Filtro_N_Recibo")) Is Nothing Then
         If Range("Liquid_Filtro_N_Recibo") = "" Then
             ActiveSheet.ListObjects(1).Range.AutoFilter Field:=CLiq_Núm_Rec
@@ -220,7 +221,7 @@ CantChanges = CantChanges + 1
             Call Rut_x_Filtro_LoTb(ActiveSheet.ListObjects(1), CLiq_Núm_Rec, Range("Liquid_Filtro_N_Recibo"))
         End If
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
     ' ============ Filtrar Año Vto. =========================================================
     If Not Application.Intersect(Target, Range("Liquid_Filtro_Año_Vto")) Is Nothing Then
@@ -230,9 +231,9 @@ CantChanges = CantChanges + 1
             Call Rut_x_Filtro_LoTb(ActiveSheet.ListObjects(1), CLiq_AñoVto, Range("Liquid_Filtro_Año_Vto"))
         End If
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Filtrar Año de Emisión del Recibo  =======================================================
+    ' ============ Filtrar Año de Emisión del Recibo  ==============================================
     If Not Application.Intersect(Target, Range("Liquid_Filtro_Año_Emi")) Is Nothing Then
         If Range("Liquid_Filtro_Año_Emi") = "" Then
             ActiveSheet.ListObjects(1).Range.AutoFilter Field:=CLiq_F_Emi
@@ -240,9 +241,9 @@ CantChanges = CantChanges + 1
             Call Rut_x_Filtro_LoTb(ActiveSheet.ListObjects(1), CLiq_F_Emi, Range("Liquid_Filtro_Año_Emi") & "*")
         End If
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
-    ' ============ Filtrar Año del Cobro del Recibo  ========================================================
+    ' ============ Filtrar Año del Cobro del Recibo  ===============================================
     If Not Application.Intersect(Target, Range("Liquid_Filtro_Año_Cob")) Is Nothing Then
         If Range("Liquid_Filtro_Año_Cob") = "" Then
             ActiveSheet.ListObjects(1).Range.AutoFilter Field:=CLiq_F_Cobro
@@ -250,7 +251,7 @@ CantChanges = CantChanges + 1
             Call Rut_x_Filtro_LoTb(ActiveSheet.ListObjects(1), CLiq_F_Cobro, Range("Liquid_Filtro_Año_Cob") & "*")
         End If
         Exit Sub
-    End If  ' -----------------------------------------------------------------------------------------------
+    End If  ' --------------------------------------------------------------------------------------
 
 
 End Sub
