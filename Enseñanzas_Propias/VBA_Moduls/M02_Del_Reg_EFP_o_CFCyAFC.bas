@@ -1,5 +1,44 @@
 Attribute VB_Name = "M02_Del_Reg_EFP_o_CFCyAFC"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M02_Del_Reg_EFP_o_CFCyAFC - Separar EFP de CFCyAFC en la importacion
+' =================================================================================================
+'
+' PROPOSITO
+'  Cada copia del libro gestiona UN tipo de ensenanza. Esta rutina borra de la
+'  importacion los recibos que no corresponden al tipo configurado en
+'  APP_EFP_o_CFC (celda de Prog__APP): o los EFP, o todo lo demas.
+'  La llama M01 sobre la copia en RAM, antes de volcar nada al libro.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  Rut_Borrar_Rec_EFP_o_CFCyAFC(Lo_Data) ... Unica rutina del modulo.
+'
+' TRAMOS DE PROGRAMACION
+'    1. Quita filtros y ordena por BD_TipoCurso (ordenar antes acelera mucho
+'       el borrado por rangos visibles).
+'    2. Anade una columna auxiliar al final de la tabla y rotula las cabeceras
+'       BD_TipoCurso y BD_ActivEco ('TipoCurso' / 'Activ_Eco'): el AdvancedFilter
+'       exige que la cabecera coincida con la del rango de criterios.
+'    3. AdvancedFilter con Tb_CriT_EFP (hoja Prog_Filtros_Concepto) -> deja
+'       visibles los recibos de EFP.
+'    4. Segun el tipo configurado:
+'         - EFP     : marca los visibles como 'EFP' en la columna auxiliar,
+'                     invierte el filtro (<>EFP) y borra el resto.
+'         - CFCyAFC : borra directamente los visibles (los EFP).
+'       Si no hay ningun recibo EFP, solo informa.
+'    5. FinRut: elimina la columna auxiliar y quita filtros.
+'
+'  El recuento se hace SIEMPRE sobre BD_Ref con SpecialCells(xlCellTypeVisible)
+'  menos 1 (la cabecera). Por eso la columna BD_Ref debe estar visible: si se
+'  oculta, el conteo sale mal y se borra de menos o de mas.
+'
+' NOTAS
+'  El nombre del End Sub ('Rut_Incorporar_Concept_Eco_y_Tipo_Ensenanza') es un
+'  comentario heredado de un copiar-pegar: no corresponde a esta rutina.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '20265-01-11
 Option Explicit
 

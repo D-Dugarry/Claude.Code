@@ -1,5 +1,55 @@
 Attribute VB_Name = "M03_Asig_nCta_CCC_Ing"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M03_Asig_nCta_CCC_Ing - Asignar la cuenta bancaria de ingreso de cada recibo
+' =================================================================================================
+'
+' PROPOSITO
+'  Rellena la columna Cta_Ingreso: en que cuenta de la UA entro realmente el
+'  dinero de cada recibo. Parte de la cuenta de pago que trae LSGES04 y la
+'  corrige por casos especiales (pagos FLY WIRE, regularizaciones manuales
+'  anotadas en BD_InfRegulariz, recibos negativos o no cobrados).
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Determinar_Cta_Ingreso_ByHand ... Lanzadera manual (cuerpo comentado).
+'  RuT_Determinar_Cta_Ingreso(Lo_Data, Col_Ref, Col_CtaPag, Col_CtaIng)
+'                                        Rutina principal.
+'
+' TRAMOS DE PROGRAMACION
+'    0. Limpia Col_CtaIng y copia sobre ella Col_CtaPag (valor de partida).
+'
+'    Despues, una pasada por cada caso especial. Todas siguen el mismo patron:
+'    quitar filtros -> (ordenar) -> filtrar -> contar sobre Col_Ref -> escribir
+'    el valor en las celdas visibles de Col_CtaIng -> anotar en el informe.
+'
+'    1. BD_ImpRec < 0                  -> 'Imp_Rec <0'  (no es un ingreso).
+'    2. BD_ACont_Cob vacio             -> 'No Cobrado'.
+'    3. Col_CtaPag = 'FLY WIRE*'       -> 0049 6659 07 2416175503.
+'    4. BD_InfRegulariz = 'FLY*'       -> 0049 6659 07 2416175503.
+'    5. BD_InfRegulariz = '0049 '      -> 0049 6659 07 2416175503 (G.Acad).
+'    6. BD_InfRegulariz = '6659072416125620*' -> 0049 6659 07 2416125620.
+'    7. BD_InfRegulariz = '*(0049)'    -> 0049 6659 07 2416125620.
+'    8. BD_InfRegulariz = '*(2100)'    -> 2100 8984 16 0200003529.
+'    9. BD_InfRegulariz = '*(0081)'    -> 0081 3191 42 0001068211.
+'   10. BD_InfRegulariz = '*(0014)'    -> 9000 0005 00 0260000014 (Bco. Espana).
+'
+'    11. Resumen: cuantos quedan SIN cuenta, cuantos venian ya con cuenta
+'        asignada por el sistema y el total de la tabla.
+'
+'  El orden importa: las reglas posteriores SOBRESCRIBEN a las anteriores,
+'  asi que las regularizaciones manuales (BD_InfRegulariz) mandan sobre lo que
+'  trajera LSGES04.
+'
+' NOTAS
+'  El informe solo se vuelca a Form_Menu si el switch Sw_Boss esta activo:
+'  es detalle tecnico pensado para el desarrollador, no para el usuario.
+'
+'  Las cuentas bancarias estan escritas a pelo en el codigo (no en una tabla
+'  de configuracion): un cambio de cuenta de la UA se corrige aqui.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-03
 Option Explicit
 

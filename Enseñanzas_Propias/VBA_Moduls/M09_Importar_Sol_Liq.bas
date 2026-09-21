@@ -1,5 +1,61 @@
 Attribute VB_Name = "M09_Importar_Sol_Liq"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M09_Importar_Sol_Liq - Importar la Solicitud de Liquidacion y sellar el numero
+' =================================================================================================
+'
+' PROPOSITO
+'  Cruza un Excel de Solicitud de Liquidacion (los recibos que el servicio
+'  reclama cobrados) con la liquidacion en pantalla (Wk_TitP_Liquid) y escribe
+'  el numero de liquidacion en los recibos que casan, para dejarlos filtrados
+'  y listos para revisar.
+'  Es un proceso independiente del pipeline LSGES04: se lanza desde el menu.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  CSol_* (Public Const) ... Esquema de columnas del Excel de Solicitud (23),
+'                            declarado aqui y no en M00_Ini_Var_APP.
+'  Import_Sol_Liquid ....... Unica rutina del modulo.
+'
+' TRAMOS DE PROGRAMACION
+'    1. NUMERO DE LIQUIDACION: lo extrae del cuadro de descripcion de Form_Menu,
+'       entre marcas [[ y ]]. Si faltan las marcas, aborta con un aviso en el
+'       informe (es el unico parametro de entrada del proceso).
+'
+'    2. SELECCION E IMPORTACION: FileDialog (cancelar muestra Form_MsgBox y sale
+'       por Restablecer_Valores); vacia Prog_Sol_Liq, copia alli la tabla del
+'       Excel elegido, lo cierra y, si no traia ListObject, crea 'Tb_Sol_Liq'.
+'
+'    3. FORMATEO: TextToColumns sobre la referencia (con formato
+'       '0000 000000000' y consolidacion de valores) y sobre el importe cobrado.
+'       Sin esta conversion la comparacion posterior falla por tipo.
+'
+'    4. CRUCE: ordena ambas tablas por referencia y las recorre en paralelo,
+'       saltando las solicitudes sin fecha de cobro. Con Select Case sobre la
+'       comparacion de referencias:
+'         - Solicitud < Liquidacion : la referencia no esta en el curso -> NotFound.
+'         - Iguales                 : ANADE el numero de liquidacion a CLiq_NumLiquid
+'                                     (concatena, no sustituye), suma el importe
+'                                     cobrado y avanza.
+'         - Solicitud > Liquidacion : avanza en la liquidacion y REPITE la misma
+'                                     fila de solicitud (LinSol - 1). Si ya se
+'                                     llego al final, cuenta NotFound y sale.
+'
+'    5. RESULTADO: ordena por nombre, filtra la liquidacion por ese numero,
+'       deja el cursor dentro de la tabla y escribe el resumen: fichero y ruta,
+'       plan y nombre del curso, no encontrados, encontrados, sin cobro, total
+'       de la solicitud e importe cobrado.
+'
+' NOTAS
+'  El numero de liquidacion se CONCATENA sobre lo que ya hubiera: un recibo
+'  puede acumular varias liquidaciones. Reimportar la misma solicitud dos veces
+'  lo duplicaria en la celda.
+'
+'  Las constantes CSol_* viven en este modulo, no en M00_Ini_Var_APP con el
+'  resto del esquema de datos.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '- M04_Importar_Sol_Liq
 Option Explicit
 

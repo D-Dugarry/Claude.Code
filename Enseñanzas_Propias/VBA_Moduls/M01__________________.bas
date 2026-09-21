@@ -1,5 +1,41 @@
 Attribute VB_Name = "M01__________________"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M01__________________ - Separador de la decena 0x: mapa del pipeline y log real
+' =================================================================================================
+'
+' PROPOSITO
+'  Modulo separador SIN codigo ejecutable. Cumple dos funciones:
+'    - Indice narrativo del pipeline de importacion LSGES04 (M01 a M08), en el
+'      orden real de ejecucion.
+'    - Archivo de un INFORME REAL de ejecucion (curso 2024-25, 09/01/2026) con
+'      las cifras de cada tramo, util como referencia de que es 'normal'.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  (Sin Subs ni Functions)
+'
+' TRAMOS DE PROGRAMACION
+'  Contenido, en dos bloques:
+'
+'    1. ESQUEMA DEL PROCESO: el arbol de llamadas de Mod_Importar_LSGES04_GE,
+'       con los modulos que intervienen en cada paso. Es el mismo recorrido que
+'       documenta la cabecera de M01_Importar_LsGes04_GE.
+'
+'    2. INFORME DE EJECUCION: volcado literal del informe de Form_Menu de una
+'       pasada real. Sirve de linea base: de 18.311 registros importados quedan
+'       7.189 tras las cribas, con el desglose por concepto economico y por tipo
+'       de recibo, y el resultado de la actualizacion de Prog_BD.
+'
+'    Para interpretar esas cifras, el detalle de cada tramo esta en la cabecera
+'    del modulo correspondiente (M01 a M08).
+'
+' NOTAS
+'  El resto de modulos separador de la serie (M10, M20, M30...) estan vacios.
+'  Este es el unico con contenido real.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-14
 Option Explicit
 

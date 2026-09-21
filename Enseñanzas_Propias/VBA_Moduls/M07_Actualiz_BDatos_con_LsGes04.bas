@@ -1,5 +1,78 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 13:54
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M07_Actualiz_BDatos_con_LsGes04 - Fusion de la importacion con la base de datos
+' =================================================================================================
+'
+' PROPOSITO
+'  El corazon del pipeline: vuelca Prog_LsGes04 (ya depurado y clasificado)
+'  sobre Prog_BD, que es la base de datos historica y contiene ademas los
+'  datos de gestion propios (JI, AD, RDT, organica, liquidado...) que NO
+'  vienen de LSGES04 y hay que preservar.
+'  Recorre las dos tablas EN PARALELO, ambas ordenadas por BD_Ref.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Actualizar_BDatos_con_LsGes04 ... Unica rutina del modulo.
+'
+' TRAMOS DE PROGRAMACION
+'    0. PREPARACION: desprotege ambas hojas, quita filtros y ordena las dos
+'       tablas por BD_Ref. Limpia en Prog_BD las columnas BD_Incidencias y
+'       BD_EP_GestReg (marcas de la pasada anterior).
+'
+'    BUCLE PRINCIPAL - avanza por LsGes04 comparando Val(BD_Ref) de cada tabla.
+'    Tres casos, que es la clasica fusion de dos listas ordenadas:
+'
+'    a) REFERENCIAS IGUALES -> el recibo YA EXISTE: actualizar.
+'       - Antes de sobrescribir, anota incidencias si cambian importes:
+'         ImpRec, ImpCob (solo si ya habia cobro) o ImpAdm; guarda el valor
+'         ANTERIOR en BD_Incidencias y en el historico BD_H_Incidencias.
+'       - Si en LsGes04 viene BD_Anul = 'S', marca 'Mat.Anulada_' en observaciones.
+'       - Copia por bloques contiguos (Resize, una sentencia por bloque):
+'           columnas 1..BD_InfRegulariz      (datos originales del recibo)
+'           BD_ACont_Vto..BD_Cta_Ing         (lo calculado en M01/M03/M04/M05)
+'           BD_Rec_Imp_Acad, _Dto, _Adm      (lo imputado en M06)
+'         Lo que NO entra en esos bloques (JI, AD, RDT, organica...) se conserva.
+'       - Sella '- Actualizado <fecha> -' y avanza en las dos tablas.
+'
+'    b) REF. NUEVA (la de BD es mayor, o BD se acabo) -> ALTA.
+'       Anade fila a Prog_BD, copia 1..BD_EP_GestReg y le asigna el coeficiente
+'       de retencion del VRI: lo busca por plan en Prog_Coef_Ret_VRI y, si el
+'       plan no existe, aplica el coeficiente por defecto segun APP_EFP_o_CFC.
+'       Sella '- Nuevo <fecha> -'.
+'
+'    c) REF. ANTIGUA que ya no viene en LsGes04 -> BAJA.
+'       Distingue dos situaciones, y es la distincion importante:
+'         - Sin JI emitido        -> BD_Tipo_Rec = 'Deleted'.
+'         - CON JI (BD_JI_Emi_Acad) -> 'DeletedConJI': el recibo ya genero un
+'           documento contable, asi que su desaparicion es una ANOMALIA.
+'       Solo avanza en Prog_BD (LsGes04 se queda donde esta).
+'
+'    Ademas: si dos filas seguidas de LsGes04 comparten referencia, marca ambas
+'    '_Duplicaty' en BD_EP_Ctrl y salta la segunda.
+'
+'    BUCLE DE COLA: al agotarse LsGes04, todo lo que quede por recorrer en
+'    Prog_BD son bajas, y se marcan con el mismo criterio Deleted/DeletedConJI.
+'
+'    CIERRE:
+'     - Avisa por MsgBox si quedan recibos sin sellar en BD_EP_GestReg.
+'     - Avisa por MsgBox si hubo bajas CON JI (requiere revision manual).
+'     - Resumen al informe: altas, actualizaciones, bajas, bajas con JI y
+'       desglose de cambios de importe.
+'     - Filtra los '*Deleted *' y los traslada a Prog_BD_Deleted (el cuarto
+'       argumento True de Rut_Lo_DataBodyRange_Filtered_Copy borra el origen).
+'     - Rut_WrkSheet_ReducirPeso sobre Prog_LsGes04 y restaura totales.
+'
+' NOTAS
+'  La fusion depende POR COMPLETO de que ambas tablas esten ordenadas por
+'  BD_Ref y de que la comparacion sea numerica (Val). Cualquier cambio en la
+'  ordenacion previa rompe el emparejamiento en silencio.
+'
+'  'DeletedConJI' no es un caso de borde: es la alarma de que se ha perdido un
+'  recibo ya contabilizado.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-09
 Option Explicit
 
@@ -163,7 +236,7 @@ Call Rut_Off_Functions
                 RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(rowfind)
             Else                            ' NO ENCONTRADO   ==>> Pongo el coeficiente establecido 15% ó 20%
                 'If IsNumeric(Left(RwDB.Range(BD_Plan), 1)) Then
-                If Range("APP_EFP_o_CFC") = "EFP" Then
+                If Prog__APP.Range("APP_EFP_o_CFC") = "EFP" Then    '- Cualificado: sin hoja dependia de la ACTIVA
                     RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(1)
                 Else
                     RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(2)

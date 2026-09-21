@@ -1,5 +1,52 @@
 Attribute VB_Name = "M00_Ini_Var_APP"
 ' Last Rev. 2026-09-19 20:52
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M00_Ini_Var_APP - Esquema de datos central (indices de columna) y variables Public
+' =================================================================================================
+'
+' PROPOSITO
+'  Modulo SIN logica: solo declaraciones. Define como Public Const el numero
+'  de columna de cada campo de las tablas clave, para que el resto del codigo
+'  nunca use numeros magicos. Referencia obligada antes de tocar cualquier
+'  rutina que lea o escriba columnas.
+'  Si se inserta o mueve una columna en una tabla, se corrige AQUI.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  (No hay Subs ni Functions: bloques de constantes y variables globales)
+'
+'  BD_*        Tabla Prog_BD (base de datos historica de recibos). 54 cols.
+'  G04_Flag_*  Columnas de marca por tipo de recibo en Prog_LsGes04 (usa M05).
+'              G04_Flag_Primera / _Cuantas delimitan el bloque para limpiarlo
+'              de golpe con Resize.
+'  CLiq_*      Tabla de Liquidacion del Plan (hoja Wk_TitP_Liquid). 26 cols.
+'  DefC_*      Tabla DefCol: definicion de columnas (titulo, formato, ancho,
+'              alineacion, si se compara, si se oculta...) que consumen las
+'              rutinas genericas Rut_Lo_*.
+'  InfRec_*    Informe Contable de Recibos (Sht__Inf_Contab_Rec).
+'  CoefVRI_*   Tabla de coeficientes de retencion del VRI (Prog_Coef_Ret_VRI).
+'  Rsm_*       Resumen de Planes por Curso Academico.
+'  Task_*      Tabla de tareas del menu auxiliar (Prog__MnAux / Tb_Tareas).
+'
+'  Variables Public: Lo_Tareas, ActivForm, Index_Tarea, Index_Usuario,
+'  H_Inicio (marca de tiempo de proceso), Concepto, Coef_VRI,
+'  MsgBx_* (parametros y respuesta de Form_MsgBox), CantChanges,
+'  CantSelectionChange, SW_Col_Ocultas.
+'
+' TRAMOS DE PROGRAMACION
+'  Las constantes van numeradas 1..N en el MISMO orden que las columnas de la
+'  tabla, con la letra de columna anotada al margen. Tres consecuencias:
+'    - El orden fisico de la tabla en la hoja es parte del contrato del codigo.
+'    - CLiq_* y BD_* son tablas distintas: no se pueden intercambiar indices.
+'    - Los rangos contiguos se copian en una sola sentencia con Resize (lo hace
+'      M07 con BD_ACont_Vto..BD_Cta_Ing y 1..BD_InfRegulariz).
+'
+' NOTAS
+'  H_Inicio la fijan las rutinas largas (H_Inicio = Timer) para informar del
+'  tiempo de proceso al terminar.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '- M00_Ini_Var_APP ---------------------------------------------------------------------------------
 Option Explicit
 

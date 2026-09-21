@@ -1,5 +1,57 @@
 Attribute VB_Name = "M00_Ini_APP"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 20:40
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M00_Ini_APP - Arranque de la aplicacion y estado del entorno Excel
+' =================================================================================================
+'
+' PROPOSITO
+'  Punto de entrada del libro y control del entorno: deja Excel en modo
+'  'aplicacion' (pantalla completa, sin Ribbon ni barras) y gobierna el
+'  switch de eventos Sw_EnableEvents de la hoja SwitchsAPP.
+'  Lo llama ThisWorkbook.Workbook_Open.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Al_Abrir_WorkBook ............. Arranque completo del libro.
+'  Rut_ConfigExcel_Establecer ........ Modo aplicacion (oculta interfaz de Excel).
+'  Rut_ConfigExcel_RESTABLECER ....... Devuelve Excel a su estado normal.
+'  Rut_Reset_ToolsBar ................ Restaura solo barras/Ribbon (sin tocar eventos).
+'  Rut_Switch_List_Status ............ Vuelca la tabla Tb_SW al informe de Form_Menu.
+'  Rut_Enable_Events_Status_Choose_ByHand  Atajo manual: fuerza eventos a ON.
+'  Rut_EnableEvents_Status_Reset ..... Realinea Application.EnableEvents con el switch.
+'  Rut_Enable_Events_Status_Choose ... CHANGE / ON / OFF sobre eventos + switch.
+'
+'  OJO: Rut_Off_Functions y Rut_On_Functions YA NO estan aqui; viven en
+'  Rut_Wb_State_Manager.bas (skill excel-state-manager, con reentrancia).
+'
+' TRAMOS DE PROGRAMACION
+'  RuT_Al_Abrir_WorkBook, en orden:
+'    1. Config de entorno + Off_Functions y Sw_EnableEvents = True.
+'    2. Si el libro vive en NEXE y no hay Usuario_ID, pide login (Form_Usuario).
+'    3. Deja visible SOLO Wk_TitP_Liquid y la protege con UserInterfaceOnly:=True
+'       (protegida para el usuario, escribible desde VBA); el resto de hojas a
+'       xlSheetVeryHidden.
+'    4. Copia de seguridad si han pasado mas de 7 dias desde APP_CopSeg_HD_Date.
+'    5. Recalcula la liquidacion activa: Rut_00_Liquid_TitProp(Liquid_Plan, Liquid_Curso_Acad).
+'    6. Rotula el boton Liquid_Sw_VerRecNeg segun el switch Sw_VerRecNeg.
+'    7. Inmoviliza paneles (2 columnas + fila de cabecera del ListObject) y deja
+'       el cursor en la primera columna visible a partir de Liquid_Plan.
+'
+'  Rut_ConfigExcel_Establecer / _RESTABLECER: pares simetricos. El Ribbon se
+'  oculta/muestra con ExecuteExcel4Macro show.toolbar (este libro NO tiene
+'  customUI14.xml). _RESTABLECER ademas resetea los menus contextuales Cell y
+'  List Range Popup, y tiene ErrorHandler que reactiva pantalla y eventos.
+'
+'  Grupo Enable_Events: el estado 'oficial' de los eventos es la celda
+'  Sw_EnableEvents (hoja SwitchsAPP / Prog__APP_Switch), no Application.
+'  _Reset copia switch -> Application; _Choose escribe en ambos a la vez.
+'
+' NOTAS
+'  Los switches viven en Prog__APP_Switch (hoja SwitchsAPP), NO en Prog__APP.
+'  Rut_Switch_List_Status lee Tb_SW de Prog__APP: es otra tabla, solo informativa.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-09
 '- M00_Ini_APP
 
@@ -72,10 +124,10 @@ On Error Resume Next
         .DisplayHeadings = False                                        'Muestra/Oculta títulos de filas y columnas
         If .DisplayWorkbookTabs Then .DisplayWorkbookTabs = False       'Muestra/Oculta las pestañas de las hojas
         If .DisplayGridlines Then .DisplayGridlines = False             'Muestra/Oculta las lineas de la cuadricula
-        If .DisplayPageBreaks Then .DisplayPageBreaks = False           'Muestra/Oculta las líneas de Salto de página
         '.DisplayHorizontalScrollBar = True                             ' Show the Horizontal Scroll Bar
         '.DisplayVerticalScrollBar = True                               ' Show the Vertical Scroll Bar
     End With
+    If ActiveSheet.DisplayPageBreaks Then ActiveSheet.DisplayPageBreaks = False 'Muestra/Oculta las líneas de Salto de página
 '    If CommandBars("Ribbon").Controls(1).Height > 100 Then CommandBars.ExecuteMso ("MinimizeRibbon")
 On Error GoTo 0
 End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

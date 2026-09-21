@@ -1,5 +1,53 @@
 Attribute VB_Name = "M04_Asign_Cnpto_Eco_y_Tip_Curso"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M04_Asign_Cnpto_Eco_y_Tip_Curso - Concepto economico y tipo de ensenanza
+' =================================================================================================
+'
+' PROPOSITO
+'  Clasifica cada recibo en su concepto economico presupuestario (1311.00,
+'  1311.03, 1312.02, 1315.00, 1303.01) y en su tipo de ensenanza TIO-EP
+'  (EFP, CFC, CFC_UPUA, AFC, TNCT_M013, TNCT_PNB1, PruebasAccesoUni).
+'  De esta clasificacion dependen despues los informes contables.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Determinar_Concepto_Eco_y_Tipo_Curso_ByHand ... Lanzadera manual.
+'  RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Lo_Data, Col_Ref, Col_Concepto,
+'          Col_TIO_EP, Col_ActivEco, Col_TipoCurso, Col_Plan) ... Principal.
+'
+' TRAMOS DE PROGRAMACION
+'    0. Escribe en el informe la leyenda de los tipos, limpia las dos columnas
+'       destino y ordena por ActivEco, TipoCurso y Plan.
+'
+'    El cuerpo se bifurca segun APP_EFP_o_CFC:
+'
+'    CASO EFP (libro de Estudios de Formacion Permanente)
+'       Un solo trazo: TODA la tabla es '1311.00' / 'EFP'. No hace falta
+'       filtrar, porque M02 ya dejo unicamente recibos EFP.
+'
+'    CASO CFCyAFC (el resto), una pasada por familia:
+'       ActivEco = 80                    -> 1315.00 / PruebasAccesoUni
+'       AdvancedFilter Tb_CriT_CFC       -> 1311.03 / CFC
+'       AdvancedFilter Tb_CriT_TUP       -> 1312.02 / CFC_UPUA (Univ. Permanente)
+'       AdvancedFilter Tb_CriT_AFC       -> 1311.03 / AFC
+'       AdvancedFilter Tb_CriT_TNCT_M013 -> 1311.03 / TNCT_M013 (acceso >25 anos)
+'       AdvancedFilter Tb_CriT_TNCT_PNB1 -> 1303.01 / TNCT_PNB1 (idiomas)
+'
+'    Control final: cuenta los recibos que se quedaron SIN concepto y, si hay
+'    alguno, lo avisa con MsgBox; ademas lo deja anotado en el informe.
+'
+'    Nota: CFC y AFC comparten concepto economico (1311.03) pero se distinguen
+'    en el tipo TIO-EP, que es lo que luego separa los informes.
+'
+' NOTAS
+'  Los rangos de criterios se invocan con Range('Tb_CriT_*') SIN cualificar la
+'  hoja (a diferencia de M02, que usa Prog_Filtros_Concepto.Range). Funciona
+'  porque la hoja activa es la correcta en ese momento; si se reordena el
+'  pipeline puede dar error 1004.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2025-12-23  ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
 

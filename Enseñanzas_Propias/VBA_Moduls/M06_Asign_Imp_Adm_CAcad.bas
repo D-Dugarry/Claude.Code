@@ -1,5 +1,49 @@
 Attribute VB_Name = "M06_Asign_Imp_Adm_CAcad"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M06_Asign_Imp_Adm_CAcad - Imputar la tasa administrativa al primer recibo
+' =================================================================================================
+'
+' PROPOSITO
+'  Una matricula puede pagarse en varios plazos, y LSGES04 repite el importe
+'  administrativo, el academico y el descuento en TODOS los recibos de esa
+'  matricula. Sumarlos tal cual multiplicaria la tasa.
+'  Esta rutina identifica el PRIMER recibo de cada matricula (Plan + DNI) y
+'  solo a el le copia esos importes en las columnas Rec_Imp_*, que son las que
+'  luego suman los informes.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  Rut_Assign_Imp_AdmAcad_C_Acad ... Unica rutina. Sin argumentos: trabaja
+'                                    siempre sobre Prog_LsGes04.
+'
+' TRAMOS DE PROGRAMACION
+'    1. Ordena la tabla por Plan, DNI, NumRec y Ref. El orden es lo que define
+'       quien es el 'primer' recibo de cada matricula: sin el, la rutina imputa
+'       la tasa a un recibo cualquiera.
+'
+'    2. Recorre la tabla llevando la clave anterior en PlanDNI_Ant:
+'         - Salta los recibos con BD_ImpRec < 0 (negativos/devoluciones).
+'         - Al cambiar la clave Plan_DNI copia, solo en esa fila:
+'             BD_ImpAcad -> BD_Rec_Imp_Acad
+'             BD_ImpAdm  -> BD_Rec_Imp_Adm
+'             BD_ImpDto  -> BD_Rec_Imp_Dto
+'         - El resto de recibos de la misma matricula quedan con Rec_Imp_* vacio.
+'
+'    3. Totaliza y vuelca al informe los tres importes (academico, administrativo
+'       y descuento) con su numero de registros. El total administrativo se suma
+'       con SumIfs > 0 para excluir los ajustes negativos de matricula.
+'
+'    La linea que excluia los recibos anulados (BD_Anul = 'S') esta comentada:
+'    hoy los anulados SI reciben la imputacion.
+'
+' NOTAS
+'  Distinguir siempre BD_ImpAdm (lo que repite LSGES04 en cada recibo) de
+'  BD_Rec_Imp_Adm (lo imputado una sola vez). Los informes deben sumar el
+'  segundo.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2025-01-14
 Option Explicit
 

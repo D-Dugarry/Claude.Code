@@ -1,5 +1,59 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
+' =================================================================================================
+'
+' PROPOSITO
+'  LSGES04 puede traer varias filas con la misma referencia de recibo (BD_Ref).
+'  Este modulo las detecta, anota EN QUE columnas difieren, se queda con la
+'  ultima de cada serie y archiva las relevantes en Prog_BD_Dupl para revision
+'  manual. Lo llama M01 antes de clasificar.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Duplicates_Search(Lo_Data, Lo_DefCol, Lo_Duplic, Colref,
+'                        ColIncidencia, Col_H_Incid) ... Rutina principal.
+'  RuT_Duplicates_Search_Mark_DIFF(Lo_Data, Lo_DefCol, ColHIncidencia,
+'                        fila, CantRepe) ......... Auxiliar: compara dos filas
+'                        consecutivas columna a columna y marca diferencias.
+'
+' TRAMOS DE PROGRAMACION
+'  PARTE 1 - Identificar y marcar (RuT_Duplicates_Search)
+'    Ordena por Colref y recorre la tabla comparando cada fila con la anterior.
+'    Al encontrar referencias iguales:
+'      - al PRIMERO de la serie lo marca 'Rp<n>'  (candidato a borrar),
+'      - al ULTIMO lo marca  'Repe<n>'            (finalista, se conserva),
+'      - lleva la cuenta del maximo numero de repeticiones de una misma ref.,
+'      - llama a _Mark_DIFF para anotar las diferencias reales.
+'    Luego informa, por numero de repeticiones, cuantas referencias hay.
+'
+'  PARTE 2 - Depurar (misma rutina, segundo bloque)
+'    a) Borra de Lo_Data los 'Rp*' (repes NO finalistas). El comentario del
+'       autor avisa: no hay criterio objetivo para elegir cual conservar, se
+'       conserva el ultimo.
+'    b) Copia los 'Repe*' (finalistas) a Lo_Duplic, ACUMULANDO con los de
+'       ejecuciones anteriores.
+'    c) En Lo_Duplic marca 'RpIdem' los que ya estaban de antes con identica
+'       incidencia, y los borra (evita que se acumulen tandas repetidas).
+'    d) Borra de Lo_Duplic los que, aun siendo duplicados, no cambian en
+'       ninguna columna comparada: su historico contiene '_(en 0 Cols):'.
+'
+'  RuT_Duplicates_Search_Mark_DIFF
+'    Recorre las columnas desde la 2 y compara solo las que tienen activo el
+'    flag DefC_Compare en la tabla DefCol. Por cada diferencia escribe en el
+'    historico de AMBAS filas el numero de columna, su titulo y el valor de la
+'    otra fila, y colorea la celda (ColorIndex 34 la anterior, 35 la actual).
+'    Al final antepone la marca '_Duplicati_<n>_(en <x> Cols):', que es
+'    justamente lo que lee el paso (d) para descartar duplicados sin cambios.
+'
+' NOTAS
+'  Dos columnas distintas de incidencia: ColIncidencia es la marca de trabajo
+'  de esta pasada (se limpia al empezar) y Col_H_Incid es el HISTORICO que se
+'  va acumulando y que sobrevive entre ejecuciones.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-11
 'M_112_Manage_Duplicates
 Option Explicit

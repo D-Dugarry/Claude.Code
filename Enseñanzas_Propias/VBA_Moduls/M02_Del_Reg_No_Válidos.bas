@@ -1,5 +1,44 @@
 Attribute VB_Name = "M02_Del_Reg_No_Válidos"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M02_Del_Reg_No_Validos - Filtrado de recibos no procesables
+' =================================================================================================
+'
+' PROPOSITO
+'  Segunda criba de la importacion: elimina de la copia en RAM todos los
+'  recibos que no deben entrar en la liquidacion, en cinco pasadas
+'  independientes. La llama M01 justo despues de separar EFP/CFCyAFC.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Del_Reg_NO_Validos(Lo_Data) ... Unica rutina del modulo.
+'
+' TRAMOS DE PROGRAMACION
+'  Las cinco pasadas, todas con el mismo patron
+'  (quitar filtros -> ordenar -> filtrar -> contar sobre BD_Ref -> borrar
+'  visibles -> informar), y todas con salida anticipada a Restablecer_Valores
+'  si la tabla se queda sin registros:
+'
+'    1. Otro curso academico: BD_C_Acad <> APP_CursAcad.
+'    2. No matriculas: BD_Matricula = 'N'.
+'    3. Fuera de Ensenanzas Propias: BD_ActivEco <> 4. Antes de filtrar hace
+'       TextToColumns sobre la columna para convertir el texto a numero (si no,
+'       el criterio numerico no casa).
+'    4. Matricula de actividad academica a coste CERO (ImpRec = ImpDto = 0),
+'       via AdvancedFilter con Tb_CriT_ImpMatCeroLsGes04.
+'    5. Subvencionados al 100%: BD_ImpRec = 0 porque el descuento cubre el
+'       importe academico.
+'
+'  Restablecer_Valores: reactiva totales, quita filtros y alertas.
+'
+' NOTAS
+'  Los simbolos de los mensajes se escriben con ChrW (<> = &H2260,
+'  >= = &H2265, => = &H21D2) para no depender de la codificacion del fichero.
+'
+'  Igual que en el resto del pipeline: el conteo exige BD_Ref VISIBLE.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-11
 Option Explicit
 

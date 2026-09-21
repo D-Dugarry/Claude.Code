@@ -1,5 +1,78 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-21 19:05
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M01_Importar_LsGes04_GE - ORQUESTADOR del pipeline de importacion LSGES04
+' =================================================================================================
+'
+' PROPOSITO
+'  Punto de entrada del proceso diario: importa la ultima consulta LSGES04_GE
+'  (exportacion de recibos del sistema contable de la UA), la depura, la
+'  clasifica y con ella actualiza Prog_BD.
+'  Este modulo NO hace casi nada por si mismo: encadena las rutinas de
+'  M02..M08 en el orden correcto y va escribiendo el informe en Form_Menu.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  Func_Informe ...................... Formatea una linea de informe en 3
+'                                      columnas (texto / importe / cantidad).
+'                                      La usan TODOS los modulos del pipeline.
+'  Mod_Importar_LSGES04_GE ........... Orquestador principal (ver tramos).
+'  RuT_Actualizar_Repetidos .......... Herramienta puntual: marca duplicados en
+'                                      Prog_BD y fusiona campos vacios. NO forma
+'                                      parte del pipeline (ver NOTAS).
+'  RuT_Marcar_Repetidos .............. Herramienta puntual: solo marca duplicados
+'                                      con '_Duplicaty' en BD_EP_Ctrl.
+'  RuT_Incorporar_Coef_VRI ........... Comentada entera (sustituida por M08).
+'  RuT_Anadir_AD_0010 ................ Comentada entera (carga manual de AD-0010).
+'
+' TRAMOS DE PROGRAMACION
+'  Mod_Importar_LSGES04_GE, tramo a tramo:
+'
+'    A. SELECCION E IMPORTACION
+'       FileDialog filtrado a LSGES04_GE_SinDtos_Curso_<CursoAcad>*; abre el
+'       Excel elegido en ReadOnly (ClsBk, en RAM) y, si no trae ListObject, lo
+'       crea sobre el UsedRange.
+'
+'    B. DEPURACION (sobre la copia en RAM, antes de tocar el libro)
+'       Rut_Borrar_Rec_EFP_o_CFCyAFC  -> M02: deja solo EFP o solo CFCyAFC.
+'       RuT_Del_Reg_NO_Validos        -> M02: quita otro curso, Matricula=N,
+'                                        AE<>4, coste CERO y subvencionados 100%.
+'       Si no queda ningun registro procesable, avisa, cierra y sale.
+'
+'    C. VOLCADO AL LIBRO
+'       Rut_Lo_DataBodyRange_Filtered_Copy vacia Lo_Ges04 (Prog_LsGes04) y copia
+'       lo depurado; cierra el libro externo sin guardar.
+'       Rut_X_Format_LoData_LoDefCol da formato segun Prog_DefCol_BD.
+'
+'    D. CLASIFICACION (todo sobre Lo_Ges04)
+'       RuT_Duplicates_Search         -> M02: duplicados a Prog_BD_Dupl.
+'       Bucle ACont_Vto: ano de vencimiento = ano de BD_FVto, y correcciones
+'         ACont_Vto >= ACont_Emi  y  ACont_Cob >= ACont_Emi. Es PREVIO y
+'         necesario: si el ano de vencimiento esta mal, M05 tipifica mal.
+'       RuT_Determinar_Cta_Ingreso    -> M03: cuenta bancaria de ingreso.
+'       RuT_Determinar_Concepto_Eco_y_Tipo_Curso -> M04: concepto economico
+'                                        (1311.00, 1311.03...) y tipo TIO-EP.
+'       RuT_Determinar_Tipo_Recibo    -> M05: Emitido/EjeAnt/Anejo/Aplazado/ADxAplz.
+'       Rut_Assign_Imp_AdmAcad_C_Acad -> M06: 1er recibo de cada matricula.
+'
+'    E. VOLCADO A LA BASE DE DATOS
+'       RuT_Actualizar_BDatos_con_LsGes04 -> M07: alta/actualizacion/baja en Prog_BD.
+'       RuT_Lo_Coef_VRI_Actualizar        -> M08: tabla de coeficientes del VRI.
+'
+'    F. CIERRE (etiqueta Restablecer_Valores)
+'       Realinea eventos con el switch, avisa por voz y restaura el estado.
+'       Es tambien el destino de los GoTo de cancelacion y de sin-registros.
+'
+' NOTAS
+'  Func_Informe es una dependencia transversal: M02, M06 y otros la llaman.
+'  Si se moviera de modulo habria que revisar todo el pipeline.
+'
+'  El bloque final de RuT_Actualizar_Repetidos tiene el Delete comentado: hoy
+'  solo MARCA (BD_EP_Ctrl), no borra. Las tres rutinas ultimas estan bajo el
+'  rotulo 'Rut de trabajo interno, a eliminar' del propio autor.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-14
 '- M02_Importar_LSGES04_GE
 Option Explicit
@@ -39,12 +112,37 @@ Dim RwPH            As ListRow
 Dim RngG4           As Range
 Dim RngPH           As Range
 Dim rowfind         As Variant
+Dim Sw_Exito        As Boolean:     Sw_Exito = False   '- Solo True si se llega al final
 
 Dim Lo_Ges04            As ListObject:      Set Lo_Ges04 = Prog_LsGes04.ListObjects(1)
 Dim Lo_Ges04_DefCol     As ListObject:      Set Lo_Ges04_DefCol = Prog_DefCol_BD.ListObjects(1)
 
+On Error GoTo Gestion_Error      '- Fase 1 (seguridad): ninguna salida deja el libro a medias
 Call Rut_Off_Functions
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
+
+    '- COPIA DE SEGURIDAD PREVIA ---------------------------------------------------------------
+    '-  Este proceso reescribe ~8.400 reg. de Prog_BD. Si algo falla a medias, esta copia es la
+    '-  unica via de vuelta atras (restituible con M71). Si la copia falla, avisamos y seguimos.
+    Dim RutaCopSeg      As String
+    RutaCopSeg = Fnc_CopSeg_Previa_Importacion("LsGes04")
+    If Len(RutaCopSeg) > 0 Then
+        Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & _
+                " Copia de seguridad previa: " & Mid$(RutaCopSeg, InStrRev(RutaCopSeg, "\") + 1) & vbCrLf
+    Else
+        Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & _
+                " iOjo! NO se pudo hacer la copia de seguridad previa." & vbCrLf
+    End If
+    '- DESPROTEGER ANTES de preparar: Rut_Lo_WrkSht_Preparar hace .Columns/.Rows.Hidden = False,
+    '-  y eso da Error 1004 sobre una hoja protegida. Estas hojas estan protegidas de serie
+    '-  (como otras 18 del libro); el proceso solo funcionaba porque la ejecucion anterior las
+    '-  dejaba abiertas -- cadena que se rompia en cuanto un error restauraba la proteccion.
+    On Error Resume Next        '- Si ya estan desprotegidas, Unprotect no molesta
+    Prog_BD.Unprotect
+    Prog_LsGes04.Unprotect
+    Prog_BD_Dupl.Unprotect
+    On Error GoTo Gestion_Error
+
     Call Rut_Lo_WrkSht_Preparar(Prog_BD)
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
     
@@ -66,7 +164,11 @@ Call Rut_Off_Functions
         Else
             Arch__EP_New = .SelectedItems(1)
 '            Nom_NewArch = Dir(Arch__EP_New) '- Falla con NEXE
-            Nom_NewArch = Right(Arch__EP_New, Len(Arch__EP_New) - InStrRev(Arch__EP_New, "/"))
+            '- Ojo: NEXE/WebDAV usa "/" y las rutas locales "\": tomamos el separador mas a la derecha.
+            Dim PosSep       As Long
+            PosSep = InStrRev(Arch__EP_New, "\")
+            If InStrRev(Arch__EP_New, "/") > PosSep Then PosSep = InStrRev(Arch__EP_New, "/")
+            Nom_NewArch = Mid$(Arch__EP_New, PosSep + 1)
             'Path_NewArch = Left(Arch__EP_New, InStrRev(Arch__EP_New, "\"))
         End If
     End With
@@ -84,6 +186,18 @@ Call Rut_Off_Functions
     Else
         Set Lo_ClsBk = Ws_ClsBk.ListObjects(1)
     End If
+        '- VALIDACION: que el Excel elegido sea de verdad un LSGES04 ------------------------------
+        '-  Sin esto, un fichero equivocado se procesa igual y acaba escribiendo basura en Prog_BD.
+        If Not Fnc_Es_LsGes04_Valido(Lo_ClsBk) Then
+            MsgBox "El fichero seleccionado NO tiene la estructura de un LSGES04." & vbLf & vbLf & _
+                   Nom_NewArch & vbLf & vbLf & "Proceso cancelado: no se ha modificado nada.", _
+                   vbOKOnly + vbCritical, "Importar LSGES04"
+            Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & _
+                   "CANCELADO: " & Nom_NewArch & " no es un LSGES04 valido." & vbCrLf
+            ClsBk.Close SaveChanges:=False
+            Set ClsBk = Nothing
+            GoTo Restablecer_Valores
+        End If
         rowfind = Lo_ClsBk.ListRows.Count
         Form_Menu.TB_Informe = Form_Menu.TB_Informe & Nom_NewArch & vbLf
             TxtMsg1 = Now & " -  Importado Excel"
@@ -190,8 +304,6 @@ Call Rut_Off_Functions
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
             Form_Menu.TB_Informe.SetFocus
     
-saltar_Aqui:
-    
     '- ---------------------------------------------------------------------------------------------
     '- Process Lo_BDatos:
     '- ---------------------------------------------------------------------------------------------
@@ -209,6 +321,7 @@ saltar_Aqui:
 
 
 Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf
+Sw_Exito = True         '- Camino feliz completado
 GoTo Restablecer_Valores
 
 '''    Dim Lo_BD               As ListObject:      Set Lo_BD = Prog_BD.ListObjects(1)
@@ -255,15 +368,67 @@ Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '    Wk_TitP_Liquid.Select
 '    Call Rut_Lo_Filtros_Quitar(Lo_BD)
     Call Rut_EnableEvents_Status_Reset
-'=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
-'Prog_BD.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
-'Prog_LsGes04.Protect , AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA
-'Prog_BD.Visible = xlSheetVeryHidden
-'Prog_LsGes04.Visible = xlSheetVeryHidden
-    Application.Speech.Speak "Proceso completado."
+'=== Las hojas del proceso se dejan como estaban (desprotegidas): Rut_Lo_WrkSht_Preparar
+'===  necesita ocultar/mostrar filas y columnas, y eso NO se puede sobre hoja protegida.
+    If Sw_Exito Then Application.Speech.Speak "Proceso completado."    '- Antes hablaba tambien al cancelar
 
 Rut_On_Functions
+Exit Sub
+
+Gestion_Error:      '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+'-  Sin este bloque, un error abortaba el proceso dejando Prog_BD DESPROTEGIDA y VISIBLE,
+'-  el libro LSGES04 abierto en memoria (rompe la siguiente importacion por libro homonimo)
+'-  y el contador de anidamiento del State Manager atascado (pantalla congelada toda la sesion).
+    Dim ErrNum      As Long:        ErrNum = Err.Number
+    Dim ErrDesc     As String:      ErrDesc = Err.Description
+    Dim ErrOrig     As String:      ErrOrig = Err.Source
+
+    On Error Resume Next        '- La limpieza no debe fallar nunca, pase lo que pase
+    If Not ClsBk Is Nothing Then
+        ClsBk.Close SaveChanges:=False
+        Set ClsBk = Nothing
+    End If
+    Call Rut_Ocultar_Hojas_Proceso  '- Deja el libro presentable (ocultar NO requiere proteger)
+    Call Rut_Reset_NestLevel        '- Desatasca el contador del State Manager
+    On Error GoTo 0
+
+    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & vbCrLf & _
+            "*** PROCESO INTERRUMPIDO POR ERROR *** " & Format(Now, "hh:mm:ss") & vbCrLf & _
+            "Error " & ErrNum & ": " & ErrDesc & vbCrLf
+    MsgBox "Error " & ErrNum & " al importar LSGES04:" & vbLf & vbLf & ErrDesc & _
+           IIf(Len(ErrOrig) > 0, vbLf & vbLf & "Origen: " & ErrOrig, "") & vbLf & vbLf & _
+           "REVISA Prog_BD: puede haber quedado a medio actualizar.", _
+           vbOKOnly + vbCritical, "Importar LSGES04"
 End Sub     ' RuT_Importar_LSGES04_GE   ------------------------------------------------------------
+'===================================================================================================
+
+'===================================================================================================
+Sub Rut_Ocultar_Hojas_Proceso()   '- Tras un ERROR, deja ocultas las hojas de trabajo del proceso
+'===================================================================================================
+'-  Solo OCULTA; deliberadamente NO protege.
+'-  Proteger estas hojas rompe la ejecucion siguiente: Rut_Lo_WrkSht_Preparar necesita hacer
+'-  .Columns/.Rows.Hidden = False, y eso da Error 1004 sobre una hoja protegida (UserInterfaceOnly
+'-  permite escribir valores, pero NO cambiar formato ni visibilidad de filas/columnas).
+'-  Por eso las lineas de .Protect del codigo original estaban comentadas.
+    On Error Resume Next        '- Best-effort: si una hoja ya esta bien, seguimos con las demas
+    Prog_LsGes04.Visible = xlSheetVeryHidden
+    Prog_BD_Dupl.Visible = xlSheetVeryHidden
+    On Error GoTo 0
+End Sub     ' Rut_Ocultar_Hojas_Proceso   ----------------------------------------------------------
+'===================================================================================================
+
+'===================================================================================================
+Function Fnc_Es_LsGes04_Valido(Lo_Data As ListObject) As Boolean   '- Valida la estructura del fichero
+'===================================================================================================
+'-  Comprueba que el Excel elegido tiene pinta de LSGES04 ANTES de tocar Prog_BD.
+'-  No valida nombres de cabecera (varian entre consultas del Generador de Informes), sino que
+'-  existan las columnas que el pipeline usa por INDICE (BD_Ref, BD_C_Acad, BD_Matricula, BD_ActivEco).
+    Fnc_Es_LsGes04_Valido = False
+    If Lo_Data Is Nothing Then Exit Function
+    If Lo_Data.DataBodyRange Is Nothing Then Exit Function          '- Sin datos
+    If Lo_Data.ListColumns.Count < BD_ActivEco Then Exit Function   '- Faltan columnas: no es un LSGES04
+    Fnc_Es_LsGes04_Valido = True
+End Function    ' Fnc_Es_LsGes04_Valido   ----------------------------------------------------------
 '===================================================================================================
 
 '''' ===============================================================================================

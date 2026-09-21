@@ -1,5 +1,62 @@
 Attribute VB_Name = "M05_Asign_Tipo_Recibo"
 ' Last Rev. 2026-09-21 12:12
+' >>> DOC-MOD (generado) >>>
+' =================================================================================================
+' M05_Asign_Tipo_Recibo - Tipificacion contable del recibo por ejercicio
+' =================================================================================================
+'
+' PROPOSITO
+'  Determina el TIPO de cada recibo segun la relacion entre sus anos de
+'  emision, vencimiento y cobro frente al ano contable en curso (APP_AnoCont):
+'  Emitido, EjeAnt, Anejo, Aplazado, ADxAplz, mas marcas especiales de
+'  devolucion, cobro ya contabilizado y ajuste de matricula.
+'  Es la clasificacion que decide en que ejercicio se imputa cada importe.
+'
+' INDICE DE RUTINAS Y FUNCIONES
+'  RuT_Determinar_Tipo_Recibo_ByHand ... Lanzadera manual (prepara la hoja).
+'  RuT_Determinar_Tipo_Recibo .......... Rutina principal. Sin argumentos:
+'                                        trabaja siempre sobre Prog_LsGes04.
+'
+' TRAMOS DE PROGRAMACION
+'    0. Ordena por ACont_Emi, ACont_Vto y ACont_Cob, y limpia tanto BD_Tipo_Rec
+'       como el bloque de columnas de marca G04_Flag_Primera..G04_Flag_ADxAplz
+'       (de una vez, con Resize sobre G04_Flag_Cuantas).
+'
+'    TIPIFICACION PRINCIPAL - una pasada por tipo, con AdvancedFilter sobre un
+'    rango de criterios propio; cada una escribe BD_Tipo_Rec Y su columna de
+'    marca G04_Flag_*, y suma al contador de tipificados:
+'       Tb_CriT_Reg_Err  -> '_ERR_Date_' (fechas incoherentes; tambien en
+'                           BD_Incidencias). No cuenta como tipificado.
+'       Tb_CriT_Emitido  -> 'Emitido'   del ejercicio corriente.
+'       Tb_CriT_EjeAnt   -> 'EjeAnt'    del ejercicio anterior.
+'       Tb_CriT_Aneja    -> 'Anejo'     anteriores al ejercicio anterior.
+'       Tb_CriT_Aplazado -> 'Aplazado'  anulados por aplazamiento el ano pasado.
+'       Tb_CriT_ADxAplz  -> 'ADxAplz'   anulados por aplazamiento este ano, a
+'                           cobrar el que viene.
+'
+'    MARCAS QUE SOBRESCRIBEN (se aplican DESPUES, con AutoFilter simple):
+'       BD_ImpRec  < 0            -> '_Devol_'        (devolucion).
+'       BD_ACont_Cob < AnoCont    -> '_AnoCont'<aa>_' (ya contabilizado).
+'       BD_ImpAdm  < 0            -> '_Ajust_Matric_' (ajuste de matricula).
+'       Tb_CriT_Reg_Anul          -> marca '_Reg_Anul_' en BD_Incidencias
+'                                    (NO toca BD_Tipo_Rec).
+'
+'    CONTROL: cuenta los recibos sin tipificar. Si sale > 0 hay que revisar los
+'    rangos de criterios: o dejan huecos, o se solapan. El MsgBox de aviso esta
+'    comentado; el dato queda en el informe.
+'
+'    ULTIMO TRAMO: oculta varios bloques de columnas de Prog_LsGes04 para poder
+'    revisar el resultado a ojo. Es ayuda de depuracion, no logica de negocio.
+'
+' NOTAS
+'  Las columnas de marca G04_Flag_* permiten ver a posteriori por que filtros
+'  paso un recibo, aunque BD_Tipo_Rec haya sido sobrescrito luego por _Devol_,
+'  _AnoCont_ o _Ajust_Matric_. Por eso conviven las dos cosas.
+'
+'  El informe detallado solo llega a Form_Menu si Sw_Boss esta activo.
+' =================================================================================================
+' <<< DOC-MOD (generado) <<<
+
 '2026-01-06
 Option Explicit
 
