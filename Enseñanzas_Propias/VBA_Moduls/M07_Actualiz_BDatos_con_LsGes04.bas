@@ -1,5 +1,5 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
-' Last Rev. 2026-09-23 15:10
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M07_Actualiz_BDatos_con_LsGes04 - Fusion de la importacion con la base de datos
@@ -112,6 +112,10 @@ Debug.Print ">>> RuT_Actualizar_BDatos_con_LsGes04"
     Dim Lo_Tb_Ret_VRI       As ListObject:      Set Lo_Tb_Ret_VRI = Prog_Coef_Ret_VRI.ListObjects(1)
     Dim TRows_BD         As Long:        TRows_BD = Lo_BD.ListRows.Count
     Dim TRows_Ges04         As Long:        TRows_Ges04 = Lo_Ges04.ListRows.Count
+    '- Fase 4: el merge copia por posicion las col. 1..39 de Lo_Ges04 a Lo_BD. Si alguien
+    '-  desalinea las constantes G04_*/BD_* en M00_Ini_Var_APP, paramos antes de escribir nada.
+    If Not Fnc_G04_Alineada_con_BD() Then Err.Raise vbObjectError + 504, "M07", _
+        "Las col. 1..39 de G04_* y BD_* no coinciden (revisar M00_Ini_Var_APP)."
     Prog_BD.Unprotect
     Prog_LsGes04.Unprotect
     Lo_BD.ShowTotals = False
@@ -123,7 +127,7 @@ Call Rut_Off_Functions
     Call Rut_Lo_Sort(Lo_BD, BD_Ref, xlAscending, True)    ' Ordenar por una Columna
     ' =============  Preparar Tabla de TitPH ==================
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
-    Call Rut_Lo_Sort(Lo_Ges04, BD_Ref, xlAscending, True)    ' Ordenar por una Columna
+    Call Rut_Lo_Sort(Lo_Ges04, G04_Ref, xlAscending, True)    ' Ordenar por una Columna
             '- Visualizo el progreso
             TxT_Progreso = Form_Menu.TB_Informe & vbCrLf
             Form_Menu.TB_Informe = TxT_Progreso & "Incorporando LSGES04:  " & " 0 de " & Format(TRows_Ges04, "#,##0")
@@ -171,9 +175,9 @@ Call Rut_Off_Functions
         '-  a incrementarse nunca y no aparece en el informe. Se mantiene porque si algun dia M02
         '-  falla o se reordena el pipeline, sin este guard el merge emparejaria mal EN SILENCIO.
         If F_G4 > 1 Then
-            If aG4(F_G4, BD_Ref) = Ref_Ant Then
-                aG4(F_G4, BD_EP_Ctrl) = aG4(F_G4, BD_EP_Ctrl) & "_Duplicaty"
-                aG4(F_G4 - 1, BD_EP_Ctrl) = aG4(F_G4 - 1, BD_EP_Ctrl) & "_Duplicaty"
+            If aG4(F_G4, G04_Ref) = Ref_Ant Then
+                aG4(F_G4, G04_EP_Ctrl) = aG4(F_G4, G04_EP_Ctrl) & "_Duplicaty"
+                aG4(F_G4 - 1, G04_EP_Ctrl) = aG4(F_G4 - 1, G04_EP_Ctrl) & "_Duplicaty"
                 Cont_Repes = Cont_Repes + 1
                 F_G4 = F_G4 + 1
                 GoTo Siguiente_Reg
@@ -181,27 +185,27 @@ Call Rut_Off_Functions
         End If
 
         '--- Referencias IGUALES <<<< Ya existe en BDatos: hay que ver si hay Cambios -----------
-        If TRows_BD > 0 And Val(aBD(F_BD, BD_Ref)) = Val(aG4(F_G4, BD_Ref)) Then
+        If TRows_BD > 0 And Val(aBD(F_BD, BD_Ref)) = Val(aG4(F_G4, G04_Ref)) Then
             '- Compruebo posibles INCIDENCIAS --------------------------------------------------
-            If aBD(F_BD, BD_ImpRec) <> aG4(F_G4, BD_ImpRec) * 1 Then          '- Cambio Imp. Recibo
+            If aBD(F_BD, BD_ImpRec) <> aG4(F_G4, G04_ImpRec) * 1 Then          '- Cambio Imp. Recibo
                 Incidencia = "Chg:PH_ImpRec=[" & aBD(F_BD, BD_ImpRec) & "]_#_"
                 aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
                 aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
                 Chg_ImpRec = Chg_ImpRec + 1
             End If
-            If aBD(F_BD, BD_ImpCob) > 0 And aBD(F_BD, BD_ImpCob) <> aG4(F_G4, BD_ImpCob) * 1 Then
+            If aBD(F_BD, BD_ImpCob) > 0 And aBD(F_BD, BD_ImpCob) <> aG4(F_G4, G04_ImpCob) * 1 Then
                 Incidencia = "Chg:PH_ImpCob=[" & aBD(F_BD, BD_ImpCob) & "]_#_"
                 aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
                 aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
                 Chg_ImpCob = Chg_ImpCob + 1
             End If
-            If aBD(F_BD, BD_ImpAdm) > 0 And aBD(F_BD, BD_ImpAdm) <> aG4(F_G4, BD_ImpAdm) * 1 Then
+            If aBD(F_BD, BD_ImpAdm) > 0 And aBD(F_BD, BD_ImpAdm) <> aG4(F_G4, G04_ImpAdm) * 1 Then
                 Incidencia = "Chg:PH_ImpAdm=[" & aBD(F_BD, BD_ImpAdm) & "]_#_"
                 aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
                 aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
                 Chg_ImpAdm = Chg_ImpAdm + 1
             End If
-            If aG4(F_G4, BD_Anul) = "S" Then          '- Tasa Anulada
+            If aG4(F_G4, G04_Anul) = "S" Then          '- Tasa Anulada
                 aBD(F_BD, BD_Obs_Conta) = "Mat.Anulada_"
                 Cont_Mat_Anul = Cont_Mat_Anul + 1
             End If
@@ -219,27 +223,35 @@ Call Rut_Off_Functions
                 aBD(F_BD, c) = aG4(F_G4, c)
             Next
             '- Importes de matricula que asigna M06 (col. contiguas 30..32) -------------------
-            aBD(F_BD, BD_Rec_Imp_Acad) = aG4(F_G4, BD_Rec_Imp_Acad)
-            aBD(F_BD, BD_Rec_Imp_Dto) = aG4(F_G4, BD_Rec_Imp_Dto)
-            aBD(F_BD, BD_Rec_Imp_Adm) = aG4(F_G4, BD_Rec_Imp_Adm)
+            aBD(F_BD, BD_Rec_Imp_Acad) = aG4(F_G4, G04_Rec_Imp_Acad)
+            aBD(F_BD, BD_Rec_Imp_Dto) = aG4(F_G4, G04_Rec_Imp_Dto)
+            aBD(F_BD, BD_Rec_Imp_Adm) = aG4(F_G4, G04_Rec_Imp_Adm)
 
             '- Preparo Salto de registro ------------------------------------------------------
             aBD(F_BD, BD_EP_GestReg) = aBD(F_BD, BD_EP_GestReg) & "- Actualizado " & F_Actualiz & " - "
-            aG4(F_G4, BD_EP_GestReg) = "Actualizado BD, " & F_Actualiz
+            aG4(F_G4, G04_EP_GestReg) = "Actualizado BD, " & F_Actualiz
             Cont_Modif = Cont_Modif + 1
             If F_BD < TRows_BD Then F_BD = F_BD + 1
             F_G4 = F_G4 + 1
-            Ref_Ant = aG4(F_G4 - 1, BD_Ref)
+            Ref_Ant = aG4(F_G4 - 1, G04_Ref)
 
         '--- Ref. NUEVA NO EXISTE <<<< ANADO UN NUEVO REGISTRO a BDatos -----------------------
-        ElseIf TRows_BD = 0 Or Val(aBD(F_BD, BD_Ref)) > Val(aG4(F_G4, BD_Ref)) Or F_BD >= TRows_BD Then
+        ElseIf TRows_BD = 0 Or Val(aBD(F_BD, BD_Ref)) > Val(aG4(F_G4, G04_Ref)) Or F_BD >= TRows_BD Then
             NumAltas = NumAltas + 1
             '- Todos los datos nuevos y anadidos, de Ges04 al registro de alta
-            For c = 1 To BD_EP_GestReg
+            '- Fase 4: solo coinciden las col. 1..G04_Coef_VRI; las 4 de trabajo se mapean una a una
+            '-  y los flags G04_Flag_* NO pasan a Prog_BD (decidido con el usuario el 2026-09-23).
+            '-  Antes se copiaba 1..BD_EP_GestReg por posicion, y los flags Emitido/EjeAnt de
+            '-  Lo_Ges04 acababan en BD_H_Incidencias/BD_EP_Ctrl del alta.
+            For c = 1 To G04_Coef_VRI
                 aAltas(NumAltas, c) = aG4(F_G4, c)
             Next
+            aAltas(NumAltas, BD_Incidencias) = aG4(F_G4, G04_Incidencias)
+            aAltas(NumAltas, BD_H_Incidencias) = aG4(F_G4, G04_H_Incidencias)
+            aAltas(NumAltas, BD_EP_Ctrl) = aG4(F_G4, G04_EP_Ctrl)
+            aAltas(NumAltas, BD_EP_GestReg) = aG4(F_G4, G04_EP_GestReg)
             ' -----------------=============  Buscar Tipo Plan  ==================-------------
-            rowfind = Fnc_Buscar_Fila_VRI(aVRI, aG4(F_G4, BD_Plan))
+            rowfind = Fnc_Buscar_Fila_VRI(aVRI, aG4(F_G4, G04_Plan))
             If rowfind > 0 Then         '- Plan Encontrado ==>> Tendra caracteristicas ESPECIALES
                 aAltas(NumAltas, BD_Coef_VRI) = aVRI(rowfind, CoefVRI_CoefVRI)
             Else                        '- NO ENCONTRADO ==>> coeficiente establecido 15% o 20%
@@ -251,10 +263,10 @@ Call Rut_Off_Functions
             End If
             '- Preparo Salto de registro ------------------------------------------------------
             aAltas(NumAltas, BD_EP_GestReg) = "- Nuevo " & F_Actualiz & " - "
-            aG4(F_G4, BD_EP_GestReg) = "- Nuevo en BD, " & F_Actualiz
+            aG4(F_G4, G04_EP_GestReg) = "- Nuevo en BD, " & F_Actualiz
             Cont_Nuevo = Cont_Nuevo + 1
             F_G4 = F_G4 + 1
-            Ref_Ant = aG4(F_G4 - 1, BD_Ref)
+            Ref_Ant = aG4(F_G4 - 1, G04_Ref)
 
         '--- Ref. ANTIGUA NO EXISTE <<<< es un REG. ELIMINADO ---------------------------------
         Else
@@ -412,3 +424,108 @@ Function Fnc_Buscar_Fila_VRI(ByRef aVRI As Variant, ByVal Cod_Plan As Variant) A
     Next
 End Function    ' Fnc_Buscar_Fila_VRI
 ' --------------------------------------------------------------------------------------------------
+
+'===================================================================================================
+Function Fnc_G04_Alineada_con_BD() As Boolean   '- Las col. 1..39 de Tb_LsGes04 y Prog_BD coinciden?
+'===================================================================================================
+'-  Fase 4 (2026-09-23): M07 (merge y altas) y Rut_Lo_G04_Filtered_Copy_a_BD copian POR POSICION
+'-  las col. 1..G04_Coef_VRI. Esta funcion es la red de seguridad de esa suposicion.
+    Dim Ok      As Boolean:     Ok = True     '- Una comparacion por linea (VBA admite solo 24 ' _')
+    Ok = Ok And (G04_ACont_Emi = BD_ACont_Emi)
+    Ok = Ok And (G04_ACont_Cob = BD_ACont_Cob)
+    Ok = Ok And (G04_Plan = BD_Plan)
+    Ok = Ok And (G04_NomPlan = BD_NomPlan)
+    Ok = Ok And (G04_TipoCurso = BD_TipoCurso)
+    Ok = Ok And (G04_C_Acad = BD_C_Acad)
+    Ok = Ok And (G04_Nom = BD_Nom)
+    Ok = Ok And (G04_DNI = BD_DNI)
+    Ok = Ok And (G04_Matricula = BD_Matricula)
+    Ok = Ok And (G04_Anul = BD_Anul)
+    Ok = Ok And (G04_Ref = BD_Ref)
+    Ok = Ok And (G04_NumRec = BD_NumRec)
+    Ok = Ok And (G04_ActivEco = BD_ActivEco)
+    Ok = Ok And (G04_FEmi = BD_FEmi)
+    Ok = Ok And (G04_FVto = BD_FVto)
+    Ok = Ok And (G04_FCob = BD_FCob)
+    Ok = Ok And (G04_ImpRec = BD_ImpRec)
+    Ok = Ok And (G04_ImpCob = BD_ImpCob)
+    Ok = Ok And (G04_FormPag = BD_FormPag)
+    Ok = Ok And (G04_CtaPag = BD_CtaPag)
+    Ok = Ok And (G04_RegMov = BD_RegMov)
+    Ok = Ok And (G04_Grupo = BD_Grupo)
+    Ok = Ok And (G04_ImpAcad = BD_ImpAcad)
+    Ok = Ok And (G04_ImpAdm = BD_ImpAdm)
+    Ok = Ok And (G04_Expdte = BD_Expdte)
+    Ok = Ok And (G04_HTipCob = BD_HTipCob)
+    Ok = Ok And (G04_Hinvalid = BD_Hinvalid)
+    Ok = Ok And (G04_ImpDto = BD_ImpDto)
+    Ok = Ok And (G04_InfRegulariz = BD_InfRegulariz)
+    Ok = Ok And (G04_Rec_Imp_Acad = BD_Rec_Imp_Acad)
+    Ok = Ok And (G04_Rec_Imp_Adm = BD_Rec_Imp_Adm)
+    Ok = Ok And (G04_Rec_Imp_Dto = BD_Rec_Imp_Dto)
+    Ok = Ok And (G04_Rec_Imp_INSS = BD_Rec_Imp_INSS)
+    Ok = Ok And (G04_ACont_Vto = BD_ACont_Vto)
+    Ok = Ok And (G04_Concepto = BD_Concepto)
+    Ok = Ok And (G04_Tipo_Rec = BD_Tipo_Rec)
+    Ok = Ok And (G04_Tipo_EP = BD_Tipo_EP)
+    Ok = Ok And (G04_Cta_Ing = BD_Cta_Ing)
+    Ok = Ok And (G04_Coef_VRI = BD_Coef_VRI)
+    Fnc_G04_Alineada_con_BD = Ok
+End Function    ' Fnc_G04_Alineada_con_BD   --------------------------------------------------------
+'===================================================================================================
+
+'===================================================================================================
+Sub Rut_Lo_G04_Filtered_Copy_a_BD(Lo_G04 As ListObject, Lo_Tgt As ListObject)   '- Filas visibles de G04 a una tabla BD
+'===================================================================================================
+'-  Copia las filas VISIBLES de Lo_G04 (Tb_LsGes04) al final de una tabla con la estructura de
+'-  Prog_BD (Tb_Duplic, Tb_BDatos). Fase 4 (2026-09-23): las dos tablas ya NO tienen la misma
+'-  numeracion, asi que no vale Rut_Lo_DataBodyRange_Filtered_Copy (copia por posicion):
+'-      G04 1..G04_Coef_VRI                  ->  BD 1..BD_Coef_VRI       (coinciden)
+'-      G04_Incidencias..G04_EP_GestReg      ->  BD_Incidencias..BD_EP_GestReg
+'-      G04_Flag_*                           ->  NO se copian
+'-  Se usa Range.Copy (no .Value) para conservar los colores con que M02 marca los duplicados.
+'-  Geometria con coordenadas NUMERICAS, calculadas antes de redimensionar la tabla destino.
+    Dim Rg_Vis          As Range
+    Dim Rg_Bloque1      As Range
+    Dim Rg_Bloque2      As Range
+    Dim ws              As Worksheet:   Set ws = Lo_Tgt.Parent
+    Dim Sw_ShowTotals   As Boolean:     Sw_ShowTotals = Lo_Tgt.ShowTotals
+    Dim Sw_DispAlerts   As Boolean:     Sw_DispAlerts = Application.DisplayAlerts
+    Dim FilCabecera     As Long, ColIniTgt As Long, ColFinTgt As Long
+    Dim StartRowAdd     As Long, NumFilas  As Long
+
+    If Not Fnc_G04_Alineada_con_BD() Then Err.Raise vbObjectError + 504, "Rut_Lo_G04_Filtered_Copy_a_BD", _
+        "Las col. 1..39 de G04_* y BD_* no coinciden (revisar M00_Ini_Var_APP)."
+    If Lo_G04.DataBodyRange Is Nothing Then Exit Sub
+    On Error Resume Next
+    Set Rg_Vis = Lo_G04.DataBodyRange.SpecialCells(xlCellTypeVisible)
+    On Error GoTo 0
+    If Rg_Vis Is Nothing Then Exit Sub
+
+    Lo_Tgt.ShowTotals = False
+    Application.DisplayAlerts = False
+    With Lo_G04.DataBodyRange
+        Set Rg_Bloque1 = Intersect(Rg_Vis, .Columns(1).Resize(, G04_Coef_VRI))
+        Set Rg_Bloque2 = Intersect(Rg_Vis, .Columns(G04_Incidencias).Resize(, G04_EP_GestReg - G04_Incidencias + 1))
+        NumFilas = Intersect(Rg_Vis, .Columns(1)).Cells.Count    '- Cuenta TODAS las areas visibles
+    End With
+
+    FilCabecera = Lo_Tgt.HeaderRowRange.Row
+    ColIniTgt = Lo_Tgt.Range.Column
+    ColFinTgt = ColIniTgt + Lo_Tgt.Range.Columns.Count - 1
+    If Lo_Tgt.DataBodyRange Is Nothing Then
+        StartRowAdd = FilCabecera + 1
+    Else
+        StartRowAdd = FilCabecera + Lo_Tgt.ListRows.Count + 1
+    End If
+
+    Rg_Bloque1.Copy Destination:=ws.Cells(StartRowAdd, ColIniTgt + BD_ACont_Emi - 1)
+    Rg_Bloque2.Copy Destination:=ws.Cells(StartRowAdd, ColIniTgt + BD_Incidencias - 1)
+    Application.CutCopyMode = False
+
+    '- Como se copia un Rango, Lo_Tgt NO se expande sola: se redimensiona para absorber las filas
+    Lo_Tgt.Resize ws.Range(ws.Cells(FilCabecera, ColIniTgt), ws.Cells(StartRowAdd + NumFilas - 1, ColFinTgt))
+    Lo_Tgt.ShowTotals = Sw_ShowTotals
+    Application.DisplayAlerts = Sw_DispAlerts
+End Sub     ' Rut_Lo_G04_Filtered_Copy_a_BD   ------------------------------------------------------
+'===================================================================================================

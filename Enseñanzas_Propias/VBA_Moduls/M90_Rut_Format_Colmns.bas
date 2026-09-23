@@ -1,10 +1,10 @@
 Attribute VB_Name = "M90_Rut_Format_Colmns"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 '- M90_Rut_Format_Colmns - Modif: 2025-10-08
 Option Explicit
 
         Sub Rut_X_Format_LoData_LoDefCol_ByHand()  '--- Solo hace falta cambiar las variables de la Rutina
-            Call Rut_X_Format_LoData_LoDefCol(Prog_LsGes04.ListObjects(1), Prog_DefCol_BD.ListObjects(1))
+            Call Rut_X_Format_LoData_LoDefCol(Prog_LsGes04.ListObjects(1), Prog_DefCol_G04.ListObjects(1))
 '            Call Rut_X_Format_LoData_LoDefCol(Prog_BD.ListObjects(1), Prog_DefCol_BD.ListObjects(1))
         End Sub
 ' ==================================================================================================

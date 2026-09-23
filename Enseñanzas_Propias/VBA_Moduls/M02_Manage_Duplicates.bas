@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
@@ -66,7 +66,13 @@ Sub RuT_Duplicates_Search(Lo_Data As ListObject, _
                           Lo_Duplic As ListObject, _
                           Colref As Integer, _
                           ColIncidencia As Integer, _
-                          Col_H_Incid As Integer)
+                          Col_H_Incid As Integer, _
+                          ColIncid_Dupl As Integer, _
+                          Col_H_Incid_Dupl As Integer)
+'-  Fase 4 (2026-09-23): Lo_Data (Tb_LsGes04) y Lo_Duplic (Tb_Duplic, con la estructura de
+'-  Prog_BD) ya NO comparten numeracion de columnas: las de incidencias van por parametro para
+'-  cada tabla (ColIncidencia/Col_H_Incid en Lo_Data, ColIncid_Dupl/Col_H_Incid_Dupl en
+'-  Lo_Duplic). Colref (col. 11) coincide en ambas.
                           
 Debug.Print ">>> RuT_Duplicates_Search"
     Dim TimeLapSub          As Single:      TimeLapSub = Timer
@@ -163,7 +169,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
         .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=Repe*"
         rowfind = .Range.Columns(ColIncidencia).SpecialCells(xlCellTypeVisible).Cells.Count - 1
         If rowfind > 0 Then
-            Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_Data, Lo_Duplic, False)
+            Call Rut_Lo_G04_Filtered_Copy_a_BD(Lo_Data, Lo_Duplic)  '- Fase 4: con mapeo de col., no por posicion
             '- Visualizo el progreso --------
                         TxtMsg1 = "Copiados Repes finalistas a Bd_Duplic:"
                         TxtMsg2 = Format(rowfind, "#,##0") & "reg."
@@ -178,19 +184,19 @@ Debug.Print ">>> RuT_Duplicates_Search"
     '- Borrar Registros Repetidos entre ellos en Lo_Duplic
     With Lo_Duplic.DataBodyRange
         Call Rut_Lo_Sort(Lo_Duplic, Colref, xlAscending, True)
-        .Columns(BD_Incidencias).ClearContents   '- Se supone que está vacía...
+        .Columns(ColIncid_Dupl).ClearContents   '- Se supone que está vacía...
         For FilaReg = 2 To Lo_Duplic.ListRows.Count
             If .Cells(FilaReg, Colref) = .Cells(FilaReg - 1, Colref) Then   '- Existe "Dupla" coincidencia en las Referencias de Recibo
-                If .Cells(FilaReg, Col_H_Incid) = .Cells(FilaReg - 1, Col_H_Incid) Then   '- Es un Repetido que ya existe de antes e idéntico en incidencia
-                    .Cells(FilaReg - 1, ColIncidencia) = "RpIdem"        '- Marco Incidencia "RpIdem" en el 1º Recibo
+                If .Cells(FilaReg, Col_H_Incid_Dupl) = .Cells(FilaReg - 1, Col_H_Incid_Dupl) Then   '- Es un Repetido que ya existe de antes e idéntico en incidencia
+                    .Cells(FilaReg - 1, ColIncid_Dupl) = "RpIdem"        '- Marco Incidencia "RpIdem" en el 1º Recibo
                 End If
             End If
         Next FilaReg
     End With
     With Lo_Duplic
-        Call Rut_Lo_Sort(Lo_Duplic, ColIncidencia, xlAscending, True)
-        .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=RpIdem"
-        rowfind = .Range.Columns(ColIncidencia).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+        Call Rut_Lo_Sort(Lo_Duplic, ColIncid_Dupl, xlAscending, True)
+        .Range.AutoFilter Field:=ColIncid_Dupl, Criteria1:="=RpIdem"
+        rowfind = .Range.Columns(ColIncid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
         If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
             '- Visualizo el progreso --------
                         TxtMsg1 = "Del Recibos Repes-X de repetidos RpIdem:"
@@ -202,13 +208,13 @@ Debug.Print ">>> RuT_Duplicates_Search"
     
     '- Borrar Registros en Lo_Duplic identificados como repetidos pero que no tienen ningún cambio en las columnas comparadas
     With Lo_Duplic
-        Dim Celda As Range, RngCol_H_Incidencia As ListColumn:            Set RngCol_H_Incidencia = .ListColumns(Col_H_Incid)
+        Dim Celda As Range, RngCol_H_Incidencia As ListColumn:            Set RngCol_H_Incidencia = .ListColumns(Col_H_Incid_Dupl)
         For Each Celda In RngCol_H_Incidencia.DataBodyRange    '- voy a borrar la referencias de duplicados a borrar por no tener cambios
             If InStr(Celda.Value, "_(en 0 Cols):") > 0 Then Celda.Value = "(en 0 Cols)"
         Next Celda
-        Call Rut_Lo_Sort(Lo_Duplic, Col_H_Incid, xlAscending, True)
-        .Range.AutoFilter Field:=Col_H_Incid, Criteria1:="=(en 0 Cols)"      '- Todos los que se han quedados sin incidencias los borramos
-        rowfind = .Range.Columns(Col_H_Incid).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+        Call Rut_Lo_Sort(Lo_Duplic, Col_H_Incid_Dupl, xlAscending, True)
+        .Range.AutoFilter Field:=Col_H_Incid_Dupl, Criteria1:="=(en 0 Cols)"      '- Todos los que se han quedados sin incidencias los borramos
+        rowfind = .Range.Columns(Col_H_Incid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
         If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
             '- Visualizo el progreso --------
                         TxtMsg1 = "Del Recibos Repes_Cambios(en 0 Cols):"
@@ -266,12 +272,12 @@ Debug.Print ">>> RuT_Duplicates_Search_Mark_DIFF"
         Incidencia = "_Duplicati_" & CantRepe - 1 & "_(en " & CAnt_Col & " Cols):"
         If CantRepe = 2 Then .Cells(F_Ant, ColHIncidencia) = Incidencia & .Cells(F_Ant, ColHIncidencia)
         .Cells(F_Ant, ColHIncidencia).Interior.ColorIndex = 34
-        .Cells(F_Ant, BD_Ref).Interior.ColorIndex = 34
+        .Cells(F_Ant, G04_Ref).Interior.ColorIndex = 34
         
         Incidencia = "_Duplicati_" & CantRepe & "_(en " & CAnt_Col & " Cols):"
         .Cells(fila, ColHIncidencia) = Incidencia & .Cells(fila, ColHIncidencia)
         .Cells(fila, ColHIncidencia).Interior.ColorIndex = 35
-        .Cells(fila, BD_Ref).Interior.ColorIndex = 35
+        .Cells(fila, G04_Ref).Interior.ColorIndex = 35
     End With
     
 End Sub     ' RuT_Duplicates_Search_Mark_DIFF

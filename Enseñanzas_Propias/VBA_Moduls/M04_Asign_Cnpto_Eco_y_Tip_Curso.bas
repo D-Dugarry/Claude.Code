@@ -1,5 +1,5 @@
 Attribute VB_Name = "M04_Asign_Cnpto_Eco_y_Tip_Curso"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M04_Asign_Cnpto_Eco_y_Tip_Curso - Concepto economico y tipo de ensenanza
@@ -54,7 +54,7 @@ Option Explicit
             Sub RuT_Determinar_Concepto_Eco_y_Tipo_Curso_ByHand()
                 Prog_LsGes04.Unprotect
 '                Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)          '- Quita filtros, filas y columnas ocultas
-                Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Prog_LsGes04.ListObjects(1), BD_Ref, BD_Concepto, BD_Tipo_EP, BD_ActivEco, BD_TipoCurso, BD_Plan)
+                Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Prog_LsGes04.ListObjects(1), G04_Ref, G04_Concepto, G04_Tipo_EP, G04_ActivEco, G04_TipoCurso, G04_Plan)
             End Sub
 '- -------------------------------------------------------------------------------------------------
 '- Asignar Código Concepto-Eco y Tipo_Ensañanza ----------------------------------------------------

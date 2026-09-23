@@ -1,5 +1,5 @@
 Attribute VB_Name = "M00_Ini_Var_APP"
-' Last Rev. 2026-09-19 20:52
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M00_Ini_Var_APP - Esquema de datos central (indices de columna) y variables Public
@@ -15,10 +15,13 @@ Attribute VB_Name = "M00_Ini_Var_APP"
 ' INDICE DE RUTINAS Y FUNCIONES
 '  (No hay Subs ni Functions: bloques de constantes y variables globales)
 '
-'  BD_*        Tabla Prog_BD (base de datos historica de recibos). 54 cols.
-'  G04_Flag_*  Columnas de marca por tipo de recibo en Prog_LsGes04 (usa M05).
-'              G04_Flag_Primera / _Cuantas delimitan el bloque para limpiarlo
-'              de golpe con Resize.
+'  BD_*        Tabla Prog_BD (base de datos historica de recibos). 59 cols.
+'  G04_*       Tabla Prog_LsGes04 (Tb_LsGes04). 48 cols. Las 1..39 coinciden con
+'              BD_* (M07 las copia por posicion); 40..43 son de trabajo y se
+'              mapean a BD_Incidencias..BD_EP_GestReg; 44..48 son los flags de
+'              tipo de recibo (M05), que NO pasan a Prog_BD.
+'              G04_Flag_Primera / _Cuantas delimitan el bloque de flags para
+'              limpiarlo de golpe con Resize.
 '  CLiq_*      Tabla de Liquidacion del Plan (hoja Wk_TitP_Liquid). 26 cols.
 '  DefC_*      Tabla DefCol: definicion de columnas (titulo, formato, ancho,
 '              alineacion, si se compara, si se oculta...) que consumen las
@@ -51,32 +54,32 @@ Attribute VB_Name = "M00_Ini_Var_APP"
 Option Explicit
 
 '--- Tabla Prog_BD  EFP y CFCyAFC -----------------------------------------------
-Public Const BD_ACont_Emi          As Integer = 1    ' col: a
-Public Const BD_ACont_Cob          As Integer = 2    ' col: b
-Public Const BD_Plan               As Integer = 3    ' col: c
-Public Const BD_NomPlan            As Integer = 4    ' col: d
-Public Const BD_TipoCurso          As Integer = 5    ' col: e
-Public Const BD_C_Acad             As Integer = 6    ' col: f
-Public Const BD_Nom                As Integer = 7    ' col: g
-Public Const BD_DNI                As Integer = 8    ' col: h
-Public Const BD_Matricula          As Integer = 9    ' col: i
-Public Const BD_Anul               As Integer = 10   ' col: j
-Public Const BD_Ref                As Integer = 11   ' col: k
-Public Const BD_NumRec             As Integer = 12   ' col: l
-Public Const BD_ActivEco           As Integer = 13   ' col: m
-Public Const BD_FEmi               As Integer = 14   ' col: n
-Public Const BD_FVto               As Integer = 15   ' col: o
-Public Const BD_FCob               As Integer = 16   ' col: p
-Public Const BD_ImpRec             As Integer = 17   ' col: q
-Public Const BD_ImpCob             As Integer = 18   ' col: r
-Public Const BD_FormPag            As Integer = 19   ' col: s
-Public Const BD_CtaPag             As Integer = 20   ' col: t
-Public Const BD_RegMov             As Integer = 21   ' col: u
-Public Const BD_Grupo              As Integer = 22   ' col: v
-Public Const BD_ImpAcad            As Integer = 23   ' col: w
-Public Const BD_ImpAdm             As Integer = 24   ' col: x
-Public Const BD_Expdte             As Integer = 25   ' col: y
-Public Const BD_HTipCob            As Integer = 26   ' col: z
+Public Const BD_ACont_Emi          As Integer = 1    ' col:  a
+Public Const BD_ACont_Cob          As Integer = 2    ' col:  b
+Public Const BD_Plan               As Integer = 3    ' col:  c
+Public Const BD_NomPlan            As Integer = 4    ' col:  d
+Public Const BD_TipoCurso          As Integer = 5    ' col:  e
+Public Const BD_C_Acad             As Integer = 6    ' col:  f
+Public Const BD_Nom                As Integer = 7    ' col:  g
+Public Const BD_DNI                As Integer = 8    ' col:  h
+Public Const BD_Matricula          As Integer = 9    ' col:  i
+Public Const BD_Anul               As Integer = 10   ' col:  j
+Public Const BD_Ref                As Integer = 11   ' col:  k
+Public Const BD_NumRec             As Integer = 12   ' col:  l
+Public Const BD_ActivEco           As Integer = 13   ' col:  m
+Public Const BD_FEmi               As Integer = 14   ' col:  n
+Public Const BD_FVto               As Integer = 15   ' col:  o
+Public Const BD_FCob               As Integer = 16   ' col:  p
+Public Const BD_ImpRec             As Integer = 17   ' col:  q
+Public Const BD_ImpCob             As Integer = 18   ' col:  r
+Public Const BD_FormPag            As Integer = 19   ' col:  s
+Public Const BD_CtaPag             As Integer = 20   ' col:  t
+Public Const BD_RegMov             As Integer = 21   ' col:  u
+Public Const BD_Grupo              As Integer = 22   ' col:  v
+Public Const BD_ImpAcad            As Integer = 23   ' col:  w
+Public Const BD_ImpAdm             As Integer = 24   ' col:  x
+Public Const BD_Expdte             As Integer = 25   ' col:  y
+Public Const BD_HTipCob            As Integer = 26   ' col:  z
 Public Const BD_Hinvalid           As Integer = 27   ' col: aa
 Public Const BD_ImpDto             As Integer = 28   ' col: ab
 Public Const BD_InfRegulariz       As Integer = 29   ' col: ac
@@ -102,7 +105,7 @@ Public Const BD_JI_443_Adm         As Integer = 48   ' col: av
 Public Const BD_JI_443_Acad        As Integer = 49   ' col: aw
 Public Const BD_Obs_Conta          As Integer = 50   ' col: ax
 Public Const BD_Incidencias        As Integer = 51   ' col: ay
-Public Const BD_H_Incidencias      As Integer = 52   ' col: bz
+Public Const BD_H_Incidencias      As Integer = 52   ' col: az
 Public Const BD_EP_Ctrl            As Integer = 53   ' col: ba
 Public Const BD_EP_GestReg         As Integer = 54   ' col: bb
 Public Const BD_Emitido            As Integer = 55   ' col: bc
@@ -111,13 +114,57 @@ Public Const BD_Añejos             As Integer = 57   ' col: be
 Public Const BD_Aplazado           As Integer = 58   ' col: bf
 Public Const BD_ADxAplz            As Integer = 59   ' col: bg
 
+'--- Tabla Prog_LsGes04  EFP y CFCyAFC -----------------------------------------------
+Public Const G04_ACont_Emi        As Integer = 1    ' col: a
+Public Const G04_ACont_Cob        As Integer = 2    ' col: b
+Public Const G04_Plan             As Integer = 3    ' col: c
+Public Const G04_NomPlan          As Integer = 4    ' col: d
+Public Const G04_TipoCurso        As Integer = 5    ' col: e
+Public Const G04_C_Acad           As Integer = 6    ' col: f
+Public Const G04_Nom              As Integer = 7    ' col: g
+Public Const G04_DNI              As Integer = 8    ' col: h
+Public Const G04_Matricula        As Integer = 9    ' col: i
+Public Const G04_Anul             As Integer = 10   ' col: j
+Public Const G04_Ref              As Integer = 11   ' col: k
+Public Const G04_NumRec           As Integer = 12   ' col: l
+Public Const G04_ActivEco         As Integer = 13   ' col: m
+Public Const G04_FEmi             As Integer = 14   ' col: n
+Public Const G04_FVto             As Integer = 15   ' col: o
+Public Const G04_FCob             As Integer = 16   ' col: p
+Public Const G04_ImpRec           As Integer = 17   ' col: q
+Public Const G04_ImpCob           As Integer = 18   ' col: r
+Public Const G04_FormPag          As Integer = 19   ' col: s
+Public Const G04_CtaPag           As Integer = 20   ' col: t
+Public Const G04_RegMov           As Integer = 21   ' col: u
+Public Const G04_Grupo            As Integer = 22   ' col: v
+Public Const G04_ImpAcad          As Integer = 23   ' col: w
+Public Const G04_ImpAdm           As Integer = 24   ' col: x
+Public Const G04_Expdte           As Integer = 25   ' col: y
+Public Const G04_HTipCob          As Integer = 26   ' col: z
+Public Const G04_Hinvalid         As Integer = 27   ' col: aa
+Public Const G04_ImpDto           As Integer = 28   ' col: ab
+Public Const G04_InfRegulariz     As Integer = 29   ' col: ac
+Public Const G04_Rec_Imp_Acad     As Integer = 30   ' col: ad
+Public Const G04_Rec_Imp_Adm      As Integer = 31   ' col: ae
+Public Const G04_Rec_Imp_Dto      As Integer = 32   ' col: af
+Public Const G04_Rec_Imp_INSS     As Integer = 33   ' col: ag
+Public Const G04_ACont_Vto        As Integer = 34   ' col: ah
+Public Const G04_Concepto         As Integer = 35   ' col: ai
+Public Const G04_Tipo_Rec         As Integer = 36   ' col: aj
+Public Const G04_Tipo_EP          As Integer = 37   ' col: ak
+Public Const G04_Cta_Ing          As Integer = 38   ' col: al
+Public Const G04_Coef_VRI         As Integer = 39   ' col: am
+Public Const G04_Incidencias      As Integer = 40   ' col: an
+Public Const G04_H_Incidencias    As Integer = 41   ' col: ao
+Public Const G04_EP_Ctrl          As Integer = 42   ' col: ap
+Public Const G04_EP_GestReg       As Integer = 43   ' col: aq
 '--- Flags internos de Tipo_Recibo en Prog_LsGes04 (M05_Asign_Tipo_Recibo) ------
 '    Columnas de marca por tipo; el valor definitivo va en BD_Tipo_Rec.
-Public Const G04_Flag_Emitido      As Integer = 52   ' col: az
-Public Const G04_Flag_EjeAnt       As Integer = 53   ' col: ba
-Public Const G04_Flag_Anejo        As Integer = 54   ' col: bb
-Public Const G04_Flag_Aplazado     As Integer = 55   ' col: bc
-Public Const G04_Flag_ADxAplz      As Integer = 56   ' col: bd
+Public Const G04_Flag_Emitido     As Integer = 44   ' col: ar
+Public Const G04_Flag_EjeAnt      As Integer = 45   ' col: as
+Public Const G04_Flag_Añejos      As Integer = 46   ' col: at
+Public Const G04_Flag_Aplazado    As Integer = 47   ' col: au
+Public Const G04_Flag_ADxAplz     As Integer = 48   ' col: av
 Public Const G04_Flag_Primera      As Integer = G04_Flag_Emitido
 Public Const G04_Flag_Cuantas      As Integer = G04_Flag_ADxAplz - G04_Flag_Emitido + 1
 

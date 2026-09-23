@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Del_Reg_EFP_o_CFCyAFC"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Del_Reg_EFP_o_CFCyAFC - Separar EFP de CFCyAFC en la importacion
@@ -57,24 +57,24 @@ Debug.Print ">>> Rut_Borrar_Rec_EFP_o_CFCyAFC"
     Dim Cont_Fail           As Long
 
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
-    Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_Data, G04_TipoCurso, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
 
     Application.DisplayAlerts = False
     With Lo_Data
         .ListColumns.Add
         .ShowTotals = False
-        .Range(BD_TipoCurso) = "TipoCurso"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
-        .Range(BD_ActivEco) = "Activ_Eco"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
+        .Range(G04_TipoCurso) = "TipoCurso"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
+        .Range(G04_ActivEco) = "Activ_Eco"  ' para q funcionen los criterios de filtro deben tener ese nombre en la cabecera de la Col.
         '-Filtra Recibos - EFP - Estudios de Formación Permanente: Máster, Especialista, Experto. --
         .Range.AdvancedFilter xlFilterInPlace, Prog_Filtros_Concepto.Range("Tb_CriT_EFP")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then     '- hay rec. de EFP
             If TipoCurso = "EFP" Then
                 .DataBodyRange.Columns(.ListColumns.Count).SpecialCells(xlCellTypeVisible).Cells.Value = "EFP"
                 '- Borra los que NO son "Tít. Propios" EFP ----
                 Call Rut_Lo_Filtros_Quitar(Lo_Data)
                 .Range.AutoFilter Field:=.ListColumns.Count, Criteria1:="<>EFP"     '- Selecciono los que NO mson EFP
-                rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+                rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
                 If rowfind > .ListColumns.Count Then
                     .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                         TxtMsg1 = "Borrados Recibos de estudios NO EFP_" & Curso_Acad

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
-' Last Rev. 2026-09-23 18:18
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M01_Importar_LsGes04_GE - ORQUESTADOR del pipeline de importacion LSGES04
@@ -43,7 +43,7 @@ Attribute VB_Name = "M01_Importar_LsGes04_GE"
 '
 '    D. CLASIFICACION (todo sobre Lo_Ges04)
 '       RuT_Duplicates_Search         -> M02: duplicados a Prog_BD_Dupl.
-'       Bucle ACont_Vto: ano de vencimiento = ano de BD_FVto, y correcciones
+'       Bucle ACont_Vto: ano de vencimiento = ano de G04_FVto, y correcciones
 '         ACont_Vto >= ACont_Emi  y  ACont_Cob >= ACont_Emi. Es PREVIO y
 '         necesario: si el ano de vencimiento esta mal, M05 tipifica mal.
 '       RuT_Determinar_Cta_Ingreso    -> M03: cuenta bancaria de ingreso.
@@ -101,7 +101,7 @@ Dim rowfind         As Variant
 Dim Sw_Exito        As Boolean:     Sw_Exito = False   '- Solo True si se llega al final
 
 Dim Lo_Ges04            As ListObject:      Set Lo_Ges04 = Prog_LsGes04.ListObjects(1)
-Dim Lo_Ges04_DefCol     As ListObject:      Set Lo_Ges04_DefCol = Prog_DefCol_BD.ListObjects(1)
+Dim Lo_Ges04_DefCol     As ListObject:      Set Lo_Ges04_DefCol = Prog_DefCol_G04.ListObjects(1)
 
 On Error GoTo Gestion_Error      '- Fase 1 (seguridad): ninguna salida deja el libro a medias
 Call Rut_Off_Functions
@@ -241,12 +241,12 @@ Call Rut_Off_Functions
 
     '- M02_Manage_Duplicates -----------------------------------------------------------------------
     Dim Lo_BD_Dupl      As ListObject:      Set Lo_BD_Dupl = Prog_BD_Dupl.ListObjects(1)
-    Dim Lo_DefCol_BD    As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
             Prog_BD_Dupl.Visible = xlSheetVisible
             Prog_BD_Dupl.Unprotect
             Call Rut_Lo_WrkSht_Preparar(Prog_BD_Dupl)
             Lo_BD_Dupl.ShowTotals = False
-    Call RuT_Duplicates_Search(Lo_Ges04, Lo_DefCol_BD, Lo_BD_Dupl, BD_Ref, BD_Incidencias, BD_H_Incidencias)
+    Call RuT_Duplicates_Search(Lo_Ges04, Lo_Ges04_DefCol, Lo_BD_Dupl, G04_Ref, _
+                               G04_Incidencias, G04_H_Incidencias, BD_Incidencias, BD_H_Incidencias)
         Set Lo_BD_Dupl = Nothing
     
     '- ¡¡¡ Modifico El ACont_Cob si ACont_Emi > ACont_Cob  ==>>  ACont_Cob = ACont_Emi !!! ---------
@@ -256,10 +256,10 @@ Call Rut_Off_Functions
     Dim Cont    As Long
     With Lo_Ges04.DataBodyRange
         For i = 1 To Lo_Ges04.ListRows.Count
-            .Cells(i, BD_ACont_Vto) = Format(.Cells(i, BD_FVto), "yyyy")
-            If .Cells(i, BD_ACont_Vto) < .Cells(i, BD_ACont_Emi) Then .Cells(i, BD_ACont_Vto) = .Cells(i, BD_ACont_Emi)
-            If .Cells(i, BD_ACont_Emi) > .Cells(i, BD_ACont_Cob) And Len(.Cells(i, BD_ACont_Cob)) > 0 Then
-                .Cells(i, BD_ACont_Cob) = .Cells(i, BD_ACont_Emi)
+            .Cells(i, G04_ACont_Vto) = Format(.Cells(i, G04_FVto), "yyyy")
+            If .Cells(i, G04_ACont_Vto) < .Cells(i, G04_ACont_Emi) Then .Cells(i, G04_ACont_Vto) = .Cells(i, G04_ACont_Emi)
+            If .Cells(i, G04_ACont_Emi) > .Cells(i, G04_ACont_Cob) And Len(.Cells(i, G04_ACont_Cob)) > 0 Then
+                .Cells(i, G04_ACont_Cob) = .Cells(i, G04_ACont_Emi)
                 Cont = Cont + 1
             End If
         Next
@@ -270,11 +270,11 @@ Call Rut_Off_Functions
     End If
     
     '- Asignar Col Cta_Ingreso con nº Cta. correspondiente -----------------------------------------
-    Call RuT_Determinar_Cta_Ingreso(Lo_Ges04, BD_Ref, BD_CtaPag, BD_Cta_Ing)
+    Call RuT_Determinar_Cta_Ingreso(Lo_Ges04, G04_Ref, G04_CtaPag, G04_Cta_Ing)
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & Format(Now, "hh:mm:ss") & " Añadidas Cta. de ingreso." & vbCrLf
     
     '- Asignar Código Concepto-Eco y Tipo_Ensañanza: 1310.00, 1311.03... EFP, CFC, TNCT, UPUA... ---
-    Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Lo_Ges04, BD_Ref, BD_Concepto, BD_Tipo_EP, BD_ActivEco, BD_TipoCurso, BD_Plan)
+    Call RuT_Determinar_Concepto_Eco_y_Tipo_Curso(Lo_Ges04, G04_Ref, G04_Concepto, G04_Tipo_EP, G04_ActivEco, G04_TipoCurso, G04_Plan)
             Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbCrLf & Format(Now, "hh:mm:ss") & _
                                     " Añadido Concepto Económico y Tipo de Enseñanza." & vbCrLf
             Form_Menu.TB_Informe.SelStart = Len(Form_Menu.TB_Informe)
@@ -368,11 +368,11 @@ Function Fnc_Es_LsGes04_Valido(Lo_Data As ListObject) As Boolean   '- Valida la 
 '===================================================================================================
 '-  Comprueba que el Excel elegido tiene pinta de LSGES04 ANTES de tocar Prog_BD.
 '-  No valida nombres de cabecera (varian entre consultas del Generador de Informes), sino que
-'-  existan las columnas que el pipeline usa por INDICE (BD_Ref, BD_C_Acad, BD_Matricula, BD_ActivEco).
+'-  existan las columnas que el pipeline usa por INDICE (G04_Ref, G04_C_Acad, G04_Matricula, G04_ActivEco).
     Fnc_Es_LsGes04_Valido = False
     If Lo_Data Is Nothing Then Exit Function
     If Lo_Data.DataBodyRange Is Nothing Then Exit Function          '- Sin datos
-    If Lo_Data.ListColumns.Count < BD_ActivEco Then Exit Function   '- Faltan columnas: no es un LSGES04
+    If Lo_Data.ListColumns.Count < G04_ActivEco Then Exit Function   '- Faltan columnas: no es un LSGES04
     Fnc_Es_LsGes04_Valido = True
 End Function    ' Fnc_Es_LsGes04_Valido   ----------------------------------------------------------
 '===================================================================================================

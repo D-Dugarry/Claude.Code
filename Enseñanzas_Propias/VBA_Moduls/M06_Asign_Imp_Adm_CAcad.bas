@@ -1,5 +1,5 @@
 Attribute VB_Name = "M06_Asign_Imp_Adm_CAcad"
-' Last Rev. 2026-09-22 19:40
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M06_Asign_Imp_Adm_CAcad - Imputar la tasa administrativa al primer recibo
@@ -79,10 +79,10 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
     
     ' Ordenar por columnas  ------------------------------
     Call Rut_Lo_Filtros_Quitar(Lo_G04)
-    Call Rut_Lo_Sort(Lo_G04, BD_Plan, xlAscending, True)
-    Call Rut_Lo_Sort(Lo_G04, BD_DNI, xlAscending, False)
-    Call Rut_Lo_Sort(Lo_G04, BD_NumRec, xlAscending, False)
-    Call Rut_Lo_Sort(Lo_G04, BD_Ref, xlAscending, False)
+    Call Rut_Lo_Sort(Lo_G04, G04_Plan, xlAscending, True)
+    Call Rut_Lo_Sort(Lo_G04, G04_DNI, xlAscending, False)
+    Call Rut_Lo_Sort(Lo_G04, G04_NumRec, xlAscending, False)
+    Call Rut_Lo_Sort(Lo_G04, G04_Ref, xlAscending, False)
 
     '- Recorro toda la tabla Lo_G04 ----------------------------------------------------------------
     '-  FASE 2 (velocidad): antes se recorria con Lo_G04.ListRows(fila) y 6 accesos COM por fila
@@ -99,25 +99,25 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
 
         For fila = 1 To TRows_G04
             '- Arrastra el valor previo, para no borrar nada que no toque esta rutina
-            aSalida(fila, 1) = aDatos(fila, BD_Rec_Imp_Acad)
-            aSalida(fila, 2) = aDatos(fila, BD_Rec_Imp_Adm)
-            aSalida(fila, 3) = aDatos(fila, BD_Rec_Imp_Dto)
+            aSalida(fila, 1) = aDatos(fila, G04_Rec_Imp_Acad)
+            aSalida(fila, 2) = aDatos(fila, G04_Rec_Imp_Adm)
+            aSalida(fila, 3) = aDatos(fila, G04_Rec_Imp_Dto)
 
             '- Comparacion IDENTICA a la del codigo original (que hacia RowData.Range(BD_ImpRec) < 0).
             '-  NO usar Val(): con decimales europeos Val("-12,50") devuelve -12 (corta en la coma).
-            If Not (aDatos(fila, BD_ImpRec) < 0) Then     '- NO tenemos en cuenta los Recibos Negativos
-                PlanDNI_New = aDatos(fila, BD_Plan) & "_" & aDatos(fila, BD_DNI)
+            If Not (aDatos(fila, G04_ImpRec) < 0) Then     '- NO tenemos en cuenta los Recibos Negativos
+                PlanDNI_New = aDatos(fila, G04_Plan) & "_" & aDatos(fila, G04_DNI)
                 If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la 1a Tasa Adm (las demas la repiten)
                     PlanDNI_Ant = PlanDNI_New
-                    aSalida(fila, 1) = aDatos(fila, BD_ImpAcad)
-                    aSalida(fila, 2) = aDatos(fila, BD_ImpAdm)
-                    aSalida(fila, 3) = aDatos(fila, BD_ImpDto)
+                    aSalida(fila, 1) = aDatos(fila, G04_ImpAcad)
+                    aSalida(fila, 2) = aDatos(fila, G04_ImpAdm)
+                    aSalida(fila, 3) = aDatos(fila, G04_ImpDto)
                 End If
             End If
         Next
 
         '- 1 sola escritura de bloque sobre las 3 columnas contiguas (no toca ninguna otra)
-        Lo_G04.DataBodyRange.Cells(1, BD_Rec_Imp_Acad).Resize(TRows_G04, 3).Value = aSalida
+        Lo_G04.DataBodyRange.Cells(1, G04_Rec_Imp_Acad).Resize(TRows_G04, 3).Value = aSalida
 
         Erase aSalida
         aDatos = Empty
@@ -135,12 +135,12 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
         Form_Menu.TB_Informe = TxT_ProgIni & vbLf & "Actualizado Tasas Adm. en: " & Format(fila - 1, "#,##0") & " reg., de " & Format(TRows_G04, "#,##0") & " reg." & vbLf
         '- Sumatorios ---------
         With .DataBodyRange
-            ImpTAcad = Application.Sum(.Columns(BD_Rec_Imp_Acad))
-            ImpTAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), .Columns(BD_Rec_Imp_Adm), ">0")
-            ImpTDto = Application.Sum(.Columns(BD_Rec_Imp_Dto))
-            CantImpAcad = Application.Count(.Columns(BD_Rec_Imp_Acad))
-            CantImpAdm = Application.CountIfs(.Columns(BD_Rec_Imp_Adm), ">0")
-            CantImpDto = Application.Count(.Columns(BD_Rec_Imp_Dto))
+            ImpTAcad = Application.Sum(.Columns(G04_Rec_Imp_Acad))
+            ImpTAdm = Application.SumIfs(.Columns(G04_Rec_Imp_Adm), .Columns(G04_Rec_Imp_Adm), ">0")
+            ImpTDto = Application.Sum(.Columns(G04_Rec_Imp_Dto))
+            CantImpAcad = Application.Count(.Columns(G04_Rec_Imp_Acad))
+            CantImpAdm = Application.CountIfs(.Columns(G04_Rec_Imp_Adm), ">0")
+            CantImpDto = Application.Count(.Columns(G04_Rec_Imp_Dto))
         End With
     End With
             TxtMsg1 = "     Total Acad. de Matrícula por un importe de:"

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Del_Reg_No_Válidos"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Del_Reg_No_Validos - Filtrado de recibos no procesables
@@ -66,9 +66,9 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
         
         '- Borra los que son de otro Curso_Acad ----------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        Call Rut_Lo_Sort(Lo_Data, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="<>" & Curso_Acad   '- Elimino los que son de otro curso
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        Call Rut_Lo_Sort(Lo_Data, G04_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+        .Range.AutoFilter Field:=G04_C_Acad, Criteria1:="<>" & Curso_Acad   '- Elimino los que son de otro curso
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 TxtMsg1 = "Borrados Recibos de Curso-Acad " & ChrW(&H2260) & " " & Curso_Acad
@@ -82,9 +82,9 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
         
         '- Borra los que BD_Matricula = "N" --------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        Call Rut_Lo_Sort(Lo_Data, BD_Matricula, xlAscending, True)    '- Ordenar primero accelera un montón el borrado --
-        .Range.AutoFilter Field:=BD_Matricula, Criteria1:="=N"                          '- Elimino las NO Martrículas
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        Call Rut_Lo_Sort(Lo_Data, G04_Matricula, xlAscending, True)    '- Ordenar primero accelera un montón el borrado --
+        .Range.AutoFilter Field:=G04_Matricula, Criteria1:="=N"                          '- Elimino las NO Martrículas
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 TxtMsg1 = "Borrados Recibos con Matrícula = N "
@@ -98,12 +98,12 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
         
         '- Borra los que BD_ActivEco <> 4 (Enseñanzas Propias) -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        .DataBodyRange.Columns(BD_ActivEco).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS
+        .DataBodyRange.Columns(G04_ActivEco).Select     '- Datos - Texto en Columnas - Finalizar - PARA NÚMEROS
         Selection.TextToColumns DataType:=xlDelimited, Space:=False, Other:=False, FieldInfo:=Array(1, 1)
-        Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---
+        Call Rut_Lo_Sort(Lo_Data, G04_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---
         '.Range.AutoFilter Field:=BD_ActivEco, Criteria1:="<>4", Operator:=xlAnd, Criteria2:="<>300"        '- Elimino las NO Títulos Propios
-        .Range.AutoFilter Field:=BD_ActivEco, Criteria1:="<>4"                                              '- Elimino las NO Títulos Propios
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        .Range.AutoFilter Field:=G04_ActivEco, Criteria1:="<>4"                                              '- Elimino las NO Títulos Propios
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 TxtMsg1 = "Borrados Recibos con AE " & ChrW(&H2260) & " 4 "
@@ -117,10 +117,10 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
         
         '-Borrar Recibos de Matrículas de coste CERO - ImpRec=ImpDto=0 - Recibos Matrícula de Actividad Académica a Coste CERO.
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado --
-        Call Rut_Lo_Sort(Lo_Data, BD_ImpDto, xlAscending, False)    '- Ordenar primero accelera un montón el borrado --
+        Call Rut_Lo_Sort(Lo_Data, G04_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado --
+        Call Rut_Lo_Sort(Lo_Data, G04_ImpDto, xlAscending, False)    '- Ordenar primero accelera un montón el borrado --
         .Range.AdvancedFilter xlFilterInPlace, Prog_Filtros_TipRec.Range("Tb_CriT_ImpMatCeroLsGes04")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then
 '            On Error Resume Next
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
@@ -136,9 +136,9 @@ Debug.Print ">>> RuT_Del_Reg_NO_Válidos"
         
         '-Borrar Recibos Importe CERO - Subvencionado- Imp_Rec =0 porque Imp_Dto >0 ----------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        Call Rut_Lo_Sort(Lo_Data, G04_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+        .Range.AutoFilter Field:=G04_ImpRec, Criteria1:="=0"
+        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 TxtMsg1 = "Borrados Rec Subvencionados 100% (ImpDto " & ChrW(&H2265) & " ImpAcad " & ChrW(&H21D2) & " Rec=0€)"

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M03_Asig_nCta_CCC_Ing"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 18:56
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M03_Asig_nCta_CCC_Ing - Asignar la cuenta bancaria de ingreso de cada recibo
@@ -85,8 +85,8 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
 
         '-Filtra Recibos "Imp_Rec <0"  -------------------------------------------------------------
         .AutoFilter.ShowAllData            ' Elimina los filtros
-        Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="<0"
+        Call Rut_Lo_Sort(Lo_Data, G04_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+        .Range.AutoFilter Field:=G04_ImpRec, Criteria1:="<0"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "Imp_Rec <0"
@@ -97,8 +97,8 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
 
         '-Filtra Recibos "No Cobrado"  -------------------------------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        Call Rut_Lo_Sort(Lo_Data, BD_ACont_Cob, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="="
+        Call Rut_Lo_Sort(Lo_Data, G04_ACont_Cob, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+        .Range.AutoFilter Field:=G04_ACont_Cob, Criteria1:="="
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "No Cobrado"
@@ -120,8 +120,8 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "FLY"  ---------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        Call Rut_Lo_Sort(Lo_Data, BD_InfRegulariz, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=FLY*"
+        Call Rut_Lo_Sort(Lo_Data, G04_InfRegulariz, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=FLY*"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "0049 6659 07 2416175503"
@@ -131,7 +131,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "0049 "  -------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=0049 "
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=0049 "
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "0049 6659 07 2416175503"
@@ -141,7 +141,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "6659072416125620 "  -------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=6659072416125620*"
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=6659072416125620*"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "0049 6659 07 2416125620"
@@ -151,7 +151,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "(0049)"  ------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=*(0049)"
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=*(0049)"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "0049 6659 07 2416125620"
@@ -161,7 +161,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "(2100)"  ------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=*(2100)"
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=*(2100)"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "2100 8984 16 0200003529"
@@ -171,7 +171,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "(0081)"  ------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=*(0081)"
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=*(0081)"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "0081 3191 42 0001068211"
@@ -181,7 +181,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
        
         '-Filtra Recibos Col_CtaPag Inf-Regularizado= "(0014)"  ------------------------------------
         .AutoFilter.ShowAllData         ' Elimina los filtros
-        .Range.AutoFilter Field:=BD_InfRegulariz, Criteria1:="=*(0014)"
+        .Range.AutoFilter Field:=G04_InfRegulariz, Criteria1:="=*(0014)"
         rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(Col_CtaIng).SpecialCells(xlCellTypeVisible).Cells.Value = "9000 0005 00 0260000014)"   '- Bco.Esp.
@@ -194,7 +194,7 @@ Debug.Print ">>> RuT_Determinar_Cta_Ingreso"
         '- Visualizo el progreso --------
         rowfind = Application.WorksheetFunction.CountIf(Lo_Data.DataBodyRange.Columns(Col_CtaIng), "")
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Rec. SIN Cta-CCC de Ingreso Asignados."
-        rowfind = Application.WorksheetFunction.CountIf(Lo_Data.DataBodyRange.Columns(BD_CtaPag), "<>")
+        rowfind = Application.WorksheetFunction.CountIf(Lo_Data.DataBodyRange.Columns(G04_CtaPag), "<>")
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(rowfind, "#,##0"), 8) & " Rec. CON Cta-CCC de Ingreso Asignados por el sistema."
         TxtProgreso = TxtProgreso & vbCrLf & Right(String(8, "_") & Format(.ListRows.Count, "#,##0"), 8) & " Rec. en BDatos"
 '        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Right(String(8, "_") & Format(RowFind, "#,##0"), 8) & " Rec. SIN Cta-CCC de Ingreso Asignados.", 0)
