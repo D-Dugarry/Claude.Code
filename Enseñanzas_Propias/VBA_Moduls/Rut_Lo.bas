@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 01:45
 Option Explicit
 
 
@@ -41,25 +41,33 @@ Debug.Print "Rut_Lo_DataBodyRange_Filtered_Copy"
     On Error GoTo 0
     If RangoACopiar Is Nothing Then Exit Sub
     
-    '- Pega datos justo debajo de la Lo_Target
+    '- Pega datos justo debajo de la Lo_Target ---------------------------------------------------
+    '-  OJO (bug corregido 2026-09-23): NO usar
+    '-      Lo_Target.DataBodyRange.Offset(DataBodyRange.Rows.Count, 0)
+    '-  como destino. Con la tabla en 1 registro (fila 5) y Totales en la 6, ese Offset apunta
+    '-  justo A LA FILA DE TOTALES, y el Resize de mas abajo dejaba la tabla una fila corta: lo
+    '-  copiado quedaba FUERA del ListObject (visto en BD_Deleted, con miles de filas huerfanas).
+    '-  Se calcula todo con COORDENADAS NUMERICAS, ya con los Totales apagados.
+    Dim FilCabecera     As Long:    FilCabecera = Lo_Target.HeaderRowRange.Row
+    Dim ColIniTgt       As Long:    ColIniTgt = Lo_Target.Range.Column
+    Dim ColFinTgt       As Long:    ColFinTgt = ColIniTgt + Lo_Target.Range.Columns.Count - 1
+    Dim FilasTgt        As Long
     Dim StartRowAdd     As Long
+
     If Lo_Target.DataBodyRange Is Nothing Then
-'        Lo_Target.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues
-        StartRowAdd = Lo_Target.Range.Offset(1, 0).Row
-        RangoACopiar.Copy Destination:=Lo_Target.Range.Offset(1, 0)
+        FilasTgt = 0
     Else
-'        Lo_Target.DataBodyRange.Offset(Lo_Target.DataBodyRange.Rows.Count, 0).PasteSpecial Paste:=xlPasteValues
-        StartRowAdd = Lo_Target.DataBodyRange.Offset(Lo_Target.DataBodyRange.Rows.Count, 0).Row
-        RangoACopiar.Copy Destination:=Lo_Target.DataBodyRange.Offset(Lo_Target.DataBodyRange.Rows.Count, 0)
+        FilasTgt = Lo_Target.ListRows.Count
     End If
-    
-    '- Como copio un Rango, Lo_Target NO se expande, Sólo se copia a continuación y forman parte de la Listobject.
-    '- Tengo que Redimensionar la tabla para incluir las nuevas filas en la Listobject
-    Dim RowsACopiar         As Long:        RowsACopiar = RangoACopiar.Rows.Count
-    Dim NuevoRangoAmpliado  As Range       '- Defino un NuevoRango que abarca la Lo_Target más el Rango Copiado.
-    Set NuevoRangoAmpliado = ws.Range(Lo_Target.Range.Cells(1, 1), _
-                             ws.Cells(StartRowAdd + RowsACopiar - 1, Lo_Target.Range.Column + Lo_Target.Range.Columns.Count - 1))
-    Lo_Target.Resize NuevoRangoAmpliado   '- Redefino Lo_Target con el tamaño de Lo_Target más el Rango Copiado: NuevoRangoAmpliado
+    StartRowAdd = FilCabecera + FilasTgt + 1        '- 1a fila libre de datos tras la tabla
+
+    RangoACopiar.Copy Destination:=ws.Cells(StartRowAdd, ColIniTgt)
+
+    '- Como copio un Rango, Lo_Target NO se expande sola: hay que redimensionarla para que
+    '-  absorba las filas nuevas.
+    Dim RowsACopiar     As Long:    RowsACopiar = RangoACopiar.Rows.Count
+    Lo_Target.Resize ws.Range(ws.Cells(FilCabecera, ColIniTgt), _
+                              ws.Cells(StartRowAdd + RowsACopiar - 1, ColFinTgt))
     
     If DelLoSourceFilteredRows Then RangoACopiar.Delete     '- Como estamos dentro del "IF Not RangoACopiar Is Nothing" el Rango tiene datos y los podemos Borrar
     Application.CutCopyMode = False

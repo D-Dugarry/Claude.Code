@@ -105,6 +105,11 @@ Public Const BD_Incidencias        As Integer = 51   ' col: ay
 Public Const BD_H_Incidencias      As Integer = 52   ' col: bz
 Public Const BD_EP_Ctrl            As Integer = 53   ' col: ba
 Public Const BD_EP_GestReg         As Integer = 54   ' col: bb
+Public Const BD_Emitido            As Integer = 55   ' col: bc
+Public Const BD_EjeAnt             As Integer = 56   ' col: bd
+Public Const BD_Añejos             As Integer = 57   ' col: be
+Public Const BD_Aplazado           As Integer = 58   ' col: bf
+Public Const BD_ADxAplz            As Integer = 59   ' col: bg
 
 '--- Flags internos de Tipo_Recibo en Prog_LsGes04 (M05_Asign_Tipo_Recibo) ------
 '    Columnas de marca por tipo; el valor definitivo va en BD_Tipo_Rec.

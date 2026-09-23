@@ -1,5 +1,5 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
-' Last Rev. 2026-09-21 13:54
+' Last Rev. 2026-09-23 15:10
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M07_Actualiz_BDatos_con_LsGes04 - Fusion de la importacion con la base de datos
@@ -105,10 +105,6 @@ Debug.Print ">>> RuT_Actualizar_BDatos_con_LsGes04"
     Dim Chg_ImpAdm          As Long:    Chg_ImpAdm = 0
     Dim F_BD                As Long:    F_BD = 1
     Dim F_G4                As Long:    F_G4 = 1
-    Dim RwG4            As ListRow
-    Dim RwDB            As ListRow
-    Dim RngG4           As Range
-    Dim RngPH           As Range
     Dim rowfind             As Variant
         
     Dim Lo_BD               As ListObject:      Set Lo_BD = Prog_BD.ListObjects(1)
@@ -147,155 +143,206 @@ Call Rut_Off_Functions
             Lo_BD.ListColumns(BD_EP_GestReg).DataBodyRange.ClearContents          '- ClearContents -----
         End If
     
+    '- ===========================================================================================
+    '-  FASE 2 (velocidad): este bucle era el 70-88% del tiempo de toda la importacion.
+    '-  Antes hacia ~30 accesos COM por fila (RwDB.Range(...) / RwG4.Range(...)) sobre 8.400
+    '-  filas = ~250.000 cruces VBA<->Excel. Ahora las dos tablas se vuelcan a arrays, TODO el
+    '-  merge se resuelve en memoria y se escribe de una vez al final.
+    '-  La logica de negocio es la MISMA: merge de dos tablas ordenadas por BD_Ref con la misma
+    '-  comparacion Val(), las mismas 3 ramas y los mismos contadores.
+    '- ===========================================================================================
+    Dim aG4()       As Variant      '- Copia en RAM de Lo_Ges04
+    Dim aBD()       As Variant      '- Copia en RAM de Lo_BD (se modifica y se vuelve a escribir)
+    Dim aVRI()      As Variant      '- Tabla de Coef. VRI (para el Coef. de las altas)
+    Dim aAltas()    As Variant      '- Registros NUEVOS, se anaden a Lo_BD de una sola vez
+    Dim NumAltas    As Long:        NumAltas = 0
+    Dim ColsBD      As Long:        ColsBD = Lo_BD.ListColumns.Count
+    Dim c           As Long
+
+    If TRows_Ges04 > 0 Then aG4 = Lo_Ges04.DataBodyRange.Value
+    If TRows_BD > 0 Then aBD = Lo_BD.DataBodyRange.Value
+    If Not Lo_Tb_Ret_VRI.DataBodyRange Is Nothing Then aVRI = Lo_Tb_Ret_VRI.DataBodyRange.Value
+    ReDim aAltas(1 To TRows_Ges04 + 1, 1 To ColsBD)     '- Cota superior: como mucho, todas altas
+
     Do While F_G4 <= TRows_Ges04
-    
-    If F_G4 = TRows_Ges04 Then
-        Debug.Print "F_G4 = TRows_Ges04"
-    End If
-        Set RwG4 = Lo_Ges04.ListRows(F_G4)
-            '- Identificar Referencias Duplicadas, la SALTO
-            If RwG4.Range(BD_Ref) = Ref_Ant Then
-                RwG4.Range(BD_EP_Ctrl) = RwG4.Range(BD_EP_Ctrl) & "_Duplicaty"
-                Lo_Ges04.ListRows(F_G4 - 1).Range(BD_EP_Ctrl) = Lo_Ges04.ListRows(F_G4 - 1).Range(BD_EP_Ctrl) & "_Duplicaty"
+        '- Guard de duplicados: CONSERVADO A PROPOSITO, pero hoy es DEFENSIVO ------------------
+        '-  M02 (RuT_Duplicates_Search) ya borra los duplicados de Lo_Ges04 antes de llegar aqui
+        '-  (en el log: "Del en Lo_Ges04 Rec. Repes NO finalistas"), asi que Cont_Repes no llega
+        '-  a incrementarse nunca y no aparece en el informe. Se mantiene porque si algun dia M02
+        '-  falla o se reordena el pipeline, sin este guard el merge emparejaria mal EN SILENCIO.
+        If F_G4 > 1 Then
+            If aG4(F_G4, BD_Ref) = Ref_Ant Then
+                aG4(F_G4, BD_EP_Ctrl) = aG4(F_G4, BD_EP_Ctrl) & "_Duplicaty"
+                aG4(F_G4 - 1, BD_EP_Ctrl) = aG4(F_G4 - 1, BD_EP_Ctrl) & "_Duplicaty"
                 Cont_Repes = Cont_Repes + 1
                 F_G4 = F_G4 + 1
                 GoTo Siguiente_Reg
             End If
-        Set RwDB = Lo_BD.ListRows(F_BD)
-        
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
-    '--- Referencias IGUALES <<<<  Ya existe en BDatos y hay que ver de Actualizar si hay Cambios  <
-        If Val(RwDB.Range(BD_Ref)) = Val(RwG4.Range(BD_Ref)) Then   '- YA EXISTE, LO ACTUALIZO -----
-            '- Compruebo posibles INCIDENCIAS ------------------------------------------------------
-            If RwDB.Range(BD_ImpRec) <> RwG4.Range(BD_ImpRec) * 1 Then                '- Cambio en el Imp. Recibo
-                Incidencia = "Chg:PH_ImpRec=[" & RwDB.Range(BD_ImpRec) & "]_#_"
-                RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
-                RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
-                Chg_ImpRec = Chg_ImpRec + 1
-                End If
-            If RwDB.Range(BD_ImpCob) > 0 And RwDB.Range(BD_ImpCob) <> RwG4.Range(BD_ImpCob) * 1 Then     '- Cambio en el Imp. Cobrado
-                Incidencia = "Chg:PH_ImpCob=[" & RwDB.Range(BD_ImpCob) & "]_#_"
-                RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
-                RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
-                Chg_ImpCob = Chg_ImpCob + 1
-                End If
-            If RwDB.Range(BD_ImpAdm) > 0 And RwDB.Range(BD_ImpAdm) <> RwG4.Range(BD_ImpAdm) * 1 Then     '- Cambio en el Imp. Adm.
-                Incidencia = "Chg:PH_ImpAdm=[" & RwDB.Range(BD_ImpAdm) & "]_#_"
-                RwDB.Range(BD_Incidencias) = RwDB.Range(BD_Incidencias) & Incidencia
-                RwDB.Range(BD_H_Incidencias) = RwDB.Range(BD_H_Incidencias) & Incidencia
-                Chg_ImpAdm = Chg_ImpAdm + 1
-                End If
-            If RwG4.Range(BD_Anul) = "S" Then     '- Tasa Anulada ----------------
-                RwDB.Range(BD_Obs_Conta) = "Mat.Anulada_"
-                Cont_Mat_Anul = Cont_Mat_Anul + 1
-                End If
-            
-            '- Actualizo Todos los datos Nuevos  de Ges04 a BDatos ---------------------------------
-            Set RngG4 = RwG4.Range.Cells(1, 1).Resize(1, BD_InfRegulariz)
-            Set RngPH = RwDB.Range.Cells(1, 1).Resize(1, BD_InfRegulariz)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            '- Actualizo Todos los datos Asignados  en Ges04 a BDatos ------------------------------
-            Set RngG4 = RwG4.Range.Cells(1, BD_ACont_Vto).Resize(1, BD_Cta_Ing - BD_Concepto + 1)
-            Set RngPH = RwDB.Range.Cells(1, BD_ACont_Vto).Resize(1, BD_Cta_Ing - BD_Concepto + 1)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            Set RngG4 = RwG4.Range.Cells(1, BD_Rec_Imp_Acad)
-            Set RngPH = RwDB.Range.Cells(1, BD_Rec_Imp_Acad)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            Set RngG4 = RwG4.Range.Cells(1, BD_Rec_Imp_Dto)
-            Set RngPH = RwDB.Range.Cells(1, BD_Rec_Imp_Dto)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            
-            Set RngG4 = RwG4.Range.Cells(1, BD_Rec_Imp_Adm)
-            Set RngPH = RwDB.Range.Cells(1, BD_Rec_Imp_Adm)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
+        End If
 
-            '- Preparo Salto de registro ------------------------------------
-            RwDB.Range(BD_EP_GestReg) = RwDB.Range(BD_EP_GestReg) & "- Actualizado " & F_Actualiz & " - "
-            RwG4.Range(BD_EP_GestReg) = "Actualizado BD, " & F_Actualiz
+        '--- Referencias IGUALES <<<< Ya existe en BDatos: hay que ver si hay Cambios -----------
+        If TRows_BD > 0 And Val(aBD(F_BD, BD_Ref)) = Val(aG4(F_G4, BD_Ref)) Then
+            '- Compruebo posibles INCIDENCIAS --------------------------------------------------
+            If aBD(F_BD, BD_ImpRec) <> aG4(F_G4, BD_ImpRec) * 1 Then          '- Cambio Imp. Recibo
+                Incidencia = "Chg:PH_ImpRec=[" & aBD(F_BD, BD_ImpRec) & "]_#_"
+                aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
+                aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
+                Chg_ImpRec = Chg_ImpRec + 1
+            End If
+            If aBD(F_BD, BD_ImpCob) > 0 And aBD(F_BD, BD_ImpCob) <> aG4(F_G4, BD_ImpCob) * 1 Then
+                Incidencia = "Chg:PH_ImpCob=[" & aBD(F_BD, BD_ImpCob) & "]_#_"
+                aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
+                aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
+                Chg_ImpCob = Chg_ImpCob + 1
+            End If
+            If aBD(F_BD, BD_ImpAdm) > 0 And aBD(F_BD, BD_ImpAdm) <> aG4(F_G4, BD_ImpAdm) * 1 Then
+                Incidencia = "Chg:PH_ImpAdm=[" & aBD(F_BD, BD_ImpAdm) & "]_#_"
+                aBD(F_BD, BD_Incidencias) = aBD(F_BD, BD_Incidencias) & Incidencia
+                aBD(F_BD, BD_H_Incidencias) = aBD(F_BD, BD_H_Incidencias) & Incidencia
+                Chg_ImpAdm = Chg_ImpAdm + 1
+            End If
+            If aG4(F_G4, BD_Anul) = "S" Then          '- Tasa Anulada
+                aBD(F_BD, BD_Obs_Conta) = "Mat.Anulada_"
+                Cont_Mat_Anul = Cont_Mat_Anul + 1
+            End If
+
+            '- Datos que vienen del LSGES04: columnas 1..BD_InfRegulariz ----------------------
+            For c = 1 To BD_InfRegulariz
+                aBD(F_BD, c) = aG4(F_G4, c)
+            Next
+            '- Datos calculados por el pipeline: BD_ACont_Vto..BD_Cta_Ing ---------------------
+            '-  OJO: el codigo original hacia Resize(1, BD_Cta_Ing - BD_Concepto + 1) = 4 col.,
+            '-  empezando en BD_ACont_Vto(34), con lo que copiaba 34..37 y DEJABA FUERA
+            '-  BD_Cta_Ing(38), que M03 acaba de calcular. Confirmado con el usuario que SI debe
+            '-  copiarse, asi que ahora el rango es BD_ACont_Vto..BD_Cta_Ing (34..38).
+            For c = BD_ACont_Vto To BD_Cta_Ing
+                aBD(F_BD, c) = aG4(F_G4, c)
+            Next
+            '- Importes de matricula que asigna M06 (col. contiguas 30..32) -------------------
+            aBD(F_BD, BD_Rec_Imp_Acad) = aG4(F_G4, BD_Rec_Imp_Acad)
+            aBD(F_BD, BD_Rec_Imp_Dto) = aG4(F_G4, BD_Rec_Imp_Dto)
+            aBD(F_BD, BD_Rec_Imp_Adm) = aG4(F_G4, BD_Rec_Imp_Adm)
+
+            '- Preparo Salto de registro ------------------------------------------------------
+            aBD(F_BD, BD_EP_GestReg) = aBD(F_BD, BD_EP_GestReg) & "- Actualizado " & F_Actualiz & " - "
+            aG4(F_G4, BD_EP_GestReg) = "Actualizado BD, " & F_Actualiz
             Cont_Modif = Cont_Modif + 1
             If F_BD < TRows_BD Then F_BD = F_BD + 1
             F_G4 = F_G4 + 1
-            Ref_Ant = RwG4.Range(BD_Ref)
-            
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
-        '--- Ref. NUEVA NO EXISTE, es un REGISTRO NUEVO  <<<<  AÑADO UN NUEVO REGISTRO a BDatos  <<<
-        ElseIf Val(RwDB.Range(BD_Ref)) > Val(RwG4.Range(BD_Ref)) Or F_BD >= TRows_BD Then        '- NO EXISTE, AÑADO REGISTRO
-            '--- Añado Registro -------------------------------------------------------------------
-            Set RwDB = Lo_BD.ListRows.Add
-            '- Actualizo Todos los datos Nuevos y Añadidos en Ges04 a BDatos -----------------------
-            Set RngG4 = RwG4.Range.Cells(1, 1).Resize(1, BD_EP_GestReg)
-            Set RngPH = RwDB.Range.Cells(1, 1).Resize(1, BD_EP_GestReg)
-            RngPH.Value = RngG4.Value  ' para cambiar parte de una fila en una sólo sentencia
-            ' -----------------=============  Buscar Tipo Plan  ==================------------------
-            rowfind = Application.Match(RwDB.Range(BD_Plan), Lo_Tb_Ret_VRI.DataBodyRange.Columns(1), 0)
-            If Not IsError(rowfind) Then    ' Plan Encontrado ==>> Tendrá características ESPECIALES
-                RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(rowfind)
-            Else                            ' NO ENCONTRADO   ==>> Pongo el coeficiente establecido 15% ó 20%
-                'If IsNumeric(Left(RwDB.Range(BD_Plan), 1)) Then
-                If Prog__APP.Range("APP_EFP_o_CFC") = "EFP" Then    '- Cualificado: sin hoja dependia de la ACTIVA
-                    RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(1)
+            Ref_Ant = aG4(F_G4 - 1, BD_Ref)
+
+        '--- Ref. NUEVA NO EXISTE <<<< ANADO UN NUEVO REGISTRO a BDatos -----------------------
+        ElseIf TRows_BD = 0 Or Val(aBD(F_BD, BD_Ref)) > Val(aG4(F_G4, BD_Ref)) Or F_BD >= TRows_BD Then
+            NumAltas = NumAltas + 1
+            '- Todos los datos nuevos y anadidos, de Ges04 al registro de alta
+            For c = 1 To BD_EP_GestReg
+                aAltas(NumAltas, c) = aG4(F_G4, c)
+            Next
+            ' -----------------=============  Buscar Tipo Plan  ==================-------------
+            rowfind = Fnc_Buscar_Fila_VRI(aVRI, aG4(F_G4, BD_Plan))
+            If rowfind > 0 Then         '- Plan Encontrado ==>> Tendra caracteristicas ESPECIALES
+                aAltas(NumAltas, BD_Coef_VRI) = aVRI(rowfind, CoefVRI_CoefVRI)
+            Else                        '- NO ENCONTRADO ==>> coeficiente establecido 15% o 20%
+                If Prog__APP.Range("APP_EFP_o_CFC") = "EFP" Then
+                    aAltas(NumAltas, BD_Coef_VRI) = aVRI(1, CoefVRI_CoefVRI)
                 Else
-                    RwDB.Range(BD_Coef_VRI) = Lo_Tb_Ret_VRI.ListColumns("Coef_VRI").DataBodyRange(2)
+                    aAltas(NumAltas, BD_Coef_VRI) = aVRI(2, CoefVRI_CoefVRI)
                 End If
             End If
-           
-            '- Preparo Salto de registro ------------------------------------
-            RwDB.Range(BD_EP_GestReg) = "- Nuevo " & F_Actualiz & " - "
-            RwG4.Range(BD_EP_GestReg) = "- Nuevo en BD, " & F_Actualiz
-'''            RwDB.Range(BD_ACont_Vto) = Format(RwDB.Range(BD_FVto), "yyyy")
+            '- Preparo Salto de registro ------------------------------------------------------
+            aAltas(NumAltas, BD_EP_GestReg) = "- Nuevo " & F_Actualiz & " - "
+            aG4(F_G4, BD_EP_GestReg) = "- Nuevo en BD, " & F_Actualiz
             Cont_Nuevo = Cont_Nuevo + 1
             F_G4 = F_G4 + 1
-            Ref_Ant = RwG4.Range(BD_Ref)
-            
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
-        '--- Ref. ANTIGUA NO EXISTE, es un REG. ELIMINADO <<<< Lo marcamos y luego los copiamos en Lo_Deleted y Borramos de BDatos
+            Ref_Ant = aG4(F_G4 - 1, BD_Ref)
+
+        '--- Ref. ANTIGUA NO EXISTE <<<< es un REG. ELIMINADO ---------------------------------
         Else
-            If RwDB.Range(BD_JI_Emi_Acad) = "" Then
-                If InStr(RwDB.Range(BD_EP_GestReg), "Deleted") = 0 Then
-                    RwDB.Range(BD_EP_GestReg) = RwDB.Range(BD_EP_GestReg) & "- Deleted " & F_Actualiz & " - "
-                    RwDB.Range(BD_Tipo_Rec) = "Deleted"
+            If aBD(F_BD, BD_JI_Emi_Acad) = "" Then
+                If InStr(aBD(F_BD, BD_EP_GestReg), "Deleted") = 0 Then
+                    aBD(F_BD, BD_EP_GestReg) = aBD(F_BD, BD_EP_GestReg) & "- Deleted " & F_Actualiz & " - "
+                    aBD(F_BD, BD_Tipo_Rec) = "Deleted"
                     Cont_Deleted = Cont_Deleted + 1
                 End If
             Else
-                If InStr(RwDB.Range(BD_EP_GestReg), "Deleted-conJI") = 0 Then
-                    RwDB.Range(BD_EP_GestReg) = "- Deleted-conJI " & F_Actualiz & " - "
-                    RwDB.Range(BD_Tipo_Rec) = "DeletedConJI"
+                If InStr(aBD(F_BD, BD_EP_GestReg), "Deleted-conJI") = 0 Then
+                    aBD(F_BD, BD_EP_GestReg) = "- Deleted-conJI " & F_Actualiz & " - "
+                    aBD(F_BD, BD_Tipo_Rec) = "DeletedConJI"
                     Cont_DeletedconJI = Cont_DeletedconJI + 1
                 End If
             End If
             If F_BD < TRows_BD Then F_BD = F_BD + 1
         End If
-                '- Visualizo el progreso -----------------------------------------------------------
-                If F_G4 Mod 500 = 0 Then
+                '- Visualizo el progreso -----------------------------------------------------
+                If F_G4 Mod 2000 = 0 Then
                     Form_Menu.TB_Informe = TxT_Progreso & "Incorporando LSGES04:  " & Format(F_G4, "#,##0") & " de " & Format(TRows_Ges04, "#,##0") & " reg."
-'                    Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
                 End If
 Siguiente_Reg:
     Loop
-    '- Si quedan recibos en BDatos, NO EXISTE EN LsGes04 y quiere decir que <<<<< ES UN REGISTRO ELIMINADO
+    '- Si quedan recibos en BDatos, NO EXISTEN en LsGes04 <<<<< SON REGISTROS ELIMINADOS ------
     Do While F_BD <= TRows_BD
-        Set RwDB = Lo_BD.ListRows(F_BD)
-        If RwDB.Range(BD_JI_Emi_Acad) = "" Then
-            If InStr(RwDB.Range(BD_EP_GestReg), "Deleted") = 0 Then
-                RwDB.Range(BD_EP_GestReg) = RwDB.Range(BD_EP_GestReg) & "- Deleted " & F_Actualiz & " - "
-                RwDB.Range(BD_Tipo_Rec) = "Deleted"
+        If aBD(F_BD, BD_JI_Emi_Acad) = "" Then
+            If InStr(aBD(F_BD, BD_EP_GestReg), "Deleted") = 0 Then
+                aBD(F_BD, BD_EP_GestReg) = aBD(F_BD, BD_EP_GestReg) & "- Deleted " & F_Actualiz & " - "
+                aBD(F_BD, BD_Tipo_Rec) = "Deleted"
                 Cont_Deleted = Cont_Deleted + 1
             End If
         Else
-            If InStr(RwDB.Range(BD_EP_GestReg), "Deleted-conJI") = 0 Then
-                RwDB.Range(BD_EP_GestReg) = "- Deleted-conJI " & F_Actualiz & " - "
-                RwDB.Range(BD_Tipo_Rec) = "DeletedConJI"
+            If InStr(aBD(F_BD, BD_EP_GestReg), "Deleted-conJI") = 0 Then
+                aBD(F_BD, BD_EP_GestReg) = "- Deleted-conJI " & F_Actualiz & " - "
+                aBD(F_BD, BD_Tipo_Rec) = "DeletedConJI"
                 Cont_DeletedconJI = Cont_DeletedconJI + 1
             End If
         End If
-        If F_BD <= TRows_BD Then F_BD = F_BD + 1
+        F_BD = F_BD + 1
     Loop
+
+    '- ===========================================================================================
+    '-  VOLCADO A LAS HOJAS: 2 escrituras de bloque + 1 para las altas
+    '- ===========================================================================================
+    If TRows_BD > 0 Then Lo_BD.DataBodyRange.Value = aBD
+    If TRows_Ges04 > 0 Then Lo_Ges04.DataBodyRange.Value = aG4
+
+    '- Las ALTAS se anaden de UNA vez (antes era un Lo_BD.ListRows.Add por registro, que
+    '-  reconstruye la tabla entera en cada llamada). Se amplia la tabla con Resize y se
+    '-  escribe el bloque completo.  OJO: el 2o argumento de Resize es el ANCHO, no la col. final.
+    If NumAltas > 0 Then
+        '- OJO (bug corregido 2026-09-23): NO usar Lo_BD.DataBodyRange.Cells(TRows_BD + 1, 1)
+        '-  como destino. TRows_BD es el tamano que tenia la tabla AL EMPEZAR, pero justo antes
+        '-  se ha hecho 'Lo_BD.DataBodyRange.Value = aBD' y se va a redimensionar: el
+        '-  DataBodyRange ya NO es el mismo rango y el bloque cae descolocado, replicando una
+        '-  fila miles de veces fuera de la tabla. Se usan COORDENADAS ABSOLUTAS DE HOJA,
+        '-  calculadas ANTES de tocar el tamano de la tabla.
+        Dim aBloque()   As Variant
+        Dim f2          As Long
+        Dim wsBD        As Worksheet:   Set wsBD = Lo_BD.Parent
+        Dim FilIniTb    As Long, ColIniTb As Long, ColFinTb As Long
+        Dim FilPrimAlta As Long, FilFinTb  As Long
+
+        ReDim aBloque(1 To NumAltas, 1 To ColsBD)
+        For f2 = 1 To NumAltas
+            For c = 1 To ColsBD
+                aBloque(f2, c) = aAltas(f2, c)
+            Next
+        Next
+
+        '- Geometria de la tabla ANTES de ampliarla -----------------------------------------
+        FilIniTb = Lo_BD.Range.Row                          '- fila de la cabecera
+        ColIniTb = Lo_BD.Range.Column
+        ColFinTb = ColIniTb + Lo_BD.Range.Columns.Count - 1
+        FilPrimAlta = FilIniTb + Lo_BD.Range.Rows.Count     '- 1a fila LIBRE tras la tabla
+        FilFinTb = FilPrimAlta + NumAltas - 1               '- ultima fila tras ampliar
+
+        '- 1o escribir las altas en la hoja, 2o ampliar la tabla para que las absorba -------
+        wsBD.Range(wsBD.Cells(FilPrimAlta, ColIniTb), _
+                   wsBD.Cells(FilFinTb, ColIniTb + ColsBD - 1)).Value = aBloque
+        Lo_BD.Resize wsBD.Range(wsBD.Cells(FilIniTb, ColIniTb), wsBD.Cells(FilFinTb, ColFinTb))
+        Erase aBloque
+    End If
+
+    Erase aAltas
+    If TRows_Ges04 > 0 Then Erase aG4
+    If TRows_BD > 0 Then Erase aBD
     
     '-Filtra Recibos Actualizar de BDatos ----------------------------------------------------------
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
@@ -340,13 +387,28 @@ Siguiente_Reg:
 
 Call Rut_Lo_Filtros_Quitar(Lo_BD)
 Call Rut_WrkSheet_ReducirPeso(Prog_LsGes04.Name, True)
+       
 Lo_BD.ShowTotals = True
 Lo_Deleted.ShowTotals = True
 Lo_Ges04.ShowTotals = True
-       
 Debug.Print "<<< RuT_Actualizar_BDatos_con_LsGes04"
 End Sub
 
-
-
-
+' ==================================================================================================
+Function Fnc_Buscar_Fila_VRI(ByRef aVRI As Variant, ByVal Cod_Plan As Variant) As Long
+' ==================================================================================================
+'-  Equivalente en memoria de Application.Match(Plan, Lo_Tb_Ret_VRI...Columns(1), 0).
+'-  Se usa dentro del bucle de altas de M07: llamar a Application.Match ahi dentro volveria a
+'-  cruzar la frontera VBA<->Excel en cada alta, que es justo lo que la Fase 2 elimina.
+'-  Devuelve la fila (1..n) o 0 si no lo encuentra.
+    Dim f       As Long
+    Fnc_Buscar_Fila_VRI = 0
+    If IsEmpty(aVRI) Then Exit Function
+    For f = LBound(aVRI, 1) To UBound(aVRI, 1)
+        If aVRI(f, CoefVRI_Plan) = Cod_Plan Then
+            Fnc_Buscar_Fila_VRI = f
+            Exit Function
+        End If
+    Next
+End Function    ' Fnc_Buscar_Fila_VRI
+' --------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M06_Asign_Imp_Adm_CAcad"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-22 19:40
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M06_Asign_Imp_Adm_CAcad - Imputar la tasa administrativa al primer recibo
@@ -63,7 +63,8 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
     Dim PlanDNI_New     As String:
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
-    Dim RowData         As ListRow
+    '- FASE 2: ya no se recorre con ListRow (un acceso COM por celda). Se vuelca la
+    '-  tabla a un array, se calcula en memoria y se escribe de una vez.
 
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
     Dim Lo_G04          As ListObject:      Set Lo_G04 = Prog_LsGes04.ListObjects(1)
@@ -84,19 +85,44 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad"
     Call Rut_Lo_Sort(Lo_G04, BD_Ref, xlAscending, False)
 
     '- Recorro toda la tabla Lo_G04 ----------------------------------------------------------------
-    For fila = 1 To TRows_G04
-        Set RowData = Lo_G04.ListRows(fila)
-        If RowData.Range(BD_ImpRec) < 0 Then GoTo Sig_Reg                 '- NO tenemos en cuenta loas Recibos Negativos
-'        If RowData.Range(BD_Anul) = "S" Then GoTo Sig_Reg                 '- NO tenemos en cuenta loas Recibos Anulados
-        PlanDNI_New = RowData.Range(BD_Plan) & "_" & RowData.Range(BD_DNI)
-        If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)
-           PlanDNI_Ant = PlanDNI_New
-                                RowData.Range(BD_Rec_Imp_Acad) = RowData.Range(BD_ImpAcad)
-                                RowData.Range(BD_Rec_Imp_Adm) = RowData.Range(BD_ImpAdm)
-                                RowData.Range(BD_Rec_Imp_Dto) = RowData.Range(BD_ImpDto)
-        End If
-Sig_Reg:
-    Next
+    '-  FASE 2 (velocidad): antes se recorria con Lo_G04.ListRows(fila) y 6 accesos COM por fila
+    '-  (~50.000 cruces VBA<->Excel con 8.400 reg.). Ahora se lee la tabla a un array, se decide
+    '-  todo en memoria y se escriben las 3 columnas destino de UNA sola vez.
+    '-  La logica de negocio es EXACTAMENTE la misma, y el recorrido mantiene el mismo orden
+    '-  (imprescindible: "el primer recibo de cada matricula" depende del orden de la tabla).
+    If TRows_G04 > 0 Then
+        Dim aDatos      As Variant      '- Copia en RAM de toda la tabla (solo lectura)
+        Dim aSalida()   As Variant      '- Lo que se escribira en Rec_Imp_Acad / _Adm / _Dto
+
+        aDatos = Lo_G04.DataBodyRange.Value          '- 1 sola lectura de bloque
+        ReDim aSalida(1 To TRows_G04, 1 To 3)        '- 3 col. CONTIGUAS: Acad(30), Adm(31), Dto(32)
+
+        For fila = 1 To TRows_G04
+            '- Arrastra el valor previo, para no borrar nada que no toque esta rutina
+            aSalida(fila, 1) = aDatos(fila, BD_Rec_Imp_Acad)
+            aSalida(fila, 2) = aDatos(fila, BD_Rec_Imp_Adm)
+            aSalida(fila, 3) = aDatos(fila, BD_Rec_Imp_Dto)
+
+            '- Comparacion IDENTICA a la del codigo original (que hacia RowData.Range(BD_ImpRec) < 0).
+            '-  NO usar Val(): con decimales europeos Val("-12,50") devuelve -12 (corta en la coma).
+            If Not (aDatos(fila, BD_ImpRec) < 0) Then     '- NO tenemos en cuenta los Recibos Negativos
+                PlanDNI_New = aDatos(fila, BD_Plan) & "_" & aDatos(fila, BD_DNI)
+                If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la 1a Tasa Adm (las demas la repiten)
+                    PlanDNI_Ant = PlanDNI_New
+                    aSalida(fila, 1) = aDatos(fila, BD_ImpAcad)
+                    aSalida(fila, 2) = aDatos(fila, BD_ImpAdm)
+                    aSalida(fila, 3) = aDatos(fila, BD_ImpDto)
+                End If
+            End If
+        Next
+
+        '- 1 sola escritura de bloque sobre las 3 columnas contiguas (no toca ninguna otra)
+        Lo_G04.DataBodyRange.Cells(1, BD_Rec_Imp_Acad).Resize(TRows_G04, 3).Value = aSalida
+
+        Erase aSalida
+        aDatos = Empty
+        fila = TRows_G04 + 1     '- El informe de abajo usa "fila - 1" como nº de reg. procesados
+    End If
     '- Visualizo el progreso -----------------------------------------------------------------------
                     Dim CantImpAcad     As Long:        CantImpAcad = 0
                     Dim CantImpAdm      As Long:        CantImpAdm = 0

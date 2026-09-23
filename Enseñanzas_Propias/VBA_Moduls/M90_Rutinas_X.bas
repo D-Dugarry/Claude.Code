@@ -1,5 +1,5 @@
 Attribute VB_Name = "M90_Rutinas_X"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-23 01:20
 Option Explicit
 
 '' =================================================================================================
@@ -251,3 +251,92 @@ Sub Rut_Unhide_All_Sheets()     ' Para uso interno, hacer visible todas las hoja
 End Sub
 ' ==================================================================================================
     
+
+' ==================================================================================================
+Sub Rut_Limpiar_BD_Deleted_Curso_Nuevo()   '- USO PUNTUAL: deja Prog_BD_Deleted vacia y sana
+' ==================================================================================================
+'-  Motivo (2026-09-23): la hoja quedo "viciada" -- el ListObject Tb_Deleted tenia sus registros,
+'-  pero A CONTINUACION, FUERA de la tabla, habia miles de filas huerfanas (6.274 copias de una
+'-  misma referencia) por un bug en la escritura de las altas de M07, ya corregido.
+'-  El usuario decide empezar de cero esta hoja para el curso 2026-27.
+'-
+'-  RECORDATORIO de la operativa correcta (verificada 2026-09-23): a Prog_BD_Deleted van los
+'-  recibos dados de baja SIN JI (filtro "=*Deleted *", con espacio). Los que tienen JI se quedan
+'-  en Prog_BD marcados como "DeletedConJI", porque ya estan contabilizados y no se pueden quitar.
+'- ---------------------------------------------------------------------------------------------
+    Dim Lo_Del      As ListObject
+    Dim ws          As Worksheet
+    Dim FilasDentro As Long
+    Dim UltFilaHoja As Long
+    Dim FilPrimLibre As Long
+    Dim Respuesta   As VbMsgBoxResult
+    Dim RutaCopia   As String
+    Dim Dummy       As String
+
+    Set ws = Prog_BD_Deleted
+    Set Lo_Del = ws.ListObjects(1)
+
+    '- Diagnostico ANTES de tocar nada -----------------------------------------------------------
+    If Lo_Del.DataBodyRange Is Nothing Then
+        FilasDentro = 0
+    Else
+        FilasDentro = Lo_Del.ListRows.Count
+    End If
+    FilPrimLibre = Lo_Del.Range.Row + Lo_Del.Range.Rows.Count
+    UltFilaHoja = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    Respuesta = MsgBox("Se va a VACIAR por completo la hoja BD_Deleted:" & vbLf & vbLf & _
+                       "   Registros DENTRO de la tabla : " & Format(FilasDentro, "#,##0") & vbLf & _
+                       "   Ultima fila con datos        : " & Format(UltFilaHoja, "#,##0") & vbLf & _
+                       "   1a fila libre tras la tabla  : " & Format(FilPrimLibre, "#,##0") & vbLf & vbLf & _
+                       "Se hara una copia de seguridad del libro antes de continuar." & vbLf & vbLf & _
+                       "Continuar?", vbYesNo + vbExclamation, "Limpiar BD_Deleted")
+    If Respuesta <> vbYes Then Exit Sub
+
+    Call Rut_Off_Functions
+    On Error GoTo Gestion_Error
+
+    '- 1) Copia de seguridad previa --------------------------------------------------------------
+    RutaCopia = Fnc_CopSeg_Previa_Importacion("LimpiarBDDeleted")
+
+    ws.Visible = xlSheetVisible
+    ws.Unprotect
+    Lo_Del.ShowTotals = False
+    Call Rut_Lo_Filtros_Quitar(Lo_Del)
+
+    '- 2) Vaciar la tabla, dejando cabecera + estructura -----------------------------------------
+    If Not Lo_Del.DataBodyRange Is Nothing Then Lo_Del.DataBodyRange.Delete
+
+    '- 3) Borrar TODO lo que quede fuera del ListObject ------------------------------------------
+    '-    Se recalcula la geometria DESPUES de vaciar: la tabla ya es cabecera + 1 fila vacia.
+    FilPrimLibre = Lo_Del.Range.Row + Lo_Del.Range.Rows.Count
+    UltFilaHoja = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    If UltFilaHoja >= FilPrimLibre Then
+        ws.Range(ws.Rows(FilPrimLibre), ws.Rows(ws.Rows.Count)).Delete
+    End If
+
+    '- 4) Compactar el rango usado ---------------------------------------------------------------
+    Dummy = ws.UsedRange.Address        '- hay que LEER UsedRange para que se recalcule
+
+    Lo_Del.ShowTotals = True
+    ws.Visible = xlSheetVeryHidden
+
+    Call Rut_On_Functions
+    MsgBox "BD_Deleted limpia." & vbLf & vbLf & _
+           "Se han eliminado " & Format(FilasDentro, "#,##0") & " registros de la tabla" & vbLf & _
+           "y todo el contenido huerfano que habia fuera de ella." & vbLf & vbLf & _
+           IIf(Len(RutaCopia) > 0, "Copia de seguridad:" & vbLf & RutaCopia, _
+                                   "OJO: no se pudo hacer la copia de seguridad."), _
+           vbOKOnly + vbInformation, "Limpiar BD_Deleted"
+    Exit Sub
+
+Gestion_Error:
+    Dim ErrN As Long, ErrD As String
+    ErrN = Err.Number: ErrD = Err.Description
+    On Error Resume Next
+    Call Rut_Reset_NestLevel
+    On Error GoTo 0
+    MsgBox "Error " & ErrN & " al limpiar BD_Deleted:" & vbLf & vbLf & ErrD, _
+           vbOKOnly + vbCritical, "Limpiar BD_Deleted"
+End Sub     ' Rut_Limpiar_BD_Deleted_Curso_Nuevo
+' --------------------------------------------------------------------------------------------------
