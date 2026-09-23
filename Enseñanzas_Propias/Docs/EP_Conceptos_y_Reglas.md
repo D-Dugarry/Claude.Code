@@ -10,7 +10,7 @@ EFP (Enseñanzas de Formación Permanente) y CFC/AFC (Cursos y Actividades de Fo
 
 | Término | Significado |
 |---|---|
-| **LSGES04** | Exportación de recibos del sistema contable de la UA; es la fuente de datos que se importa periódicamente a `Prog_BD`. |
+| **LSGES04** | Exportación de recibos del sistema contable de la UA; es la fuente de datos que se importa periódicamente a `Prog_BD`. Cada descarga trae **todos** los recibos de un curso académico, no solo los nuevos (ver *Qué trae cada descarga de LSGES04*). |
 | **EFP** | Enseñanzas de Formación Permanente. |
 | **CFC / AFC** | Cursos de Formación Continua / Actividades de Formación Complementaria — se tratan como un mismo grupo (`CFCyAFC`) a efectos de fichero/copia anual. |
 | **Plan** | Código del plan de estudios (título propio) al que pertenece un recibo. |
@@ -77,15 +77,42 @@ Una Liquidación es el conjunto de recibos de `Prog_BD` (tabla `Lo_BD`) de un **
    └─────────────────────────────────────────┘
 ```
 
+### Qué trae cada descarga de LSGES04
+
+Cada descarga de LSGES04 es una **foto completa** de los recibos de un curso académico, no un incremento. Por eso, al actualizar `Prog_BD` con una descarga nueva:
+
+- **La mayoría de los recibos se repiten** de la descarga anterior: se actualizan (`M07`, refs iguales).
+- **Algunos son nuevos**: se dan de alta en `Prog_BD`.
+- **Otros han desaparecido**, porque el recibo se ha anulado o por otro motivo: se marcan `Deleted`. Si ya estaban **liquidados** (tienen número de JI) hay que conservarlos: se marcan `DeletedConJI`, con aviso obligatorio.
+- **Los duplicados también se repiten**: si una descarga trae referencias duplicadas, lo más probable es que la siguiente traiga los mismos. Al guardarlos en `Tb_Duplic` hay que evitar que se acumulen los que ya venían de una descarga anterior (ver *Duplicados*).
+
 ### M02 — Depuración inicial
 
 Solo se procesan recibos del Curso Académico configurado, con `Matrícula ≠ N` y `ActivEco = 4`, descartando también las matrículas a coste cero y los recibos subvencionados al 100 % (`ImpRec = 0`). `M02_Del_Reg_EFP_o_CFCyAFC.bas` separa además el subconjunto EFP del CFC/AFC.
 
 ### Duplicados (`M02_Manage_Duplicates.bas`)
 
-`RuT_Duplicates_Search` ordena por `BD_Ref` y compara cada fila con la anterior: si coinciden, marca la primera como `"RpN"` y la siguiente como `"RepeN+1"` en `BD_Incidencias`, y llama a `RuT_Duplicates_Search_Mark_DIFF`, que compara columna a columna (solo las marcadas `Compare=True` en `Prog_DefCol_BD`) y anota en `BD_H_Incidencias` el detalle `"En Col. nºX (Nombre)<>[valor]"`. Después borra de la tabla de trabajo todos los repetidos salvo el último de cada serie, copia los "finalistas" a `Prog_BD_Dupl` (histórico), y en esa tabla purga los que ya estaban repetidos de tandas anteriores (`RpIdem`) o los que no tuvieron ningún cambio real (`"(en 0 Cols)"`).
+`RuT_Duplicates_Search` ordena por `G04_Ref` y compara cada fila con la anterior. Si coinciden:
 
-> *Implementado en:* `RuT_Duplicates_Search` / `RuT_Duplicates_Search_Mark_DIFF` (`M02_Manage_Duplicates.bas`).
+- marca la primera como `"RpN"` y la siguiente como `"RepeN+1"` en `G04_Incidencias`;
+- llama a `RuT_Duplicates_Search_Mark_DIFF`, que compara columna a columna (solo las marcadas `Compare=True` en `Prog_DefCol_G04`) y anota en `G04_H_Incidencias` el detalle `"En Col. nºX (Nombre)<>[valor]"`.
+
+Después borra de la tabla de trabajo todos los repetidos salvo el último de cada serie y copia esos "finalistas" a `Tb_Duplic` (hoja `Prog_BD_Dupl`), que acumula los de todas las descargas. Por último depura `Tb_Duplic` (`Rut_Duplic_Depurar`) y borra:
+
+| Marca | Qué se borra |
+|---|---|
+| `RpIdem` | Versión antigua **idéntica en todas las columnas comparadas** a otra posterior de la misma `Ref`: es el mismo duplicado de una descarga anterior. |
+| `RpNoSale` | `Ref` que en esta descarga ya no sale duplicada: se ha resuelto o anulado en origen. |
+| `RpVacio` | Filas sin `Ref` (filas en blanco dentro de la tabla). |
+| `(en 0 Cols)` | Duplicados que no difieren en ninguna columna comparada. |
+
+Reglas de negocio (confirmadas por el usuario, 2026-09-23):
+
+- **Un duplicado es "el mismo"** que el de una descarga anterior si todos los campos comparados son iguales. Si cambia cualquiera, es otro duplicado y se conservan las dos versiones (histórico).
+- **No hay criterio para elegir qué fila conservar** de cada serie: se queda la última del LSGES04. Si otra descarga trae las filas en orden inverso, la conservada cambia; no tiene solución.
+- Los duplicados que dejan de salir se quitan de `Tb_Duplic`.
+
+> *Implementado en:* `RuT_Duplicates_Search` / `RuT_Duplicates_Search_Mark_DIFF` / `Rut_Duplic_Depurar` (`M02_Manage_Duplicates.bas`).
 
 ### Tipo de Recibo (`M05_Asign_Tipo_Recibo.bas`)
 
