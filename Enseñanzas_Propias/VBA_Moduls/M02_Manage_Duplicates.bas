@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
-' Last Rev. 2026-09-23 18:56
+' Last Rev. 2026-09-23 23:52
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
@@ -34,8 +34,12 @@ Attribute VB_Name = "M02_Manage_Duplicates"
 '       conserva el ultimo.
 '    b) Copia los 'Repe*' (finalistas) a Lo_Duplic, ACUMULANDO con los de
 '       ejecuciones anteriores.
-'    c) En Lo_Duplic marca 'RpIdem' los que ya estaban de antes con identica
-'       incidencia, y los borra (evita que se acumulen tandas repetidas).
+'    c) Depura Lo_Duplic (Rut_Duplic_Depurar). Cada LSGES04 trae TODOS los
+'       recibos del curso, asi que los mismos duplicados vuelven a salir en
+'       cada descarga. Borra: 'RpVacio' (filas sin Ref), 'RpNoSale' (Ref que
+'       ya no sale duplicada en ESTA descarga) y 'RpIdem' (version antigua
+'       identica en TODAS las col. comparadas a otra posterior de su Ref).
+'       Si cambia algun valor comparado, es otro duplicado y se conserva.
 '    d) Borra de Lo_Duplic los que, aun siendo duplicados, no cambian en
 '       ninguna columna comparada: su historico contiene '_(en 0 Cols):'.
 '
@@ -88,6 +92,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
     Dim rowfind            As Variant
     Dim Sh_Data             As Worksheet:   Set Sh_Data = Lo_Data.Parent
     Dim Sh_Duplic           As Worksheet:   Set Sh_Duplic = Lo_Duplic.Parent
+    Dim Dic_RefDupl         As Object:      Set Dic_RefDupl = CreateObject("Scripting.Dictionary")   '- Ref duplicadas en ESTA descarga
     
     Call Rut_Lo_WrkSht_Preparar(Sh_Data)
     Call Rut_Lo_WrkSht_Preparar(Sh_Duplic)
@@ -112,6 +117,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
                 .Cells(FilaReg - 1, ColIncidencia) = "Rp" & CantRepe     '- Al 1º de la Dupla le cambio la incidencia por una genérica "RP"
                 CantRepe = CantRepe + 1                                     '- Acumulo contador de nº de repeticiones de esta Referencia
                 .Cells(FilaReg, ColIncidencia) = "Repe" & CantRepe       '- Al 2º de la Dupla le pongo "Repe"+El némero de repetición por el que va de esta Referencia
+                Dic_RefDupl(Fnc_Duplic_Txt(.Cells(FilaReg, Colref).Value)) = True
                 If MaxNumRepe < CantRepe Then MaxNumRepe = CantRepe         '- Registro cual es el máximo número de Repeticiones que hay de una misma Ref.
                                                                             'MaxNumRepe = WorksheetFunction.Max(MaxNumRepe, CantRepe)   '- Es más lento...
                 Call RuT_Duplicates_Search_Mark_DIFF(Lo_Data, Lo_DefCol, Col_H_Incid, FilaReg, CantRepe)
@@ -181,48 +187,28 @@ Debug.Print ">>> RuT_Duplicates_Search"
         End If
         .AutoFilter.ShowAllData            ' Elimina los filtros
     End With
-    '- Borrar Registros Repetidos entre ellos en Lo_Duplic
-    With Lo_Duplic.DataBodyRange
-        Call Rut_Lo_Sort(Lo_Duplic, Colref, xlAscending, True)
-        .Columns(ColIncid_Dupl).ClearContents   '- Se supone que está vacía...
-        For FilaReg = 2 To Lo_Duplic.ListRows.Count
-            If .Cells(FilaReg, Colref) = .Cells(FilaReg - 1, Colref) Then   '- Existe "Dupla" coincidencia en las Referencias de Recibo
-                If .Cells(FilaReg, Col_H_Incid_Dupl) = .Cells(FilaReg - 1, Col_H_Incid_Dupl) Then   '- Es un Repetido que ya existe de antes e idéntico en incidencia
-                    .Cells(FilaReg - 1, ColIncid_Dupl) = "RpIdem"        '- Marco Incidencia "RpIdem" en el 1º Recibo
-                End If
-            End If
-        Next FilaReg
-    End With
-    With Lo_Duplic
-        Call Rut_Lo_Sort(Lo_Duplic, ColIncid_Dupl, xlAscending, True)
-        .Range.AutoFilter Field:=ColIncid_Dupl, Criteria1:="=RpIdem"
-        rowfind = .Range.Columns(ColIncid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
-        If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
-            '- Visualizo el progreso --------
-                        TxtMsg1 = "Del Recibos Repes-X de repetidos RpIdem:"
-                        TxtMsg2 = Format(rowfind, "#,##0") & "reg."
-                        TxtMsg3 = " quedan " & Format(.ListRows.Count, "#,##0") & "reg."
-                    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
-       Lo_Duplic.AutoFilter.ShowAllData            ' Elimina los filtros
-    End With
+    '- Depurar Lo_Duplic: filas vacias, duplicados que ya no salen y versiones antiguas identicas
+    Call Rut_Duplic_Depurar(Lo_Duplic, Lo_DefCol, Dic_RefDupl, Colref, ColIncid_Dupl)
     
     '- Borrar Registros en Lo_Duplic identificados como repetidos pero que no tienen ningún cambio en las columnas comparadas
-    With Lo_Duplic
-        Dim Celda As Range, RngCol_H_Incidencia As ListColumn:            Set RngCol_H_Incidencia = .ListColumns(Col_H_Incid_Dupl)
-        For Each Celda In RngCol_H_Incidencia.DataBodyRange    '- voy a borrar la referencias de duplicados a borrar por no tener cambios
-            If InStr(Celda.Value, "_(en 0 Cols):") > 0 Then Celda.Value = "(en 0 Cols)"
-        Next Celda
-        Call Rut_Lo_Sort(Lo_Duplic, Col_H_Incid_Dupl, xlAscending, True)
-        .Range.AutoFilter Field:=Col_H_Incid_Dupl, Criteria1:="=(en 0 Cols)"      '- Todos los que se han quedados sin incidencias los borramos
-        rowfind = .Range.Columns(Col_H_Incid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
-        If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
-            '- Visualizo el progreso --------
-                        TxtMsg1 = "Del Recibos Repes_Cambios(en 0 Cols):"
-                        TxtMsg2 = Format(rowfind, "#,##0") & "reg."
-                        TxtMsg3 = " quedan " & Format(.ListRows.Count, "#,##0") & "reg."
-                    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
-        .AutoFilter.ShowAllData            ' Elimina los filtros
-    End With
+    If Not Lo_Duplic.DataBodyRange Is Nothing Then     '- Puede haber quedado vacia al depurar
+        With Lo_Duplic
+            Dim Celda As Range, RngCol_H_Incidencia As ListColumn:            Set RngCol_H_Incidencia = .ListColumns(Col_H_Incid_Dupl)
+            For Each Celda In RngCol_H_Incidencia.DataBodyRange    '- voy a borrar la referencias de duplicados a borrar por no tener cambios
+                If InStr(Celda.Value, "_(en 0 Cols):") > 0 Then Celda.Value = "(en 0 Cols)"
+            Next Celda
+            Call Rut_Lo_Sort(Lo_Duplic, Col_H_Incid_Dupl, xlAscending, True)
+            .Range.AutoFilter Field:=Col_H_Incid_Dupl, Criteria1:="=(en 0 Cols)"      '- Todos los que se han quedados sin incidencias los borramos
+            rowfind = .Range.Columns(Col_H_Incid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+            If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
+                '- Visualizo el progreso --------
+                            TxtMsg1 = "Del Recibos Repes_Cambios(en 0 Cols):"
+                            TxtMsg2 = Format(rowfind, "#,##0") & "reg."
+                            TxtMsg3 = " quedan " & Format(.ListRows.Count, "#,##0") & "reg."
+                        Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
+            .AutoFilter.ShowAllData            ' Elimina los filtros
+        End With
+    End If
 
 Restaurar_Valores:
     Call Rut_Lo_WrkSht_Preparar(Sh_Data)
@@ -283,6 +269,89 @@ Debug.Print ">>> RuT_Duplicates_Search_Mark_DIFF"
 End Sub     ' RuT_Duplicates_Search_Mark_DIFF
 '---------------------------------------------------------------------------------------------------
 
+'===================================================================================================
+'- Depura Tb_Duplic tras anadir los duplicados de esta descarga (2026-09-23)
+Sub Rut_Duplic_Depurar(Lo_Duplic As ListObject, _
+                       Lo_DefCol As ListObject, _
+                       Dic_RefDupl As Object, _
+                       Colref As Integer, _
+                       ColIncid_Dupl As Integer)
+'-  Cada LSGES04 trae TODOS los recibos del curso, asi que los mismos duplicados vuelven a salir
+'-  descarga tras descarga. Marca en ColIncid_Dupl y borra:
+'-      RpVacio   - filas sin Ref (filas en blanco dentro de la tabla).
+'-      RpNoSale  - Ref que en ESTA descarga ya no sale duplicada (resuelto/anulado en origen).
+'-      RpIdem    - version antigua IDENTICA en todas las col. comparadas (DefC_Compare de
+'-                  Lo_DefCol, col. 2..39, comunes a G04 y BD) a otra posterior de su Ref.
+'-  Una version con algun valor comparado distinto es OTRO duplicado y se conserva.
+'-  Se apoya en que el Sort es estable: dentro de una Ref, las filas antiguas quedan primero.
+Debug.Print ">>> Rut_Duplic_Depurar"
+    Dim ArrDat      As Variant, ArrCmp As Variant, ArrMarca() As Variant
+    Dim NumFil      As Long, f As Long, g As Long, c As Long
+    Dim RefF        As String
+    Dim Sw_Iguales  As Boolean
+    Dim N_Vacio     As Long, N_NoSale As Long, N_Idem As Long
+    Dim TxtMsg1 As String, TxtMsg2 As String, TxtMsg3 As String
 
+    If Lo_Duplic.DataBodyRange Is Nothing Then Exit Sub
+    Call Rut_Lo_Sort(Lo_Duplic, Colref, xlAscending, True)
+    NumFil = Lo_Duplic.ListRows.Count
+    ArrDat = Lo_Duplic.DataBodyRange.Value
+    ArrCmp = Lo_DefCol.ListColumns(DefC_Compare).DataBodyRange.Value
+    ReDim ArrMarca(1 To NumFil, 1 To 1)
 
+    For f = 1 To NumFil
+        RefF = Fnc_Duplic_Txt(ArrDat(f, Colref))
+        If RefF = "" Then
+            ArrMarca(f, 1) = "RpVacio":   N_Vacio = N_Vacio + 1
+        ElseIf Not Dic_RefDupl.Exists(RefF) Then
+            ArrMarca(f, 1) = "RpNoSale":  N_NoSale = N_NoSale + 1
+        Else
+            For g = f + 1 To NumFil                                 '- Versiones posteriores de la Ref
+                If Fnc_Duplic_Txt(ArrDat(g, Colref)) <> RefF Then Exit For
+                Sw_Iguales = True
+                For c = 2 To BD_Coef_VRI
+                    If CBool(ArrCmp(c, 1)) Then
+                        If Fnc_Duplic_Txt(ArrDat(f, c)) <> Fnc_Duplic_Txt(ArrDat(g, c)) Then
+                            Sw_Iguales = False
+                            Exit For
+                        End If
+                    End If
+                Next c
+                If Sw_Iguales Then
+                    ArrMarca(f, 1) = "RpIdem":    N_Idem = N_Idem + 1
+                    Exit For
+                End If
+            Next g
+        End If
+    Next f
 
+    Lo_Duplic.ListColumns(ColIncid_Dupl).DataBodyRange.Value = ArrMarca
+    If N_Vacio + N_NoSale + N_Idem > 0 Then
+        Lo_Duplic.Range.AutoFilter Field:=ColIncid_Dupl, Criteria1:="=Rp*"
+        Lo_Duplic.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
+        If Lo_Duplic.AutoFilter.FilterMode Then Lo_Duplic.AutoFilter.ShowAllData
+    End If
+
+    '- Visualizo el progreso --------
+    TxtMsg3 = " quedan " & Format(Lo_Duplic.ListRows.Count, "#,##0") & "reg."
+    TxtMsg1 = "Del Duplic. ya existentes (RpIdem):":     TxtMsg2 = Format(N_Idem, "#,##0") & "reg."
+    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
+    TxtMsg1 = "Del Duplic. que ya no salen:":            TxtMsg2 = Format(N_NoSale, "#,##0") & "reg."
+    Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
+    If N_Vacio > 0 Then
+        TxtMsg1 = "Del Duplic. filas vacias:":           TxtMsg2 = Format(N_Vacio, "#,##0") & "reg."
+        Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
+    End If
+Debug.Print "<<< Rut_Duplic_Depurar"
+End Sub     ' Rut_Duplic_Depurar
+'---------------------------------------------------------------------------------------------------
+
+'- Valor de celda como texto para comparar (sin romper con valores de error ni vacios)
+Private Function Fnc_Duplic_Txt(v As Variant) As String
+    If IsError(v) Then
+        Fnc_Duplic_Txt = "#ERR"
+    Else
+        Fnc_Duplic_Txt = Trim$(CStr(v))
+    End If
+End Function    ' Fnc_Duplic_Txt
+'---------------------------------------------------------------------------------------------------
