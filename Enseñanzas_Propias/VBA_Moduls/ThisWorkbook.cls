@@ -38,4 +38,3 @@ Private Sub Workbook_Activate()
 '    Rut_ConfigExcel_Establecer
 End Sub
 ' ==================================================================================================
-

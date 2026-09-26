@@ -12,6 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 ' Last Rev. 2026-09-21 12:12
 '- M02_Importar_LSGES04_GE - Modif: 2025-10-08
 Option Explicit
