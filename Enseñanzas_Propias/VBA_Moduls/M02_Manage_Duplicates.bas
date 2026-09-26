@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
-' Last Rev. 2026-09-23 23:52
+' Last Rev. 2026-09-27 00:46
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
@@ -333,13 +333,16 @@ Debug.Print ">>> Rut_Duplic_Depurar"
     End If
 
     '- Visualizo el progreso --------
-    TxtMsg3 = " quedan " & Format(Lo_Duplic.ListRows.Count, "#,##0") & "reg."
+    '- "quedan" = lo que quedaba tras CADA paso (el borrado real es uno solo, de todos los Rp*)
     TxtMsg1 = "Del Duplic. ya existentes (RpIdem):":     TxtMsg2 = Format(N_Idem, "#,##0") & "reg."
+    TxtMsg3 = " quedan " & Format(NumFil - N_Idem, "#,##0") & "reg."
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
     TxtMsg1 = "Del Duplic. que ya no salen:":            TxtMsg2 = Format(N_NoSale, "#,##0") & "reg."
+    TxtMsg3 = " quedan " & Format(NumFil - N_Idem - N_NoSale, "#,##0") & "reg."
     Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
     If N_Vacio > 0 Then
         TxtMsg1 = "Del Duplic. filas vacias:":           TxtMsg2 = Format(N_Vacio, "#,##0") & "reg."
+        TxtMsg3 = " quedan " & Format(NumFil - N_Idem - N_NoSale - N_Vacio, "#,##0") & "reg."
         Form_Menu.TB_Informe = Form_Menu.TB_Informe & vbLf & Func_Informe(TxtMsg1, TxtMsg2, TxtMsg3)
     End If
 Debug.Print "<<< Rut_Duplic_Depurar"
