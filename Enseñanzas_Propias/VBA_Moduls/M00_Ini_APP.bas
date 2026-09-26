@@ -1,5 +1,5 @@
 Attribute VB_Name = "M00_Ini_APP"
-' Last Rev. 2026-09-21 20:40
+' Last Rev. 2026-09-26 18:36
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M00_Ini_APP - Arranque de la aplicacion y estado del entorno Excel
@@ -20,6 +20,7 @@ Attribute VB_Name = "M00_Ini_APP"
 '  Rut_Enable_Events_Status_Choose_ByHand  Atajo manual: fuerza eventos a ON.
 '  Rut_EnableEvents_Status_Reset ..... Realinea Application.EnableEvents con el switch.
 '  Rut_Enable_Events_Status_Choose ... CHANGE / ON / OFF sobre eventos + switch.
+'  Rut_Usuario_Chg ................... Login (Form_Usuario); movida desde Mód_Menú_Usuario.
 '
 '  OJO: Rut_Off_Functions y Rut_On_Functions YA NO estan aqui; viven en
 '  Rut_Wb_State_Manager.bas (skill excel-state-manager, con reentrancia).
@@ -244,6 +245,16 @@ Sub Rut_Enable_Events_Status_Choose(Optional Choose As String = "CHANGE")      '
                             Prog__APP_Switch.Range("Sw_EnableEvents") = False
     End Select
     Form_Menu.TB_Informe = "Enable Events Status now is: " & Prog__APP_Switch.Range("Sw_EnableEvents")
+End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+
+
+' ==================================================================================================
+Sub Rut_Usuario_Chg()      '- Movida aqui desde Mód_Menú_Usuario.bas (2026-09-26) ------------------
+' ==================================================================================================
+        Form_Usuario.Show
+        Application.ScreenUpdating = True
+        DoEvents
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================
 
