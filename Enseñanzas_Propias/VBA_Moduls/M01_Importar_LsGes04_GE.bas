@@ -1,5 +1,5 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
-' Last Rev. 2026-09-23 18:56
+' Last Rev. 2026-09-27 00:05
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M01_Importar_LsGes04_GE - ORQUESTADOR del pipeline de importacion LSGES04
@@ -26,9 +26,10 @@ Attribute VB_Name = "M01_Importar_LsGes04_GE"
 '  Mod_Importar_LSGES04_GE, tramo a tramo:
 '
 '    A. SELECCION E IMPORTACION
-'       FileDialog filtrado a LSGES04_GE_SinDtos_Curso_<CursoAcad>*; abre el
-'       Excel elegido en ReadOnly (ClsBk, en RAM) y, si no trae ListObject, lo
-'       crea sobre el UsedRange.
+'       FileDialog con patron unico *LsGes04*<CursoAcad>* (cubre LSGES04_GE_
+'       SinDtos_Curso_ y LsGes04_..._AE4); si Dir() no encuentra nada, se abre
+'       sin filtro. Abre el Excel elegido en ReadOnly (ClsBk, en RAM) y, si no
+'       trae ListObject, lo crea sobre el UsedRange.
 '
 '    B. DEPURACION (sobre la copia en RAM, antes de tocar el libro)
 '       Rut_Borrar_Rec_EFP_o_CFCyAFC  -> M02: deja solo EFP o solo CFCyAFC.
@@ -66,24 +67,7 @@ Attribute VB_Name = "M01_Importar_LsGes04_GE"
 ' =================================================================================================
 ' <<< DOC-MOD (generado) <<<
 
-'2026-01-14
-'- M02_Importar_LSGES04_GE
 Option Explicit
-
-'- Seleccionar fichero Excel LSGES04 a importar
-'- Importar el Excel LSGES04 en un WorkBook_Close
-'       - Si no viene con Tabla la Creo
-'- Borrar Recibos NO Pertinentes:  Curso-Acad, Matrícula=N, AE<>4
-'- Formatear la Tabla de Prog_LsGes04
-'- Recorro toda la Tabla Prog_LsGes04 para actualizar Prog_BD (BD_Hist)
-'       - Añado Todos los registros NUEVOS de TLSGES04 en BD_Hist
-'   - Los registros que no están el TLGES04 y sí en BD_Hist, los marco como eliminados
-'   - De los registros coindidentes:
-'       - Informe de posibles cambios: ImpRec, ImpCob, ImpAmd, MatAnulada
-'       - Copio los datos de TLSGES04 en BD_Hist
-'- Actualiza en BD_Hist el Imp. Tasa Adm., Sólo si no tiene ya un Importe.
-'- Incorporar Concepto Económico y Tipo de Enseñanza TIO-EP (EFP, CFC, AFC, TNCT)
-'- Borrar Prog_LsGes04 menos los DUPLICADOS para su posible control
 
 Function Func_Informe(Tx1 As String, Optional Tx2 As String = "", Optional Tx3 As String = "") As String
     Dim Texto As String
@@ -135,8 +119,25 @@ Call Rut_Off_Functions
     '- Seleccionar fichero Excel LSGES04 e importar en ClsBook (RAM) -------------------------------
         Dim Arch__EP_New        As String
         Dim Nom_NewArch         As String
+    '- Patron unico que cubre los dos formatos de fichero LSGES04 (contienen "LsGes04" y el Curso_Acad) --
+    Dim Ruta_Carpeta_LsGes04   As String
+    Dim Patron_LsGes04         As String
+    Ruta_Carpeta_LsGes04 = Application.Workbooks(ThisWorkbook.Name).Path & "\"
+    Patron_LsGes04 = "*LsGes04*" & Curso_Acad & "*"
+    '- Dir() da Error 52 con rutas NEXE/WebDAV: si falla, se deja el patron tal cual (el
+    '-  FileDialog lo usa solo como texto precargado, así que un error aqui no debe bloquear nada).
+    Dim Hay_Coincidencias_LsGes04   As Boolean
+    On Error Resume Next
+    Hay_Coincidencias_LsGes04 = (Len(Dir(Ruta_Carpeta_LsGes04 & Patron_LsGes04)) > 0)
+    On Error GoTo Gestion_Error
+    If Not Hay_Coincidencias_LsGes04 Then
+        '- Sin coincidencias (o Dir no pudo evaluarlo): se abre sin filtro para que el usuario
+        '-  busque a mano en la carpeta.
+        Patron_LsGes04 = ""
+    End If
+
     With Application.FileDialog(msoFileDialogFilePicker)
-        .InitialFileName = Application.Workbooks(ThisWorkbook.Name).Path & "\" & "LSGES04_GE_SinDtos_Curso_" & Curso_Acad & "*"
+        .InitialFileName = Ruta_Carpeta_LsGes04 & Patron_LsGes04
         .Title = "Seleccionar el Fichero Excel de la última consulta LSG4_GE de un PLAN ÚNICO del Generador de Informes: "
         .InitialView = msoFileDialogViewDetails
         .AllowMultiSelect = False
