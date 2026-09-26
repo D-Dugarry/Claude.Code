@@ -1,5 +1,5 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
-' Last Rev. 2026-09-23 18:56
+' Last Rev. 2026-09-27 00:29
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M07_Actualiz_BDatos_con_LsGes04 - Fusion de la importacion con la base de datos
@@ -162,6 +162,7 @@ Call Rut_Off_Functions
     Dim NumAltas    As Long:        NumAltas = 0
     Dim ColsBD      As Long:        ColsBD = Lo_BD.ListColumns.Count
     Dim c           As Long
+    Dim Cmp_Ref     As Integer      '- 0 = Ref iguales, 1 = alta (BD mayor o agotada), -1 = baja
 
     If TRows_Ges04 > 0 Then aG4 = Lo_Ges04.DataBodyRange.Value
     If TRows_BD > 0 Then aBD = Lo_BD.DataBodyRange.Value
@@ -184,8 +185,27 @@ Call Rut_Off_Functions
             End If
         End If
 
+        '- Comparacion de Ref (FIX 2026-09-27) ---------------------------------------------------
+        '-  Antes F_BD no pasaba nunca de TRows_BD ('If F_BD < TRows_BD Then F_BD = F_BD + 1') y
+        '-  'BD agotada' se detectaba con 'F_BD >= TRows_BD'. Asi, la ULTIMA fila de Lo_BD (la
+        '-  Ref mas alta) se actualizaba y, como F_BD no avanzaba, el bucle final de ELIMINADOS
+        '-  la volvia a recorrer y la marcaba 'Deleted': se iba a BD_Deleted y en la importacion
+        '-  siguiente volvia a entrar como 'Nuevo' (las 2 Ref mas altas se turnaban: 1 alta +
+        '-  1 Deleted falsos en cada importacion). Ahora F_BD avanza SIEMPRE y F_BD > TRows_BD
+        '-  significa 'BD agotada'. Se evalua en Ifs anidados porque VBA no cortocircuita el Or
+        '-  y aBD(TRows_BD + 1, ...) daria error de subindice.
+        If TRows_BD = 0 Or F_BD > TRows_BD Then
+            Cmp_Ref = 1                                             '- BD agotada: el resto son ALTAS
+        ElseIf Val(aBD(F_BD, BD_Ref)) = Val(aG4(F_G4, G04_Ref)) Then
+            Cmp_Ref = 0
+        ElseIf Val(aBD(F_BD, BD_Ref)) > Val(aG4(F_G4, G04_Ref)) Then
+            Cmp_Ref = 1
+        Else
+            Cmp_Ref = -1
+        End If
+
         '--- Referencias IGUALES <<<< Ya existe en BDatos: hay que ver si hay Cambios -----------
-        If TRows_BD > 0 And Val(aBD(F_BD, BD_Ref)) = Val(aG4(F_G4, G04_Ref)) Then
+        If Cmp_Ref = 0 Then
             '- Compruebo posibles INCIDENCIAS --------------------------------------------------
             If aBD(F_BD, BD_ImpRec) <> aG4(F_G4, G04_ImpRec) * 1 Then          '- Cambio Imp. Recibo
                 Incidencia = "Chg:PH_ImpRec=[" & aBD(F_BD, BD_ImpRec) & "]_#_"
@@ -231,12 +251,12 @@ Call Rut_Off_Functions
             aBD(F_BD, BD_EP_GestReg) = aBD(F_BD, BD_EP_GestReg) & "- Actualizado " & F_Actualiz & " - "
             aG4(F_G4, G04_EP_GestReg) = "Actualizado BD, " & F_Actualiz
             Cont_Modif = Cont_Modif + 1
-            If F_BD < TRows_BD Then F_BD = F_BD + 1
+            F_BD = F_BD + 1
             F_G4 = F_G4 + 1
             Ref_Ant = aG4(F_G4 - 1, G04_Ref)
 
         '--- Ref. NUEVA NO EXISTE <<<< ANADO UN NUEVO REGISTRO a BDatos -----------------------
-        ElseIf TRows_BD = 0 Or Val(aBD(F_BD, BD_Ref)) > Val(aG4(F_G4, G04_Ref)) Or F_BD >= TRows_BD Then
+        ElseIf Cmp_Ref = 1 Then
             NumAltas = NumAltas + 1
             '- Todos los datos nuevos y anadidos, de Ges04 al registro de alta
             '- Fase 4: solo coinciden las col. 1..G04_Coef_VRI; las 4 de trabajo se mapean una a una
@@ -283,7 +303,7 @@ Call Rut_Off_Functions
                     Cont_DeletedconJI = Cont_DeletedconJI + 1
                 End If
             End If
-            If F_BD < TRows_BD Then F_BD = F_BD + 1
+            F_BD = F_BD + 1
         End If
                 '- Visualizo el progreso -----------------------------------------------------
                 If F_G4 Mod 2000 = 0 Then
