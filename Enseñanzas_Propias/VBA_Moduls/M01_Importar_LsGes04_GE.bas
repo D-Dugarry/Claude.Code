@@ -1,5 +1,5 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
-' Last Rev. 2026-09-27 08:55
+' Last Rev. 2026-09-27 18:11
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M01_Importar_LsGes04_GE - ORQUESTADOR del pipeline de importacion LSGES04
@@ -367,12 +367,24 @@ End Sub     ' Rut_Ocultar_Hojas_Proceso   --------------------------------------
 Function Fnc_Es_LsGes04_Valido(Lo_Data As ListObject) As Boolean   '- Valida la estructura del fichero
 '===================================================================================================
 '-  Comprueba que el Excel elegido tiene pinta de LSGES04 ANTES de tocar Prog_BD.
-'-  No valida nombres de cabecera (varian entre consultas del Generador de Informes), sino que
-'-  existan las columnas que el pipeline usa por INDICE (G04_Ref, G04_C_Acad, G04_Matricula, G04_ActivEco).
+'-  Valida que existan las columnas que el pipeline usa por INDICE (G04_Ref, G04_C_Acad,
+'-  G04_Matricula, G04_ActivEco) y que los nombres de cabecera coincidan, fila a fila, con
+'-  Prog_DefCol_G04.Tb_DefCols_G04.DefC_TitColGenInf (solo hasta la ultima fila con dato en esa
+'-  columna: las filas finales de esa tabla son columnas de trabajo, sin cabecera de LSGES04).
+    Dim Lo_DefCol_G04 As ListObject
+    Dim Fila_DefCol As Long
+    Dim Tit_Esperado As String
     Fnc_Es_LsGes04_Valido = False
     If Lo_Data Is Nothing Then Exit Function
     If Lo_Data.DataBodyRange Is Nothing Then Exit Function          '- Sin datos
     If Lo_Data.ListColumns.Count < G04_ActivEco Then Exit Function   '- Faltan columnas: no es un LSGES04
+    Set Lo_DefCol_G04 = Prog_DefCol_G04.ListObjects(1)
+    For Fila_DefCol = 1 To Lo_DefCol_G04.ListRows.Count
+        Tit_Esperado = Trim(CStr(Lo_DefCol_G04.DataBodyRange.Cells(Fila_DefCol, DefC_TitColGenInf).Value))
+        If Tit_Esperado = "" Then Exit For   '- Fin de las columnas con cabecera de LSGES04
+        If Fila_DefCol > Lo_Data.ListColumns.Count Then Exit Function   '- Faltan columnas
+        If Lo_Data.ListColumns(Fila_DefCol).Name <> Tit_Esperado Then Exit Function   '- Cabecera distinta
+    Next Fila_DefCol
     Fnc_Es_LsGes04_Valido = True
 End Function    ' Fnc_Es_LsGes04_Valido   ----------------------------------------------------------
 '===================================================================================================
