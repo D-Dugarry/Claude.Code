@@ -1,5 +1,5 @@
 Attribute VB_Name = "M32_List_Anul_y_Devoluciones"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-27 08:55
 '2026-01-31
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -14,7 +14,7 @@ Sub RuT_Inf_Anulaciones_y_Devoluciones()
 
     Dim RngVisible  As Range
     Dim Lo_BD           As ListObject:      Set Lo_BD = Prog_BD.ListObjects(1)
-        Prog_BD.Unprotect:     Lo_BD.ShowTotals = False
+        Prog_BD.Unprotect
         Call Rut_Lo_WrkSht_Preparar(Prog_BD)
     Dim Lo_BD_Filtrada  As ListObject
                 

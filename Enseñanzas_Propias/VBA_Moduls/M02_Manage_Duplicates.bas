@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
-' Last Rev. 2026-09-27 00:46
+' Last Rev. 2026-09-27 08:55
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
@@ -96,8 +96,6 @@ Debug.Print ">>> RuT_Duplicates_Search"
     
     Call Rut_Lo_WrkSht_Preparar(Sh_Data)
     Call Rut_Lo_WrkSht_Preparar(Sh_Duplic)
-    Lo_Data.ShowTotals = False
-    Lo_Duplic.ShowTotals = False
     
     Application.DisplayAlerts = False
 

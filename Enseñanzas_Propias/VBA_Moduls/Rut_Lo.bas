@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-23 01:45
+' Last Rev. 2026-09-27 08:51
 Option Explicit
 
 
@@ -86,6 +86,7 @@ Sub Rut_Lo_WrkSht_Preparar(WrkSht As Worksheet)
         .Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
         .Rows.EntireRow.Hidden = False              ' Mostrar todas las Filas
         Call Rut_Lo_Filtros_Quitar(.ListObjects(1))
+        .ListObjects(1).ShowTotals = False          ' Ocultar Fila de Totales
     End With
 End Sub
 ' --------------------------------------------------------------------------------------------------

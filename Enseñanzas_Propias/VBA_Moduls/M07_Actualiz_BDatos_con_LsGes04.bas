@@ -1,5 +1,5 @@
 Attribute VB_Name = "M07_Actualiz_BDatos_con_LsGes04"
-' Last Rev. 2026-09-27 00:29
+' Last Rev. 2026-09-27 08:55
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M07_Actualiz_BDatos_con_LsGes04 - Fusion de la importacion con la base de datos
@@ -118,8 +118,6 @@ Debug.Print ">>> RuT_Actualizar_BDatos_con_LsGes04"
         "Las col. 1..39 de G04_* y BD_* no coinciden (revisar M00_Ini_Var_APP)."
     Prog_BD.Unprotect
     Prog_LsGes04.Unprotect
-    Lo_BD.ShowTotals = False
-    Lo_Ges04.ShowTotals = False
     
 Call Rut_Off_Functions
     ' =============  Preparar Tabla de TitPH ==================

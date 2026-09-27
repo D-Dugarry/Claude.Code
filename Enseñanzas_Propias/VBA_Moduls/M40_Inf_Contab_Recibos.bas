@@ -1,5 +1,5 @@
 Attribute VB_Name = "M40_Inf_Contab_Recibos"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-27 08:55
 Option Explicit
 
 '- Genera la Tabla Informe_Contable_de_Recibos
@@ -20,7 +20,7 @@ Sub Rut_Generar_Tabla_Inf_Contable_de_Recibos()
     Dim rowfind     As Variant
     Dim RngVisible  As Range
     Dim Lo_BD           As ListObject:      Set Lo_BD = Prog_BD.ListObjects(1)
-        Prog_BD.Unprotect:     Lo_BD.ShowTotals = False
+        Prog_BD.Unprotect
         Call Rut_Lo_WrkSht_Preparar(Prog_BD)
     Dim Lo_BD_Filtrada  As ListObject
                 

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M05_Asign_Tipo_Recibo"
-' Last Rev. 2026-09-23 18:56
+' Last Rev. 2026-09-27 08:55
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M05_Asign_Tipo_Recibo - Tipificacion contable del recibo por ejercicio
@@ -80,7 +80,6 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     Dim Lo_G04          As ListObject:      Set Lo_G04 = Prog_LsGes04.ListObjects(1)
     Application.ScreenUpdating = False
     Prog_LsGes04.Select
-    Lo_G04.ShowTotals = False
     Call Rut_Lo_WrkSht_Preparar(Prog_LsGes04)
     
         '- Visualizo el progreso -------------------------------------------------------------------

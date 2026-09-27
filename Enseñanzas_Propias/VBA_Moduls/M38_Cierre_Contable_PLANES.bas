@@ -1,5 +1,5 @@
 Attribute VB_Name = "M38_Cierre_Contable_PLANES"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-09-27 08:55
 '2026-01-27
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -35,7 +35,7 @@ Sub Rut_Cierre_Contable_AñoCont()
     
     Dim RngVisible  As Range
     Dim Lo_BD           As ListObject:      Set Lo_BD = Prog_BD.ListObjects(1)
-        Prog_BD.Unprotect:     Lo_BD.ShowTotals = False
+        Prog_BD.Unprotect
         Call Rut_Lo_WrkSht_Preparar(Prog_BD)
     Dim Lo_BD_Filtrada  As ListObject
                 

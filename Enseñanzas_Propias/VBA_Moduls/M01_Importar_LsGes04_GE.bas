@@ -1,5 +1,5 @@
 Attribute VB_Name = "M01_Importar_LsGes04_GE"
-' Last Rev. 2026-09-27 00:05
+' Last Rev. 2026-09-27 08:55
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M01_Importar_LsGes04_GE - ORQUESTADOR del pipeline de importacion LSGES04
@@ -245,7 +245,6 @@ Call Rut_Off_Functions
             Prog_BD_Dupl.Visible = xlSheetVisible
             Prog_BD_Dupl.Unprotect
             Call Rut_Lo_WrkSht_Preparar(Prog_BD_Dupl)
-            Lo_BD_Dupl.ShowTotals = False
     Call RuT_Duplicates_Search(Lo_Ges04, Lo_Ges04_DefCol, Lo_BD_Dupl, G04_Ref, _
                                G04_Incidencias, G04_H_Incidencias, BD_Incidencias, BD_H_Incidencias)
         Set Lo_BD_Dupl = Nothing
