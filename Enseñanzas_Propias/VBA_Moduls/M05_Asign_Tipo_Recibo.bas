@@ -1,5 +1,5 @@
 Attribute VB_Name = "M05_Asign_Tipo_Recibo"
-' Last Rev. 2026-09-27 08:55
+' Last Rev. 2026-09-27 23:42
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M05_Asign_Tipo_Recibo - Tipificacion contable del recibo por ejercicio
@@ -100,7 +100,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, G04_FEmi, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Incidencias).SpecialCells(xlCellTypeVisible).Cells.Value = "_ERR_Date_"
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_ERR_Date_"
@@ -111,7 +111,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .AutoFilter.ShowAllData            ' Elimina los filtros
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Emitido")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
             .DataBodyRange.Columns(G04_Flag_Emitido).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
@@ -122,7 +122,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         '-Filtra Recibos EjeAnt --------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_EjeAnt")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
             .DataBodyRange.Columns(G04_Flag_EjeAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
@@ -133,7 +133,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     
         '-Filtra Recibos Añejos --------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Añeja")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
             .DataBodyRange.Columns(G04_Flag_Añejos).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
@@ -144,7 +144,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     
         '-Filtra Recibos Aplazado ------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aplazado")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
             .DataBodyRange.Columns(G04_Flag_Aplazado).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
@@ -155,7 +155,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
     
         '-Filtra Recibos ADxAplz -------------------------------------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ADxAplz")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
             .DataBodyRange.Columns(G04_Flag_ADxAplz).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
@@ -183,7 +183,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, G04_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=G04_ImpRec, Criteria1:="<0"
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Devol_"
         End If
@@ -195,7 +195,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AutoFilter Field:=G04_ACont_Cob, Criteria1:="<" & APP_AñoCont
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_AñoCont'" & Right(APP_AñoCont - 1, 2) & "_"
         End If
@@ -207,7 +207,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         '-------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         .Range.AutoFilter Field:=G04_ImpAdm, Criteria1:="<0"
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Ajust_Matríc_"
         End If
@@ -228,7 +228,7 @@ Debug.Print ">>> RuT_Determinar_Tipo_Recibo"
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, G04_Anul, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Anul")
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, G04_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(G04_Incidencias).SpecialCells(xlCellTypeVisible).Cells.Value = "_Reg_Anul_"
         End If

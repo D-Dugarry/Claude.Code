@@ -1,5 +1,5 @@
 Attribute VB_Name = "M04_Asign_Cnpto_Eco_y_Tip_Curso"
-' Last Rev. 2026-09-23 18:56
+' Last Rev. 2026-09-27 23:42
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M04_Asign_Cnpto_Eco_y_Tip_Curso - Concepto economico y tipo de ensenanza
@@ -114,7 +114,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos Cod_Activ = 80 - Pruebas de aptitud para acceso a la Universidad ------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AutoFilter Field:=Col_ActivEco, Criteria1:=80
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1315.00"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "PruebasAccesoUni"
@@ -125,7 +125,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos - CFC - Cursos de Formación Contínua ----------------------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_CFC")
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.03"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "CFC"
@@ -136,7 +136,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos - CFC-TUP - Cursos de Formación Contínua (TUP) ------------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TUP")
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1312.02"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "CFC_UPUA"
@@ -147,7 +147,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos - AFC - Actividades de Formación Complementaria -----------------------
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_AFC")
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.03"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "AFC"
@@ -158,7 +158,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos - TNCT-M013 - Cursos NO Contabilizables como Títulos Propios Universidad (M013)
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_M013")
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.03"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "TNCT_M013"
@@ -169,7 +169,7 @@ Debug.Print ">>> RuT_Determinar_Concepto_Eco_y_Tipo_Curso"
             '-Filtra Recibos - TNCT-PNB1 - Cursos NO Contabilizables como Títulos Propios Universidad (PNB1)
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_PNB1")
-            rowfind = .Range.Columns(Col_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA Col_Ref
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, Col_Ref)
             If rowfind > 0 Then
                 .DataBodyRange.Columns(Col_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1303.01"
                 .DataBodyRange.Columns(Col_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "TNCT_PNB1"

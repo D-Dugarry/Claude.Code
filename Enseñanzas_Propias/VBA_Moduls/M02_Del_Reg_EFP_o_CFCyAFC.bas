@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Del_Reg_EFP_o_CFCyAFC"
-' Last Rev. 2026-09-27 21:30
+' Last Rev. 2026-09-27 23:42
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Del_Reg_EFP_o_CFCyAFC - Separar EFP de CFCyAFC en la importacion
@@ -94,7 +94,7 @@ Debug.Print ">>> Rut_Borrar_Rec_EFP_o_CFCyAFC"
 
         '-Filtra Recibos - EFP - Estudios de Formación Permanente: Máster, Especialista, Experto. --
         .Range.AdvancedFilter xlFilterInPlace, Rg_CriT_EFP
-        rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, G04_Ref)
         If rowfind > 0 Then     '- hay rec. de EFP
             If TipoCurso = "EFP" Then
                 .ListColumns.Add
@@ -102,7 +102,7 @@ Debug.Print ">>> Rut_Borrar_Rec_EFP_o_CFCyAFC"
                 '- Borra los que NO son "Tít. Propios" EFP ----
                 Call Rut_Lo_Filtros_Quitar(Lo_Data)
                 .Range.AutoFilter Field:=.ListColumns.Count, Criteria1:="<>EFP"     '- Selecciono los que NO mson EFP
-                rowfind = .Range.Columns(G04_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1  '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA G04_Ref
+                rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, G04_Ref)
                 If rowfind > 0 Then
                     .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                         TxtMsg1 = "Borrados Recibos de estudios NO EFP_" & Curso_Acad

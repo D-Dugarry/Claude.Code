@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-27 08:51
+' Last Rev. 2026-09-27 23:42
 Option Explicit
 
 
@@ -126,6 +126,37 @@ End Sub
 
 
 '###################################################################################################
+' Cuenta las filas VISIBLES del cuerpo de una tabla, leyendo por la columna indicada.
+'   Sustituye al patron antiguo, repetido en 45 sitios del pipeline:
+'       rowfind = Lo.Range.Columns(Col).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+'   que contaba sobre .Range (CON la cabecera) y compensaba con un -1 a mano. Ese -1 solo era
+'   correcto con ShowTotals = False; con la fila de totales visible contaba 1 de mas.
+'   Contando sobre DataBodyRange desaparecen las tres dependencias ocultas del patron viejo:
+'     1) el -1 magico por la cabecera,
+'     2) el estado de ShowTotals,
+'     3) que la columna leida estuviera VISIBLE (el comentario "OJO, TIENE QUE ESTAR VISIBLE LA
+'        COLUMNA..." que acompanaba a cada linea): si esta oculta, SpecialCells da error 1004;
+'        aqui se captura y devuelve 0 en vez de propagar un conteo erroneo.
+'   Devuelve 0 (sin error) si la tabla esta vacia, si la columna esta fuera de rango o si no
+'   hay ninguna fila visible.
+'   Columna va ByVal a proposito: todas las llamadas pasan constantes Integer (G04_*, BD_*) y
+'   un parametro ByRef As Long no admite un Integer (error de compilacion). ByVal lo promociona.
+Function Fnc_Lo_Contar_Visibles(Lo_Data As ListObject, ByVal Columna As Long) As Long
+' --------------------------------------------------------------------------------------------------
+    Dim Rg_Visibles     As Range
+    Fnc_Lo_Contar_Visibles = 0
+    If Lo_Data Is Nothing Then Exit Function
+    If Lo_Data.DataBodyRange Is Nothing Then Exit Function      '- Tabla sin cuerpo
+    If Columna < 1 Or Columna > Lo_Data.ListColumns.Count Then Exit Function
+    On Error Resume Next        '- Sin filas visibles (o columna oculta) -> SpecialCells da error 1004
+    Set Rg_Visibles = Lo_Data.DataBodyRange.Columns(Columna).SpecialCells(xlCellTypeVisible)
+    On Error GoTo 0
+    If Not Rg_Visibles Is Nothing Then Fnc_Lo_Contar_Visibles = Rg_Visibles.Cells.Count
+End Function
+' --------------------------------------------------------------------------------------------------
+
+
+'###################################################################################################
     ' Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, ColSearch1, Criterio1)    ¡¡¡ QUITA FILTROS SI HAY  !!!
 Sub Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data As ListObject, _
                                          ColSearch1 As Integer, _
@@ -148,7 +179,7 @@ Sub Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data As ListObject, _
             .Range.AutoFilter Field:=ColSearch2, Criteria1:=Criterio2, Operator:=xlAnd
         End If
         .ShowTotals = False
-        RowsFind = .Range.Columns(ColSearch1).SpecialCells(xlCellTypeVisible).Cells.Count - 1 '2 + .ShowTotals  '- Si tiene TotalsRowRange .ShowTotals = -1 (True = -1, False = 0)
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_Data, ColSearch1)
         If RowsFind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete          '- Borrar Filas visibles
     End With
     Call Rut_Lo_Filtros_Quitar(Lo_Data)                '- Quitar filtros

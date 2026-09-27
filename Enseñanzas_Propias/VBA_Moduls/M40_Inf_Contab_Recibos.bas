@@ -1,5 +1,5 @@
 Attribute VB_Name = "M40_Inf_Contab_Recibos"
-' Last Rev. 2026-09-27 08:55
+' Last Rev. 2026-09-27 23:42
 Option Explicit
 
 '- Genera la Tabla Informe_Contable_de_Recibos
@@ -59,7 +59,7 @@ Sub Rut_Generar_Tabla_Inf_Contable_de_Recibos()
         Call Rut_Lo_Filtros_Quitar(Lo_BD_Filtrada)
         With Lo_BD_Filtrada
         .Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="=EjeAnt"
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD_Filtrada, BD_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
         End If
@@ -69,7 +69,7 @@ Sub Rut_Generar_Tabla_Inf_Contable_de_Recibos()
         Call Rut_Lo_Filtros_Quitar(Lo_BD_Filtrada)
         With Lo_BD_Filtrada
         .Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="=ADxAplz"
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD_Filtrada, BD_Ref)
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
         End If

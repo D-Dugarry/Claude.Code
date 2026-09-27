@@ -1,5 +1,5 @@
 Attribute VB_Name = "M02_Manage_Duplicates"
-' Last Rev. 2026-09-27 08:55
+' Last Rev. 2026-09-27 23:42
 ' >>> DOC-MOD (generado) >>>
 ' =================================================================================================
 ' M02_Manage_Duplicates - Deteccion y gestion de referencias duplicadas
@@ -129,7 +129,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
             Call Rut_Lo_Sort(Lo_Data, ColIncidencia, xlAscending, True)
             For Cont = 2 To MaxNumRepe
                 .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=Repe" & Cont & "*"    '- Todos los que se han quedados sin incidencias los borramos
-                rowfind = .Range.Columns(ColIncidencia).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+                rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, ColIncidencia)
                 If rowfind > 0 Then
                     RepsFind = RepsFind + rowfind
                     '- Visualizo el progreso --------
@@ -155,7 +155,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
     With Lo_Data
         '- Borrar Registros Repes en Lo_Data excepto el último --- OJO, PORQUE NO TENEMOS CRITERIO PARA SABER CUAL ES MEJOR QUEDARSE.
         .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=Rp*"
-        rowfind = .Range.Columns(ColIncidencia).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, ColIncidencia)
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
             '- Visualizo el progreso --------
@@ -171,7 +171,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
         '- Copiar los Registros Repes Finalistas de Lo_Data (sólo los últimos de cada repetición) en Lo_Duplic
         Call Rut_Lo_Sort(Lo_Data, ColIncidencia, xlAscending, True)
         .Range.AutoFilter Field:=ColIncidencia, Criteria1:="=Repe*"
-        rowfind = .Range.Columns(ColIncidencia).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, ColIncidencia)
         If rowfind > 0 Then
             Call Rut_Lo_G04_Filtered_Copy_a_BD(Lo_Data, Lo_Duplic)  '- Fase 4: con mapeo de col., no por posicion
             '- Visualizo el progreso --------
@@ -197,7 +197,7 @@ Debug.Print ">>> RuT_Duplicates_Search"
             Next Celda
             Call Rut_Lo_Sort(Lo_Duplic, Col_H_Incid_Dupl, xlAscending, True)
             .Range.AutoFilter Field:=Col_H_Incid_Dupl, Criteria1:="=(en 0 Cols)"      '- Todos los que se han quedados sin incidencias los borramos
-            rowfind = .Range.Columns(Col_H_Incid_Dupl).SpecialCells(xlCellTypeVisible).Cells.Count - 1
+            rowfind = Fnc_Lo_Contar_Visibles(Lo_Duplic, Col_H_Incid_Dupl)
             If rowfind > 0 Then .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                             TxtMsg1 = "Del Recibos Repes_Cambios(en 0 Cols):"
