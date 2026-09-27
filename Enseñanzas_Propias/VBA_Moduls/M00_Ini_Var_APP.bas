@@ -29,7 +29,7 @@ Attribute VB_Name = "M00_Ini_Var_APP"
 '  InfRec_*    Informe Contable de Recibos (Sht__Inf_Contab_Rec).
 '  CoefVRI_*   Tabla de coeficientes de retencion del VRI (Prog_Coef_Ret_VRI).
 '  Rsm_*       Resumen de Planes por Curso Academico.
-'  Task_*      Tabla de tareas del menu auxiliar (Prog__MnAux / Tb_Tareas).
+'  Task_*      Tabla de tareas del menu auxiliar (Prog__Menú_Aux / Tb_Tareas).
 '
 '  Variables Public: Lo_Tareas, ActivForm, Index_Tarea, Index_Usuario,
 '  H_Inicio (marca de tiempo de proceso), Concepto, Coef_VRI,
