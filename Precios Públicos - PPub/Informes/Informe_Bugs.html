@@ -77,6 +77,21 @@ article.finding{background:var(--panel);border:1px solid var(--border);border-ra
 .impact strong{color:var(--accent);}
 footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:50px;}
 a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
+
+/* --- Marcas de estado ---------------------------------------------------- */
+:root{ --fix:#15803d; --fix-bg:#e8f7ee; --pend:#b45309; --pend-bg:#fdf3e3; --park:#6b7280; --park-bg:#eef0f3; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --fix:#4ade80; --fix-bg:#112a1b; --pend:#fbbf24; --pend-bg:#2e2310; --park:#aab1bd; --park-bg:#262a31; } }
+:root[data-theme="dark"]{ --fix:#4ade80; --fix-bg:#112a1b; --pend:#fbbf24; --pend-bg:#2e2310; --park:#aab1bd; --park-bg:#262a31; }
+.st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.02em;border:1px solid currentColor;white-space:nowrap;}
+.st.fixed{color:var(--fix);background:var(--fix-bg);} .st.pend{color:var(--pend);background:var(--pend-bg);} .st.park{color:var(--park);background:var(--park-bg);}
+.st.sm{font-size:.66rem;padding:1px 7px;margin-right:6px;vertical-align:1px;}
+.estado{border-radius:8px;padding:9px 14px;font-size:.88rem;margin:4px 0 12px;border-left:4px solid;}
+.estado.fixed{background:var(--fix-bg);border-color:var(--fix);} .estado.pend{background:var(--pend-bg);border-color:var(--pend);} .estado.park{background:var(--park-bg);border-color:var(--park);}
+.estado b{margin-right:4px;}
+article.finding.fixed{opacity:.93;}
+.stats.estado-stats .stat.fixed .n{color:var(--fix);} .stats.estado-stats .stat.pend .n{color:var(--pend);} .stats.estado-stats .stat.park .n{color:var(--park);}
+.leyenda{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:.85rem;color:var(--muted);align-items:center;}
+nav.toc li.sep{list-style:none;margin-left:-20px;font-weight:600;margin-top:4px;}
 </style>
 </head>
 <body>
@@ -84,13 +99,14 @@ a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
 
 <header class="top">
 <h1>Informe de Bugs — PPub_BDatos_2026.xlsm</h1>
-<p class="sub">Precios Públicos · Universidad de Alicante — Auditoría del código VBA exportado en <code>VBA_Moduls\</code> (excluye RibbonX, que tiene informe propio). Generado el 25/07/2026.</p>
+<p class="sub">Precios Públicos · Universidad de Alicante — Auditoría del código VBA exportado en <code>VBA_Moduls\</code> (excluye RibbonX, que tiene informe propio). Generado el 25/07/2026 · <strong>Estado actualizado el 30/09/2026</strong>.</p>
 <div class="stats">
   <div class="stat crit"><div class="n">7</div><div class="l">Críticos</div></div>
   <div class="stat alto"><div class="n">8</div><div class="l">Altos</div></div>
   <div class="stat medio"><div class="n">15</div><div class="l">Medios</div></div>
   <div class="stat bajo"><div class="n">8</div><div class="l">Bajos</div></div>
 </div>
+<div class="stats estado-stats"><div class="stat fixed"><div class="n">35</div><div class="l">Arreglados</div></div><div class="stat pend"><div class="n">1</div><div class="l">Pendientes</div></div><div class="stat park"><div class="n">2</div><div class="l">Aparcados</div></div></div>
 </header>
 
 <div class="notebox">
@@ -99,57 +115,59 @@ a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
 
 <nav class="toc">
 <h2>Índice</h2>
+<div class="leyenda"><span class="st fixed">✔ Arreglado</span> <span class="st pend">● Pendiente</span> <span class="st park">⏸ Aparcado para más adelante</span></div>
 <ul>
-<li><a href="#bloqueA">Bloque A — Arranque y pipeline LSGES04</a></li>
-<li><a href="#a1">A1 · Límite de bucle hardcodeado a 1000 (pérdida de datos)</a></li>
-<li><a href="#a2">A2 · Módulo que no compila (M_193)</a></li>
-<li><a href="#a3">A3 · EnableEvents no se fuerza en Rut_Off_Functions</a></li>
-<li><a href="#a4">A4 · Índices numéricos de CommandBars frágiles</a></li>
-<li><a href="#a5">A5 · Reintento infinito sin límite</a></li>
-<li><a href="#a6">A6 · Conversión de fecha frágil ante configuración regional</a></li>
-<li><a href="#a7">A7 · Merge-join sin manejar tabla vacía</a></li>
-<li><a href="#a8">A8 · Contraseña en texto plano en el código fuente</a></li>
-<li><a href="#a9">A9 · Subs "ByHand" llaman a rutina inexistente</a></li>
-<li><a href="#a10">A10 · Posible desajuste texto/número al filtrar Concepto</a></li>
-<li><a href="#a11">A11 · Números de columna mágicos fuera de esquema</a></li>
-<li><a href="#a12">A12 · Nombre de hoja hardcodeado sin verificar</a></li>
-<li><a href="#bloqueB">Bloque B — LSace06 / AE4 / JI's / Cierre contable</a></li>
-<li><a href="#b1">B1 · Confusión curso Anterior/Posterior en 3 módulos</a></li>
-<li><a href="#b2">B2 · Filtro de Anulados "se escapó" en el Cierre Contable</a></li>
-<li><a href="#b3">B3 · Fallthrough entre Ciclo_1 y Ciclo_2</a></li>
-<li><a href="#b4">B4 · Protección de hoja equivocada + filtro nunca retirado</a></li>
-<li><a href="#b5">B5 · Lógica invertida al respetar Imp. Admin. manual</a></li>
-<li><a href="#b6">B6 · Merge-join trunca silenciosamente (Exit For)</a></li>
-<li><a href="#b7">B7 · ScreenUpdating/DisplayAlerts nunca se restauran</a></li>
-<li><a href="#b8">B8 · Sin manejo de errores en bucle de 176.000 filas</a></li>
-<li><a href="#b9">B9 · Acumulador suma la variable equivocada</a></li>
-<li><a href="#b10">B10 · Texto de progreso con variables cruzadas</a></li>
-<li><a href="#b11">B11 · Borrado sin restringir al curso correcto</a></li>
-<li><a href="#b12">B12 · RetenVRI As Integer trunca decimales</a></li>
-<li><a href="#b13">B13 · Parámetro TipoEP nunca usado</a></li>
-<li><a href="#bloqueC">Bloque C — Librería transversal Rut_*/Prog_*/Sht__*</a></li>
-<li><a href="#c1">C1 · Typo LoTb (variable no declarada)</a></li>
-<li><a href="#c2">C2 · Subs de autotest rotas ("ByHand")</a></li>
-<li><a href="#c3">C3 · Exportar cualquier hoja puede borrar Sht__BD</a></li>
-<li><a href="#c4">C4 · Sin manejo de errores al abrir libros externos</a></li>
-<li><a href="#c5">C5 · Preparación de hoja origen inconsistente entre duplicados</a></li>
-<li><a href="#c6">C6 · Select sin cualificar en LiberarEspacio</a></li>
-<li><a href="#c7">C7 · Workbook_Open muerto en módulo estándar</a></li>
-<li><a href="#c8">C8 · Hoja Prog_WB_List inexistente</a></li>
-<li><a href="#c9">C9 · Rut_Filtro_Avanzado_VBA confirmado roto</a></li>
-<li><a href="#c10">C10 · Subs ajenas al proyecto pegadas sin adaptar</a></li>
-<li><a href="#c11">C11 · Debug.Print con nombre de hoja copiado (12 ficheros)</a></li>
-<li><a href="#c12">C12 · Sht__Inf_Inf_Rsm con lógica de negocio ajena</a></li>
-<li><a href="#c13">C13 · Módulo1.bas no tan residual como parece</a></li>
+<li class="sep"><a href="#bloqueA">Bloque A — Arranque y pipeline LSGES04</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a1">A1 · Límite de bucle hardcodeado a 1000 (pérdida de datos)</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a2">A2 · Módulo que no compila (M_193)</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a3">A3 · EnableEvents no se fuerza en Rut_Off_Functions</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a4">A4 · Índices numéricos de CommandBars frágiles</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a5">A5 · Reintento infinito sin límite</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a6">A6 · Conversión de fecha frágil ante configuración regional</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a7">A7 · Merge-join sin manejar tabla vacía</a></li>
+<li><span class="st park sm">⏸ Aparcado para más adelante</span><a href="#a8">A8 · Contraseña en texto plano en el código fuente</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a9">A9 · Subs "ByHand" llaman a rutina inexistente</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a10">A10 · Posible desajuste texto/número al filtrar Concepto</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a11">A11 · Números de columna mágicos fuera de esquema</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#a12">A12 · Nombre de hoja hardcodeado sin verificar</a></li>
+<li class="sep"><a href="#bloqueB">Bloque B — LSace06 / AE4 / JI's / Cierre contable</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b1">B1 · Confusión curso Anterior/Posterior en 3 módulos</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b2">B2 · Filtro de Anulados "se escapó" en el Cierre Contable</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b3">B3 · Fallthrough entre Ciclo_1 y Ciclo_2</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b4">B4 · Protección de hoja equivocada + filtro nunca retirado</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b5">B5 · Lógica invertida al respetar Imp. Admin. manual</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b6">B6 · Merge-join trunca silenciosamente (Exit For)</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b7">B7 · ScreenUpdating/DisplayAlerts nunca se restauran</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b8">B8 · Sin manejo de errores en bucle de 176.000 filas</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b9">B9 · Acumulador suma la variable equivocada</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b10">B10 · Texto de progreso con variables cruzadas</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b11">B11 · Borrado sin restringir al curso correcto</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#b12">B12 · RetenVRI As Integer trunca decimales</a></li>
+<li><span class="st pend sm">● Pendiente</span><a href="#b13">B13 · Parámetro TipoEP nunca usado</a></li>
+<li class="sep"><a href="#bloqueC">Bloque C — Librería transversal Rut_*/Prog_*/Sht__*</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c1">C1 · Typo LoTb (variable no declarada)</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c2">C2 · Subs de autotest rotas ("ByHand")</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c3">C3 · Exportar cualquier hoja puede borrar Sht__BD</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c4">C4 · Sin manejo de errores al abrir libros externos</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c5">C5 · Preparación de hoja origen inconsistente entre duplicados</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c6">C6 · Select sin cualificar en LiberarEspacio</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c7">C7 · Workbook_Open muerto en módulo estándar</a></li>
+<li><span class="st park sm">⏸ Aparcado para más adelante</span><a href="#c8">C8 · Hoja Prog_WB_List inexistente</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c9">C9 · Rut_Filtro_Avanzado_VBA confirmado roto</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c10">C10 · Subs ajenas al proyecto pegadas sin adaptar</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c11">C11 · Debug.Print con nombre de hoja copiado (12 ficheros)</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c12">C12 · Sht__Inf_Inf_Rsm con lógica de negocio ajena</a></li>
+<li><span class="st fixed sm">✔ Arreglado</span><a href="#c13">C13 · Módulo1.bas no tan residual como parece</a></li>
 </ul>
 </nav>
 
 <section class="block" id="bloqueA">
 <h2 class="block-title">Bloque A — Arranque y pipeline LSGES04 <span style="font-size:.6em;color:var(--muted);font-weight:400;">(ThisWorkbook, M_000, M_90, M_110–M_215)</span></h2>
 
-<article class="finding" id="a1">
-<div class="finding-head"><span class="badge crit">Crítico</span><h3>A1 · Límite de bucle hardcodeado a 1000 filas — pérdida silenciosa de datos</h3></div>
+<article class="finding fixed" id="a1">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico</span><h3>A1 · Límite de bucle hardcodeado a 1000 filas — pérdida silenciosa de datos</h3></div>
 <span class="filepath">VBA_Moduls/M_195_Add_UXXIdata_in_BDatos.bas — línea 83</span>
+<p class="estado fixed"><b>Arreglado:</b> No hizo falta cambio: el bucle ya usaba <code>TF_BDAnt</code> en el código real (el hallazgo era falso).</p>
 <p class="desc">El bucle que traslada datos contables UXXI de <code>Sht__BD_Ant</code> a <code>Sht__BD</code> usa un literal <code>1000</code> en vez del bound real <code>TF_BDant</code>, que está calculado dos líneas antes y quedó comentado. Si el curso anterior tiene más de 1000 recibos —muy probable en una universidad—, todo lo que va después de la fila 1000 nunca se copia, sin ningún aviso.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>For F_BDant = 1 To 1000 'TF_BDAnt</pre></div>
@@ -158,9 +176,10 @@ a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
 <p class="impact"><strong>Impacto:</strong> pérdida silenciosa de datos contables (coeficiente VRI/JIs/AD) en un proceso anual cuyo resultado alimenta directamente los Justificantes de Ingreso.</p>
 </article>
 
-<article class="finding" id="a2">
-<div class="finding-head"><span class="badge crit">Crítico</span><h3>A2 · Módulo que no compila: declaraciones duplicadas y código inalcanzable</h3></div>
+<article class="finding fixed" id="a2">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico</span><h3>A2 · Módulo que no compila: declaraciones duplicadas y código inalcanzable</h3></div>
 <span class="filepath">VBA_Moduls/M_193_Importar_Datos_Wb_mes_Ant.bas — líneas 28-108</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>M_193_Importar_Datos_Wb_mes_Ant.bas</code> eliminado entero, también del <code>.xlsm</code>.</p>
 <p class="desc">La Sub <code>Rut_Import_Wb_Actualizar_LoBdatos_con_Ant</code> redeclara con <code>Dim</code> parámetros que ya recibe (<code>Lo_BD</code>, <code>Lo_BD_Ant</code>), y además una tercera vez más abajo. Con <code>Option Explicit</code> esto es un error de compilación real ("Nombre ambiguo" / declaración duplicada). Tras un <code>Exit Sub</code> hay código muerto con un <code>End If</code> huérfano y llamadas a rutinas (<code>CargarDatosEnDiccionario</code>, <code>ProcesarDatosPrincipales</code>, <code>OrdenarTablas</code>) que no existen en el proyecto.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Import_Wb_Actualizar_LoBdatos_con_Ant(Lo_BD As ListObject, _
@@ -190,9 +209,10 @@ a.backtop{font-size:.78rem;color:var(--accent);text-decoration:none;}
 <p class="impact"><strong>Impacto:</strong> todos los módulos de un proyecto VBA se compilan juntos. Si este módulo llega a recompilarse (Debug → Compilar, o tras cualquier edición que invalide el p-code), <strong>puede bloquear la ejecución de todas las macros del libro</strong>, no solo esta rutina. El propio comentario "Por Mirar 2025-11-21" confirma que está a medio terminar — recomiendo aislarlo o corregirlo cuanto antes.</p>
 </article>
 
-<article class="finding" id="a3">
-<div class="finding-head"><span class="badge alto">Alto</span><h3>A3 · Rut_Off_Functions no fuerza EnableEvents, depende de un switch que puede estar desincronizado</h3></div>
+<article class="finding fixed" id="a3">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><h3>A3 · Rut_Off_Functions no fuerza EnableEvents, depende de un switch que puede estar desincronizado</h3></div>
 <span class="filepath">VBA_Moduls/M_000_Ini_APP.bas — líneas 58-63</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>Rut_Off_Functions</code> fija siempre <code>EnableEvents = False</code> (<code>M_000_Ini_APP.bas:62</code>).</p>
 <p class="desc">La desactivación de <code>Application.EnableEvents</code> está condicionada al valor del switch de hoja <code>SW_Events</code> en vez de fijarse siempre. Si el switch ya vale <code>False</code> por cualquier motivo previo (p. ej. tras el reseteo de variables que provoca un error VBA no controlado, ya documentado como riesgo conocido del proyecto), esta rutina no hace nada y los eventos quedan activos durante bucles masivos de import/depuración.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Off_Functions()
@@ -215,9 +235,10 @@ End Sub</pre></div>
 <p class="impact"><strong>Impacto:</strong> <code>Rut_On_Functions</code> ya hace bien esto (ambas ramas fijan el valor); la asimetría entre ambas es la señal de que aquí falta el mismo cuidado.</p>
 </article>
 
-<article class="finding" id="a4">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>A4 · Índices numéricos de CommandBars, frágiles entre versiones/idiomas de Office</h3></div>
+<article class="finding fixed" id="a4">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>A4 · Índices numéricos de CommandBars, frágiles entre versiones/idiomas de Office</h3></div>
 <span class="filepath">VBA_Moduls/M_000_Ini_APP.bas — líneas 166-193</span>
+<p class="estado fixed"><b>Arreglado:</b> Las barras se referencian por nombre: <code>Array("Cell", "List Range Popup")</code>.</p>
 <p class="desc"><code>Rut_Context_Buttons_Hide</code> referencia barras de menú contextual por índice numérico (<code>38</code>, <code>74</code>), mientras que su gemela <code>Rut_Context_Buttons_Restore</code> usa nombres (<code>"Cell"</code>, <code>"List Range Popup"</code>). El índice no está garantizado estable entre versiones de Office, idiomas de instalación, ni add-ins que registren sus propias barras.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Item_Bar = 38 '- (38)=("Cell") -----------------------------
@@ -236,9 +257,10 @@ Next ib</pre></div>
 <p class="impact"><strong>Impacto:</strong> si en el PC del trabajo o tras una actualización de Office esos índices apuntasen a otra barra, se ocultarían/mostrarían controles del menú equivocado sin ningún error visible.</p>
 </article>
 
-<article class="finding" id="a5">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>A5 · Reintento infinito sin límite en el manejador de error de Form_Running_Rut</h3></div>
+<article class="finding fixed" id="a5">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>A5 · Reintento infinito sin límite en el manejador de error de Form_Running_Rut</h3></div>
 <span class="filepath">VBA_Moduls/M_110_Update_LSGES04_ACont.bas y M_210_Update_LSGES04_C_Acad_Ant.bas</span>
+<p class="estado fixed"><b>Arreglado:</b> Contador de intentos en <code>M_110</code> y <code>M_210</code>, y también en <code>M_310</code>, <code>M_410</code>, <code>M_510</code> y <code>M_520</code>, que el informe no citaba. Las 6 ocurrencias de <code>M___RibbonUI.bas</code> quedan para <em>Informe_RibbonX.html</em>.</p>
 <p class="desc">Si el error <code>-2147417848</code> (Office ocupado) persiste, el <code>Resume</code> reintenta indefinidamente cada 2 segundos sin contador ni vía de salida, dejando la app aparentemente congelada.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>ManejoError:
@@ -261,9 +283,10 @@ Next ib</pre></div>
 </div>
 </article>
 
-<article class="finding" id="a6">
-<div class="finding-head"><span class="badge alto">Alto</span><span class="badge confirm">A confirmar</span><h3>A6 · Conversión de fecha por recorte de cadena, frágil ante configuración regional</h3></div>
+<article class="finding fixed" id="a6">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><span class="badge confirm">A confirmar</span><h3>A6 · Conversión de fecha por recorte de cadena, frágil ante configuración regional</h3></div>
 <span class="filepath">VBA_Moduls/M_111_Del_Null_Reg_G04_ACont.bas — líneas 227 y 251</span>
+<p class="estado fixed"><b>Arreglado:</b> El criterio se construye con <code>Format(CDate(...), "mm\/dd\/yyyy")</code> en <code>M_111</code>.</p>
 <p class="desc">El criterio de filtro se construye recortando con <code>Mid/Left/Right</code> una cadena de fecha que asume siempre formato <code>dd/mm/aaaa</code> con ceros a la izquierda. Si el formato regional de Windows produce <code>d/m/aaaa</code> (por ejemplo, al cambiar de ordenador casa/trabajo, cada uno con su configuración regional), el criterio de filtro queda corrupto.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>.Range.AutoFilter Field:=BD_FCob, _
@@ -276,9 +299,10 @@ FechCierreCriteria = Format(CDate(Prog__APP.Range("APP_FechCierreCont").Value2),
 <p class="impact"><strong>Sospecha a confirmar:</strong> si el formato de la celda <code>APP_FechCierreCont</code> está garantizado siempre con ceros, el bug hoy es solo latente — pero el patrón es frágil y debería corregirse igual, dado que decide qué recibos se borran.</p>
 </article>
 
-<article class="finding" id="a7">
-<div class="finding-head"><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>A7 · Merge-join manual sin manejar la tabla BD vacía</h3></div>
+<article class="finding fixed" id="a7">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>A7 · Merge-join manual sin manejar la tabla BD vacía</h3></div>
 <span class="filepath">VBA_Moduls/M_118_Actualiz_BD_con_BD_Ant24.bas — líneas 56-72 (mismo patrón en M_195 y M_215)</span>
+<p class="estado fixed"><b>Arreglado:</b> Guarda de tabla vacía en <code>M_118</code>, <code>M_195</code> y <code>M_215</code>.</p>
 <p class="desc">Si <code>Sht__BD</code> está vacía al arrancar un nuevo año contable, <code>Lo_BD.DataBodyRange</code> es <code>Nothing</code> y la primera lectura lanza Error 91/1004, interrumpiendo el proceso justo al inicio de campaña sin mensaje claro.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>F_BD = 1
@@ -299,9 +323,10 @@ For F_BDant = 1 To TF_BDant
 <p class="impact"><strong>Sospecha a confirmar:</strong> depende de si en la práctica <code>Sht__BD</code> puede estar vacía al llegar a este punto. El mismo patrón se repite en 3 módulos (M_118, M_195, M_215), lo que aumenta el valor de una guarda centralizada — ver propuesta de reprogramación en el informe de eficiencia.</p>
 </article>
 
-<article class="finding" id="a8">
-<div class="finding-head"><span class="badge alto">Alto — Seguridad</span><h3>A8 · Contraseña de protección de hoja en texto plano en el código fuente</h3></div>
+<article class="finding park" id="a8">
+<div class="finding-head"><span class="st park">⏸ Aparcado para más adelante</span><span class="badge alto">Alto — Seguridad</span><h3>A8 · Contraseña de protección de hoja en texto plano en el código fuente</h3></div>
 <span class="filepath">VBA_Moduls/M_90_Rutinas_Protect_WrkSht.bas — línea 31</span>
+<p class="estado park"><b>Aparcado para más adelante:</b> Por decisión del usuario: la contraseña se deja como está (solo es una precaución).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>protectionPassword = "Comptabilitat2020" ' Cambia esto por la contraseña actual</pre></div>
 <div class="codebox after"><div class="label">Después</div><pre>'- No hardcodear la contraseña real en un fichero que se exporta como texto plano.
@@ -311,9 +336,10 @@ For F_BDant = 1 To TF_BDant
 <p class="impact"><strong>Impacto:</strong> la contraseña queda expuesta en <code>VBA_Moduls\</code>, que puede acabar en git, backups o cualquier copia del proyecto — no solo en el <code>.xlsm</code>. Recomiendo rotarla.</p>
 </article>
 
-<article class="finding" id="a9">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>A9 · Subs "ByHand" de prueba manual llaman a una rutina con nombre/firma inexistente</h3></div>
+<article class="finding fixed" id="a9">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>A9 · Subs "ByHand" de prueba manual llaman a una rutina con nombre/firma inexistente</h3></div>
 <span class="filepath">VBA_Moduls/M_111_Del_Null_Reg_G04_ACont.bas y M_211_Del_Null_Reg_CAcadAnt.bas</span>
+<p class="estado fixed"><b>Arreglado:</b> Los <code>_ByHand</code> llaman a la rutina real: <code>RuT_Remove_Reg_No_Valid</code> (<code>M_111</code>) y <code>RuT_Remove_Null_Reg_CAcad</code> (<code>M_211</code>).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub RuT_Remove_Null_Reg_ByHand()
     ...
@@ -326,9 +352,10 @@ End Sub</pre></div>
 <p class="impact"><strong>Impacto:</strong> son ayudas de prueba manual, no forman parte del flujo automático — pero si no compilan, arriesgan la compilación del proyecto completo igual que A2.</p>
 </article>
 
-<article class="finding" id="a10">
-<div class="finding-head"><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>A10 · Posible desajuste texto/número al filtrar por Concepto con Val()</h3></div>
+<article class="finding fixed" id="a10">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>A10 · Posible desajuste texto/número al filtrar por Concepto con Val()</h3></div>
 <span class="filepath">VBA_Moduls/M_132_Añadir_Núm_JIs_al_Inf.bas:78 y M_133_Añadir_Núm_JIs_a_BDatos.bas:61</span>
+<p class="estado fixed"><b>Arreglado:</b> No hizo falta cambio: comprobado en vivo que <code>TypeName</code> devuelve <code>Double</code>, así que el <code>Val()</code> es correcto.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Concept = "1" &amp; RwJI.Range(InfRec_ConcptEco)         ' p.ej. "1310.00"
 ...
@@ -338,9 +365,10 @@ Lo_BD.Range.AutoFilter Field:=BD_Concepto, Criteria1:="=" &amp; Val(Concept)   '
 <p class="impact"><strong>Sospecha a confirmar:</strong> depende del tipo real almacenado en <code>BD_Concepto</code> (texto vs numérico). Verificable con <code>Debug.Print TypeName(Lo_BD.ListColumns(BD_Concepto).DataBodyRange.Cells(2,1).Value)</code>. Si es texto, hoy la asignación de números de JI falla silenciosamente para esos conceptos.</p>
 </article>
 
-<article class="finding" id="a11">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>A11 · Números de columna mágicos (52–58) fuera del esquema central de constantes</h3></div>
+<article class="finding fixed" id="a11">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>A11 · Números de columna mágicos (52–58) fuera del esquema central de constantes</h3></div>
 <span class="filepath">VBA_Moduls/M_114_Clasif_Recibos.bas — líneas 68-145</span>
+<p class="estado fixed"><b>Arreglado:</b> 7 constantes <code>BD_CriT_*</code> nuevas en <code>M_000_Ini_Var_APP.bas</code>, usadas en <code>M_114</code>.</p>
 <p class="desc">Todo el resto del proyecto referencia columnas por constante <code>Public Const BD_*</code> definida en <code>M_000_Ini_Var_APP.bas</code>, precisamente para poder reordenar columnas sin romper el código. Aquí se usan literales directos que ni siquiera tienen constante asociada.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>.DataBodyRange.Columns(52).Resize(, 56).ClearContents
@@ -357,9 +385,10 @@ Public Const BD_CriT_EjeAnt = 53
 <p class="impact"><strong>Impacto:</strong> si se inserta una columna nueva antes de la 52 en <code>Sht__BD</code>, esta rutina escribe en la columna equivocada sin ningún aviso.</p>
 </article>
 
-<article class="finding" id="a12">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>A12 · Nombre de hoja hardcodeado sin verificar existencia</h3></div>
+<article class="finding fixed" id="a12">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><h3>A12 · Nombre de hoja hardcodeado sin verificar existencia</h3></div>
 <span class="filepath">VBA_Moduls/M_193_Importar_Datos_Wb_mes_Ant.bas — línea 79</span>
+<p class="estado fixed"><b>Arreglado:</b> Queda sin objeto: el módulo <code>M_193</code> se eliminó (ver A2).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Set WsOrigen = wbOrigen.Worksheets("Hoja_BD") ' Ajustar nombre</pre></div>
 <div class="codebox after"><div class="label">Después</div><pre>'- Comprobar existencia antes de asignar, y cerrar wbOrigen en cualquier ruta de error:
@@ -380,9 +409,10 @@ End If</pre></div>
 <section class="block" id="bloqueB">
 <h2 class="block-title">Bloque B — LSace06 / AE4 / Cálculo de JI's / Cierre contable <span style="font-size:.6em;color:var(--muted);font-weight:400;">(M_310–M_602)</span></h2>
 
-<article class="finding" id="b1">
-<div class="finding-head"><span class="badge crit">Crítico</span><h3>B1 · Confusión entre el toggle de usuario y la constante fija de curso académico, en 3 módulos</h3></div>
+<article class="finding fixed" id="b1">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico</span><h3>B1 · Confusión entre el toggle de usuario y la constante fija de curso académico, en 3 módulos</h3></div>
 <span class="filepath">M_310_Update_LSace06_INSS.bas:40, M_410_Update_BD_AE4x4.bas:43, M_602_Cierre_Contable_PLANES.bas:24</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>M_310</code>, <code>M_410</code> y <code>M_602</code> leen <code>APP_C_Acad_Pos</code>.</p>
 <p class="desc"><code>Prog__APP.Range("APP_CursAcad")</code> es un <strong>selector de UI</strong> que el usuario cambia en <code>Form_Menu</code> (Ant/Pos), no un curso fijo. M_310, M_410 y M_602 necesitan Curso Anterior <em>y</em> Posterior simultáneamente, pero los tres leen el toggle en vez de la constante <code>APP_C_Acad_Pos</code> — a diferencia de sus módulos hermanos (M_311, M_314, M_315, M_411, M_413, M_415), que sí lo hacen bien.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>' M_310 línea 40 / M_410 línea 43
@@ -397,9 +427,10 @@ Dim CursoAcad As String: CursoAcad = Prog__APP.Range("APP_C_Acad_Pos")</pre></di
 <p class="impact"><strong>Impacto:</strong> si al ejecutar M_310/M_410/M_602 el selector de <code>Form_Menu</code> está en modo "Curso Anterior" (habitual, porque se usa antes para M_115/M_210), estas rutinas piden/filtran el <strong>mismo curso dos veces</strong> en vez de Ant+Pos — en M_410 pediría el mismo fichero ya importado; en M_602 el Cierre Contable imprimiría el resumen del curso equivocado sin aviso. Recomiendo auditar además con grep todas las apariciones de <code>APP_CursAcad</code> fuera de los módulos donde sí es correcto.</p>
 </article>
 
-<article class="finding" id="b2">
-<div class="finding-head"><span class="badge crit">Crítico</span><h3>B2 · El filtro de recibos Anulados "se escapó" — el propio código lo confiesa</h3></div>
+<article class="finding fixed" id="b2">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico</span><h3>B2 · El filtro de recibos Anulados "se escapó" — el propio código lo confiesa</h3></div>
 <span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — líneas 66-68, 99-102, 134-136, 168-171 (4 ciclos)</span>
+<p class="estado fixed"><b>Arreglado:</b> Filtro <code>BD_Anul &lt;&gt; "S"</code> activo en los 4 ciclos del Cierre Contable.</p>
 <p class="desc">El comentario del propio autor, en español y dentro del código, dice literalmente que el filtro "se debería haber puesto y se escapó". Los 4 ciclos del Cierre Contable suman recibos <strong>anulados</strong> en todos los importes.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Lo_BD.Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" &amp; CursoAcad
@@ -414,9 +445,10 @@ Lo_BD.Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="&lt;&gt;_Devol_", Operato
 <p class="impact"><strong>Impacto financiero directo:</strong> las 4 variantes del Cierre Contable sobrevaloran los importes (Imp_Emis, Imp_Cobr...) al incluir recibos anulados. Aplicar en los 4 ciclos (líneas citadas).</p>
 </article>
 
-<article class="finding" id="b3">
-<div class="finding-head"><span class="badge crit">Crítico</span><h3>B3 · Ciclo_1 sin GoTo Salir — fallthrough que ejecuta también Ciclo_2</h3></div>
+<article class="finding fixed" id="b3">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico</span><h3>B3 · Ciclo_1 sin GoTo Salir — fallthrough que ejecuta también Ciclo_2</h3></div>
 <span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — bloque Select Case opción</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>GoTo Salir</code> añadido al final de <code>Ciclo_1</code>.</p>
 <p class="desc">Ciclo_2, Ciclo_3 y Ciclo_4 sí terminan con <code>GoTo Salir</code>. Solo Ciclo_1 no lo tiene, así que elegir "1 EFP curso anterior" cae de forma continuada dentro de Ciclo_2 y procesa también el curso posterior sin que el usuario lo pida.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Ciclo_1:
@@ -435,9 +467,10 @@ Ciclo_2:
 </div>
 </article>
 
-<article class="finding" id="b4">
-<div class="finding-head"><span class="badge alto">Alto</span><h3>B4 · Protege una hoja equivocada (Prog_BD, clase vacía) y nunca retira el AutoFilter de Sht__BD</h3></div>
+<article class="finding fixed" id="b4">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><h3>B4 · Protege una hoja equivocada (Prog_BD, clase vacía) y nunca retira el AutoFilter de Sht__BD</h3></div>
 <span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — líneas 203-208, 541, 959</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>Sht__BD.Protect</code> + <code>Rut_Lo_Filtros_Quitar</code> a la salida. <code>Prog_BD</code> no existía en el <code>.xlsm</code> (habría impedido compilar): <code>Prog_BD.cls</code> eliminado.</p>
 <p class="desc"><code>Prog_BD.cls</code> es una clase vacía; <code>Prog_BD.Protect</code> no aparece en ningún otro sitio del proyecto — casi con certeza un autocompletado erróneo del editor por <code>Sht__BD</code>. Mientras tanto, el filtro de 3 criterios aplicado sobre <code>Sht__BD</code> en cada ciclo nunca se retira.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Restablecer_Valores:
@@ -459,9 +492,10 @@ End Sub</pre></div>
 <p class="impact"><strong>Impacto:</strong> tras ejecutar el Cierre Contable, la tabla maestra queda desprotegida y filtrada, mostrando solo la fracción de recibos del último ciclo — el usuario ve "desaparecer" la mayoría de los 176.000+ registros y puede editarlos sin protección.</p>
 </article>
 
-<article class="finding" id="b5">
-<div class="finding-head"><span class="badge alto">Alto</span><h3>B5 · Lógica invertida al "respetar" un Importe Administrativo manual — impacto monetario directo</h3></div>
+<article class="finding fixed" id="b5">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><h3>B5 · Lógica invertida al "respetar" un Importe Administrativo manual — impacto monetario directo</h3></div>
 <span class="filepath">VBA_Moduls/M_413_Assign_ImpAdm_AE4x1.bas — líneas 62-71</span>
+<p class="estado fixed"><b>Arreglado:</b> Lógica corregida en <code>M_413</code>: un Imp. Admin. ya existente no se sobreescribe.</p>
 <p class="desc">El comentario dice que hay que "respetar" (preservar) un Imp. Admin. introducido manualmente. El código hace justo lo contrario: si ya existe valor, lo sobreescribe; si está vacío, no asigna nada.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>If RowData.Range(BD_Rec_Imp_Adm) &lt;&gt; "" Then      '- Esto respeta el ImpAdm manual...
@@ -480,9 +514,10 @@ End If</pre></div>
 <p class="impact"><strong>Confirmar con el usuario antes de aplicar:</strong> el nombre de las variables y el comentario apuntan claramente a que la intención original es la que se propone, pero conviene validarlo dado el impacto económico (alimenta M_415→M_510→M_602).</p>
 </article>
 
-<article class="finding" id="b6">
-<div class="finding-head"><span class="badge alto">Alto</span><h3>B6 · El emparejamiento por Referencia trunca silenciosamente al agotar la tabla BD</h3></div>
+<article class="finding fixed" id="b6">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><h3>B6 · El emparejamiento por Referencia trunca silenciosamente al agotar la tabla BD</h3></div>
 <span class="filepath">VBA_Moduls/M_315_Copy_INSS_a_BD.bas — líneas 71-91</span>
+<p class="estado fixed"><b>Arreglado:</b> Sin <code>Exit For</code>. Corregida también la rama <code>Case Is =</code>, que tenía el mismo fallo y el informe no citaba.</p>
 <p class="desc">Cuando <code>F_BD</code> llega a la última fila y hace falta seguir avanzando, el código hace <code>Exit For</code> y abandona <strong>todo</strong> el bucle: el resto de filas de <code>Lo_Bd_INSS</code> se quedan sin marcar, y el contador <code>NotFound</code> queda corto.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Case Is &lt; .Cells(F_BDINSS, LS06_Ref)
@@ -501,9 +536,10 @@ End If</pre></div>
 <p class="impact">Con este cambio, cada comparación siguiente entra en "Is &lt;" y se marca correctamente, sin necesidad de interrumpir el recuento con <code>Exit For</code>.</p>
 </article>
 
-<article class="finding" id="b7">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>B7 · ScreenUpdating/DisplayAlerts nunca se restauran tras Recalcular JI's AE4</h3></div>
+<article class="finding fixed" id="b7">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>B7 · ScreenUpdating/DisplayAlerts nunca se restauran tras Recalcular JI's AE4</h3></div>
 <span class="filepath">VBA_Moduls/M_510_Calcular_JIs_AE4.bas — líneas 33-36 y 198-202</span>
+<p class="estado fixed"><b>Arreglado:</b> Restaura <code>ScreenUpdating</code> y <code>DisplayAlerts</code> antes del <code>MsgBox</code>.</p>
 <p class="desc">La rutina desactiva <code>DisplayAlerts</code>/<code>ScreenUpdating</code> al principio pero no llama a <code>Rut_On_Functions</code> ni los restaura manualmente al final.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>    MsgBox MenAux_Msg
@@ -520,9 +556,10 @@ End Sub</pre></div>
 <p class="impact">Restaurar <code>ScreenUpdating</code> antes del <code>MsgBox</code> (no después) evita el patrón ya conocido de indicador visual congelado mientras el aviso modal está en pantalla.</p>
 </article>
 
-<article class="finding" id="b8">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>B8 · Bucle sobre 176.000+ filas sin ningún manejador de errores</h3></div>
+<article class="finding fixed" id="b8">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>B8 · Bucle sobre 176.000+ filas sin ningún manejador de errores</h3></div>
 <span class="filepath">VBA_Moduls/M_600_Informe_EP_RSm.bas — Rut_Recalcular_Tabla_Inf_RSm</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>On Error GoTo ErrorHandler</code> con restauración de eventos y funciones.</p>
 <p class="desc">La rutina desactiva Calculation/ScreenUpdating/EnableEvents y recorre miles de filas sin ningún <code>On Error</code> en todo el módulo — exactamente el patrón de riesgo ya documentado del proyecto (un error no controlado deja los eventos desactivados y resetea variables globales).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Recalcular_Tabla_Inf_RSm()
@@ -551,9 +588,10 @@ End Sub</pre></div>
 </div>
 </article>
 
-<article class="finding" id="b9">
-<div class="finding-head"><span class="badge medio">Medio-Bajo</span><h3>B9 · Acumulador TImp_RDT suma la variable equivocada</h3></div>
+<article class="finding fixed" id="b9">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio-Bajo</span><h3>B9 · Acumulador TImp_RDT suma la variable equivocada</h3></div>
 <span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — línea 480 (rutina "_Ant")</span>
+<p class="estado fixed"><b>Arreglado:</b> Suma <code>Imp__RDT</code>.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>TImp_RDT = TImp_RDT + Imp_Cobr        ' &lt;- debería ser Imp__RDT</pre></div>
 <div class="codebox after"><div class="label">Después</div><pre>TImp_RDT = TImp_RDT + Imp__RDT</pre></div>
@@ -561,9 +599,10 @@ End Sub</pre></div>
 <p class="impact">La rutina hermana "_Pos" ya lo hace bien — es un desliz de copia/pega aislado. Severidad reducida porque hoy <code>TImp_RDT</code> no se imprime en el resumen final, pero corromperá cualquier uso futuro.</p>
 </article>
 
-<article class="finding" id="b10">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>B10 · Texto de progreso condicionado por una variable distinta de la que muestra</h3></div>
+<article class="finding fixed" id="b10">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><h3>B10 · Texto de progreso condicionado por una variable distinta de la que muestra</h3></div>
 <span class="filepath">VBA_Moduls/M_602_Cierre_Contable_PLANES.bas — líneas 500-505 (rutina "_Ant")</span>
+<p class="estado fixed"><b>Arreglado:</b> Cada <code>IIf</code> evalúa la misma variable que muestra.</p>
 <p class="desc">Cada condición <code>IIf</code> decide mostrar un número de una métrica distinta a la que evalúa. La rutina "_Pos" sí lo hace correctamente.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>IIf(Imp_Cobr &gt; 0, " " &amp; Format(Imp_EmisPos, "#,##0.00"), "  No hay Cobros") &amp; _
@@ -574,9 +613,10 @@ IIf(Imp__ADx &gt; 0, " " &amp; Format(Imp__ADx, "#,##0.00"), " ") &amp; _</pre><
 <p class="impact">No afecta a los datos de la tabla (se escriben antes correctamente) — solo al texto informativo que ve el usuario en pantalla.</p>
 </article>
 
-<article class="finding" id="b11">
-<div class="finding-head"><span class="badge bajo">Bajo</span><span class="badge confirm">A confirmar</span><h3>B11 · Borrado de recibos "cobrados en año anterior" sin restringir al curso correcto</h3></div>
+<article class="finding fixed" id="b11">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><span class="badge confirm">A confirmar</span><h3>B11 · Borrado de recibos "cobrados en año anterior" sin restringir al curso correcto</h3></div>
 <span class="filepath">VBA_Moduls/M_314_Find_Rec_INSS.bas — líneas 91-103</span>
+<p class="estado fixed"><b>Arreglado:</b> El borrado filtra también por curso.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>'- Borrar Recibos de C_Acad_Ant y Cobrados en Año_Cont_Ant -----
 Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" &amp; AñoCont - 1)</pre></div>
@@ -586,9 +626,10 @@ Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" &amp; AñoC
 <p class="impact">El comentario dice "de C_Acad_Ant" pero el filtro no comprueba el curso — podría borrar también recibos de C_Acad_Pos si se diera el caso. A confirmar si ese caso es posible en los datos reales.</p>
 </article>
 
-<article class="finding" id="b12">
-<div class="finding-head"><span class="badge bajo">Bajo</span><span class="badge confirm">A confirmar</span><h3>B12 · RetenVRI declarada As Integer puede truncar retenciones con decimales</h3></div>
+<article class="finding fixed" id="b12">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><span class="badge confirm">A confirmar</span><h3>B12 · RetenVRI declarada As Integer puede truncar retenciones con decimales</h3></div>
 <span class="filepath">VBA_Moduls/M_600_Informe_EP_RSm.bas — líneas 31 y 186</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>RetenVRI As Double</code>.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Dim RetenVRI As Integer</pre></div>
 <div class="codebox after"><div class="label">Después</div><pre>Dim RetenVRI As Double</pre></div>
@@ -596,9 +637,10 @@ Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" &amp; AñoC
 <p class="impact">Solo tiene impacto si alguna retención vigente en <code>Prog_RetVRI</code> tiene decimales (p. ej. 12,5%); a confirmar con los valores reales de esa tabla.</p>
 </article>
 
-<article class="finding" id="b13">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>B13 · Parámetro TipoEP recibido pero nunca usado</h3></div>
+<article class="finding pend" id="b13">
+<div class="finding-head"><span class="st pend">● Pendiente</span><span class="badge bajo">Bajo</span><h3>B13 · Parámetro TipoEP recibido pero nunca usado</h3></div>
 <span class="filepath">VBA_Moduls/M_413_Assign_ImpAdm_AE4x1.bas</span>
+<p class="estado pend"><b>Pendiente:</b> Necesita una decisión de negocio: ¿algún tratamiento de Plan (M013/PNB1/UPUA) debería depender del tipo de Enseñanza Propia? Si no, se elimina el parámetro.</p>
 <p class="desc"><code>TipoEP</code> se recibe pero no se referencia en ningún punto del cuerpo. Los tratamientos especiales de Plan (M013, PNB1, UPUA) se aplican incondicionalmente a todos los tipos de EP. Confirmar con negocio si debería condicionar alguna rama, o eliminar el parámetro si es vestigial.</p>
 </article>
 </section>
@@ -606,9 +648,10 @@ Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" &amp; AñoC
 <section class="block" id="bloqueC">
 <h2 class="block-title">Bloque C — Librería transversal Rut_* / Prog_* / Sht__*</h2>
 
-<article class="finding" id="c1">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>C1 · Typo LoTb: variable no declarada bajo Option Explicit</h3></div>
+<article class="finding fixed" id="c1">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>C1 · Typo LoTb: variable no declarada bajo Option Explicit</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Lo.bas — línea 553 (Rut_Lo_Filtro, código muerto hoy)</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>LoTb</code> corregido a <code>Lo_Tb</code>.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, Columna As Integer, Criterio As String, Optional SW_Clear As Boolean = False)
     If SW_Clear And Not Lo_Tb.AutoFilter Is Nothing Then LoTb.AutoFilter.ShowAllData
@@ -622,9 +665,10 @@ End Sub</pre></div>
 <p class="impact">No se invoca desde ningún otro módulo hoy — pero si el proyecto llega a recompilarse (Debug → Compilar), es un error de compilación que afecta a todo el libro, igual que A2/A9.</p>
 </article>
 
-<article class="finding" id="c2">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>C2 · Tres subs de autotest "ByHand" con referencias rotas</h3></div>
+<article class="finding fixed" id="c2">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>C2 · Tres subs de autotest "ByHand" con referencias rotas</h3></div>
 <span class="filepath">Rut_Lo.bas:149, Rut_Lo_Format.bas:7 y 13</span>
+<p class="estado fixed"><b>Arreglado:</b> Las Subs de autotest rotas (<code>Prog_TitPH</code>...) quedan comentadas.</p>
 <p class="desc">Llaman a funciones con aridad incorrecta o a objetos/Subs que no existen en el proyecto (p. ej. <code>Prog_TitPH</code>, <code>Rut_Format_LoData_LoDefCol</code> — vestigio de otro libro de Títulos Propios pegado sin adaptar).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub Rut_Format_LoData_LoDefCol_ByHand()
@@ -636,9 +680,10 @@ End Sub</pre></div>
 <p class="impact">Ninguna se invoca en producción — el riesgo es, de nuevo, bloquear la compilación del proyecto el día que alguien fuerce un recompilado completo.</p>
 </article>
 
-<article class="finding" id="c3">
-<div class="finding-head"><span class="badge crit">Crítico — trampa latente</span><h3>C3 · Exportar cualquier hoja con "borrar registros" activado borraría en realidad Sht__BD</h3></div>
+<article class="finding fixed" id="c3">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge crit">Crítico — trampa latente</span><h3>C3 · Exportar cualquier hoja con "borrar registros" activado borraría en realidad Sht__BD</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Ws_Export.bas — Rut_Lo_Export_WS_Xlsx, línea 63</span>
+<p class="estado fixed"><b>Arreglado:</b> El borrado actúa sobre <code>WrkSht</code>, no sobre <code>Sht__BD</code>.</p>
 <p class="desc">El mensaje de confirmación pregunta por los registros de <code>WrkSht</code> (la hoja que se acaba de exportar), pero el borrado real siempre actúa sobre <code>Sht__BD</code> —la tabla maestra de recibos—, sea cual sea la hoja exportada. Su gemela <code>Rut_Ws_Export_XLSM.bas</code> sí lo hace bien, pero esa versión correcta no se llama desde ningún sitio del proyecto.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>If GuardarReg = vbYes Then
@@ -651,9 +696,10 @@ End Sub</pre></div>
 <p class="impact"><strong>Impacto:</strong> hoy está dormido porque los dos puntos de llamada (botón genérico "Exportar hoja" y "Exportar histórico BDatos", en <code>M_90_Rutinas_Menú_Aux.bas</code>) pasan <code>AskDelRegs:=False</code>. Pero el día que alguien active esa opción en el botón genérico —perfectamente razonable de pedir, ya que hoy no borra nada aunque el usuario confirme "Sí"— exportar cualquier hoja que no sea <code>Sht__BD</code> y confirmar el borrado <strong>vaciaría silenciosamente la tabla maestra de recibos</strong>.</p>
 </article>
 
-<article class="finding" id="c4">
-<div class="finding-head"><span class="badge alto">Alto</span><h3>C4 · Ausencia total de manejo de errores alrededor de Workbooks.Open</h3></div>
+<article class="finding fixed" id="c4">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge alto">Alto</span><h3>C4 · Ausencia total de manejo de errores alrededor de Workbooks.Open</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Lo_Import.bas — Rut_Lo_Import_WorkSheet (línea 75) y Rut_Lo_Import_LoData_LoDefCol (línea 254)</span>
+<p class="estado fixed"><b>Arreglado:</b> Guarda <code>ClosedBook Is Nothing</code> en las dos rutinas de importación.</p>
 <p class="desc">Ninguna de las dos rutinas de importación —usadas desde M_110, M_210, M_311, M_193 y el menú— tiene <code>On Error</code>. Si <code>Workbooks.Open</code> falla (fichero ya abierto con el mismo nombre, ruta de red caída), devuelve <code>Nothing</code> en silencio con <code>DisplayAlerts=False</code> y el error salta después, lejos de la causa — exactamente el patrón ya documentado en el proyecto sobre libros homónimos.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Prog__APP.Range("SW_WB_Deactivate") = False
@@ -678,9 +724,10 @@ End If</pre></div>
 <p class="impact">Sin esta guarda, un fallo de apertura deja <code>SW_WB_Deactivate</code> en <code>False</code> para siempre (altera <code>Workbook_Deactivate</code> permanentemente) y la hoja con <code>ScreenUpdating</code>/<code>EnableEvents</code> desactivados hasta cerrar y reabrir el libro.</p>
 </article>
 
-<article class="finding" id="c5">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>C5 · Preparación de la hoja origen inconsistente entre las dos rutinas de importación duplicadas</h3></div>
+<article class="finding fixed" id="c5">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>C5 · Preparación de la hoja origen inconsistente entre las dos rutinas de importación duplicadas</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Lo_Import.bas — línea 291 vs 113-118</span>
+<p class="estado fixed"><b>Arreglado:</b> La rutina gemela también muestra columnas/filas ocultas y quita filtros.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>' Rut_Lo_Import_LoData_LoDefCol, línea 291:
 Ws_ClsBk.Unprotect
@@ -693,9 +740,10 @@ Call Rut_Lo_Filtros_Quitar(Lo_ClsBk)</pre></div>
 <p class="impact">Si el Excel origen llega con columnas ocultas o un filtro activo (habitual en exportes hechos a mano), la copia posterior puede importar solo las celdas visibles — menos filas de las reales, sin aviso.</p>
 </article>
 
-<article class="finding" id="c6">
-<div class="finding-head"><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>C6 · Select sin cualificar puede operar sobre la hoja activa en vez de la deseada</h3></div>
+<article class="finding fixed" id="c6">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><span class="badge confirm">A confirmar</span><h3>C6 · Select sin cualificar puede operar sobre la hoja activa en vez de la deseada</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Ws.bas — Rut_WrkSheet_LstObj_LiberarEspacio</span>
+<p class="estado fixed"><b>Arreglado:</b> Sin <code>Select</code>/<code>ActiveCell</code>: trabaja sobre <code>WrkSht</code> con <code>UltCelda</code>.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>With .ListObjects(1).Range
     Range(.Cells(.Rows.Count, .Columns.Count).Address).Select   '&lt;- Range() sin cualificar = ActiveSheet
@@ -713,9 +761,10 @@ WrkSht.Range(WrkSht.Cells(UltCelda.Row + 1, UltCelda.Column + 1), _
 <p class="impact">Si <code>WrkSht</code> no es la hoja activa al llamar a esta rutina, <code>.Select</code> actúa sobre otra hoja — funciona "por casualidad" cuando coincide, falla de forma intermitente cuando no. La versión propuesta elimina toda dependencia de <code>Select</code>/<code>ActiveCell</code>.</p>
 </article>
 
-<article class="finding" id="c7">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>C7 · Workbook_Open muerto dentro de un módulo estándar (no ThisWorkbook)</h3></div>
+<article class="finding fixed" id="c7">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><h3>C7 · Workbook_Open muerto dentro de un módulo estándar (no ThisWorkbook)</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Wb.bas — líneas 47-58</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>Workbook_Open</code> eliminado de <code>Rut_Wb.bas</code>.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Private Sub Workbook_Open()    ' &lt;- en un .bas, este evento NUNCA se dispara
     Dim wb As Workbook
@@ -731,9 +780,10 @@ End Sub</pre></div>
 <p class="impact">Código muerto que puede inducir a error a un futuro mantenedor que busque "dónde se minimizan las ventanas al abrir" y se quede leyendo la versión que nunca se ejecuta.</p>
 </article>
 
-<article class="finding" id="c8">
-<div class="finding-head"><span class="badge alto">Alto</span><span class="badge confirm">A confirmar</span><h3>C8 · Tres rutinas de backup dependen de una hoja (Prog_WB_List) que no aparece exportada</h3></div>
+<article class="finding park" id="c8">
+<div class="finding-head"><span class="st park">⏸ Aparcado para más adelante</span><span class="badge alto">Alto</span><span class="badge confirm">A confirmar</span><h3>C8 · Tres rutinas de backup dependen de una hoja (Prog_WB_List) que no aparece exportada</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Wb_CopSegTimed_USB_HD.bas — líneas 33-34, 96</span>
+<p class="estado park"><b>Aparcado para más adelante:</b> Confirmado con captura del Project Explorer: <code>Prog_WB_List</code> no existe, así que el framework de copias está roto de raíz. Se sustituirá por el skill <code>excel-copseg-backup</code> en otra sesión.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Dim Lo_WB_List As ListObject: Set Lo_WB_List = Prog_WB_List.ListObjects("Tb_WB_List")
 Dim Lo_WB_Names As ListObject: Set Lo_WB_Names = Prog_WB_List.ListObjects("Tb_WB_Names")</pre></div>
@@ -744,9 +794,10 @@ Dim Lo_WB_Names As ListObject: Set Lo_WB_Names = Prog_WB_List.ListObjects("Tb_WB
 <p class="impact">No existe ningún <code>Prog_WB_List.cls</code> entre los 120 ficheros exportados. Puede ser un despiste del ciclo manual de import/export de módulos (el propio CLAUDE.md del proyecto ya advierte de que esa sincronización es manual) más que un bug de lógica.</p>
 </article>
 
-<article class="finding" id="c9">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>C9 · Rut_Filtro_Avanzado_VBA.bas — confirmado: no es solo "en desarrollo", no compila</h3></div>
+<article class="finding fixed" id="c9">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>C9 · Rut_Filtro_Avanzado_VBA.bas — confirmado: no es solo "en desarrollo", no compila</h3></div>
 <span class="filepath">VBA_Moduls/Rut_Filtro_Avanzado_VBA.bas</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>Rut_Filtro_Avanzado_VBA.bas</code> eliminado, también del <code>.xlsm</code>.</p>
 <p class="desc">El CLAUDE.md ya avisaba de variables no declaradas; la lectura completa confirma que es más severo: usa <code>ThisWorkbook.Sht__BD_Adm</code> (sintaxis inválida para CodeName, y esa hoja no existe), asigna un <code>Worksheet</code> a una variable <code>As ListObject</code>, y usa <code>Ws</code>/<code>TablaDatos</code> sin declarar en ningún sitio. No está enlazado desde ningún botón — es la única Sub del módulo y nadie la llama.</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Sub FiltrarPorAnioConAdvancedFilter()
@@ -759,15 +810,17 @@ Dim Lo_WB_Names As ListObject: Set Lo_WB_Names = Prog_WB_List.ListObjects("Tb_WB
 </div>
 </article>
 
-<article class="finding" id="c10">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>C10 · Dos subs completamente ajenas al proyecto, pegadas de otro contexto</h3></div>
+<article class="finding fixed" id="c10">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><h3>C10 · Dos subs completamente ajenas al proyecto, pegadas de otro contexto</h3></div>
 <span class="filepath">VBA_Moduls/Rut_File_Folder_NEXE.bas — líneas 193-232 y 236-316</span>
+<p class="estado fixed"><b>Arreglado:</b> Las 2 Subs ajenas se eliminaron de <code>Rut_File_Folder_NEXE.bas</code>. Falta reimportar ese módulo en el <code>.xlsm</code>.</p>
 <p class="desc"><code>ImportMultipleFiles</code> usa <code>Lr</code> sin declarar (error de compilación bajo Option Explicit). <code>RuT_WrkBook_Sheets_Select_Inport</code> referencia hojas/columnas de un TPV ("Tb_TPV", "Importe", "Comision", "Cobrado") que no existen en ningún otro fichero del proyecto. Ninguna de las dos se llama desde ningún sitio — recomiendo eliminarlas.</p>
 </article>
 
-<article class="finding" id="c11">
-<div class="finding-head"><span class="badge bajo">Bajo — cosmético</span><h3>C11 · Debug.Print con el nombre de otra hoja copiado, en 12 clases</h3></div>
+<article class="finding fixed" id="c11">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo — cosmético</span><h3>C11 · Debug.Print con el nombre de otra hoja copiado, en 12 clases</h3></div>
 <span class="filepath">Prog__APP.cls, Prog__Menú_Aux.cls, Prog__Usuarios.cls, Sht__Inf_Inf_Rsm.cls, Sht__BD_Dupl.cls, Sht__BD_Ant.cls, Sht__BD_ErrDate.cls, Sht__BD_JIs_AE4.cls, Sht__BD_RegAnul.cls, Sht__Inf_Recibos_TIO.cls, Sht__Inf_RecibosJIs.cls, Sht__Inf_Recibos3.cls</span>
+<p class="estado fixed"><b>Arreglado:</b> <code>Debug.Print</code> con <code>ActiveSheet.Name</code> en los 13 ficheros (el informe citaba 12; faltaba <code>Work_TitPropios_Cierre.cls</code>).</p>
 <div class="codediff">
 <div class="codebox before"><div class="label">Antes</div><pre>Private Sub Worksheet_Activate()
 Debug.Print "Worksheet_Activate - Wk_TitP_Liquid"    '&lt;- copiado de otra hoja, en los 12 ficheros</pre></div>
@@ -777,16 +830,18 @@ Debug.Print "Worksheet_Activate - " &amp; ActiveSheet.Name   '- patrón que ya u
 <p class="impact">No afecta a la lógica (solo <code>Debug.Print</code>), pero confunde durante la depuración: la ventana Inmediato muestra un nombre de hoja que no es el real.</p>
 </article>
 
-<article class="finding" id="c12">
-<div class="finding-head"><span class="badge medio">Medio</span><h3>C12 · Sht__Inf_Inf_Rsm rompe el patrón "clase vacía": tiene lógica de negocio ajena pegada</h3></div>
+<article class="finding fixed" id="c12">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge medio">Medio</span><h3>C12 · Sht__Inf_Inf_Rsm rompe el patrón "clase vacía": tiene lógica de negocio ajena pegada</h3></div>
 <span class="filepath">VBA_Moduls/Sht__Inf_Inf_Rsm.cls — líneas 26-59</span>
+<p class="estado fixed"><b>Arreglado:</b> La protección usa ya los mismos parámetros que el resto del proyecto. El <code>Worksheet_Change</code> se mantiene.</p>
 <p class="desc">A diferencia de todas las demás <code>Sht__*</code>, incluye un <code>Worksheet_Change</code> completo con filtrado de Planes de Títulos Propios copiado literalmente de <code>Work_TitPropios_Cierre.cls</code> (donde sí tiene sentido). Además, protege la hoja sin los parámetros de permisividad (<code>allowFiltering</code>, <code>allowSorting</code>...) que usa el resto del proyecto.</p>
 <p class="impact">Confirmar con el usuario si esta hoja de informe realmente necesita reaccionar a cambios en <code>"TP_Cod_Plan"</code>, o si es un pegado accidental a eliminar. Si se ejecuta, deja la hoja más restrictivamente protegida de lo habitual, pudiendo bloquear operaciones de macro posteriores.</p>
 </article>
 
-<article class="finding" id="c13">
-<div class="finding-head"><span class="badge bajo">Bajo</span><h3>C13 · Módulo1.bas no es tan "residual" como asume la documentación del proyecto</h3></div>
+<article class="finding fixed" id="c13">
+<div class="finding-head"><span class="st fixed">✔ Arreglado</span><span class="badge bajo">Bajo</span><h3>C13 · Módulo1.bas no es tan "residual" como asume la documentación del proyecto</h3></div>
 <span class="filepath">VBA_Moduls/Módulo1.bas</span>
+<p class="estado fixed"><b>Arreglado:</b> Sí bloqueaba la compilación (<code>Dim</code>/<code>Const</code> tras <code>End Sub</code>): bloque comentado. <code>Macro1</code> y <code>gh</code> se conservan.</p>
 <p class="desc">El CLAUDE.md lo cataloga junto a <code>Hoja1/4/17.cls</code> como residual vacío — confirmado que esos tres sí lo están, pero <code>Módulo1.bas</code> contiene dos macros grabadas sin usar (<code>Macro1</code>, <code>gh</code>) y ~80 líneas de <code>Dim</code>/<code>Const</code> a nivel de módulo que calzan con variables de <code>M_600_Informe_EP_RSm.bas</code> — claramente un borrador de esa fase, pegado y olvidado.</p>
 <p class="impact">No rompe nada (es sintácticamente válido), pero conviene vaciarlo igual que los <code>Hoja*.cls</code> o documentar que sí contiene un borrador muerto, para no confiar ciegamente en la etiqueta "residual = seguro de ignorar".</p>
 </article>

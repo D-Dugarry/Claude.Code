@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PPub — Identificadores con tilde</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --text:#1b1e23; --muted:#5f6672; --border:#e3e5ea;
+  --accent:#9a3ec9; --chip-bg:#f4ecf9; --ok:#0f7a33; --ok-bg:#eaf7ef;
+  --warn:#b45309; --warn-bg:#fff4e0; --rib:#2554c7; --rib-bg:#e8eefc; --evt:#0f7a33; --evt-bg:#e6f6ec;
+  --zebra:#fafbfc; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+    --accent:#d29bf0; --chip-bg:#241b2b; --ok:#7ce8b3; --ok-bg:#0f2318;
+    --warn:#fbbf24; --warn-bg:#2d2310; --rib:#8fb0ff; --rib-bg:#172035; --evt:#7ce8b3; --evt-bg:#0f2318;
+    --zebra:#1a1d22; --shadow: 0 1px 3px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171b; --panel:#1d2025; --text:#e7e8ea; --muted:#9aa1ac; --border:#2c2f36;
+  --accent:#d29bf0; --chip-bg:#241b2b; --ok:#7ce8b3; --ok-bg:#0f2318;
+  --warn:#fbbf24; --warn-bg:#2d2310; --rib:#8fb0ff; --rib-bg:#172035; --evt:#7ce8b3; --evt-bg:#0f2318;
+  --zebra:#1a1d22;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 16px 80px;}
+header.top{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px 32px;box-shadow:var(--shadow);margin-bottom:22px;}
+header.top h1{margin:0 0 6px;font-size:1.7rem;}
+header.top p.sub{margin:0;color:var(--muted);font-size:.95rem;}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;}
+.stat{flex:1;min-width:96px;background:var(--chip-bg);border-radius:10px;padding:10px 12px;text-align:center;}
+.stat .n{font-size:1.45rem;font-weight:700;color:var(--accent);}
+.stat .l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.notebox{background:var(--chip-bg);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:14px 18px;margin-bottom:18px;font-size:.92rem;}
+.notebox strong{color:var(--accent);}
+.notebox.done{background:var(--ok-bg);border-left-color:var(--ok);} .notebox.done strong{color:var(--ok);}
+nav.toc{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px 26px;margin-bottom:26px;box-shadow:var(--shadow);}
+nav.toc h2{margin-top:0;font-size:1.05rem;}
+nav.toc ul{columns:2;gap:24px;margin:0;padding-left:20px;}
+@media (max-width:640px){nav.toc ul{columns:1;}}
+nav.toc li{margin-bottom:6px;font-size:.9rem;}
+nav.toc a{color:var(--text);text-decoration:none;} nav.toc a:hover{color:var(--accent);text-decoration:underline;}
+h2.block-title{font-size:1.3rem;border-bottom:2px solid var(--border);padding-bottom:8px;margin:36px 0 14px;scroll-margin-top:12px;}
+h2.block-title .count{display:inline-block;background:var(--chip-bg);color:var(--accent);border-radius:999px;font-size:.8rem;padding:2px 10px;vertical-align:middle;margin-left:6px;}
+p.intro{color:var(--muted);font-size:.9rem;margin:0 0 12px;max-width:980px;}
+.todo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 14px;}
+@media (max-width:760px){.todo{grid-template-columns:1fr;}}
+.who{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.86rem;}
+.who .lab{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.who.you{border-top:3px solid var(--warn);} .who.you .lab{color:var(--warn);}
+.who.me{border-top:3px solid var(--ok);} .who.me .lab{color:var(--ok);}
+.who ol{margin:0;padding-left:18px;} .who li{margin-bottom:4px;}
+.tw{overflow-x:auto;background:var(--panel);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);}
+table{width:100%;min-width:720px;border-collapse:collapse;font-size:.86rem;}
+thead th{background:var(--chip-bg);text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+tbody tr:nth-child(even) td{background:var(--zebra);} tbody tr:last-child td{border-bottom:none;}
+code{font-family:Consolas,Menlo,monospace;font-size:.92em;}
+code.id{font-weight:700;color:var(--accent);word-break:break-all;}
+code.fp{color:var(--muted);font-size:.84em;word-break:break-all;}
+.new{font-size:.8rem;color:var(--ok);margin-top:2px;word-break:break-all;}
+.muted{color:var(--muted);} .small{font-size:.8rem;margin-top:4px;}
+.n{font-weight:700;} .zero{color:var(--muted);font-weight:700;}
+details{margin-top:4px;} summary{cursor:pointer;color:var(--accent);font-size:.82rem;}
+ul.lines{margin:6px 0 0;padding-left:18px;font-size:.78rem;color:var(--muted);}
+ul.lines li{margin-bottom:3px;word-break:break-word;}
+ul.cols{columns:3;gap:18px;} @media (max-width:760px){ul.cols{columns:1;}}
+ul.ext{list-style:none;margin:0;padding:0;font-size:.82rem;} ul.ext li{margin-bottom:4px;}
+.tag{display:inline-block;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;border-radius:6px;padding:1px 7px;margin-right:4px;}
+.t-ribbon{background:var(--rib-bg);color:var(--rib);} .t-forma{background:var(--evt-bg);color:var(--evt);}
+.t-celda{background:var(--warn-bg);color:var(--warn);} .t-nombre{background:var(--chip-bg);color:var(--accent);}
+details.anexo{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 18px;margin-top:36px;}
+details.anexo > summary{font-size:.92rem;}
+footer{color:var(--muted);font-size:.82rem;text-align:center;margin-top:50px;}
+a{color:var(--accent);} a.backtop{font-size:.78rem;text-decoration:none;}
+
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;}
+ol.steps > li{counter-increment:s;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:14px 18px 14px 58px;margin-bottom:12px;position:relative;box-shadow:var(--shadow);}
+ol.steps > li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;
+  background:var(--warn-bg);color:var(--warn);font-weight:700;display:flex;align-items:center;justify-content:center;}
+ol.steps > li h3{margin:2px 0 6px;font-size:1rem;}
+ol.steps > li p{margin:4px 0;font-size:.9rem;}
+.warnbox{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:8px;padding:10px 14px;font-size:.88rem;margin:8px 0;}
+
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;}
+ol.steps > li{counter-increment:s;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:14px 18px 14px 58px;margin-bottom:12px;position:relative;box-shadow:var(--shadow);}
+ol.steps > li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;
+  background:var(--warn-bg);color:var(--warn);font-weight:700;display:flex;align-items:center;justify-content:center;}
+ol.steps > li h3{margin:2px 0 6px;font-size:1rem;}
+ol.steps > li p{margin:4px 0;font-size:.9rem;}
+.warnbox{background:var(--warn-bg);border-left:4px solid var(--warn);border-radius:8px;padding:10px 14px;font-size:.88rem;margin:8px 0;}
+</style>
+</head>
+<body>
+<div class="wrap" id="top">
+<header class="top">
+<h1>Identificadores con tilde o ñ — pendientes</h1>
+<p class="sub">PPub_BDatos_2026.xlsm · Precios Públicos, Universidad de Alicante — Todo está resuelto en el
+código y en el libro. Solo quedan tus pasos en Excel, en este orden. Actualizado el 30/09/2026 20:14.</p>
+<div class="stats"><div class="stat"><div class="n">58</div><div class="l">Resueltos</div></div><div class="stat"><div class="n">0</div><div class="l">Con tilde en el código</div></div><div class="stat"><div class="n">2</div><div class="l">CodeNames (F4)</div></div><div class="stat"><div class="n">9</div><div class="l">Módulos a importar</div></div><div class="stat"><div class="n">1</div><div class="l">Línea en ThisWorkbook</div></div></div>
+</header>
+
+<div class="notebox done"><strong>Resuelto: los 58 identificadores.</strong> No queda ninguno con tilde ni ñ en el código
+(verificado con un nuevo análisis completo), y dentro del <code>.xlsm</code> ya están cambiados:
+<ul>
+<li>el <b>XML del Ribbon</b> (<code>customUI14.xml</code>): 6 callbacks en 12 referencias. Si tienes el XML en el Custom UI
+Editor, <b>vuelve a cargarlo</b> antes de editarlo;</li>
+<li>lo que hiciste tú: los 3 controles y sus eventos, las macros de las formas y las celdas de <code>Tb_Tareas</code>;</li>
+<li>el rótulo <code>_DefCol_BD_Aux!A2</code> (« Tabla Prog__Menu_Aux.ListObjects(1)»).</li>
+</ul>
+Copia de seguridad previa (libro + <code>VBA_Moduls/</code>): <code>PPub_BDatos_2026_BACKUP_20260930_200433/</code>.</div>
+
+<h2 class="block-title">Pasos pendientes en Excel</h2>
+
+<ol class="steps">
+<li><h3>Abre el libro</h3>
+<p>Hasta terminar el paso 3, los botones que ya apuntan a los nombres nuevos (formas de <code>_ConfigAPP</code>,
+<code>_Menú_Aux</code>, <code>Inf_Recibos_TIO</code> e <code>Inf_RecibosJIs</code>, opciones <em>Visible / Restrict</em> del
+menú contextual y la tarea <em>0_ Activar Modo Programación</em>) darán «no se encuentra la macro». Es normal: el
+código del libro aún tiene los nombres antiguos.</p></li>
+
+<li><h3>Cambia el CodeName de 2 hojas (F4)</h3>
+<p>En el editor VBA, carpeta <b>Microsoft Excel Objects</b>, selecciona la hoja y en Propiedades (F4) cambia
+<b>(Name)</b>:</p>
+<div class="tw"><table><thead><tr><th>Hoja (pestaña)</th><th>CodeName actual</th><th>CodeName nuevo</th></tr></thead><tbody><tr><td><code>_Menú_Aux</code></td><td><code class="id">Prog__Menú_Aux</code></td><td><code>Prog__Menu_Aux</code></td></tr><tr><td><code>Prog_Orgánicas</code></td><td><code class="id">Prog_Orgánicas</code></td><td><code>Prog_Organicas</code></td></tr></tbody></table></div>
+<div class="warnbox">No importes <code>Prog__Menu_Aux.cls</code> ni <code>Prog_Organicas.cls</code>: son módulos de hoja, y al
+importarlos se crearían como clases nuevas. El nombre de la pestaña no cambia; solo cambia el CodeName.</div></li>
+
+<li><h3>Quita e importa estos 9 módulos</h3>
+<p>Quita el módulo de la columna izquierda (con el nombre <b>antiguo</b> en los 4 marcados) e importa el fichero de
+<code>VBA_Moduls/</code>. Los <code>.frx</code> de los dos formularios ya llevan los nombres de control que pusiste
+(comprobado byte a byte contra el libro).</p>
+<div class="tw"><table><thead><tr><th>Quitar</th><th>Importar</th></tr></thead><tbody><tr><td><code class="id">Form_Menu</code></td><td><code>Form_Menu.frm (+ .frx)</code></td></tr><tr><td><code class="id">Form_Running_Rut</code></td><td><code>Form_Running_Rut.frm (+ .frx)</code></td></tr><tr><td><code class="id">M_000_Ini_APP</code></td><td><code>M_000_Ini_APP.bas</code></td></tr><tr><td><code class="id">M_000_Ini_Var_APP</code></td><td><code>M_000_Ini_Var_APP.bas</code></td></tr><tr><td><code class="id">M_000_Menú_Usuario</code></td><td><code>M_000_Menu_Usuario.bas</code> <span class="chip evt">nombre nuevo</span></td></tr><tr><td><code class="id">M_132_Añadir_Núm_JIs_al_Inf</code></td><td><code>M_132_Anadir_Num_JIs_al_Inf.bas</code> <span class="chip evt">nombre nuevo</span></td></tr><tr><td><code class="id">M_133_Añadir_Núm_JIs_a_BDatos</code></td><td><code>M_133_Anadir_Num_JIs_a_BDatos.bas</code> <span class="chip evt">nombre nuevo</span></td></tr><tr><td><code class="id">M_90_Rutinas_Menú_Aux</code></td><td><code>M_90_Rutinas_Menu_Aux.bas</code> <span class="chip evt">nombre nuevo</span></td></tr><tr><td><code class="id">M___RibbonUI</code></td><td><code>M___RibbonUI.bas</code></td></tr></tbody></table></div>
+<p class="muted small"><code>M_195</code>, <code>M_602</code> y <code>Rut_Lo_Import</code> <b>no</b> hace falta reimportarlos:
+el repo ya es copia de lo que tenías en el libro.</p></li>
+
+<li><h3>Una línea en <code>ThisWorkbook</code></h3>
+<p>Es un módulo del libro y no se importa. Ábrelo, pulsa Ctrl+H y cambia <code>Rut_Menú_ShowAll</code> por
+<code>Rut_Menu_ShowAll</code> (1 aparición, en <code>Workbook_Open</code>).</p></li>
+
+<li><h3>Compila y guarda</h3>
+<p><b>Depuración → Compilar VBAProject</b>. Después prueba el clic derecho en una hoja, la tarea
+<em>0_ Activar Modo Programación</em> y un botón de cada hoja con formas.</p></li>
+
+<li><h3>Cierra el libro y avísame</h3>
+<p>Con el libro cerrado leo su código directamente del <code>.xlsm</code> y compruebo que coincide con
+<code>VBA_Moduls/</code>, sin que tengas que exportar nada.</p></li>
+</ol>
+
+<details class="anexo"><summary>Equivalencias: nombre antiguo → nombre nuevo (58)</summary><div class="tw"><table><thead><tr><th>Tipo</th><th>Antes</th><th>Ahora</th></tr></thead><tbody><tr><td>Rutina</td><td><code>GetLbl_CCtxtRightClickMenúRestrictOptions</code></td><td><code class="id">GetLbl_CCtxtRightClickMenuRestrictOptions</code></td></tr><tr><td>Rutina</td><td><code>GetLbl_CCtxtRightClickMenúVisible</code></td><td><code class="id">GetLbl_CCtxtRightClickMenuVisible</code></td></tr><tr><td>Rutina</td><td><code>GetLbl_RightClickMenúRestrictOptions_Group</code></td><td><code class="id">GetLbl_RightClickMenuRestrictOptions_Group</code></td></tr><tr><td>Rutina</td><td><code>GetLbl_RightClickMenúVisible_Group</code></td><td><code class="id">GetLbl_RightClickMenuVisible_Group</code></td></tr><tr><td>Rutina</td><td><code>OnAct_RightClickMenúRestrictOptions</code></td><td><code class="id">OnAct_RightClickMenuRestrictOptions</code></td></tr><tr><td>Rutina</td><td><code>OnAct_RightClickMenúVisible</code></td><td><code class="id">OnAct_RightClickMenuVisible</code></td></tr><tr><td>Rutina</td><td><code>Rut_Activar_Programación</code></td><td><code class="id">Rut_Activar_Programacion</code></td></tr><tr><td>Rutina</td><td><code>Rut_Añadir_a_BDatos_JIs_de_Inf_Recibos</code></td><td><code class="id">Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos</code></td></tr><tr><td>Rutina</td><td><code>Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos</code></td><td><code class="id">Rut_Anadir_a_Inf_Recibos_JIs_de_BDatos</code></td></tr><tr><td>Rutina</td><td><code>RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio</code></td><td><code class="id">RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio</code></td></tr><tr><td>Rutina</td><td><code>RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio_ByHand</code></td><td><code class="id">RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio_ByHand</code></td></tr><tr><td>Rutina</td><td><code>Rut_Btn_Menú_Aux</code></td><td><code class="id">Rut_Btn_Menu_Aux</code></td></tr><tr><td>Rutina</td><td><code>Rut_Menú_HideAll</code></td><td><code class="id">Rut_Menu_HideAll</code></td></tr><tr><td>Rutina</td><td><code>Rut_Menú_ShowAll</code></td><td><code class="id">Rut_Menu_ShowAll</code></td></tr><tr><td>Rutina</td><td><code>Rut_Menú_ShowAll_Short</code></td><td><code class="id">Rut_Menu_ShowAll_Short</code></td></tr><tr><td>Rutina</td><td><code>Tbx_AñoContable_AfterUpdate</code></td><td><code class="id">Tbx_AnoContable_AfterUpdate</code></td></tr><tr><td>Rutina</td><td><code>TBx_Descripción_Change</code></td><td><code class="id">TBx_Descripcion_Change</code></td></tr><tr><td>Constante</td><td><code>BD_CriT_Añejo</code></td><td><code class="id">BD_CriT_Anejo</code></td></tr><tr><td>Constante</td><td><code>BD_Orgánica</code></td><td><code class="id">BD_Organica</code></td></tr><tr><td>Constante</td><td><code>DR_H_AñoMes_Cob</code></td><td><code class="id">DR_H_AnoMes_Cob</code></td></tr><tr><td>Constante</td><td><code>DR_H_AñoMes_Emi</code></td><td><code class="id">DR_H_AnoMes_Emi</code></td></tr><tr><td>Constante</td><td><code>DR_H_AñoMes_Rem</code></td><td><code class="id">DR_H_AnoMes_Rem</code></td></tr><tr><td>Constante</td><td><code>Eplz_Año_P1</code></td><td><code class="id">Eplz_Ano_P1</code></td></tr><tr><td>Constante</td><td><code>Eplz_Año_P2</code></td><td><code class="id">Eplz_Ano_P2</code></td></tr><tr><td>Constante</td><td><code>Eplz_Año_P3</code></td><td><code class="id">Eplz_Ano_P3</code></td></tr><tr><td>Constante</td><td><code>Eplz_Año_P4</code></td><td><code class="id">Eplz_Ano_P4</code></td></tr><tr><td>Constante</td><td><code>InfRec_Enseñanza</code></td><td><code class="id">InfRec_Ensenanza</code></td></tr><tr><td>Constante</td><td><code>IRs_Año_Emi</code></td><td><code class="id">IRs_Ano_Emi</code></td></tr><tr><td>Constante</td><td><code>IRs_Orgánica</code></td><td><code class="id">IRs_Organica</code></td></tr><tr><td>Constante</td><td><code>JIs_Enseñanza</code></td><td><code class="id">JIs_Ensenanza</code></td></tr><tr><td>Constante</td><td><code>Task_Descripción</code></td><td><code class="id">Task_Descripcion</code></td></tr><tr><td>Variable</td><td><code>AñoCob</code></td><td><code class="id">AnoCob</code></td></tr><tr><td>Variable</td><td><code>AñoCont</code></td><td><code class="id">AnoCont</code></td></tr><tr><td>Variable</td><td><code>AñoEmi</code></td><td><code class="id">AnoEmi</code></td></tr><tr><td>Variable</td><td><code>APP_AñoCont</code></td><td><code class="id">APP_AnoCont</code></td></tr><tr><td>Variable</td><td><code>ContAñja</code></td><td><code class="id">ContAnja</code></td></tr><tr><td>Variable</td><td><code>DescripciónA</code></td><td><code class="id">DescripcionA</code></td></tr><tr><td>Variable</td><td><code>DescripciónB</code></td><td><code class="id">DescripcionB</code></td></tr><tr><td>Variable</td><td><code>Filter_APP_AñoCont</code></td><td><code class="id">Filter_APP_AnoCont</code></td></tr><tr><td>Variable</td><td><code>MenúAux_Msg</code></td><td><code class="id">MenuAux_Msg</code></td></tr><tr><td>Variable</td><td><code>RegsAñejo</code></td><td><code class="id">RegsAnejo</code></td></tr><tr><td>Variable</td><td><code>RngTAñj</code></td><td><code class="id">RngTAnj</code></td></tr><tr><td>Variable</td><td><code>RngTAñjCob</code></td><td><code class="id">RngTAnjCob</code></td></tr><tr><td>Variable</td><td><code>RngTAñjPdte</code></td><td><code class="id">RngTAnjPdte</code></td></tr><tr><td>Parámetro</td><td><code>Hide_RightClickMenú</code></td><td><code class="id">Hide_RightClickMenu</code></td></tr><tr><td>Parámetro</td><td><code>Título</code></td><td><code class="id">Titulo</code></td></tr><tr><td>Etiqueta</td><td><code>SalaAquí</code></td><td><code class="id">SalaAqui</code></td></tr><tr><td>Etiqueta</td><td><code>SaltoAquí</code></td><td><code class="id">SaltoAqui</code></td></tr><tr><td>Control</td><td><code>Lb_Tít_Informe</code></td><td><code class="id">Lb_Tit_Informe</code></td></tr><tr><td>Control</td><td><code>Tbx_AñoContable</code></td><td><code class="id">Tbx_AnoContable</code></td></tr><tr><td>Control</td><td><code>TBx_Descripción</code></td><td><code class="id">TBx_Descripcion</code></td></tr><tr><td>Módulo</td><td><code>M_000_Menú_Usuario</code></td><td><code class="id">M_000_Menu_Usuario</code></td></tr><tr><td>Módulo</td><td><code>M_132_Añadir_Núm_JIs_al_Inf</code></td><td><code class="id">M_132_Anadir_Num_JIs_al_Inf</code></td></tr><tr><td>Módulo</td><td><code>M_133_Añadir_Núm_JIs_a_BDatos</code></td><td><code class="id">M_133_Anadir_Num_JIs_a_BDatos</code></td></tr><tr><td>Módulo</td><td><code>M_90_Rutinas_Menú_Aux</code></td><td><code class="id">M_90_Rutinas_Menu_Aux</code></td></tr><tr><td>Módulo</td><td><code>Módulo1</code></td><td><code class="id">Modulo1</code></td></tr><tr><td>Módulo</td><td><code>Prog__Menú_Aux</code></td><td><code class="id">Prog__Menu_Aux</code></td></tr><tr><td>Módulo</td><td><code>Prog_Orgánicas</code></td><td><code class="id">Prog_Organicas</code></td></tr></tbody></table></div></details>
+
+<details class="anexo"><summary>Avisos ajenos al renombrado (3)</summary>
+<ul>
+<li><b>El Ribbon llama a 3 rutinas que no existen</b>: <code>GetLbl_CCtxtBtnSW_PruebaONOFF</code>,
+<code>OnAct_Change_Usuario</code> y <code>OnAct_GroupSaveTimer_USB</code> (botones del menú contextual <em>PruebaONOFF</em>,
+<em>Change_Usuario</em> y <em>SaveTimer_USB</em>). No están en el código actual, ni en el commit de julio, ni en la copia de
+las 17:56. Es un fallo anterior: al pulsarlos saldrá «no se encuentra la macro».</li>
+<li><code>_ConfigAPP!C38</code> (<code>APP_Task_Rut</code>, «Nombre SubRutina Ejecutada») guarda todavía
+<code>Rut_Activar_Programación</code>. Es el registro de la última tarea ejecutada: el código siempre lo escribe antes
+de leerlo, así que se corregirá solo la próxima vez que se ejecute una tarea.</li>
+<li><b>Nombres de Excel con tilde</b> que no se han tocado porque no son identificadores VBA y el código los usa
+entre comillas: 7 nombres definidos (<code>APP_AñoCont</code>, <code>SW_DelRegMatrículaCero</code>,
+<code>SW_ProtecciónDatosActivado</code>, <code>SW_RightClickMenú_Restricted</code>, <code>SW_RightClickMenú_Visible</code>,
+<code>T_Orgánicas</code>, <code>Tb_CriT_Añeja</code>), 2 tablas (<code>Tab_Orgánicas</code>,
+<code>Tb_Tipo_Enseñanzas</code>), 4 pestañas (<code>Cuenta_Fórmulas</code>, <code>Hipervínculos</code>,
+<code>_Menú_Aux</code>, <code>Prog_Orgánicas</code>) y el nombre de forma <code>Btn_Menú_Aux</code>.</li>
+</ul></details>
+
+<footer>Generado a partir de <code>VBA_Moduls/</code> y <code>PPub_BDatos_2026.xlsm</code> · 30/09/2026 20:14</footer>
+</div>
+</body>
+</html>
