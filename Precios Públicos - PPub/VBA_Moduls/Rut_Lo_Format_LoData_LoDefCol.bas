@@ -1,9 +1,7 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
+' Last Rev. 2026-09-30 18:25
 Option Explicit
 
-        Sub Rut_Lo_Format_LoData_LoDefColData_ByHand()  '--- Solo hace falta cambiar las variables de la Rutina -----------------------
-            Call Rut_Lo_Format_LoData_LoDefColData(Sht__BD.ListObjects(1), Prog_DefCol.ListObjects(1))
-        End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Formatea una Tabla Listobject ----------------------------------------------------------------------------------------------
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -125,12 +123,6 @@ ExitSub:
 Debug.Print "<<< Rut_Lo_Format_LoData_LoDefColData"
 End Sub     ' Rut_Lo_Format_LoData_LoDefColData
 ' ==================================================================================================================================
-
-Sub kk()
-        Dim HiddenCol   As Boolean
-        HiddenCol = True
-        ActiveSheet.Columns(ActiveSheet.ListObjects(1).ListColumns(6).Range.Column).Hidden = HiddenCol '- Para Ocultar Col.
-End Sub
 
 '''' ==================================================================================================================================
 '''Sub Rut_Format_LoData_LoDefCol(ByRef LoData As ListObject, _

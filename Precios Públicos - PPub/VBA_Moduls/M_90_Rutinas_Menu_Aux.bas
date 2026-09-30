@@ -1,4 +1,5 @@
-Attribute VB_Name = "M_90_Rutinas_Menú_Aux"
+Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
+' Last Rev. 2026-09-30 21:12
 Option Explicit
 
 '==================================================================================================================================
@@ -6,7 +7,7 @@ Option Explicit
 Sub RuT_Ejecutar_Rut(TaskRut As String, Optional Show_Msg As Boolean = True)
 Debug.Print "RuT_Ejecutar_Rut"
     Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menú_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
+    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
     If IsError(TaskIndice) Then     ' ¡¡¡ NO Existe la Rutina !!! ------------------------
         MsgBx_Msg = "¡ No Existe la Tarea o su nombre ha cambiado !"
     Else                            ' ¡¡¡ Existe la Rutina !!! ------------------------
@@ -14,9 +15,10 @@ Debug.Print "RuT_Ejecutar_Rut"
         Prog__APP.Range("APP_Task_Index") = TaskIndice
         '--------------
         Application.Run Prog__APP.Range("APP_Task_Rut").Value
+        If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- Red de seguridad: la tarea se saltó algún Rut_On_Functions
         '--------------
         MsgBx_Msg = Prog__APP.Range("APP_Task_Inf")
-        Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
     End If
     If Show_Msg Then
         MsgBx_Title = "Informe del Proceso de Ejecutar la Tarea:  " & TaskRut
@@ -29,11 +31,11 @@ Sub RuT_Load_Task_Data(TaskRut As String)
 Debug.Print "RuT_Load_Task_Data"
     Dim Rutinas_Name    As String
     Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menú_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
+    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
         Prog__APP.Range("APP_Task_Rut") = TaskRut
         Prog__APP.Range("APP_Task_Index") = TaskIndice
         
-        Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
 End Sub
 '==================================================================================================================================
 '===================================================================================================================================
@@ -41,17 +43,17 @@ Sub RuT_Save_Task_Data(TaskRut As String, Optional Task_Inf As String = "")
 Debug.Print "RuT_Save_Task_Data"
     Dim Rutinas_Name    As String
     Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menú_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
+    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
     If IsError(TaskIndice) Then
         Debug.Print "RuT_Save_Task_Data - ERROR - Task NOT FOUND -------------------<<<"
     Else
         Prog__APP.Range("APP_Task_Rut") = TaskRut
         Prog__APP.Range("APP_Task_Index") = TaskIndice
         If Task_Inf = "" Then
-            Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+            Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
         Else
             Debug.Print Task_Inf
-        Dim Rng     As Range:     Set Rng = Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe)
+        Dim Rng     As Range:     Set Rng = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe)
             Rng.Value = Task_Inf
         End If
     End If
@@ -66,8 +68,8 @@ Debug.Print "Rut_Chg_Usuario"
     MyRibbon.InvalidateControl "GroupChangeUser"    '- 2º el Grupo, Actualiza solo este Control_ID
 End Sub
 '===================================================================================================================================
-Sub Rut_Activar_Programación()
-Debug.Print "Rut_Activar_Programación"
+Sub Rut_Activar_Programacion()
+Debug.Print "Rut_Activar_Programacion"
     Call RuT_Al_Abrir_WorkBook
     Call Rut_Sheets_ShowAll
     Call Rut_ConfigExcel_RESTABLECER
@@ -111,7 +113,7 @@ Debug.Print "Rut_Lo_Export_Bdatos"
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
     
-    Dim Arch_New_Name         As String:    Arch_New_Name = "Histórico_BDatos_" & Prog__APP.Range("APP_AñoCont") & "-"
+    Dim Arch_New_Name         As String:    Arch_New_Name = "Histórico_BDatos_" & Prog__APP.Range("APP_AnoCont") & "-"
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColLstObj, Arch_New_Name)
     Prog__APP.Range("APP_Last_BD_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     
@@ -123,6 +125,7 @@ Debug.Print "Rut_Lo_Export_Bdatos"
 End Sub
 '===================================================================================================================================
 Sub Rut_Reset_App()
+    Call Rut_Reset_State            '- Deja a 0 el contador de Rut_Off/On_Functions
     Call RuT_Al_Abrir_WorkBook
     Prog__APP.Range("APP_Task_Inf") = "App Reset" & vbCrLf & Now
     Call RuT_Load_Task_Data("Rut_Reset_App")
@@ -134,7 +137,7 @@ Sub Rut_RibbonRefresh()
     Prog__APP.Range("APP_Task_Inf") = "RibbonX Refreshed " & Now
 End Sub
 '===================================================================================================================================
-Sub Rut_Btn_Menú_Aux()
+Sub Rut_Btn_Menu_Aux()
     Form_Menu.Show
 End Sub
 '===================================================================================================================================
@@ -147,7 +150,7 @@ Sub Rut_Columns_Show_All()
 End Sub
 '===================================================================================================================================
 Sub Rut_RibbonX_ShowAll()
-    Call Rut_Menú_ShowAll
+    Call Rut_Menu_ShowAll
     Prog__APP.Range("APP_Task_Inf") = "RibbonX Showed" & vbCrLf & Now
 End Sub
 '===================================================================================================================================
@@ -321,7 +324,7 @@ End Sub
 '    Dim Cadena      As String
 '    Dim Caract      As String
 '
-'        Cadena = Form_Menu.TBx_Descripción
+'        Cadena = Form_Menu.Tbx_Descripcion
 '        Pos_Ini = InStr(Cadena, "[[")
 '        Pos_Fin = InStr(Cadena, "]]")
 '        If Pos_Ini * Pos_Fin = 0 Then   '---Controla que existe marca de inicio y fin y que hay algun dato entre marcas
@@ -337,7 +340,7 @@ End Sub
 '        End If
 '
 '        Prog__APP.Range("APP_Task_Inf") =   "Lista de Columnas a visualizar: [[" & Cadena & "]]" & vbCrLf & Now
-'        Form_Menu.TBx_Descripción = Left(Form_Menu.TBx_Descripción, Pos_Ini + 1) & Cadena & Mid(Form_Menu.TBx_Descripción, Pos_Fin)
+'        Form_Menu.Tbx_Descripcion = Left(Form_Menu.Tbx_Descripcion, Pos_Ini + 1) & Cadena & Mid(Form_Menu.Tbx_Descripcion, Pos_Fin)
 '
 '        Range(Columns(2), Columns(LastCol_Tb_Solicitudes)).Hidden = True    '---Oculta de la Columna 2 a la última
 '
@@ -372,4 +375,3 @@ End Sub
 '    End Sub     ' Rut_Mostrar_Columnas_Lista     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 '    '==================================================================================================================================
 '
-

@@ -25,12 +25,12 @@ Los ficheros `.bas`/`.cls`/`.frm` son **Windows-1252 (CP1252), no UTF-8**, con f
 - **`M_D___________.bas`** (p. ej. `M_1____`, `M_2____`, `M_9____`) — módulos "separador": no son código ejecutable, solo comentarios que documentan en detalle cada fase del pipeline (incluso con logs reales de ejecución). Son la mejor fuente para entender el negocio de cada rango de cientos.
 - **`Prog_*.cls`** — code-behind de **hojas de configuración/catálogo** (`VB_Name` = CodeName de la hoja), casi siempre vacío salvo `Worksheet_Activate/Deactivate`. El contenido funcional vive en el `ListObject` (tabla Excel) de esa hoja, no en la clase. Dos subtipos:
   - `Prog_DefCol_*` → definición de columnas (nombre, formato, ancho, orden, ocultar/proteger) usada por las rutinas genéricas de formateo/import de `Rut_Lo_*`.
-  - Catálogos de dominio (`Prog_Concept`, `Prog_ClasifEco`, `Prog_TipoRec`, `Prog_Bco`, `Prog_Orgánicas`, `Prog_CodActiv`, `Prog_Tipo_EPE`, `Prog_RetVRI`, `Prog_TitOf_Plazos`...) → tablas maestras de lookup.
-  - `Prog__APP`, `Prog__Usuarios`, `Prog__Menú_Aux` (doble guion bajo) → configuración de la aplicación: switches (`SW_*`), rutas, usuario activo, textos de `Form_MsgBox`, tabla de tareas del menú/Ribbon con visibilidad por usuario.
+  - Catálogos de dominio (`Prog_Concept`, `Prog_ClasifEco`, `Prog_TipoRec`, `Prog_Bco`, `Prog_Organicas`, `Prog_CodActiv`, `Prog_Tipo_EPE`, `Prog_RetVRI`, `Prog_TitOf_Plazos`...) → tablas maestras de lookup.
+  - `Prog__APP`, `Prog__Usuarios`, `Prog__Menu_Aux` (doble guion bajo) → configuración de la aplicación: switches (`SW_*`), rutas, usuario activo, textos de `Form_MsgBox`, tabla de tareas del menú/Ribbon con visibilidad por usuario.
 - **`Sht__*.cls`** — mismo patrón que `Prog_*` (wrapper vacío de hoja), pero para las **hojas de datos**: `Sht__BD` (tabla maestra de recibos), `Sht__BD_Ant` (versión/ejercicio anterior), `Sht__BD_Dupl`, `Sht__BD_ErrDate`, `Sht__BD_RegAnul`, `Sht__BD_AE4x4`, `Sht__BD_INSS`, `Sht__BD_JIs_AE4`, `Sht__BD_IAdm_CAcadAnt`, hojas `Sht__Inf_*` (informes), `Sht__Buffer` (hoja de trabajo temporal). Se referencian por CodeName (`Sht__BD.ListObjects(1)`) para no depender del nombre visible de la pestaña.
 - **`Rut_*.bas`** (y variante `RuT_*.bas`) — librería transversal de utilidades reutilizables agrupada por objeto Excel: `Rut_Wb*` (Workbook — incluye `Rut_Wb_CopSegTimed_USB_HD.bas`, copias de seguridad con marca de tiempo en USB+disco local), `Rut_Ws*` (Worksheet), `Rut_Lo*` (ListObject: import/export/formato/orden/duplicados — el núcleo del framework de tablas), `Rut_UserForms`, `Rut_Hipervinculos`, `Rut_Filtro_Avanzado_VBA`, `Rut_File_Folder_NEXE`.
 - **`Form_*.frm/.frx`** — UserForms.
-- **`Hoja1.cls`, `Hoja4.cls`, `Hoja17.cls`, `Módulo1.bas`** — residuales/plantilla por defecto de Excel, sin renombrar; no forman parte de la arquitectura activa.
+- **`Hoja1.cls`, `Hoja4.cls`, `Hoja17.cls`** — residuales/plantilla por defecto de Excel, sin renombrar; no forman parte de la arquitectura activa. (`Módulo1.bas`, del mismo tipo, se eliminó el 2026-09-30.)
 
 ### Flujo de arranque (`ThisWorkbook.cls` → `Workbook_Open`)
 
@@ -39,13 +39,13 @@ Los ficheros `.bas`/`.cls`/`.frm` son **Windows-1252 (CP1252), no UTF-8**, con f
 3. Muestra `Form_Usuario` (login) y carga datos de tareas (`RuT_Load_Task_Data`).
 4. Oculta el menú contextual nativo dejando solo las opciones custom (`Rut_Context_Buttons_Hide`) y oculta el Ribbon nativo.
 5. Activa `Sht__BD`, quita filtros, muestra todas las hojas, inmoviliza paneles.
-6. Ejecuta `RuT_Al_Abrir_WorkBook` (en `M_000_Ini_APP.bas`) y `Rut_Menú_ShowAll` (muestra el Ribbon custom).
+6. Ejecuta `RuT_Al_Abrir_WorkBook` (en `M_000_Ini_APP.bas`) y `Rut_Menu_ShowAll` (muestra el Ribbon custom).
 
 No hay un menú de UserForm como pantalla principal: la interacción diaria es vía **Ribbon personalizado (RibbonX, backend en `M___RibbonUI.bas`)**, con dos pestañas: `TabUserMenu` (import/export de BD, importaciones LSGES04/LSace06/AE4, recalcular tablas JIs, exportar hoja, mostrar/ocultar columnas, navegación entre hojas) y `TabProgMenu` (solo visible para el usuario "Boss": herramientas de depuración, proteger hoja, refrescar ribbon, auditar hipervínculos). Los UserForms se reservan para login, progreso y diálogos puntuales.
 
-- **`M_000_Ini_APP.bas`** — rutinas de entorno Excel: `Rut_ConfigExcel_Establecer/RESTABLECER`, `Rut_Off_Functions`/`Rut_On_Functions` (pausar cálculo/eventos durante procesos largos), `Rut_Context_Buttons_Hide/Restore`, `Rut_Menú_HideAll/ShowAll/ShowAll_Short`.
+- **`M_000_Ini_APP.bas`** — rutinas de entorno Excel: `Rut_ConfigExcel_Establecer/RESTABLECER`, `Rut_Off_Functions`/`Rut_On_Functions` (pausar cálculo/eventos durante procesos largos), `Rut_Context_Buttons_Hide/Restore`, `Rut_Menu_HideAll/ShowAll/ShowAll_Short`.
 - **`M_000_Ini_Var_APP.bas`** — sin lógica: es el **esquema de datos central**. Define como `Public Const` el índice de columna de cada tabla clave (`BD_*`, `AE4_*`, `LSace06_*`, `EPplazos_*`, `JIs_*`, `InfRec_*`, `DR_*`, `DefCol_*`, `Task_*`) más variables públicas de estado. Es la referencia obligada antes de tocar cualquier rutina que lea/escriba columnas de una tabla.
-- **`M_000_Menú_Usuario.bas`** — cambio de usuario (`Rut_Usuario_Chg`) y filtrado de qué botones del Ribbon/menú son visibles según usuario activo y hoja activa (`Rut_Filtrar_Tareas`, lee `Prog__Menú_Aux`).
+- **`M_000_Menu_Usuario.bas`** — cambio de usuario (`Rut_Usuario_Chg`) y filtrado de qué botones del Ribbon/menú son visibles según usuario activo y hoja activa (`Rut_Filtrar_Tareas`, lee `Prog__Menu_Aux`).
 
 ### Pipeline de proceso anual (módulos `M_NNN_*`, por rango de cientos)
 
@@ -71,4 +71,5 @@ Los módulos separadores `M_D_____________` de cada rango documentan el detalle 
 
 - Los `.cls` de `Prog_*`/`Sht__*` están vacíos a propósito: no busques lógica de negocio dentro, está en el `ListObject` de la hoja o en los módulos `M_*`/`Rut_*` que la referencian.
 - Antes de escribir `Hoja.Range("NombreDefinido")`, comprueba en qué hoja vive realmente el nombre (Administrador de Nombres, Ctrl+F3) — el ámbito "Libro" de un nombre no exime de cualificar con la hoja física donde vive la celda.
+- **Identificadores sin tildes ni `ñ`** (variables, constantes, rutinas, parámetros, etiquetas, controles y nombres de módulo): se quitan las tildes y la `ñ` pasa a `n` (`AnoCont`, `Rut_Menu_ShowAll`), igual que en Jornadas_y_Congresos. Todo el código se normalizó el 2026-09-30. Lo mismo para los **nombres de Excel** (nombres definidos y tablas: `APP_AnoCont`, `SW_RightClickMenu_Visible`, `Tab_Organicas`...), renombrados el 2026-09-30 en el libro y en las cadenas del código; las **pestañas** (`_Menú_Aux`, `Prog_Orgánicas`, `Hipervínculos`, `Cuenta_Fórmulas`) y los textos visibles conservan sus tildes. Ojo: una rutina puede estar referenciada **por su nombre** fuera del código (callbacks del `customUI14.xml`, macros asignadas a formas, columna `Nombre_Rut` de `Tb_Tareas`, que `RuT_Ejecutar_Rut`/`RuT_Load_Task_Data` buscan con `Application.Match`): si se renombra, hay que cambiar esos sitios a la vez.
 - `Rut_Filtro_Avanzado_VBA.bas` tiene referencias a variables no declaradas (`Ws`, `TablaDatos`): parece código en desarrollo/borrador, no confirmado como activo.

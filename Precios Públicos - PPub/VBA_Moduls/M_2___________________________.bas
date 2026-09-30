@@ -1,5 +1,6 @@
 Attribute VB_Name = "M_2___________________________"
-'    '- Importar LSGES04_GE por Curso_Acad_Ant, para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AñoCont.
+' Last Rev. 2026-09-30 19:16
+'    '- Importar LSGES04_GE por Curso_Acad_Ant, para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AnoCont.
 '
 '    - Rut_Lo_Import_LoData_LoDefCol, Import LSGES04 por Curso_Acad_Ant
 '    - Rut_Lo_ListColumns_ClearContents_DefC_ProtectData, Borrar por protección de Datos, Información sensible y no necesarias, según DefCol

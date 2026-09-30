@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -90,7 +91,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Dim TimeLap2        As Single
     Dim TxT_Progreso    As String
     Dim Arch_New_Name   As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     
@@ -130,18 +131,18 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
         '- Ajuste de la Fecha del Cierro Contable --------------
 '''        Call Rut_AskDate_CierreContable(Range("APP_FechCierreCont"))
         
-'GoTo SaltoAquí
+'GoTo SaltoAqui
 
-    If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 ?") Then GoTo SaltoAquí
+    If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 ?") Then GoTo SaltoAqui
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSGES04 por Año Contable --------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AñoCont
+    Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AnoCont
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD.Range("d2") = "Última Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
-    Sht__BD.Range("b3") = " Tabla Recibos Académicos de TIO y EP. y de Imp.Adm del Año_Contable " & Prog__APP.Range("APP_AñoCont") & _
+    Sht__BD.Range("b3") = " Tabla Recibos Académicos de TIO y EP. y de Imp.Adm del Año_Contable " & Prog__APP.Range("APP_AnoCont") & _
                             ", y Cursos: " & Prog__APP.Range("APP_C_Acad_Ant") & " y " & Prog__APP.Range("APP_C_Acad_Pos") & "."
     
 Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
@@ -149,7 +150,7 @@ Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
     '    '- ----------------------------------------------------------------------------------------------------------------------------
     '    '- Rut_Lo: Borrar por protección de Datos, Información sensible y no necesarias -------------------------------------------------------
     '    '- ----------------------------------------------------------------------------------------------------------------------------
-    '    If Prog__APP.Range("SW_ProtecciónDatosActivado") Then
+    '    If Prog__APP.Range("SW_ProteccionDatosActivado") Then
     '        Call Rut_Lo_ListColumns_ClearContents_DefC_ProtectData(Lo_BD, Lo_DefCol_BD, DefC_ProtectData)    '- Borrar por protección de Datos, Información sensible y no necesarios
     '            '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
     '            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Eliminada Información sensible.", LastTimeLap)
@@ -210,13 +211,13 @@ RuT_Duplicates_Search:
             Set Lo_BD_Dpl = Nothing
         
 '''Rut_Copy_AE4x4_en_BDatos:
-'''    If Not Func_MsgBox_vbYesNo("¿ Trasladar los recibos de AE4x4 a BDatos ?") Then GoTo RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio
+'''    If Not Func_MsgBox_vbYesNo("¿ Trasladar los recibos de AE4x4 a BDatos ?") Then GoTo RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio
 '''    '- ----------------------------------------------------------------------------------------------------------------------------
 '''    '- M_315_Copy_INSS_a_BD, Trasladar el importe INSS a los recibos de BDatos ----------------------------------------------------
 '''    '- ----------------------------------------------------------------------------------------------------------------------------
 '''    Call Rut_Copy_AE4x4_en_BDatos   '¡¡¡ Quizás preguntar si no hay que actualizar antes con el módúlo Update_LSGES04_C_Acad_Ant !!!
 
-RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio:
+RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio:
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_113, Asignar Código Concepto-Eco del Rec Y Rellenar Col Cta_Ingreso con el nº de Cta. correspondiente y Año de Vencimiento en ACont_Vto-----
     '- ----------------------------------------------------------------------------------------------------------------------------
@@ -224,7 +225,7 @@ RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio:
     '- Determinar Cta-CCC Ingreso
     '- Determinar Concepto Económico
     '- Determinar Tipo de Enseñanza TIO-EP
-    Call RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio(Lo_BD)
+    Call RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio(Lo_BD)
 
 RuT_Clasif_Recibos:
     '- ----------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +255,7 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar el Imp_INSS del C_Acad_Ant/Pos a BDatos 
     Call Rut_Copy_ImpINSS_en_BDatos   '¡¡¡ Quizás preguntar si no hay que actualizar antes con el módúlo Update_LSGES04_C_Acad_Ant !!!
         
 
-SaltoAquí:
+SaltoAqui:
 
 Rut_Lo_Import_WorkSheet:
 If Not Func_MsgBox_vbYesNo("¿ Importar Datos del Mes Anterior ?") Then GoTo Rut_Actualizar_LoBDatos_con_LoBD_Ant
@@ -271,7 +272,7 @@ If Not Func_MsgBox_vbYesNo("¿ Actualizams BDatos con BDatos del Mes Anterior ?")
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_118_Actualiz_BD_con_BD_Ant -------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Dim Ws_BD_Ant   As Worksheet:   Set Ws_BD_Ant = Sht__BD_Ant
+    Set Ws_BD_Ant = Sht__BD_Ant
     Arch_New_Name = "PPub_BDatos_Prog-RibbonX V-"
     Call Rut_Lo_Import_WorkSheet(Ws_BD_Ant, Arch_New_Name, Sht__BD.Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores

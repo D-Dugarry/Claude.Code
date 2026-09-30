@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_411_Import_AE4x1"
+' Last Rev. 2026-09-30 21:12
 '2026-01-25
 Option Explicit
 
@@ -18,8 +19,8 @@ Option Explicit
 '            -            3º Comprobar que la Tabla Lo_ClsBk tiene datos
 '            -            4º Comprobar que la cabecera de la Tabla Lo_ClsBk corresponde con la establecida en la LoDefCol
 '            - Proceso ClsBk:
-'                        - Borrar Recibos ACont_Emi = AñoCont-1 y Acont_Cob <> AñoCont
-'                        - Borrar Recibos ACont_Emi > AñoCont
+'                        - Borrar Recibos ACont_Emi = AnoCont-1 y Acont_Cob <> AnoCont
+'                        - Borrar Recibos ACont_Emi > AnoCont
 '                        - Borrar Datos de Rec. con F_Cob > APP_FechCierreCont: Vaciar/Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
 '                        - Borrar Recibos M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b --
 '            - Copy ClsBk:
@@ -44,7 +45,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
     Dim ArchRequest     As String:      ArchRequest = Arch_New_Name
     Dim TxT_ProgIni     As String:      TxT_ProgIni = ActivForm.Controls("TBx_Informe")
     Dim TxT_Progreso    As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim FechCierreCont  As String:      FechCierreCont = Prog__APP.Range("APP_FechCierreCont")
@@ -155,26 +156,26 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
                                                             Format(Lo_ClsBk.ListRows.Count, "#,##0") & " reg", TxT_Progreso)
     '- --------------------------------------------------------------------------------------------------------------
     '- --------------------------------------------------------------------------------------------------------------
-    '- Proceso ClosedBook: (para transferir sólo los recibos del AñoCont y no los del C_Acad)
-    '        - Borrar Recibos ACont_Emi = AñoCont-1 y Acont_Cob <> AñoCont
-    '        - Borrar Recibos ACont_Emi > AñoCont
+    '- Proceso ClosedBook: (para transferir sólo los recibos del AnoCont y no los del C_Acad)
+    '        - Borrar Recibos ACont_Emi = AnoCont-1 y Acont_Cob <> AnoCont
+    '        - Borrar Recibos ACont_Emi > AnoCont
     '        - Borrar Recibos Importe CERO - Subvencionado- Imp_Rec =0 porque Imp_Dto >0
     '        - Borrar Datos de Rec. con F_Cob > APP_FechCierreCont: Vaciar/Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
     '        - Borrar Recibos M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b -- M013 -- NO M013b --
     '- --------------------------------------------------------------------------------------------------------------
    
-'- Borrar Recibos ACont_Emi = AñoCont-1 y Acont_Cob <> AñoCont -----------------------------------------------------------------------------------
+'- Borrar Recibos ACont_Emi = AnoCont-1 y Acont_Cob <> AnoCont -----------------------------------------------------------------------------------
     RowsFind = Lo_ClsBk.ListRows.Count
     Rng_Informe = " Fich. con " & Format(RowsFind, "#,##0") & " reg., "
-    Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, BD_ACont_Emi, "=" & AñoCont - 1, BD_ACont_Cob, "<>" & AñoCont)
+    Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, BD_ACont_Emi, "=" & AnoCont - 1, BD_ACont_Cob, "<>" & AnoCont)
     RowsFind = RowsFind - Lo_ClsBk.ListRows.Count
-    Rng_Informe = Rng_Informe & " Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi=" & AñoCont - 1 & " y ACont_Cob" & ChrW(&H2260) & AñoCont
+    Rng_Informe = Rng_Informe & " Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi=" & AnoCont - 1 & " y ACont_Cob" & ChrW(&H2260) & AnoCont
     If RowsFind > 0 Then
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "Borrados Rec. ACont_Emi = " & AñoCont - 1 & " y ACont_Cob " & ChrW(&H2260) & "  " & AñoCont, 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "Borrados Rec. ACont_Emi = " & AnoCont - 1 & " y ACont_Cob " & ChrW(&H2260) & "  " & AnoCont, 0, _
                                                         Format(RowsFind, " #,##0") & " reg", _
                                                         "quedan " & Format(Lo_ClsBk.ListRows.Count, "#,##0") & " reg")
     Else
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "No hay Rec. ACont_Emi = " & AñoCont - 1 & " y ACont_Cob " & ChrW(&H2260) & "  " & AñoCont, 0)
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "No hay Rec. ACont_Emi = " & AnoCont - 1 & " y ACont_Cob " & ChrW(&H2260) & "  " & AnoCont, 0)
     End If
     '- Comprobar que quedan registros
     If Lo_ClsBk.DataBodyRange Is Nothing Then
@@ -182,17 +183,17 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
         GoTo Cancel_Rut
     End If
 
-'- Borrar Recibos ACont_Emi > AñoCont -----------------------------------------------------------------------------------
+'- Borrar Recibos ACont_Emi > AnoCont -----------------------------------------------------------------------------------
     RowsFind = Lo_ClsBk.ListRows.Count
-    Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, BD_ACont_Emi, ">" & AñoCont)
+    Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, BD_ACont_Emi, ">" & AnoCont)
     RowsFind = RowsFind - Lo_ClsBk.ListRows.Count
-    Rng_Informe = Rng_Informe & ", Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi > " & AñoCont
+    Rng_Informe = Rng_Informe & ", Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi > " & AnoCont
     If RowsFind > 0 Then
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "Borrados Rec. ACont_Emi > " & AñoCont, 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "Borrados Rec. ACont_Emi > " & AnoCont, 0, _
                                                         Format(RowsFind, " #,##0") & " reg", _
                                                         "quedan " & Format(Lo_ClsBk.ListRows.Count, "#,##0") & " reg")
     Else
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "No hay Rec. ACont_Emi > " & AñoCont, 0)
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "No hay Rec. ACont_Emi > " & AnoCont, 0)
     End If
     '- Comprobar que quedan registros
     If Lo_ClsBk.DataBodyRange Is Nothing Then
@@ -204,7 +205,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
     RowsFind = Lo_ClsBk.ListRows.Count
     Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, BD_ImpRec, "=0,00")
     RowsFind = RowsFind - Lo_ClsBk.ListRows.Count
-    Rng_Informe = Rng_Informe & ", Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi > " & AñoCont
+    Rng_Informe = Rng_Informe & ", Del " & Format(RowsFind, "#,##0") & " reg. ACont_Emi > " & AnoCont
     If RowsFind > 0 Then
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(10, " ") & "Borrados Rec. de Matrícula_Cero Subvencionada, ImpRec = 0", 0, _
                                                         Format(RowsFind, " #,##0") & " reg", _

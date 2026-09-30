@@ -1,10 +1,11 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-02-15
 Option Explicit
 
 '- Genera la Tabla Informe_Recibos
     '- Borrado Tabla explicativa de Tipos de Recibos: Emitido, ADxAplz, Aplazado, EjeAnt y Añejo.
-    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ----------------------------------------------
+    '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
 
@@ -34,11 +35,11 @@ Dim Concept         As Variant
 Dim Concept2        As String
 Dim Tp_Rec          As String
 Dim TipRec_Cncpt    As String:          TipRec_Cncpt = ""
-Dim DescripciónA    As String
-Dim DescripciónB    As String
-Dim MenúAux_Msg     As String
-Dim APP_AñoCont     As String:          APP_AñoCont = Prog__APP.Range("APP_AñoCont")
-Dim APP_ACont       As String:          APP_ACont = Right(Prog__APP.Range("APP_AñoCont"), 2)
+Dim DescripcionA    As String
+Dim DescripcionB    As String
+Dim MenuAux_Msg     As String
+Dim APP_AnoCont     As String:          APP_AnoCont = Prog__APP.Range("APP_AnoCont")
+Dim APP_ACont       As String:          APP_ACont = Right(Prog__APP.Range("APP_AnoCont"), 2)
 Dim APP_AcadAnt     As String:          APP_AcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
 Dim APP_AcadPos     As String:          APP_AcadPos = Prog__APP.Range("APP_C_Acad_Pos")
 
@@ -86,38 +87,38 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     Sht_Inf.Select
     Lo_Inf.ShowTotals = False
     
-    '- Vaciar Lo_Inf, Añadir Leyenda con AñoCont y Rellenar Lo_inf ----------------------------------------------
+    '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
     If Not Lo_Inf.DataBodyRange Is Nothing Then Lo_Inf.DataBodyRange.Delete
 
     '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto ------------------------------------
     With Lo_Inf.HeaderRowRange
     
     
-        .Cells(InfRec_JI_Emi_Adm) = "JI-" & APP_AñoCont - 1 & " o JI-" & APP_AñoCont & vbLf & "1303.00" & vbLf & "Adm."
-        .Cells(InfRec_JI_Emi_Acad) = "JI-" & APP_AñoCont - 1 & " o JI-" & APP_AñoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
-        .Cells(InfRec_AD_Emi_Adm) = "AD-" & APP_AñoCont & vbLf & "1303.00" & vbLf & "Adm."
-        .Cells(InfRec_AD_Emi_Acad) = "AD-" & APP_AñoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
-        .Cells(InfRec_JI_443_Adm) = "JI-" & APP_AñoCont & vbLf & "1303.00" & vbLf & "Adm."
-        .Cells(InfRec_JI_443_Acad) = "JI-" & APP_AñoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
+        .Cells(InfRec_JI_Emi_Adm) = "JI-" & APP_AnoCont - 1 & " o JI-" & APP_AnoCont & vbLf & "1303.00" & vbLf & "Adm."
+        .Cells(InfRec_JI_Emi_Acad) = "JI-" & APP_AnoCont - 1 & " o JI-" & APP_AnoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
+        .Cells(InfRec_AD_Emi_Adm) = "AD-" & APP_AnoCont & vbLf & "1303.00" & vbLf & "Adm."
+        .Cells(InfRec_AD_Emi_Acad) = "AD-" & APP_AnoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
+        .Cells(InfRec_JI_443_Adm) = "JI-" & APP_AnoCont & vbLf & "1303.00" & vbLf & "Adm."
+        .Cells(InfRec_JI_443_Acad) = "JI-" & APP_AnoCont & vbLf & "1310.xx 00/01/02" & vbLf & "Acad."
     
-        .Cells(InfRec_ConcptEco2).Offset(-2, 0) = "Año Contable " & APP_AñoCont & ", Cursos Académicos " & APP_AcadAnt & " y " & APP_AcadPos & ", (importes académicos)"
+        .Cells(InfRec_ConcptEco2).Offset(-2, 0) = "Año Contable " & APP_AnoCont & ", Cursos Académicos " & APP_AcadAnt & " y " & APP_AcadPos & ", (importes académicos)"
         .Cells(InfRec_ImpAcad_Crs_Ant) = "Emi.'" & APP_ACont & vbLf & "Curso" & vbLf & APP_AcadAnt
         .Cells(InfRec_ImpAcad_Crs_Pos) = "Emi.'" & APP_ACont & vbLf & "Curso" & vbLf & APP_AcadPos
         
-        .Cells(InfRec_ImpAcad_EmiAnt) = "Emi.'" & APP_ACont - 1 & vbLf & "No Cob.'" & APP_ACont - 1 & vbLf & "JI-" & APP_AñoCont - 1
+        .Cells(InfRec_ImpAcad_EmiAnt) = "Emi.'" & APP_ACont - 1 & vbLf & "No Cob.'" & APP_ACont - 1 & vbLf & "JI-" & APP_AnoCont - 1
         .Cells(InfRec_ImpAcad_Emi) = "Emi.'" & APP_ACont & vbLf & "No Cob.'" & APP_ACont & vbLf & "Vto.'" & APP_ACont + 1
         .Cells(InfRec_ImpAcad_Cob_AcadAnt) = "Cob.'" & APP_ACont & vbLf & "Curso" & vbLf & APP_AcadAnt
         .Cells(InfRec_ImpAcad_Cob_AcadPos) = "Cob.'" & APP_ACont & vbLf & "Curso" & vbLf & APP_AcadPos
         .Cells(InfRec_ImpAcad_Pdte) = vbLf & "Pdte. Cob."
-        .Cells(InfRec_ADxAplz) = "Emi. y No Cob.'" & APP_ACont & vbLf & "Vto.'" & APP_ACont + 1 & vbLf & "AD-" & APP_AñoCont
-        .Cells(InfRec_Aplazado) = "AD'" & APP_ACont - 1 & " Cob.'" & APP_ACont & vbLf & "JI-" & APP_AñoCont & vbLf & "A la 4430"
+        .Cells(InfRec_ADxAplz) = "Emi. y No Cob.'" & APP_ACont & vbLf & "Vto.'" & APP_ACont + 1 & vbLf & "AD-" & APP_AnoCont
+        .Cells(InfRec_Aplazado) = "AD'" & APP_ACont - 1 & " Cob.'" & APP_ACont & vbLf & "JI-" & APP_AnoCont & vbLf & "A la 4430"
     End With
     
     '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
     For F_Tp_Rec = 1 To Lo_Tipo_Rec.ListRows.Count
         
         Tp_Rec = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 1)
-        DescripciónA = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 2)
+        DescripcionA = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 2)
         
         '- Para cada Concepto Económico= Tipo de Enseñanza; 1310.00, 1310.01, 1311.00, 1303.00 .. (TIO, EFP, CFC/AF y ADM.) -----------------------------
         For F_Concept = 1 To Lo_Concept.ListRows.Count
@@ -130,12 +131,12 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             End If
             Concept2 = Lo_Concept.DataBodyRange.Cells(F_Concept, 5)     '- 303.00, 303.01, 310.00, 310.01, 310.02, 311.00, 311.03, 312.00, 312.02, 315.00
             RwJI.Range(InfRec_TipRec) = Tp_Rec                             '- ADxAplz, Añejo, EjeAnt, Emitido, Aplazado
-            RwJI.Range(InfRec_Enseñanza) = Lo_Concept.DataBodyRange.Cells(F_Concept, 4)    '- TIO, EFP, TNCT, CFC, ADM
+            RwJI.Range(InfRec_Ensenanza) = Lo_Concept.DataBodyRange.Cells(F_Concept, 4)    '- TIO, EFP, TNCT, CFC, ADM
             RwJI.Range(InfRec_ConcptEco) = Lo_Concept.DataBodyRange.Cells(F_Concept, 5)
             RwJI.Range(InfRec_ConcptEco2) = RwJI.Range(InfRec_ConcptEco)
             RwJI.Range(InfRec_Cta_Adm) = Lo_Concept.DataBodyRange.Cells(F_Concept, 6)      '- Cta. Adm
-            DescripciónB = Lo_Concept.DataBodyRange.Cells(F_Concept, 2)
-            RwJI.Range(InfRec_ConcptNom) = DescripciónB
+            DescripcionB = Lo_Concept.DataBodyRange.Cells(F_Concept, 2)
+            RwJI.Range(InfRec_ConcptNom) = DescripcionB
             
             With Sht__BD.ListObjects(1).DataBodyRange
             '-----------------------------------------------------------------------------------------------------------------------
@@ -203,7 +204,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-----------------------------------------------------------------------------------------------------------------------
             '-------------------------------- Importes Académicos SIN Adm. y SIN INSS ----------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
-            If RwJI.Range(InfRec_Enseñanza) <> "ADM" And RwJI.Range(InfRec_Enseñanza) <> "TNCT" Then
+            If RwJI.Range(InfRec_Ensenanza) <> "ADM" And RwJI.Range(InfRec_Ensenanza) <> "TNCT" Then
                 '- Imp. Acad. ------------------------------------------------------------------------------------------------------
                 RwJI.Range(InfRec_Acad_Emi) = RwJI.Range(InfRec_Tot_Emi) - RwJI.Range(InfRec_Adm_Emi) - RwJI.Range(InfRec_Adm_INSS_Emi)
                 '- Imp. Acad. Cobrado ----------------------------------------------------------------------------------------------
@@ -256,26 +257,26 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             
             '- Importe Recibos Cobrados x Curso_Acad Ant / Pos ----------------------------------------------------------------------
             ImpCobCursAnt = Application.SumIfs(.Columns(BD_ImpCob), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
+                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
             ImpCobCursPos = Application.SumIfs(.Columns(BD_ImpCob), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
+                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_C_Acad), "=" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
             '- Importe Adm. Cobrados  x Curso_Acad Ant / Pos -------------------------------------------------------------------------
             ImpCobCursAdmAnt = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
+                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
                                                     .Columns(BD_Concepto), Concept)
             ImpCobCursAdmPos = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AñoCont, _
+                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
                                                     .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
                                                     .Columns(BD_C_Acad), "=" & APP_AcadPos, _
                                                     .Columns(BD_FEmi), FechCierreCont, _
@@ -285,7 +286,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-----------------------------------------------------------------------------------------------------------------------
             '-------------------------------- Importes Académicos SIN Adm. y SIN INSS ----------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
-            If RwJI.Range(InfRec_Enseñanza) <> "ADM" And RwJI.Range(InfRec_Enseñanza) <> "TNCT" Then
+            If RwJI.Range(InfRec_Ensenanza) <> "ADM" And RwJI.Range(InfRec_Ensenanza) <> "TNCT" Then
                 '- Imp. Acad. ------------------------------------------------------------------------------------------------------
                 RwJI.Range(InfRec_ImpAcad_Crs_Ant) = ImpAcadCursAnt
                 RwJI.Range(InfRec_ImpAcad_Crs_Pos) = ImpAcadCursPos
@@ -347,28 +348,28 @@ Sigiente_Concepto:
 
             Select Case RwJI.Range(InfRec_TipRec)
             Case "EjeAnt"
-                RwJI.Range(InfRec_Descrip_Contab) = "Añadir línea de Cobro en JI-" & APP_AñoCont - 1 & " del Importe Cobrado. Concepto Eco. " _
-                                             & Concept2 & "__" & DescripciónB & ".  "
+                RwJI.Range(InfRec_Descrip_Contab) = "Añadir línea de Cobro en JI-" & APP_AnoCont - 1 & " del Importe Cobrado. Concepto Eco. " _
+                                             & Concept2 & "__" & DescripcionB & ".  "
             Case "Emitido", "Añejo"
-                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AñoCont & " del importe Emitido y línea de cobro del Importe Cobrado. Concepto Eco. " _
-                                             & Concept2 & "__" & DescripciónB & ".  "
+                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AnoCont & " del importe Emitido y línea de cobro del Importe Cobrado. Concepto Eco. " _
+                                             & Concept2 & "__" & DescripcionB & ".  "
             
             Case "ADxAplz"
-                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AñoCont & " del importe Emitido y AD-" & APP_AñoCont & ", del mismo Importe. Concepto Eco. " _
-                                             & Concept2 & "__" & DescripciónB & ".  "
+                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AnoCont & " del importe Emitido y AD-" & APP_AnoCont & ", del mismo Importe. Concepto Eco. " _
+                                             & Concept2 & "__" & DescripcionB & ".  "
             
             Case "Aplazado"
-                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AñoCont & " a la Cta. 4430, del importe Cobrado y línea de cobro del mismo Importe. Concepto Eco. " _
-                                             & Concept2 & "__" & DescripciónB & ".  "
+                RwJI.Range(InfRec_Descrip_Contab) = "JI-" & APP_AnoCont & " a la Cta. 4430, del importe Cobrado y línea de cobro del mismo Importe. Concepto Eco. " _
+                                             & Concept2 & "__" & DescripcionB & ".  "
             End Select
             
             If RwJI.Range(JIs_TipRec) = "EjeAnt" Then
-                RwJI.Range(InfRec_Descrip_JI) = "Añadir línea de Cobro en JI-" & APP_AñoCont - 1 & _
+                RwJI.Range(InfRec_Descrip_JI) = "Añadir línea de Cobro en JI-" & APP_AnoCont - 1 & _
                                              " del Importe Cobrado y de Concepto Eco. " & Concept2 & _
-                                             "__" & RwJI.Range(InfRec_Enseñanza) & " - " & DescripciónB & ".  "
+                                             "__" & RwJI.Range(InfRec_Ensenanza) & " - " & DescripcionB & ".  "
             Else
-                RwJI.Range(InfRec_Descrip_JI) = "Liq.PPub_" & Concept2 & "__" & Tp_Rec & "_" & APP_AñoCont & _
-                                             "__" & RwJI.Range(InfRec_Enseñanza) & " - " & DescripciónB & ".  "
+                RwJI.Range(InfRec_Descrip_JI) = "Liq.PPub_" & Concept2 & "__" & Tp_Rec & "_" & APP_AnoCont & _
+                                             "__" & RwJI.Range(InfRec_Ensenanza) & " - " & DescripcionB & ".  "
             End If
             
             
@@ -438,11 +439,11 @@ SiguienteColumna:
     Cells(UltFila, ColIni).PasteSpecial Paste:=xlPasteFormats
     Cells(UltFila, ColIni).PasteSpecial Paste:=xlPasteValues
     Application.CutCopyMode = False
-    '- Añado Datos de AñoCont y Cursos Acad -----------------
-    Cells(UltFila, ColIni + 1) = "Descripción para Recibos del Año Contable " & APP_AñoCont & vbLf & _
+    '- Añado Datos de AnoCont y Cursos Acad -----------------
+    Cells(UltFila, ColIni + 1) = "Descripción para Recibos del Año Contable " & APP_AnoCont & vbLf & _
                             " Rec. que abarcan el Curso Académico " & APP_AcadAnt & " y " & APP_AcadPos & vbLf & _
-                            " Y Son Rec. Emitidos en " & APP_AñoCont & " (Cobrados o NO)," & vbLf & _
-                            " O Rec. Cobrados en " & APP_AñoCont & " (Emitidos en cualquier Año =< " & APP_AñoCont & ")"
+                            " Y Son Rec. Emitidos en " & APP_AnoCont & " (Cobrados o NO)," & vbLf & _
+                            " O Rec. Cobrados en " & APP_AnoCont & " (Emitidos en cualquier Año =< " & APP_AnoCont & ")"
     '- Cambio el alto de las filas y centro verticalmente ---
     Range(Cells(UltFila, ColIni), Cells(UltFila + TRows_LoTipoRec, ColIni + 1)).Select
             Selection.RowHeight = 80
@@ -521,9 +522,9 @@ Finalizar:
     Prog__APP.Range("APP_Last_Calc_" & Nom_Inf) = Format(Now(), "dd-mmm-yy hh:mm")
     
 ''    '- Visualizo el progreso ---------------------------------------------------------------------------------------
-''    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
+''    MenuAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
 ''        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
-''    MsgBox MenúAux_Msg
+''    MsgBox MenuAux_Msg
     Lo_BD.ShowTotals = True
     
     Application.ScreenUpdating = True

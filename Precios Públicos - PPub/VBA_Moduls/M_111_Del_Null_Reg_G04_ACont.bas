@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -14,7 +15,7 @@ Option Explicit
 '        - Borrar Recibos INVALIDADOS
 '        - Filtra Recibos con F_Cob > APP_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
 '        - Borrar Recibos con F_Emi > APP_FechCierreCont "FUERA DEL PERÍODO CONTABLE"
-'        - Borrar Incongruencias de Fechas, Recibos Cobrados en Años Anteriores o Posteriores a AñoCont
+'        - Borrar Incongruencias de Fechas, Recibos Cobrados en Años Anteriores o Posteriores a AnoCont
 
             Sub RuT_Remove_Null_Reg_ByHand()
                 
@@ -24,10 +25,6 @@ Option Explicit
                 Dim Lo_BD_ErrDate       As ListObject:      Set Lo_BD_ErrDate = Sht__BD_ErrDate.ListObjects(1)
                 Dim Lo_BD_RegAnul       As ListObject:      Set Lo_BD_RegAnul = Sht__BD_RegAnul.ListObjects(1)
                 Dim Lo_DefCol_BD        As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
-                
-                Dim Lo_BdM013           As ListObject:      Set Lo_BdM013 = Sht__BD_M013.ListObjects(1)
-                Dim Lo_BdPNB1           As ListObject:      Set Lo_BdPNB1 = Sht__BD_PNB1.ListObjects(1)
-                Dim Lo_BdAdmP           As ListObject:      Set Lo_BdAdmP = Sht__BD_AdmP.ListObjects(1)
                 
                 Call RuT_Remove_Reg_No_Valid(Lo_BD, Lo_BD_ErrDate)
                 
@@ -40,7 +37,7 @@ Sub RuT_Remove_Reg_No_Valid(Lo_Data As ListObject, _
                         
 Debug.Print ">>> RuT_Remove_Reg_No_Valid"
     Dim rowfind     As Variant
-    Dim AñoCont         As String:  AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:  AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim FechCierreCont  As String:  FechCierreCont = Prog__APP.Range("APP_FechCierreCont")
     Dim FechCierreCriteria As String:  FechCierreCriteria = Format(CDate(FechCierreCont), "mm\/dd\/yyyy")   '- Criteria robusto ante config. regional (no depende de recortar posiciones de texto)
     Dim Sh_Data     As Worksheet:   Set Sh_Data = Lo_Data.Parent
@@ -102,7 +99,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatrículaCero") Then
+            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero A Coste Cero", 0, _
@@ -126,7 +123,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatrículaCero") Then
+            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero Subvencionada", 0, _
@@ -245,7 +242,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- ----------- Borrar Recibos con fechas FUERA DEL PERÍODO CONTABLE -------------------------------------------------
 '- ------------------------------------------------------------------------------------------------------------------
 '- ------------------------------------------------------------------------------------------------------------------
-'- Borrar Recibos Emitidos en Años Posteriores a AñoCont ---------------------------------------------------------
+'- Borrar Recibos Emitidos en Años Posteriores a AnoCont ---------------------------------------------------------
 '-Filtra Recibos con F_Emi > APP_FechCierreCont y los Borra  ----------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         rowfind = .ListRows.Count
@@ -264,7 +261,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- ---------------------------------------------------------------------------------------------------------------
 '- Borrar Incongruencias de Fechas -------------------------------------------------------------------------------
 '- ---------------------------------------------------------------------------------------------------------------
-'- Borrar Recibos Cobrados en Años Anteriores o Posteriores a AñoCont --------------------------------------------
+'- Borrar Recibos Cobrados en Años Anteriores o Posteriores a AnoCont --------------------------------------------
 '- ---------------------------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")

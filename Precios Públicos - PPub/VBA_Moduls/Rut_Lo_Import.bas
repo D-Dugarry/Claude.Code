@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
+' Last Rev. 2026-09-30 21:12
 '2026-01-18
 Option Explicit
 
@@ -16,7 +17,7 @@ Rut_Off_Functions
     Dim ArchRequest         As String:          ArchRequest = Arch_New_Name
     Dim TxT_Progreso        As String
     Dim NomArch             As String
-    Dim AñoCont             As String:          AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim Lo_Data             As ListObject:      Set Lo_Data = WrkSht.ListObjects(1)
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -35,6 +36,7 @@ Rut_Off_Functions
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
 '            End With
+            Rut_On_Functions
             Exit Sub
         End If
         NomArch = Dir(Arch_New_Name)
@@ -49,11 +51,12 @@ Rut_Off_Functions
 '                ActivForm.Repaint
 '            End With
             Arch_New_Name = "Cancel"
+            Rut_On_Functions
             Exit Sub
         End If
             
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
-''''            ActivForm.Controls("Lb_Tít_Informe").Caption = "Progreso Tarea: Importar Informe: " & NomArch
+''''            ActivForm.Controls("Lb_Tit_Informe").Caption = "Progreso Tarea: Importar Informe: " & NomArch
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excel Seleccionado: " & NomArch, LastTimeLap)
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
     
@@ -109,6 +112,7 @@ Rut_Off_Functions
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
                 Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Rut_On_Functions
                 Exit Sub
             End If
             
@@ -145,6 +149,7 @@ Rut_Off_Functions
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
         '- Comprobar que la cabecera de la Tabla corresponde con la establecida en la LoDefCol ---------------------
@@ -163,6 +168,7 @@ Rut_Off_Functions
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
         
@@ -184,6 +190,7 @@ Rut_Off_Functions
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
 
+Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
 
@@ -209,7 +216,7 @@ Rut_Off_Functions
     Dim ArchRequest         As String:          ArchRequest = Arch_New_Name
     Dim TxT_Progreso        As String
     Dim NomArch             As String
-    Dim AñoCont             As String:          AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim WrkSht              As Worksheet:       Set WrkSht = Lo_Data.Parent
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -228,6 +235,7 @@ Rut_Off_Functions
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
 '            End With
+            Rut_On_Functions
             Exit Sub
         End If
         NomArch = Dir(Arch_New_Name)
@@ -242,11 +250,12 @@ Rut_Off_Functions
 '                ActivForm.Repaint
 '            End With
             Arch_New_Name = "Cancel"
+            Rut_On_Functions
             Exit Sub
         End If
             
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
-''''            ActivForm.Controls("Lb_Tít_Informe").Caption = "Progreso Tarea: Importar Informe: " & NomArch
+''''            ActivForm.Controls("Lb_Tit_Informe").Caption = "Progreso Tarea: Importar Informe: " & NomArch
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excel Seleccionado: " & NomArch, LastTimeLap)
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
     
@@ -302,6 +311,7 @@ Rut_Off_Functions
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
                 Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Rut_On_Functions
                 Exit Sub
             End If
             
@@ -335,6 +345,7 @@ Rut_Off_Functions
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
         '- Comprobar que la cabecera de la Tabla corresponde con la establecida en la LoDefCol ---------------------
@@ -353,6 +364,7 @@ Rut_Off_Functions
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
         
@@ -374,7 +386,7 @@ Rut_Off_Functions
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
 
+Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
-

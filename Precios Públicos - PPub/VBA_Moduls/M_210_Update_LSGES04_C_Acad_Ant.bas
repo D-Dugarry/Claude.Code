@@ -1,10 +1,11 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
+' Last Rev. 2026-09-30 21:12
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
 Option Explicit
 
-'    '- Importar LSGES04_GE por Curso_Acad_Ant, para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AñoCont.
+'    '- Importar LSGES04_GE por Curso_Acad_Ant, para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AnoCont.
 '
 '    - Rut_Lo_Import_LoData_LoDefCol, Import LSGES04 del Curso_Acad_Ant
 '    - Rut_Lo_ListColumns_ClearContents_DefC_ProtectData, Borrar por protección de Datos, Información sensible y no necesarias, según DefCol
@@ -46,7 +47,7 @@ ManejoError:
                 MsgBox "<<< Err_Rut Form_Running_Rut >>>"
             End Sub
 '==================================================================================================================================
-Sub RuT_Update_LSGES04_IAdm_CAcadAnt()  '- Importar LSGES04_GE por Curso-Acad., para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AñoCont.
+Sub RuT_Update_LSGES04_IAdm_CAcadAnt()  '- Importar LSGES04_GE por Curso-Acad., para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AnoCont.
 '==================================================================================================================================
 Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
     Dim TimeLap2        As Single
@@ -84,11 +85,12 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
 
 If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 C_Acad_" & C_Acad_Ant & " ?" & vbLf & vbLf & _
                            "¡¡¡ NO tiene que estar formateado !!!" & vbLf & vbLf & _
-                           "¡¡¡ se formatea en el proceso !!!") Then GoTo SalaAquí
+                           "¡¡¡ se formatea en el proceso !!!") Then GoTo SalaAqui
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSGES04 del Curso_Acad_Ant ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
     Dim Arch_New_Name         As String:    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant & "_BD"
+    Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
@@ -98,7 +100,7 @@ Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Rut_Lo: Borrar por protección de Datos, Información sensible y no necesarias -------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    If Prog__APP.Range("SW_ProtecciónDatosActivado") Then
+    If Prog__APP.Range("SW_ProteccionDatosActivado") Then
         Call Rut_Lo_ListColumns_ClearContents_DefC_ProtectData(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_ProtectData)
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Eliminada Información sensible.", LastTimeLap)
@@ -146,7 +148,7 @@ RuT_Find_Imp_AdmAcad_C_Acad:
     Call RuT_Find_Imp_AdmAcad_C_Acad(Lo_ImpAdmCAcadAnt)
                 
 'GoTo Terminar
-SalaAquí:
+SalaAqui:
 
     
 Rut_Copy_ImpAdm_CAcadAnt_a_BDatos:

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_410_Update_BD_AE4x4"
+' Last Rev. 2026-09-30 21:12
 '2026-01-017
 '- M_410_Update_Lo_AE4 -----------------------------------------------------------------------------------------------------------
 
@@ -41,7 +42,7 @@ Debug.Print "------------------------- >>> RuT_Update_AE4x4()"
     Dim Arch_New_Name   As String
     Dim NameFile        As String
     Dim PathFile        As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim Rng_Informe     As Range:       Set Rng_Informe = Sht__BD_AE4x4.Range("g5")
@@ -70,7 +71,7 @@ Debug.Print "------------------------- >>> RuT_Update_AE4x4()"
     
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Importar Rec. AE4 - EFPyAFC Del Curso_Acad " & C_Acad_Ant & " y " & C_Acad_Pos & vbLf & _
-                    "- Sólo los Recibos del Año Contable: " & AñoCont & " (Del Acont_Cob = AñoCont-1), y añadir Rec. a tabla BDatos.", 0)
+                    "- Sólo los Recibos del Año Contable: " & AnoCont & " (Del Acont_Cob = AñoCont-1), y añadir Rec. a tabla BDatos.", 0)
 
 If Not Func_MsgBox_vbYesNo("¿ Importamos WBs_AE4 ?" & vbLf & vbLf & _
                             "EFP_" & C_Acad_Ant & " y EFP_" & C_Acad_Pos & vbLf & vbLf & _

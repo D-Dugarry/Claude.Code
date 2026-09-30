@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
+' Last Rev. 2026-09-30 21:12
 '2026-01-23
 Option Explicit
 
@@ -26,7 +27,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     Dim F_BDAdm         As Long
     Dim Found           As Long:        Found = 0
     Dim NotFound        As Long:        NotFound = 0
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
     Dim TimeLapSub      As Single:      TimeLapSub = Time
@@ -52,7 +53,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     
     '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
     TxT_ProgIni = ActivForm.Controls("TBx_Informe")
-    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Procedimiento: Incorporar Imp. Acad. y Adm., Curso_Ant: " & C_Acad_Ant & ", a BDatos de " & AñoCont, 0, , , , , , 4)
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Procedimiento: Incorporar Imp. Acad. y Adm., Curso_Ant: " & C_Acad_Ant & ", a BDatos de " & AnoCont, 0, , , , , , 4)
     TxT_Progreso = ActivForm.Controls("TBx_Informe")
 
     '- --------------------------------------------------------------------------------------------------------
@@ -116,7 +117,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
         Next F_BDAdm
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporado Imp.Adm. de C_Acad_Ant_" & C_Acad_Ant & _
-                                                       ", Cobrado en " & AñoCont & " a BDatos.", 0, , , TxT_ProgIni, , , 2)
+                                                       ", Cobrado en " & AnoCont & " a BDatos.", 0, , , TxT_ProgIni, , , 2)
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos a: " & _
                             Format(Found, "#,##0") & " reg. de BDatos, de un total de " & Format(TF_BDAdm, "#,##0") & "reg. de " & Sht__BD_IAdm_CAcadAnt.Name, 0)
     End With        '-  Lo_BD_CAcad_Ant.DataBodyRange

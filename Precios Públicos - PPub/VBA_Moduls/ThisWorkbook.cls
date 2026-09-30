@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-09-30 21:12
 Option Explicit
 
 Private myRibUI             As IRibbonUI
@@ -45,7 +46,7 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     Application.DisplayFullScreen = True
     Application.EnableEvents = True:        Prog__APP.Range("SW_Events") = True
     Prog__APP.Range("SW_Test") = False
-    Prog__APP.Range("SW_RightClickMenú_Visible") = True
+    Prog__APP.Range("SW_RightClickMenu_Visible") = True
     Prog__APP.Range("SW_WB_Deactivate") = True     '- Cambiarlo a True para los usuarios
     
 '    Application.ErrorCheckingOptions.NumberAsText = False
@@ -68,7 +69,7 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     
     Call Rut_Lo_FreezePanes_InmovilizaFxCx(2)
     Call RuT_Al_Abrir_WorkBook
-    Call Rut_Menú_ShowAll
+    Call Rut_Menu_ShowAll
 Debug.Print "Workbook_Open ---------------------------<<< ThisWorkbook "
 End Sub
 ' ==================================================================================================================================
@@ -106,9 +107,9 @@ End Sub
 ' ==================================================================================================================================
 '- Please, copy the following event code in ThisWorkbook code module:
 ' ==================================================================================================================================
-Sub Workbook_SheetBeforeRightClick(ByVal SheetX As Object, ByVal Target As Range, Hide_RightClickMenú As Boolean)
-    Hide_RightClickMenú = Not Prog__APP.Range("SW_RightClickMenú_Visible")  '- Si Falso: NO hay Right-Click...
-Debug.Print "Workbook_SheetBeforeRightClick:   Hide_RightClickMenú = ", Hide_RightClickMenú
+Sub Workbook_SheetBeforeRightClick(ByVal SheetX As Object, ByVal Target As Range, Hide_RightClickMenu As Boolean)
+    Hide_RightClickMenu = Not Prog__APP.Range("SW_RightClickMenu_Visible")  '- Si Falso: NO hay Right-Click...
+Debug.Print "Workbook_SheetBeforeRightClick:   Hide_RightClickMenú = ", Hide_RightClickMenu
 ' ==================================================================================================================================
 '- Para una hoja en concreto, introducir este código en la misma hoja...
 ' ==================================================================================================================================

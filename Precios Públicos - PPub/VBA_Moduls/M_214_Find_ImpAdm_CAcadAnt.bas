@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
+' Last Rev. 2026-09-30 21:12
 '2026-01-25
 Option Explicit
 
@@ -16,7 +17,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim Fila            As Long
     Dim TF_Bdata        As Long:        TF_Bdata = Lo_AE4x1.ListRows.Count
     Dim RowsDel         As Long
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
@@ -106,17 +107,17 @@ Sig_Reg:
     
         '- Borrar Recibos Cobrados en Año_Cont_Ant -----------------------------------
         rowfind = .ListRows.Count
-        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_AE4x1, BD_ACont_Cob, "=" & AñoCont - 1)
+        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_AE4x1, BD_ACont_Cob, "=" & AnoCont - 1)
         TF_Bdata = .ListRows.Count
         RowsDel = rowfind - TF_Bdata
         If RowsDel > 0 Then
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "- Borrados Rec. Cobrados en Año_Cont_Ant " & AñoCont - 1, 0, _
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "- Borrados Rec. Cobrados en Año_Cont_Ant " & AnoCont - 1, 0, _
                                 Format(RowsDel, " #,##0") & " reg.", "quedan " & Format(TF_Bdata, "#,##0") & " reg.", , , , 2)
         Else
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "No hay Rec. Cobrados en Año_Cont_Ant " & AñoCont - 1, 0, , , , , , 2)
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "No hay Rec. Cobrados en Año_Cont_Ant " & AnoCont - 1, 0, , , , , , 2)
         End If
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes Adm. del Curso " & C_Acad_Ant & ", cobrado en " & AñoCont, 0, , _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes Adm. del Curso " & C_Acad_Ant & ", cobrado en " & AnoCont, 0, , _
                                                         "en " & Format(TF_Bdata, "#,##0") & "reg.", , , , 2)
         '- Sumatorios ---------
             With .DataBodyRange

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_113_Assign_Concept_Eco"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 '                           ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. por 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
@@ -8,21 +9,21 @@ Option Explicit
     '- Determinar Concepto Económico
     '- Determinar Tipo de Enseñanza TIO-EP
 
-            Sub RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio_ByHand()
+            Sub RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio_ByHand()
                 Sht__BD.Unprotect
                 Sht__BD.Columns.EntireColumn.Hidden = False        ' Mostrar todas las Columnas
-                Call RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio(Sht__BD.ListObjects(1))
-'                Call RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio(Sht__BD.ListObjects(1), Prog_ClasifEco.ListObjects(1))
+                Call RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio(Sht__BD.ListObjects(1))
+'                Call RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio(Sht__BD.ListObjects(1), Prog_ClasifEco.ListObjects(1))
             End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
     '- Determinar Fecha de Vencimiento --------------------------------------------------------------------------------------------------------
 '- ----------------------------------------------------------------------------------------------------------------------------
-Sub RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio(Lo_Data As ListObject)
-Debug.Print ">>> RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio"
+Sub RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio(Lo_Data As ListObject)
+Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
     Dim TimeLapSub          As Single:      TimeLapSub = LastTimeLap
     Dim TF_Sin_Concepto     As Integer
     Dim TF_ActivNotFind     As Integer
-    Dim AñoCont             As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont             As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim Cont_Fail           As Long
     Dim ContErrFVto         As Long
     Dim i                   As Long
@@ -42,53 +43,53 @@ Debug.Print ">>> RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio"
         Call Rut_Lo_Sort(Lo_Data, BD_FVto, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .DataBodyRange.Columns(BD_ACont_Vto).ClearContents   '- Se supone que está vacía...
         
-    '- Año_Vto = AñoCont -------------------------------------------------------------------------------------------------------
-        '- Cuando F_Vto anterior al 1-Ene del AñoCont-1, Es decir que es un Rec. Añejo Pongo F_Vto = AñoCont
-                .Range.AutoFilter Field:=BD_FVto, Criteria1:="<01/01/" & AñoCont - 1
+    '- Año_Vto = AnoCont -------------------------------------------------------------------------------------------------------
+        '- Cuando F_Vto anterior al 1-Ene del AnoCont-1, Es decir que es un Rec. Añejo Pongo F_Vto = AnoCont
+                .Range.AutoFilter Field:=BD_FVto, Criteria1:="<01/01/" & AnoCont - 1
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AñoCont
+            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont
         End If
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AñoCont & " ( F_Vto < " & AñoCont - 1 & ")", 0, Format(rowfind, "#,##0"))
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AnoCont & " ( F_Vto < " & AnoCont - 1 & ")", 0, Format(rowfind, "#,##0"))
         
-    '- Año_Vto = AñoCont -------------------------------------------------------------------------------------------------------
-        '- Cuando F_Vto corresponde al AñoCont, Es decir que es un Rec. Emitido o Aplazado, pongo Año_Vto = AñoCont
+    '- Año_Vto = AnoCont -------------------------------------------------------------------------------------------------------
+        '- Cuando F_Vto corresponde al AnoCont, Es decir que es un Rec. Emitido o Aplazado, pongo Año_Vto = AnoCont
         .AutoFilter.ShowAllData            ' Elimina los filtros
-                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AñoCont, _
-                                 Operator:=xlAnd, Criteria2:="<01/01/" & AñoCont + 1
-                                 'Operator:=xlAnd, Criteria2:="<=12/31/" & AñoCont   ¡¡¡ OJO !!! así no funciona seguramente porque habría que poner algo como por ejemplo 12/31/2025 23:59:59
+                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AnoCont, _
+                                 Operator:=xlAnd, Criteria2:="<01/01/" & AnoCont + 1
+                                 'Operator:=xlAnd, Criteria2:="<=12/31/" & AnoCont   ¡¡¡ OJO !!! así no funciona seguramente porque habría que poner algo como por ejemplo 12/31/2025 23:59:59
         '.Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_FVto_Act")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AñoCont
+            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont
         End If
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AñoCont & " ( F_Vto = " & AñoCont & ")", 0, Format(rowfind, "#,##0"))
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AnoCont & " ( F_Vto = " & AnoCont & ")", 0, Format(rowfind, "#,##0"))
     
-    '- Año_Vto = AñoCont - 1 -------------------------------------------------------------------------------------------------------
-        '- Cuando F_Vto corresponde al AñoCont-1, Es decir que es un Rec. EjeAnt, pongo Año_Vto = AñoCont - 1
+    '- Año_Vto = AnoCont - 1 -------------------------------------------------------------------------------------------------------
+        '- Cuando F_Vto corresponde al AnoCont-1, Es decir que es un Rec. EjeAnt, pongo Año_Vto = AnoCont - 1
         .AutoFilter.ShowAllData            ' Elimina los filtros
-                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AñoCont - 1, _
-                                 Operator:=xlAnd, Criteria2:="<01/01/" & AñoCont
+                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AnoCont - 1, _
+                                 Operator:=xlAnd, Criteria2:="<01/01/" & AnoCont
 '        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_FVto_Ant")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AñoCont - 1
+            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont - 1
         End If
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AñoCont - 1 & " ( F_Vto = " & AñoCont - 1 & ")", 0, Format(rowfind, "#,##0"))
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AnoCont - 1 & " ( F_Vto = " & AnoCont - 1 & ")", 0, Format(rowfind, "#,##0"))
         
-    '- Año_Vto = AñoCont +1 -------------------------------------------------------------------------------------------------------
-        '- Cuando F_Vto corresponde al AñoCont + 1, Es decir que es un Rec. ADxAplz, pongo Año_Vto = AñoCont + 1 ------------
+    '- Año_Vto = AnoCont +1 -------------------------------------------------------------------------------------------------------
+        '- Cuando F_Vto corresponde al AnoCont + 1, Es decir que es un Rec. ADxAplz, pongo Año_Vto = AnoCont + 1 ------------
         .AutoFilter.ShowAllData            ' Elimina los filtros
-                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AñoCont + 1
+                .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AnoCont + 1
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AñoCont + 1
+            .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont + 1
         End If
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AñoCont + 1 & " ( F_Vto = " & AñoCont + 1 & ")", 0, Format(rowfind, "#,##0"))
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " Año_Vto = " & AnoCont + 1 & " ( F_Vto = " & AnoCont + 1 & ")", 0, Format(rowfind, "#,##0"))
         
         '.ShowAutoFilter = True          '- El AdvancedFilter con Rango de Criterio desactiva el "ShowFilterMarck"
         
-    '- Detectar errores: AñoEmi>AñoVto
+    '- Detectar errores: AnoEmi>AñoVto
         For i = 1 To TF_BD
             With .DataBodyRange
                 If .Cells(i, BD_ACont_Emi) > .Cells(i, BD_ACont_Vto) Then
@@ -104,17 +105,17 @@ Debug.Print ">>> RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio"
             Dim CantACon As Long
             Dim CantAConPos As Long
             With .DataBodyRange
-                CantAConAnt = Application.CountIfs(.Columns(BD_ACont_Vto), AñoCont - 1)
-                CantACon = Application.CountIfs(.Columns(BD_ACont_Vto), AñoCont)
-                CantAConPos = Application.CountIfs(.Columns(BD_ACont_Vto), AñoCont + 1)
+                CantAConAnt = Application.CountIfs(.Columns(BD_ACont_Vto), AnoCont - 1)
+                CantACon = Application.CountIfs(.Columns(BD_ACont_Vto), AnoCont)
+                CantAConPos = Application.CountIfs(.Columns(BD_ACont_Vto), AnoCont + 1)
 '                ImpTAdm = Application.SumIfs(.Columns(BD_ImpAdm), .Columns(BD_Obs_Conta), "RecCab")
 '                ImpTDto = Application.Sum(.Columns(BD_ImpDto))
             End With
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AñoCont - 1, 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AnoCont - 1, 0, _
                                                         Format(CantAConAnt, "#,##0"))
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AñoCont, 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AnoCont, 0, _
                                                         Format(CantACon, "#,##0"))
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AñoCont + 1, 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Identificado Rec. AñoVto " & AnoCont + 1, 0, _
                                                         Format(CantAConPos, "#,##"))
         
         
@@ -443,6 +444,6 @@ Debug.Print ">>> RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio"
         
 Restablecer_Valores:
 Call Rut_Lo_Filtros_Quitar(Lo_Data)
-Debug.Print "<<< RuT_Assign_AñoVto_CtaCCC_ConcepEco_y_TipoEstudio"
+Debug.Print "<<< RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 End Sub
 

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_600_Informe_EP_RSm"
+' Last Rev. 2026-09-30 21:12
 Option Explicit
 
 ' ==================================================================================================================================
@@ -10,8 +11,8 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
     Dim F_Ant           As Long
     Dim Plan            As String
     Dim CAcad           As String
-    Dim AñoEmi          As String
-    Dim AñoCob          As String
+    Dim AnoEmi          As String
+    Dim AnoCob          As String
     Dim TIO_EP          As String
     Dim Anexo           As String
     Dim Cont_Tot_Reg        As Long
@@ -36,7 +37,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
     Dim Tipo_Rec        As Variant:    Tipo_Rec = Array("Emitido", "EjeAnt", "Añejo", "ADxAplz", "Aplazado")
 
     Dim Lo_EPs          As ListObject:       Set Lo_EPs = Sht__BD.ListObjects(1)
-    Dim Lo_InfRSm       As ListObject:       Set Lo_InfRSm = Wk_Inf_Rsm.ListObjects(1)
+    Dim Lo_InfRSm       As ListObject:       Set Lo_InfRSm = Sht__Inf_Inf_Rsm.ListObjects(1)
     Dim Lo_RetVRI       As ListObject:       Set Lo_RetVRI = Prog_RetVRI.ListObjects(1)
     
     Call Rut_Off_Functions
@@ -50,16 +51,16 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
     Call Rut_Lo_Sort(Lo_EPs, BD_ACont_Emi, xlAscending)
 '    Call Rut_Lo_Sort(Lo_EPs, BD_Ref, xlAscending)
     '- Preparar Tabla de Wk_Inf_Rsm ==================
-    Wk_Inf_Rsm.Visible = xlSheetVisible
-    Wk_Inf_Rsm.Select
-    Call Rut_Lo_WrkSht_Preparar(Wk_Inf_Rsm)
-    Wk_Inf_Rsm.Unprotect
+    Sht__Inf_Inf_Rsm.Visible = xlSheetVisible
+    Sht__Inf_Inf_Rsm.Select
+    Call Rut_Lo_WrkSht_Preparar(Sht__Inf_Inf_Rsm)
+    Sht__Inf_Inf_Rsm.Unprotect
     '- Vacío la Tabla de Tit.Prop.  =====================================
     Call Rut_Lo_Filtros_Quitar(Lo_InfRSm)
     If Not Lo_InfRSm.DataBodyRange Is Nothing Then Lo_InfRSm.DataBodyRange.Delete
     ' ==================================================================================================================================
     ' ###############################  Genero la Tabla de Planes de DR  #####################################
-    Plan = "":   CAcad = "":   AñoEmi = 0: Cont_Tot_Reg = 0:
+    Plan = "":   CAcad = "":   AnoEmi = 0: Cont_Tot_Reg = 0:
     Range("TP_Cod_Plan") = ""
     Range("TP_Cod_Plan").Select
 '    ActiveCell.Offset(0, 1) = Prog__APP.Range("APP_CursAcad")
@@ -93,12 +94,12 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
         Cont_Reg_Proc = Cont_Reg_Proc + 1
         Cont_Tot_Reg = Cont_Tot_Reg + 1
         ' --------------=============  Tratamiento de los Datos  ==================
-        If Plan & CAcad & AñoEmi = RwEPs.Range(BD_Plan) & RwEPs.Range(BD_C_Acad) & RwEPs.Range(BD_ACont_Emi) Then GoTo Siguiente_Fila   ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
+        If Plan & CAcad & AnoEmi = RwEPs.Range(BD_Plan) & RwEPs.Range(BD_C_Acad) & RwEPs.Range(BD_ACont_Emi) Then GoTo Siguiente_Fila   ' ------- Control cambio de Plan de estudio y de Curso Académico ---------------
             
         Plan = RwEPs.Range(BD_Plan)
         CAcad = RwEPs.Range(BD_C_Acad)
-        AñoEmi = RwEPs.Range(BD_ACont_Emi)
-        AñoCob = RwEPs.Range(BD_ACont_Cob)
+        AnoEmi = RwEPs.Range(BD_ACont_Emi)
+        AnoCob = RwEPs.Range(BD_ACont_Cob)
         TIO_EP = RwEPs.Range(BD_TIO_EP)
         
         '- Por cada tipo de Recibos: Emitido, AjeAnt, Añejo, ADxAplz, Aplazado
@@ -110,7 +111,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 T_Emi_Tot = Application.SumIfs(.Columns(BD_ImpRec), _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -120,7 +121,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 T_Cob_Tot = Application.SumIfs(.Columns(BD_ImpCob), _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -128,7 +129,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 T_Emi_Adm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -136,7 +137,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 T_Cob_Adm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -145,7 +146,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 CountRec = Application.CountIfs( _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -155,7 +156,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                                                             .Columns(BD_RDT), "<>", _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpRec), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -165,7 +166,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                                                             .Columns(BD_RDT), "<>", _
                                                             .Columns(BD_Plan), "=" & Plan, _
                                                             .Columns(BD_C_Acad), "=" & CAcad, _
-                                                            .Columns(BD_ACont_Emi), "=" & AñoEmi, _
+                                                            .Columns(BD_ACont_Emi), "=" & AnoEmi, _
                                                             .Columns(BD_ImpCob), ">0", _
                                                             .Columns(BD_Tipo_Rec), Tipo_Rec(IndxTipRec), _
                                                             .Columns(BD_TIO_EP), TIO_EP)
@@ -180,10 +181,10 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
             ' Buscar Orgánica -------------------
             RowFound = Application.Match(RwEPs.Range(BD_Plan) & "_" & RwEPs.Range(BD_C_Acad), Lo_RetVRI.DataBodyRange.Columns(3), 0)
             If IsError(RowFound) Then
-                RwInf.Range(IRs_Orgánica) = "Not Foud"
-                                 RetenVRI = RwEPs.Range(BD_Dtos)
+                RwInf.Range(IRs_Organica) = "Not Foud"
+                                 RetenVRI = RwEPs.Range(BD_ImpDto)
             Else
-                RwInf.Range(IRs_Orgánica) = Lo_RetVRI.DataBodyRange.Columns(5).Cells(RowFound)
+                RwInf.Range(IRs_Organica) = Lo_RetVRI.DataBodyRange.Columns(5).Cells(RowFound)
                                  RetenVRI = Lo_RetVRI.DataBodyRange.Columns(4).Cells(RowFound)
             End If
             
@@ -220,24 +221,24 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 
                 Case "Añejo"
                         RwInf.Range(IRs_Incidencia) = "Añejo_" & RwEPs.Range(BD_C_Acad)
-                        Anexo = "_Cont" & Right(Prog__APP.Range("APP_AñoCont"), 2) & " Añejo"
+                        Anexo = "_Cont" & Right(Prog__APP.Range("APP_AnoCont"), 2) & " Añejo"
                 Case "EjeAnt"
-                        RwInf.Range(IRs_Incidencia) = "Pdte.Cob." & Prog__APP.Range("APP_AñoCont") - 1
+                        RwInf.Range(IRs_Incidencia) = "Pdte.Cob." & Prog__APP.Range("APP_AnoCont") - 1
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " Em_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "Emitido"
                         RwInf.Range(IRs_Incidencia) = "Emi Curso_" & RwEPs.Range(BD_C_Acad)
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " Em_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "ADxAplz"
-                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AñoCont")
+                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AnoCont")
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " AD_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "Aplazado"
-                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AñoCont") - 1
+                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AnoCont") - 1
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) + 1 & " Rm_" & Right(RwEPs.Range(BD_C_Acad), 5)
             End Select
             
             RwInf.Range(IRs_Cod_Plan) = RwEPs.Range(BD_Plan)
             RwInf.Range(IRs_Curso_Acad) = RwEPs.Range(BD_C_Acad)
-            RwInf.Range(IRs_Año_Emi) = RwEPs.Range(BD_ACont_Emi)
+            RwInf.Range(IRs_Ano_Emi) = RwEPs.Range(BD_ACont_Emi)
             RwInf.Range(IRs_Plan_Curso) = RwEPs.Range(BD_Plan) & "_" & RwEPs.Range(BD_C_Acad) & Anexo
             RwInf.Range(IRs_NomPlan) = RwEPs.Range(BD_NomPlan)
             RwInf.Range(IRs_Ref_JI) = RwEPs.Range(BD_JI_Emi_Acad)
@@ -246,13 +247,13 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
             If RwEPs.Range(BD_Tipo_Rec) = "Aplazado" Then
                 RwInf.Range(IRs_Descripc) = "LIQ-EP_Plan_" & RwEPs.Range(BD_Plan) & _
                                             "-N Curso_" & RwEPs.Range(BD_C_Acad) & _
-                                            "_AñoCont_" & Prog__APP.Range("APP_AñoCont") & _
+                                            "_AñoCont_" & Prog__APP.Range("APP_AnoCont") & _
                                             " TipoRec_Rms443" & _
                                             " - " & RwEPs.Range(BD_NomPlan)
             Else
                 RwInf.Range(IRs_Descripc) = "LIQ-EP_Plan_" & RwEPs.Range(BD_Plan) & _
                                             "-N Curso_" & RwEPs.Range(BD_C_Acad) & _
-                                            "_AñoCont_" & Prog__APP.Range("APP_AñoCont") & _
+                                            "_AñoCont_" & Prog__APP.Range("APP_AnoCont") & _
                                             " TipoRec_" & RwEPs.Range(BD_Tipo_Rec) & _
                                             " - " & RwEPs.Range(BD_NomPlan)
             End If
@@ -261,17 +262,17 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
 ''                    R_Emi_Acad = .Cells(F_Ant, IRs_Emi_Tot) - .Cells(F_Ant, IRs_Emi_Adm)
 ''                    .Cells(F_Ant, IRs_Emi_VRI) = Application.Round(R_Emi_Acad * .Cells(F_Ant, IRs_Ret_VRI) / 100, 2)
 ''                    .Cells(F_Ant, IRs_Emi_Org) = R_Emi_Acad - .Cells(F_Ant, IRs_Emi_VRI)
-''                    If .Cells(F_Ant, IRs_Orgánica) = "" Then .Cells(F_Ant, IRs_Emi_SinOrg) = .Cells(F_Ant, IRs_Emi_Org) + .Cells(F_Ant, IRs_Emi_Adm)
+''                    If .Cells(F_Ant, IRs_Organica) = "" Then .Cells(F_Ant, IRs_Emi_SinOrg) = .Cells(F_Ant, IRs_Emi_Org) + .Cells(F_Ant, IRs_Emi_Adm)
 ''                    '----- Reparto de lo Cobrado -------------------------------------------
 ''                    R_Cob_Acad = .Cells(F_Ant, IRs_Cob_Tot) - .Cells(F_Ant, IRs_Cob_Adm)
 ''                    .Cells(F_Ant, IRs_Cob_VRI) = Application.Round(R_Cob_Acad * .Cells(F_Ant, IRs_Ret_VRI) / 100, 2)
 ''                    .Cells(F_Ant, IRs_Cob_Org) = R_Cob_Acad - .Cells(F_Ant, IRs_Cob_VRI)
-''                    If .Cells(F_Ant, IRs_Orgánica) = "" Then .Cells(F_Ant, IRs_Cob_SinOrg) = .Cells(F_Ant, IRs_Cob_Org) + .Cells(F_Ant, IRs_Cob_Adm)
+''                    If .Cells(F_Ant, IRs_Organica) = "" Then .Cells(F_Ant, IRs_Cob_SinOrg) = .Cells(F_Ant, IRs_Cob_Org) + .Cells(F_Ant, IRs_Cob_Adm)
 ''                    '--- Reparto Importes Redistribuidos -----------------------------------
 ''                    R_Rdt_Acad = .Cells(F_Ant, IRs_RDT_Tot) - .Cells(F_Ant, IRs_RDT_Adm)
 ''                    .Cells(F_Ant, IRs_RDT_VRI) = Application.Round(R_Rdt_Acad * .Cells(F_Ant, IRs_Ret_VRI) / 100, 2)
 ''                    .Cells(F_Ant, IRs_RDT_Org) = R_Rdt_Acad - .Cells(F_Ant, IRs_RDT_VRI)
-''                    If .Cells(F_Ant, IRs_Orgánica) = "" Then .Cells(F_Ant, IRs_RDT_SinOrg) = .Cells(F_Ant, IRs_RDT_Org) + .Cells(F_Ant, IRs_RDT_Adm)
+''                    If .Cells(F_Ant, IRs_Organica) = "" Then .Cells(F_Ant, IRs_RDT_SinOrg) = .Cells(F_Ant, IRs_RDT_Org) + .Cells(F_Ant, IRs_RDT_Adm)
 ''                    '----- Reparto Saldos --------------------------------------------------
 ''                    .Cells(F_Ant, IRs_RDT_Pte_Tot) = .Cells(F_Ant, IRs_Cob_Tot) - .Cells(F_Ant, IRs_RDT_Tot)
 ''                    .Cells(F_Ant, IRs_RDT_Pte_Org) = .Cells(F_Ant, IRs_Cob_Org) - .Cells(F_Ant, IRs_RDT_Org)

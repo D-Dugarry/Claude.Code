@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_602_Cierre_Contable_PLANES"
+' Last Rev. 2026-09-30 21:12
 '2026-01-27
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -223,7 +224,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String)
 '==================================================================================================================================
-    Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
     Dim Txt_Cabecera    As String
@@ -333,33 +334,33 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
     
     Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, False)
     ' Inicio Listado en Tabla excel
-    Txt_Cabecera = "Resumen del Año Contable " & AñoCont & ", de los Planes de " & TipoCurso & "_" & CursoAcad & String(10, " ") & Now
+    Txt_Cabecera = "Resumen del Año Contable " & AnoCont & ", de los Planes de " & TipoCurso & "_" & CursoAcad & String(10, " ") & Now
     Ws_Lista.Range("b2") = Txt_Cabecera
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Emis).Value = "Contab." & AñoCont & vbLf & "Imp_Emi" & vbLf & CursoAcad
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAnt).Value = "Imp_Emi" & vbLf & "en " & AñoCont - 1 & vbLf & "Conta'" & Right(AñoCont, 2)
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADx).Value = "Imp_Emi'" & Right(AñoCont - 1, 2) & vbLf & "y ADxAplz" & vbLf & "en " & AñoCont - 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADxAdm).Value = "Imp_ADxAplz" & vbLf & "Adm. en" & vbLf & AñoCont - 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADxAcad).Value = "Imp_ADxAplz" & vbLf & "Acad. en" & vbLf & AñoCont - 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Aplz).Value = "ADxAplz'" & Right(AñoCont - 1, 2) & vbLf & "Cob " & AñoCont & vbLf & "Aplazado'" & Right(AñoCont, 2)
-    Lo_Lst.HeaderRowRange.Cells(Lst_ImpEjeAnt).Value = "Emi." & AñoCont - 1 & vbLf & "Rec. EjeAnt" & vbLf & "Cob " & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPos).Value = "Imp_Emi" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPosAdm).Value = "Imp_Emi" & vbLf & "Adm. en" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPosAcad).Value = "Imp_Emi" & vbLf & "Acad. en" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Cobr).Value = "Imp_Cob" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_CobrAdm).Value = "Imp_Cob" & vbLf & "Adm." & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_CobrAcad).Value = "Imp_Cob" & vbLf & "Acad." & AñoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Emis).Value = "Contab." & AnoCont & vbLf & "Imp_Emi" & vbLf & CursoAcad
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAnt).Value = "Imp_Emi" & vbLf & "en " & AnoCont - 1 & vbLf & "Conta'" & Right(AnoCont, 2)
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADx).Value = "Imp_Emi'" & Right(AnoCont - 1, 2) & vbLf & "y ADxAplz" & vbLf & "en " & AnoCont - 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADxAdm).Value = "Imp_ADxAplz" & vbLf & "Adm. en" & vbLf & AnoCont - 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADxAcad).Value = "Imp_ADxAplz" & vbLf & "Acad. en" & vbLf & AnoCont - 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Aplz).Value = "ADxAplz'" & Right(AnoCont - 1, 2) & vbLf & "Cob " & AnoCont & vbLf & "Aplazado'" & Right(AnoCont, 2)
+    Lo_Lst.HeaderRowRange.Cells(Lst_ImpEjeAnt).Value = "Emi." & AnoCont - 1 & vbLf & "Rec. EjeAnt" & vbLf & "Cob " & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPos).Value = "Imp_Emi" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPosAdm).Value = "Imp_Emi" & vbLf & "Adm. en" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisPosAcad).Value = "Imp_Emi" & vbLf & "Acad. en" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Cobr).Value = "Imp_Cob" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_CobrAdm).Value = "Imp_Cob" & vbLf & "Adm." & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_CobrAcad).Value = "Imp_Cob" & vbLf & "Acad." & AnoCont
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp__RDT).Value = "Imp_RDT" & vbLf & CursoAcad
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp_SRDT).Value = "Pdte. RDT"
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte.Cob. " & vbLf & AñoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte.Cob. " & vbLf & AnoCont
     
     
-'    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADx).Value = "Imp_ADxAplz" & vbLf & AñoCont + 1
-'    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte_Cob" & vbLf & AñoCont
+'    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_ADx).Value = "Imp_ADxAplz" & vbLf & AnoCont + 1
+'    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte_Cob" & vbLf & AnoCont
 
     '- Visualizo el progreso ---------------------------------------------------------------------------------------
-    Form_Menu.Lb_Tít_Informe.Caption = "Progreso de la Tarea."
+    Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TBx_Informe = Txt_Cabecera & vbCrLf & vbCrLf
-    Txt_Cabecera = String(16, " ") & AñoCont - 1 & String(11, " ") & AñoCont & String(11, " ") & AñoCont & "         Cob." & AñoCont & "       Cob." & AñoCont & vbLf & _
+    Txt_Cabecera = String(16, " ") & AnoCont - 1 & String(11, " ") & AnoCont & String(11, " ") & AnoCont & "         Cob." & AnoCont & "       Cob." & AnoCont & vbLf & _
                    "    Plan       Imp_Emi        Imp_Emi        ADxAplz       Aplazado        Eje_Ant"
     Form_Menu.TBx_Informe = Form_Menu.TBx_Informe & Txt_Cabecera & vbLf
     
@@ -389,7 +390,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp_EmisAnt = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont - 1)
+                                          .Columns(BD_ACont_Emi), AnoCont - 1)
             RowNew.Range(Lst_Imp_EmisAnt) = Imp_EmisAnt
             TImpEmisAnt = TImpEmisAnt + Imp_EmisAnt
     
@@ -397,9 +398,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp__ADx = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont, _
-                                          .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
-                                          .Columns(BD_ACont_Emi), AñoCont - 1)
+                                          .Columns(BD_ACont_Vto), AnoCont, _
+                                          .Columns(BD_ACont_Cob), "<>" & AnoCont - 1, _
+                                          .Columns(BD_ACont_Emi), AnoCont - 1)
             RowNew.Range(Lst_Imp_ADx) = Imp__ADx
             TImp_ADx = TImp_ADx + Imp__ADx
 
@@ -407,9 +408,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp__ADxAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont, _
-                                          .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
-                                          .Columns(BD_ACont_Emi), AñoCont - 1)
+                                          .Columns(BD_ACont_Vto), AnoCont, _
+                                          .Columns(BD_ACont_Cob), "<>" & AnoCont - 1, _
+                                          .Columns(BD_ACont_Emi), AnoCont - 1)
             RowNew.Range(Lst_Imp_ADxAdm) = Imp__ADxAdm
             TImp_ADxAdm = TImp_ADxAdm + Imp__ADxAdm
 
@@ -418,23 +419,23 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             RowNew.Range(Lst_Imp_ADxAcad) = Imp__ADxAcad
             TImp_ADxAcad = TImp_ADxAcad + Imp__ADxAcad
             
-'- Importe Aplazado (ADxAplz el AñoCont -1 ----------------------------------------------------------------------------------------------------------------
+'- Importe Aplazado (ADxAplz el AnoCont -1 ----------------------------------------------------------------------------------------------------------------
             Imp_Aplz = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont, _
-                                          .Columns(BD_ACont_Cob), "<>" & AñoCont - 1, _
-                                          .Columns(BD_ACont_Emi), AñoCont - 1)
+                                          .Columns(BD_ACont_Vto), AnoCont, _
+                                          .Columns(BD_ACont_Cob), "<>" & AnoCont - 1, _
+                                          .Columns(BD_ACont_Emi), AnoCont - 1)
             RowNew.Range(Lst_Imp_Aplz) = Imp_Aplz
             TImpAplz = TImpAplz + Imp_Aplz
 
-'- Importe EjeAnt ( Emitido el AñoCont-1, Vto AñoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
+'- Importe EjeAnt ( Emitido el AnoCont-1, Vto AnoCont-1 y Cob Añocont ----------------------------------------------------------------------------------------------------------------
             I_EjeAnt = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont - 1, _
-                                          .Columns(BD_ACont_Cob), "=" & AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont - 1)
+                                          .Columns(BD_ACont_Vto), AnoCont - 1, _
+                                          .Columns(BD_ACont_Cob), "=" & AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont - 1)
             RowNew.Range(Lst_ImpEjeAnt) = I_EjeAnt
             T_EjeAnt = T_EjeAnt + I_EjeAnt
 
@@ -442,7 +443,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp_EmisPos = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_EmisPos) = Imp_EmisPos
             TImpEmisPos = TImpEmisPos + Imp_EmisPos
     
@@ -450,7 +451,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp_EmisPosAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_EmisPosAdm) = Imp_EmisPosAdm
             TimpEmisPosAdm = TimpEmisPosAdm + Imp_EmisPosAdm
     
@@ -470,7 +471,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp_CobrAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpCob), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Cob), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont)
             RowNew.Range(Lst_Imp_CobrAdm) = Imp_CobrAdm
             TImpCobradm = TImpCobradm + Imp_CobrAdm
     
@@ -491,8 +492,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
             Imp_SRDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_Plan), Cod_Plan, _
                                           .Columns(BD_RDT), "=", _
-                                          .Columns(BD_ACont_Cob), AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_SRDT) = Imp_SRDT
             TImpSRDT = TImpSRDT + Imp_SRDT
 
@@ -558,7 +559,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String)
 '==================================================================================================================================
-    Dim AñoCont         As Integer:     AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
     Dim Txt_Cabecera    As String
@@ -656,24 +657,24 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 
     Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, False)
     ' Inicio Listado en Tabla excel
-    Txt_Cabecera = "Resumen del Año Contable " & AñoCont & ", de los Planes de " & TipoCurso & "_" & CursoAcad & String(10, " ") & Now
+    Txt_Cabecera = "Resumen del Año Contable " & AnoCont & ", de los Planes de " & TipoCurso & "_" & CursoAcad & String(10, " ") & Now
     Ws_Lista.Range("b2") = Txt_Cabecera
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Emis).Value = "Imp_Emi" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAdm).Value = "Imp_Emi" & vbLf & AñoCont & vbLf & "Adm."
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAcad).Value = "Imp_Emi" & vbLf & AñoCont & vbLf & "Acad."
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Cobr).Value = "Imp_Cob" & vbLf & AñoCont
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__RDT).Value = "Imp_RDT" & vbLf & AñoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Emis).Value = "Imp_Emi" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAdm).Value = "Imp_Emi" & vbLf & AnoCont & vbLf & "Adm."
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_EmisAcad).Value = "Imp_Emi" & vbLf & AnoCont & vbLf & "Acad."
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_Cobr).Value = "Imp_Cob" & vbLf & AnoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__RDT).Value = "Imp_RDT" & vbLf & AnoCont
     Lo_Lst.HeaderRowRange.Cells(Lst_Imp_SRDT).Value = "Pdte_RDT"
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADx).Value = "Imp_ADxAplz" & vbLf & AñoCont + 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADxAdm).Value = "Imp_ADxAplz" & vbLf & "1303.00 " & vbLf & "Adm. " & AñoCont + 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADxAcad).Value = "Imp_ADxAplz" & vbLf & "1311.00 " & vbLf & "Acad " & AñoCont + 1
-    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte_Cob" & vbLf & AñoCont
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADx).Value = "Imp_ADxAplz" & vbLf & AnoCont + 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADxAdm).Value = "Imp_ADxAplz" & vbLf & "1303.00 " & vbLf & "Adm. " & AnoCont + 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp__ADxAcad).Value = "Imp_ADxAplz" & vbLf & "1311.00 " & vbLf & "Acad " & AnoCont + 1
+    Lo_Lst.HeaderRowRange.Cells(Lst_Imp_PdtCob).Value = "Pdte_Cob" & vbLf & AnoCont
 
     '- Visualizo el progreso ---------------------------------------------------------------------------------------
-    Form_Menu.Lb_Tít_Informe.Caption = "Progreso de la Tarea."
+    Form_Menu.Lb_Tit_Informe.Caption = "Progreso de la Tarea."
     Form_Menu.TBx_Informe = Txt_Cabecera & vbCrLf & vbCrLf
-    Txt_Cabecera = String(27, " ") & "Cob-" & AñoCont & String(18, " ") & "Cob-" & AñoCont & String(6, " ") & "ADxAplz" & String(6, " ") & "ADxAplz" & String(7, " ") & AñoCont & vbLf & _
-                   "    Plan     Imp_Rec       Imp_Cob       Imp_RDT     Pdte.RDT     Adm." & AñoCont + 1 & "     Acad." & AñoCont + 1 & "     Pde_Cob"
+    Txt_Cabecera = String(27, " ") & "Cob-" & AnoCont & String(18, " ") & "Cob-" & AnoCont & String(6, " ") & "ADxAplz" & String(6, " ") & "ADxAplz" & String(7, " ") & AnoCont & vbLf & _
+                   "    Plan     Imp_Rec       Imp_Cob       Imp_RDT     Pdte.RDT     Adm." & AnoCont + 1 & "     Acad." & AnoCont + 1 & "     Pde_Cob"
     Form_Menu.TBx_Informe = Form_Menu.TBx_Informe & Txt_Cabecera & vbLf
 
 
@@ -693,21 +694,21 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             Imp_Emis = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             If Imp_Emis = 0 Then GoTo Siguiente_Plan    '- Si todo está cobrado en año anterior
             RowNew.Range(Lst_Imp_Emis) = Imp_Emis
             TimpEmis = TimpEmis + Imp_Emis
             RegsEmis = Application.CountIfs( _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_RegsEmis) = RegsEmis
 
             '- Importe Recibos Emi_Adm -----------------------------------------------------------------------------------------------------------------
             Imp_EmisAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_EmisAdm) = Imp_EmisAdm
             TimpEmisAdm = TimpEmisAdm + Imp_EmisAdm
             
@@ -720,8 +721,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             Imp_Cobr = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Cob), AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_Cobr) = Imp_Cobr
             TImpCobr = TImpCobr + Imp_Cobr
             
@@ -730,8 +731,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
                                           .Columns(BD_RDT), "<>", _
-                                          .Columns(BD_ACont_Cob), AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp__RDT) = Imp__RDT
             TImp_RDT = TImp_RDT + Imp__RDT
 
@@ -739,24 +740,24 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             Imp_SRDT = Application.SumIfs(.Columns(BD_ImpCob), _
                                           .Columns(BD_Plan), Cod_Plan, _
                                           .Columns(BD_RDT), "=", _
-                                          .Columns(BD_ACont_Cob), AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_SRDT) = Imp_SRDT
             TImpSRDT = TImpSRDT + Imp_SRDT
             RegsSRDT = Application.CountIfs( _
                                           .Columns(BD_Plan), Cod_Plan, _
                                           .Columns(BD_RDT), "=", _
-                                          .Columns(BD_ACont_Cob), AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Cob), AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_RegsSRDT) = RegsSRDT
 
             '- Importe ADxADxAplz --------------------------------------------------------------------------------------------------------------------
             Imp__ADx = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont + 1, _
-                                          .Columns(BD_ACont_Cob), "<>" & AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Vto), AnoCont + 1, _
+                                          .Columns(BD_ACont_Cob), "<>" & AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp__ADx) = Imp__ADx
             TImp_ADx = TImp_ADx + Imp__ADx
 
@@ -764,9 +765,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             Imp_ADxAdm = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont + 1, _
-                                          .Columns(BD_ACont_Cob), "<>" & AñoCont, _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Vto), AnoCont + 1, _
+                                          .Columns(BD_ACont_Cob), "<>" & AnoCont, _
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp__ADxAdm) = Imp_ADxAdm
             TImpADxAdm = TImpADxAdm + Imp_ADxAdm
 
@@ -780,9 +781,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
             Imp_PdtCob = Application.SumIfs(.Columns(BD_ImpRec), _
                                           .Columns(BD_ImpRec), ">0", _
                                           .Columns(BD_Plan), Cod_Plan, _
-                                          .Columns(BD_ACont_Vto), AñoCont, _
+                                          .Columns(BD_ACont_Vto), AnoCont, _
                                           .Columns(BD_ACont_Cob), "=", _
-                                          .Columns(BD_ACont_Emi), AñoCont)
+                                          .Columns(BD_ACont_Emi), AnoCont)
             RowNew.Range(Lst_Imp_PdtCob) = Imp_PdtCob
             TimpPdtCob = TimpPdtCob + Imp_PdtCob
 
@@ -794,7 +795,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 ''''            If Imp_Emis = 0 Then GoTo Siguiente_Plan    '- Si todo está cobrado en año anterior
 '''            RowNew.Range(Lst_Imp_Emis) = Imp_Emis
 '''            TimpEmis = TimpEmis + Imp_Emis
@@ -804,7 +805,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_RegsEmis) = RegsEmis
 '''
 '''            '- Importe Cob_2025, Emi_2025 --------------------------------------------------------------------------------------------------------------------
@@ -814,8 +815,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp_Cobr) = Imp_Cobr
 '''            TImpCobr = TImpCobr + Imp_Cobr
 '''            RegsCobr = Application.CountIfs( _
@@ -824,8 +825,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_RegsCobr) = RegsCobr
 '''
 '''            '- Importe RDT --------------------------------------------------------------------------------------------------------------------
@@ -836,8 +837,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''
 '''
 '''                                          .Columns(BD_RDT), "<>", _
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp__RDT) = Imp__RDT
 '''            TImp_RDT = TImp_RDT + Imp__RDT
 '''            Regs_RDT = Application.CountIfs( _
@@ -847,8 +848,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''
 '''
 '''                                          .Columns(BD_RDT), "<>", _
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Regs_RDT) = Regs_RDT
 '''
 '''            '- Importe Pdte_RDT --------------------------------------------------------------------------------------------------------------------
@@ -858,8 +859,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''
 '''
 '''                                          .Columns(BD_RDT), "=", _
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp_SRDT) = Imp_SRDT
 '''            TImpSRDT = TImpSRDT + Imp_SRDT
 '''            RegsSRDT = Application.CountIfs( _
@@ -868,8 +869,8 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''
 '''
 '''                                          .Columns(BD_RDT), "=", _
-'''                                          .Columns(BD_ACont_Cob), AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Cob), AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_RegsSRDT) = RegsSRDT
 '''
 '''            '- Importe ADxAplz --------------------------------------------------------------------------------------------------------------------
@@ -879,9 +880,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Vto), AñoCont + 1, _
-'''                                          .Columns(BD_ACont_Cob), "<>" & AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Vto), AnoCont + 1, _
+'''                                          .Columns(BD_ACont_Cob), "<>" & AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp__ADx) = Imp__ADx
 '''            TImp_ADx = TImp_ADx + Imp__ADx
 '''
@@ -892,9 +893,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Vto), AñoCont + 1, _
-'''                                          .Columns(BD_ACont_Cob), "<>" & AñoCont, _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Vto), AnoCont + 1, _
+'''                                          .Columns(BD_ACont_Cob), "<>" & AnoCont, _
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp__ADxAdm) = Imp_ADxAdm
 '''            TImpADxAdm = TImpADxAdm + Imp_ADxAdm
 '''
@@ -911,9 +912,9 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
 '''                                          .Columns(BD_Anul), "<>S", _
 '''
 '''
-'''                                          .Columns(BD_ACont_Vto), AñoCont, _
+'''                                          .Columns(BD_ACont_Vto), AnoCont, _
 '''                                          .Columns(BD_ACont_Cob), "=", _
-'''                                          .Columns(BD_ACont_Emi), AñoCont)
+'''                                          .Columns(BD_ACont_Emi), AnoCont)
 '''            RowNew.Range(Lst_Imp_PdtCob) = Imp_PdtCob
 '''            TimpPdtCob = TimpPdtCob + Imp_PdtCob
 '''

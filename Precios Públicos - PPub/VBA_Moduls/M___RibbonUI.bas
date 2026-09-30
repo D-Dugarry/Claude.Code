@@ -1,4 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
+' Last Rev. 2026-09-30 21:12
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -25,7 +26,7 @@ Public SW_TrafficLight3         As Boolean
 Public BtnGrabarSiVisible       As Boolean
 Public BtnExportSiVisible       As Boolean
 
-Public Filter_APP_AñoCont       As String
+Public Filter_APP_AnoCont       As String
 Public Filter_Siglas            As String
 Public Filter_Texto             As String
 Public Filter_Importe           As String
@@ -161,7 +162,7 @@ End Sub
 '------------------------------------------------------------------------------------------
 Function Func_CtrlTab_View(Ctrl As String)
     Dim Cont_Row    As Integer
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
         For Cont_Row = 1 To .Rows.Count     '- Recorre la Tabla para ver los que deben verse.
             MyTag = .Cells(Cont_Row, Task_Uribbon_Tags)
             If MyTag <> "" Then MyTag = MyTag & "*"         '- única diff ----
@@ -187,10 +188,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Function Func_STip_CtrlTab_Value(CtrlTag As String)
     Dim Lin_Lst     As Variant
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
         Lin_Lst = Application.Match(CtrlTag, .Columns(Task_Uribbon_Tags), 0)
         If Not IsError(Lin_Lst) Then
-            Func_STip_CtrlTab_Value = .Cells(Lin_Lst, Task_Descripción)
+            Func_STip_CtrlTab_Value = .Cells(Lin_Lst, Task_Descripcion)
             If Prog__APP.Range("SW_Boss") Then
                 Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & vbLf & vbLf & _
                                      "BOSS_Rut: " & vbLf & .Cells(Lin_Lst, Task_Nombre_Rut) & vbLf & vbLf
@@ -254,11 +255,11 @@ End Sub
 Sub OnAct_RibbView(control As IRibbonControl)
     Select Case control.Tag
         Case "RibbViewNone"
-            Call RuT_Ejecutar_Rut("Rut_Menú_HideAll", False)
+            Call RuT_Ejecutar_Rut("Rut_Menu_HideAll", False)
         Case "RibbViewMin"
-            Call RuT_Ejecutar_Rut("Rut_Menú_ShowAll_Short", False)
+            Call RuT_Ejecutar_Rut("Rut_Menu_ShowAll_Short", False)
         Case "RibbViewMax"
-            Call RuT_Ejecutar_Rut("Rut_Menú_ShowAll", False)
+            Call RuT_Ejecutar_Rut("Rut_Menu_ShowAll", False)
     End Select
 Debug.Print "OnAct_RibbView"
 End Sub
@@ -403,10 +404,10 @@ End Sub
 '  <group id="ImportLsGes04_Group"     tag="ImportLsGes04_Group"   label="Import LsGes04">
 '__________________________________________________________________________________________
 '
-'   Importar LsGes04 x AñoCont a BDatos ---------------------------------------------------
+'   Importar LsGes04 x AnoCont a BDatos ---------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_Import_G04_ACont(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_Import"), "dd-mmm hh:mm") & " A.Cont " & Prog__APP.Range("APP_AñoCont")
+    LabelVal = Format(Prog__APP.Range("APP_Last_Import"), "dd-mmm hh:mm") & " A.Cont " & Prog__APP.Range("APP_AnoCont")
 Debug.Print "GetLbl_Import_G04_ACont", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -764,7 +765,7 @@ End Sub
 ''------------------------------------------------------------------------------------------
 '    '''Sub GetVsbl_Buttons(control As IRibbonControl, ByRef Visible)
 '    '''    Dim Cont_Row    As Integer
-'    '''    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+'    '''    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
 '    '''        For Cont_Row = 1 To .Rows.Count     '- Recorre la Tabla para ver los que deben verse.
 '    '''            MyTag = .Cells(Cont_Row, 7)
 '    '''            SW_Tag_Visible = .Cells(Cont_Row, 8)
@@ -817,11 +818,11 @@ End Sub
 Sub OnAct_RibbonVisible(control As IRibbonControl)
     Select Case control.ID
         Case "CellCtxtRibbonXVisibilityNone"
-            Call Rut_Menú_HideAll
+            Call Rut_Menu_HideAll
         Case "CellCtxtRibbonXVisibilityMin"
-            Call Rut_Menú_ShowAll_Short
+            Call Rut_Menu_ShowAll_Short
         Case "CellCtxtRibbonXVisibilityMax"
-            Call Rut_Menú_ShowAll
+            Call Rut_Menu_ShowAll
     End Select
 '    Call RefreshRibbon
 Debug.Print "OnChange_EditBoxPlanCurso"
@@ -887,8 +888,8 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ModeProg(control As IRibbonControl)
 Debug.Print "-------------------------------- >>> Sub OnAct_ModeProg <<< -----------------"
-    Call Rut_Activar_Programación
-    Call RuT_Load_Task_Data("Rut_Activar_Programación")
+    Call Rut_Activar_Programacion
+    Call RuT_Load_Task_Data("Rut_Activar_Programacion")
 Debug.Print "-------------------------------- <<< Sub OnAct_ModeProg >>> -----------------"
 End Sub
 '------------------------------------------------------------------------------------------
@@ -1166,7 +1167,7 @@ End Sub
 '------------------------------------------------------------------------------------------
 Function Func_Rut_CtrlTab_Value(CtrlTag As String)  '- Busca el nombre de la Rutina en Menú_Aux
     Dim Lin_Lst     As Variant
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
         Lin_Lst = Application.Match(CtrlTag, .Columns(Task_Uribbon_Tags), 0)
         If Not IsError(Lin_Lst) Then
             Func_Rut_CtrlTab_Value = .Cells(Lin_Lst, Task_Nombre_Rut)
@@ -1186,21 +1187,21 @@ End Function
 '
 '- RightClickMenúVisible_Group ------------------------------------------------------------
 '------------------------------------------------------------------------------------------
-Sub GetLbl_RightClickMenúVisible_Group(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenú_Visible") Then LabelVal = "Showed" Else LabelVal = "Hidden"
-Debug.Print "GetLbl_RightClickMenúVisible_Group", LabelVal
+Sub GetLbl_RightClickMenuVisible_Group(control As IRibbonControl, ByRef LabelVal)
+    If Prog__APP.Range("SW_RightClickMenu_Visible") Then LabelVal = "Showed" Else LabelVal = "Hidden"
+Debug.Print "GetLbl_RightClickMenuVisible_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
-Sub GetLbl_CCtxtRightClickMenúVisible(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenú_Visible") Then LabelVal = "Context Menú on Right-Click is Showed, Press to Hide" _
+Sub GetLbl_CCtxtRightClickMenuVisible(control As IRibbonControl, ByRef LabelVal)
+    If Prog__APP.Range("SW_RightClickMenu_Visible") Then LabelVal = "Context Menú on Right-Click is Showed, Press to Hide" _
                                                     Else LabelVal = "Context Menú on Right-Click is hidden, Press to Show"
-Debug.Print "GetLbl_CCtxtRightClickMenúVisible", LabelVal
+Debug.Print "GetLbl_CCtxtRightClickMenuVisible", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
-Sub OnAct_RightClickMenúVisible(control As IRibbonControl)
-    Prog__APP.Range("SW_RightClickMenú_Visible") = Not Prog__APP.Range("SW_RightClickMenú_Visible")
+Sub OnAct_RightClickMenuVisible(control As IRibbonControl)
+    Prog__APP.Range("SW_RightClickMenu_Visible") = Not Prog__APP.Range("SW_RightClickMenu_Visible")
     MyRibbon.InvalidateControl "RightClickMenúVisible_Group"    '- Actualiza solo este Control_ID
-Debug.Print "OnAct_RightClickMenúVisible,  SW_RightClickMenú_Visible = ", Prog__APP.Range("SW_RightClickMenú_Visible")
+Debug.Print "OnAct_RightClickMenuVisible,  SW_RightClickMenu_Visible = ", Prog__APP.Range("SW_RightClickMenu_Visible")
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -1212,25 +1213,25 @@ End Sub
 '
 '- RightClickMenúRestrictOptions_Group ----------------------------------------------------
 '------------------------------------------------------------------------------------------
-Sub GetLbl_RightClickMenúRestrictOptions_Group(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenú_Restricted") Then LabelVal = "Restricted" Else LabelVal = "Not Restricted"
-Debug.Print "GetLbl_RightClickMenúRestrictOptions_Group", LabelVal
+Sub GetLbl_RightClickMenuRestrictOptions_Group(control As IRibbonControl, ByRef LabelVal)
+    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then LabelVal = "Restricted" Else LabelVal = "Not Restricted"
+Debug.Print "GetLbl_RightClickMenuRestrictOptions_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
-Sub GetLbl_CCtxtRightClickMenúRestrictOptions(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenú_Restricted") Then LabelVal = "Right-Click is Restricted, Press to Release" _
+Sub GetLbl_CCtxtRightClickMenuRestrictOptions(control As IRibbonControl, ByRef LabelVal)
+    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then LabelVal = "Right-Click is Restricted, Press to Release" _
                                                        Else: LabelVal = "Right-Click is Non Restricted, Press to Restrict"
-Debug.Print "GetLbl_CCtxtRightClickMenúRestrictOptions", LabelVal
+Debug.Print "GetLbl_CCtxtRightClickMenuRestrictOptions", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
-Sub OnAct_RightClickMenúRestrictOptions(control As IRibbonControl)
-    If Prog__APP.Range("SW_RightClickMenú_Restricted") Then
+Sub OnAct_RightClickMenuRestrictOptions(control As IRibbonControl)
+    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then
         Call Rut_Context_Buttons_Restore    '- Restaura las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     Else
         Call Rut_Context_Buttons_Hide   '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     End If
     MyRibbon.InvalidateControl "RightClickMenúRestrictOptions_Group"    '- Actualiza solo este Control_ID
-Debug.Print "OnAct_RightClickMenúRestrictOptions,  SW_RightClickMenú_Restricted = ", Prog__APP.Range("SW_RightClickMenú_Restricted")
+Debug.Print "OnAct_RightClickMenuRestrictOptions,  SW_RightClickMenu_Restricted = ", Prog__APP.Range("SW_RightClickMenu_Restricted")
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -1274,7 +1275,7 @@ End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
 '
-'   "GroupParam" AñoCont y Curso Acad  ------------------------------------------------
+'   "GroupParam" AnoCont y Curso Acad  ------------------------------------------------
 '------------------------------------------------------------------------------------------
 '  <group id="Parámetros_Group"     label="Parámetros APP">
 '__________________________________________________________________________________________
@@ -1282,7 +1283,7 @@ End Sub
 '    Año-Cont
 '------------------------------------------------------------------------------------------
 Sub GetText_EditBoxACont(control As IRibbonControl, ByRef returnedVal)
-    returnedVal = Prog__APP.Range("APP_AñoCont")
+    returnedVal = Prog__APP.Range("APP_AnoCont")
 Debug.Print "GetText_EditBoxACont", returnedVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -1295,7 +1296,7 @@ Sub OnChange_EditBoxACont(control As IRibbonControl, ACont As String)
         SW_C_Acad_Ant = True
         SW_C_Acad_Pos = False
         MyTag = "checkBoxAcad1"
-        Prog__APP.Range("APP_AñoCont") = ACont
+        Prog__APP.Range("APP_AnoCont") = ACont
         '------------------------------------------------------------------------------------<<<<
     Else
         MsgBx_Msg = "¡¡¡ Año incorrecto, debe ser mayor que 2021 !!!"
@@ -1417,7 +1418,7 @@ End Sub
 ''------------------------------------------------------------------------------------------
 '    Function Func_TagVisible(Tag As String)
 '        Dim Cont_Row    As Integer
-'        With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+'        With Prog__Menu_Aux.ListObjects(1).DataBodyRange
 '            For Cont_Row = 1 To .Rows.Count
 '                MyTag = .Cells(Cont_Row, 7)
 '                SW_Tag_Visible = .Cells(Cont_Row, 8)
@@ -1455,7 +1456,7 @@ End Sub
         Dim Num_Tarea       As Integer:     Num_Tarea = 1
         Dim xml As String
         '- Recorremos toda la tabla de Tareas y seleccionamos las que empiezan por "9_ "
-        With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+        With Prog__Menu_Aux.ListObjects(1).DataBodyRange
             For Cont_Row = 1 To .Rows.Count
                 If (InStr((.Cells(Cont_Row, 2)), (Prog__APP.Range("APP_User_ID"))) > 0 And Len(Prog__APP.Range("APP_User_ID")) > 3 Or .Cells(Cont_Row, 2) = "") And Left(.Cells(Cont_Row, 1), 3) = "9_ " Then
                     If Num_Tarea > 1 Then xml = xml & "<menuSeparator  id='Separ" & Num_Tarea & "' />"
@@ -1476,8 +1477,8 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
     Dim Pos_Delimitador     As Integer
     Dim Rutinas_Name        As String
     Dim Rut_Name        As String
-    Prog__APP.Range(APP_Task_Index) = Val(Right(control.Tag, 2))
-    Rutinas_Name = Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range(APP_Task_Index), 3)
+    Prog__APP.Range("APP_Task_Index") = Val(Right(control.Tag, 2))
+    Rutinas_Name = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 3)
     Do       ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         Pos_Delimitador = InStr(Rutinas_Name, " + ")
         If Pos_Delimitador < 1 Then ' ------------------ Última o Única Rutina ---------------------
@@ -1486,7 +1487,7 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
         Rut_Name = Left(Rutinas_Name, Pos_Delimitador - 1)
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         Application.Run Rut_Name
-        Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range(APP_Task_Index), 5) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf")
     Loop While Len(Rutinas_Name) > 0
     Application.ScreenUpdating = True
     DoEvents

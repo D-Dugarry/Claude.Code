@@ -12,6 +12,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Last Rev. 2026-09-30 23:09
+
+' Last Rev. 2026-09-30 19:16
 Option Explicit
 
 Dim TaskIndice   As Integer
@@ -21,14 +24,6 @@ Private Declare PtrSafe Function GetSystemMetrics Lib "user32" (ByVal nIndex As 
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Btn_Eixir_Click()
     Unload Me
-End Sub
-
-Private Sub Frame_C_Acad_Click()
-
-End Sub
-
-Private Sub Tbx_Informe_Change()
-
 End Sub
 
 ' ------------------------------------------------------------------------------------------------------
@@ -84,15 +79,15 @@ Debug.Print "Sub UserForm_Initialize() - Form_menu"
 '    Me.Zoom = zoomFactor
     
     Me.Caption = ThisWorkbook.Name & "        - Menú de tareas auxiliares."
-    Prog__Menú_Aux.Unprotect
-    If Lo_Tareas Is Nothing Then Set Lo_Tareas = Prog__Menú_Aux.ListObjects(1)
+    Prog__Menu_Aux.Unprotect
+    If Lo_Tareas Is Nothing Then Set Lo_Tareas = Prog__Menu_Aux.ListObjects(1)
     Call Rut_Lo_Sort(Lo_Tareas, 1, xlAscending, True)
 
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_Activate()
 Debug.Print "Sub UserForm_Activate() - Form_menu"
-    Me.Tbx_AñoContable = Prog__APP.Range("APP_AñoCont")
+    Me.Tbx_AnoContable = Prog__APP.Range("APP_AnoCont")
     Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_C_Acad_Ant")
     Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_C_Acad_Pos")
     
@@ -139,19 +134,19 @@ Debug.Print "Sub UserForm_Activate() - Form_menu"
 End Sub     ' UserForm_Activate    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 ' ------------------------------------------------------------------------------------------------------
-Sub Tbx_AñoContable_AfterUpdate()
-    If Me.Tbx_AñoContable >= 2022 Then
-        Prog__APP.Range("APP_AñoCont") = Me.Tbx_AñoContable
+Sub Tbx_AnoContable_AfterUpdate()
+    If Me.Tbx_AnoContable >= 2022 Then
+        Prog__APP.Range("APP_AnoCont") = Me.Tbx_AnoContable
         Me.FrOpBt_CAcadAnt.Value = True
-        Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_AñoCont") - 1 & "-" & Right(Prog__APP.Range("APP_AñoCont"), 2)
+        Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_AnoCont") - 1 & "-" & Right(Prog__APP.Range("APP_AnoCont"), 2)
         Prog__APP.Range("APP_CursAcad") = Me.FrOpBt_CAcadAnt.Caption
         Prog__APP.Range("APP_C_Acad_Ant") = Me.FrOpBt_CAcadAnt.Caption
-        Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_AñoCont") & "-" & Right(Prog__APP.Range("APP_AñoCont"), 2) + 1
+        Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_AnoCont") & "-" & Right(Prog__APP.Range("APP_AnoCont"), 2) + 1
         Prog__APP.Range("APP_C_Acad_Pos") = Me.FrOpBt_CAcadPos.Caption
     Else
         MsgBox "¡¡¡ Año incorrecto, debe ser mayor que 2021 !!!", vbOKOnly, "Proceso: Procedimiento de Liquidación"
-        Me.Tbx_AñoContable = Prog__APP.Range("APP_AñoCont")
-        Me.Tbx_AñoContable.SetFocus
+        Me.Tbx_AnoContable = Prog__APP.Range("APP_AnoCont")
+        Me.Tbx_AnoContable.SetFocus
     End If
 End Sub
 ' ------------------------------------------------------------------------------------------------------
@@ -216,7 +211,7 @@ Sub Btn_Ejec_Tarea_Click()
     Prog__APP.Range("APP_Task_Index") = TaskIndice
     Me.Lb_Fondo_Inf.BackColor = RGB(255, 222, 255)          '- Rosa Pink   RGB(255, 224, 192)
     Me.Lb_Fondo_Tit_Inf.BackColor = RGB(255, 224, 192)     '- Rosa Pink
-    Me.Lb_Tít_Informe.Caption = "Tarea en Proceso: " & Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
+    Me.Lb_Tit_Informe.Caption = "Tarea en Proceso: " & Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
     Me.TBx_Informe = ""
     
     Do       ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -235,7 +230,7 @@ Sub Btn_Ejec_Tarea_Click()
         Else
             Application.Run Rut_Name
         End If
-        Me.Lb_Tít_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Tarea)
+        Me.Lb_Tit_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Tarea)
         
         If Prog__APP.Range("APP_Task_Inf") <> "" Then Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")
         
@@ -260,20 +255,20 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Sub LBx_Tareas_Click()
     TaskIndice = Application.Match(Me.LBx_Tareas, Lo_Tareas.DataBodyRange.Columns(1), 0)
         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
-    Me.TBx_Descripción = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Descripción)
+    Me.TBx_Descripcion = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Descripcion)
     Me.TBx_Tarea_Name = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
     Me.TBx_Rutina_Name = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Nombre_Rut)
-    Me.Lb_Tít_Informe.Caption = "Informe última Tarea realizada: " & Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
+    Me.Lb_Tit_Informe.Caption = "Informe última Tarea realizada: " & Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
     Me.TBx_Informe = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Rut_Informe)
     Me.Lb_Fondo_Inf.BackColor = RGB(224, 255, 255)         '- LightCyan
     Me.Lb_Fondo_Tit_Inf.BackColor = RGB(224, 255, 255)     '- LightCyan
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
-Sub TBx_Descripción_Change()
+Sub Tbx_Descripcion_Change()
         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
-    Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Descripción) = Me.TBx_Descripción
-    Me.Lb_Tít_Informe.Caption = "Tarea realizada: "
+    Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Descripcion) = Me.TBx_Descripcion
+    Me.Lb_Tit_Informe.Caption = "Tarea realizada: "
     Me.TBx_Informe = "Cambio de la Descripción de la Tarea."
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
 End Sub
@@ -289,7 +284,7 @@ Private Sub Tbx_Tarea_Name_AfterUpdate()
     Lo_Tareas.DataBodyRange.Cells(TaskIndice, 1) = Me.TBx_Tarea_Name
     Me.TBx_Tarea_Name = ""
     Call Mostrar_Tareas
-    Me.Lb_Tít_Informe.Caption = "Tarea realizada: "
+    Me.Lb_Tit_Informe.Caption = "Tarea realizada: "
     Me.TBx_Informe = "Cambio del Nombre de la Tarea."
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
 End Sub
@@ -299,7 +294,7 @@ Private Sub TBx_Rutina_Name_AfterUpdate()
     Lo_Tareas.DataBodyRange.Cells(TaskIndice, 3) = Me.TBx_Rutina_Name
     Me.TBx_Rutina_Name = ""
     Call Mostrar_Tareas
-    Me.Lb_Tít_Informe.Caption = "Tarea realizada: "
+    Me.Lb_Tit_Informe.Caption = "Tarea realizada: "
     Me.TBx_Informe = "Cambio del Nombre de la Rutina de la Tarea."
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
 End Sub
@@ -321,6 +316,3 @@ Sub FrOpBt_Curs_Click()
 '    Range("APP_TitP_o_Curs") = Me.FrOpBt_Curs.Caption
 '    Wk_TitP_Liquid.Name = "Liquid_Cursos200h"
 End Sub
-
-
-

@@ -2,11 +2,12 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Prog__Menú_Aux"
+Attribute VB_Name = "Prog__Menu_Aux"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-09-30 20:04
 'Option Explicit
 
 Private Sub Worksheet_Activate()

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_X"
+' Last Rev. 2026-09-30 20:55
 Option Explicit
 
 '' ==================================================================================================================================
@@ -63,34 +64,8 @@ Sub Rut_Quita_Ascii_160(ByRef Lo_Tb As ListObject, Columna As Integer)
         ReplaceFormat:=False, FormulaVersion:=xlReplaceFormula2
 End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 '==================================================================================================================================
-Sub Rut_Ajustar_V_H_Alignment()    ' Ajustar la Vertical/Horizontal-Alignment de todas las columnas  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ' ==================================================================================================================================
-Dim Col As Integer
-With Lo_Aplic.DataBodyRange
-    For Col = 1 To Lo_Prog_Colns.DataBodyRange.Columns.Count
-        .Range(Cells(1, Col), Cells(.Rows.Count, Col)).HorizontalAlignment = Lo_Prog_Colns.DataBodyRange.Cells(5, Col).Value2
-        .Range(Cells(1, Col), Cells(.Rows.Count, Col)).VerticalAlignment = Lo_Prog_Colns.DataBodyRange.Cells(11, Col).Value2
-    Next Col
-End With
-End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
-Sub Rut_Filas_Ajustar_Alto()        '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-' ==================================================================================================================================
-    Lo_Aplic.HeaderRowRange.RowHeight = 35
-    Lo_Aplic.DataBodyRange.Rows.EntireRow.AutoFit
-End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ==================================================================================================================================
-Sub Rut_Columnas_Ajustar_Ancho()      '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-' ==================================================================================================================================
-    Dim Cont_Col As Integer
-    Dim Ancho   As Integer
-    For Cont_Col = 1 To LastCol_Tb_Solicitudes
-        If Not Columns(Cont_Col).Hidden And Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) <> "Ocultar" Then
-            Ancho = Lo_Prog_Colns.DataBodyRange.Cells(4, Cont_Col)      '.Value2
-            Columns(Cont_Col).ColumnWidth = Ancho
-        End If
-    Next Cont_Col
-End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
 Sub Rut_Filas_Mostrar()      ' Muestra Todas las Solicitudes  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     Rows.EntireRow.Hidden = False
@@ -106,24 +81,14 @@ Sub Rut_Columnas_Mostrar_WrkSht(WrkSht As String)     ' >>>>>>>>>>>>>>>>>>>>>>>>
     Sheets(WrkSht).Columns.EntireColumn.Hidden = False
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
-Sub Rut_Columnas_Mostrar()      ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-' ==================================================================================================================================
-Dim Cont_Col As Integer
-Application.ScreenUpdating = False
-        For Cont_Col = 1 To LastCol_Tb_Solicitudes
-            If Lo_Prog_Colns.DataBodyRange.Cells(7, Cont_Col) <> "Ocultar" Then Columns(Cont_Col).Hidden = False
-        Next Cont_Col
-Application.ScreenUpdating = True
-Debug.Print "Columnas Ocultas Visibles"
-End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 ' ==================================================================================================================================
-Sub Rut_Select_File(Título As String, ByRef NomFich As String, TipoFich As String)  '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+Sub Rut_Select_File(Titulo As String, ByRef NomFich As String, TipoFich As String)  '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ' ==================================================================================================================================
 Dim fDialog As Office.FileDialog
 Set fDialog = Application.FileDialog(msoFileDialogFilePicker)
     With fDialog
-        .Title = Título
+        .Title = Titulo
         .InitialFileName = ThisWorkbook.Path & "\"
         .InitialView = msoFileDialogViewDetails
         .AllowMultiSelect = False
@@ -147,21 +112,6 @@ End Sub     '  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
 ' =====================     RuT_Visible_Hidde_Tablas_Prog              ==============================================================
 ' ==================================================================================================================================
-Sub Rut_Visible_Hidde_Tablas_Prog()
-    Dim WkS As Worksheet
-    For Each WkS In Worksheets
-        If Left(WkS.Name, 5) = "Prog_" Then
-            Select Case Visibilidad_Hoja
-                Case Is = "Visible"
-                WkS.Visible = xlSheetVisible
-                Case Is = "Hidden"
-                WkS.Visible = xlSheetHidden
-                Case Is = "VeryHidden"
-                WkS.Visible = xlSheetVeryHidden
-            End Select  ' Case wks.Visible
-        End If
-    Next
-End Sub     '      <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
 
 ' ==================================================================================================================================

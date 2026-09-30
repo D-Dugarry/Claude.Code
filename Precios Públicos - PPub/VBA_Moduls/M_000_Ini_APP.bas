@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_000_Ini_APP"
+' Last Rev. 2026-09-30 21:12
 '- M00_Ini_APP --------
 Option Explicit    ' Para obligar a definir todas las variable.  'lo he quitado porque me genera muchos errores.
 
@@ -55,33 +56,11 @@ Debug.Print "Rut_ConfigExcel_RESTABLECER"
     If Application.Toolbars("Ribbon").Visible = False Then Application.ExecuteExcel4Macro "Show.ToolBar(""Ribbon"",True)"
 End Sub
 ' ==================================================================================================================================
-Sub Rut_Off_Functions()
-Debug.Print "Rut_Off_Functions"
-    Application.Calculation = xlCalculationManual
-    Application.ScreenUpdating = False
-    Application.EnableEvents = False:     Prog__APP.Range("SW_Events") = False               ' DesHABILITA LOS EVENTOS (SIEMPRE, sin depender del switch)
-End Sub
+' Rut_Off_Functions / Rut_On_Functions -> movidas a Rut_Wb_State_Manager.bas
+'   (ahora con contador de anidamiento; skill excel-state-manager, 2026-09-30)
 ' ==================================================================================================================================
-Sub Rut_On_Functions()
-    If Prog__APP.Range("SW_App_Calculation") Then
-        Application.Calculation = xlCalculationAutomatic
-    Else
-         Application.Calculation = xlCalculationManual
-    End If
-    Application.DisplayAlerts = True
-    Application.ScreenUpdating = True
-    
-    If Prog__APP.Range("SW_Events") Then
-        Application.EnableEvents = True
-    Else
-        Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-        Prog__APP.Range("SW_Events") = True
-    End If
-Debug.Print "Rut_On_Functions"
-End Sub
-' ==================================================================================================================================
-Sub Rut_Menú_HideAll()
-Debug.Print "Rut_Menú_HideAll"
+Sub Rut_Menu_HideAll()
+Debug.Print "Rut_Menu_HideAll"
 '''    ActiveSheet.Shapes("Traffic-Light").Visible = True
 '''            SW_TrafficLight1 = True
 '''            SW_TrafficLight2 = False
@@ -99,8 +78,8 @@ Debug.Print "Rut_Menú_HideAll"
 Debug.Print "RibbonX Ocultado  -  " & Now
 End Sub
 ' ==================================================================================================================================
-Sub Rut_Menú_ShowAll()
-Debug.Print "Rut_Menú_ShowAll"
+Sub Rut_Menu_ShowAll()
+Debug.Print "Rut_Menu_ShowAll"
     ' Exit Full Screen
     ' - If this was used to show full screen after other display settings
     '   were changed, then put it before those settings are changed back.
@@ -131,8 +110,8 @@ Debug.Print "Rut_Menú_ShowAll"
 Debug.Print "RibbonX Visible y Expandido  -  " & Now
 End Sub
 ' ==================================================================================================================================
-Sub Rut_Menú_ShowAll_Short()
-Debug.Print "Rut_Menú_ShowAll_Short"
+Sub Rut_Menu_ShowAll_Short()
+Debug.Print "Rut_Menu_ShowAll_Short"
     ' Exit Full Screen
     ' - If this was used to show full screen after other display settings
     '   were changed, then put it before those settings are changed back.
@@ -181,7 +160,7 @@ Dim CommBarItem        As CommandBarControl
             End If
         Next Count
     Next ib
-    Prog__APP.Range("SW_RightClickMenú_Restricted") = True
+    Prog__APP.Range("SW_RightClickMenu_Restricted") = True
 End Sub
 ' ==================================================================================================================================
 Sub Rut_Context_Buttons_Restore()  '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
@@ -196,7 +175,7 @@ Debug.Print "Rut_Context_Buttons_Restore"
     'La barra de comandos "List Range Popup" es la que aparece cuando haces clic derecho en un rango de celdas que forma parte de una lista o tabla en Excel. _
      Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
     
-    Prog__APP.Range("SW_RightClickMenú_Restricted") = False
+    Prog__APP.Range("SW_RightClickMenu_Restricted") = False
 End Sub
 ' ==================================================================================================================================
 '===================================================================================================================================

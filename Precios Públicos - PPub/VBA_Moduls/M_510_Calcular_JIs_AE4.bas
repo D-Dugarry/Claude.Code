@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_510_Calcular_JIs_AE4"
+' Last Rev. 2026-09-30 21:12
 '- M_510_Generar_JIs_AE4
 
 Option Explicit
@@ -42,9 +43,9 @@ Dim Concept         As Variant
 Dim Concept2        As String
 Dim Tp_Rec          As String
 Dim TipRec_Cncpt    As String:      TipRec_Cncpt = ""
-Dim DescripciónA    As String
-Dim DescripciónB    As String
-Dim MenúAux_Msg     As String
+Dim DescripcionA    As String
+Dim DescripcionB    As String
+Dim MenuAux_Msg     As String
 Dim F_Concept       As Integer
 
 Dim Clv             As String
@@ -82,10 +83,10 @@ Dim TF_BD           As Long:        TF_BD = Lo_BD.ListRows.Count
     Sht__BD_JIs_AE4.Unprotect
     Lo_PlanAE4.ShowTotals = False
 '    With Lo_PlanAE4.HeaderRowRange
-'        .Cells(AE4_JI_Ant) = "JI-" & Prog__APP.Range("APP_AñoCont") - 1
-'        .Cells(AE4_AD_Ant) = "AD-" & Prog__APP.Range("APP_AñoCont") - 1
-'        .Cells(AE4_JI_Actual) = "JI-" & Prog__APP.Range("APP_AñoCont")
-'        .Cells(AE4_AD_Actual) = "AD-" & Prog__APP.Range("APP_AñoCont")
+'        .Cells(AE4_JI_Ant) = "JI-" & Prog__APP.Range("APP_AnoCont") - 1
+'        .Cells(AE4_AD_Ant) = "AD-" & Prog__APP.Range("APP_AnoCont") - 1
+'        .Cells(AE4_JI_Actual) = "JI-" & Prog__APP.Range("APP_AnoCont")
+'        .Cells(AE4_AD_Actual) = "AD-" & Prog__APP.Range("APP_AnoCont")
 '    End With
     With Lo_BD.DataBodyRange
     For F_BD = 1 To TF_BD
@@ -144,11 +145,11 @@ Dim TF_BD           As Long:        TF_BD = Lo_BD.ListRows.Count
 '''            If IsError(RowFind) Then     ' ¡¡¡ NO Existe !!! ------------------------
 '''                MsgBox "¡ No Existe El Concepto Eco. !"
 '''            Else                            ' ¡¡¡ Existe la Rutina !!! ------------------------
-'''                DescripciónB = Lo_Concept.DataBodyRange.Cells(RowFind, 2)
+'''                DescripcionB = Lo_Concept.DataBodyRange.Cells(RowFind, 2)
 '''            End If
                     
             RwPln.Range(AE4_Descrip_JI) = "Liq.PPub_" & Right(RwPln.Range(AE4_ConcptEco), 6) & "__" & _
-                    RwPln.Range(AE4_TipRec) & "_" & Prog__APP.Range("APP_AñoCont") & "__Plan_" & _
+                    RwPln.Range(AE4_TipRec) & "_" & Prog__APP.Range("APP_AnoCont") & "__Plan_" & _
                     RwPln.Range(AE4_Plan) & "_C_Acad_" & RwPln.Range(AE4_C_Acad) & "_" & RwPln.Range(AE4_PlanNom)
             
             If PlanAnt <> RwPln.Range(AE4_Plan) Then
@@ -180,7 +181,7 @@ SigRec:
             Debug.Print Format(Now, "hh:mm:ss") & " Revizado BDatos:  " & Format(F_BD, "#,##0") & " de " & Format(TF_BD, "#,##0") & " reg."
 '            Application.ScreenUpdating = True:     DoEvents:         Application.ScreenUpdating = False
         End If
-'            RwPln.Range(AE4_Descrip_JI) = "Liq.PPub_" & Concept2 & "__" & Tp_Rec & "_" & Prog__APP.Range("APP_AñoCont") & "__" & DescripciónB & ".  "
+'            RwPln.Range(AE4_Descrip_JI) = "Liq.PPub_" & Concept2 & "__" & Tp_Rec & "_" & Prog__APP.Range("APP_AnoCont") & "__" & DescripcionB & ".  "
 '
     Next F_BD
     End With        '- Lo_BD.DataBodyRange
@@ -200,9 +201,9 @@ SigRec:
     '- Visualizo el progreso ---------------------------------------------------------------------------------------
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
-    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
+    MenuAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
         vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
-    MsgBox MenúAux_Msg
+    MsgBox MenuAux_Msg
     Application.Calculation = Sw_Calculation
     Application.Speech.Speak "Proceso completado puede verificar el resultado.", True
 End Sub

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_415_Copy_AE4_a_BD"
+' Last Rev. 2026-09-30 21:12
 '2026-01-01
 '-M_415_Copy_AE4_a_BD
 Option Explicit
@@ -22,7 +23,7 @@ Debug.Print ">>> Rut_Copy_AE4x4_en_BDatos"
     Dim F_BDINSS        As Long
     Dim Found           As Long:        Found = 0
     Dim NotFound        As Long:        NotFound = 0
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim TimeLapSub      As Single:      TimeLapSub = LastTimeLap

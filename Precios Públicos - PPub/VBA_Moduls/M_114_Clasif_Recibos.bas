@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -17,7 +18,7 @@ Sub RuT_Clasif_Recibos()
 Debug.Print ">>> RuT_Clasif_Recibos"
     Dim RegsEmitido         As Long
     Dim RegsEjeAnt          As Long
-    Dim RegsAñejo           As Long
+    Dim RegsAnejo           As Long
     Dim RegsAplazado        As Long
     Dim RegsADxAplz         As Long
     Dim RegsADxAplzEPCurs   As Long
@@ -34,7 +35,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     Dim RegsNOCUADRA        As Long
     
     Dim rowfind             As Variant
-    Dim APP_AñoCont         As String:      APP_AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim APP_AnoCont         As String:      APP_AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim TxT_Resumen         As String
     Dim TimeLapSub          As Single:      TimeLapSub = LastTimeLap
 
@@ -91,10 +92,10 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     
     '-Rec. Añejos -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Añeja")
-        RegsAñejo = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsAñejo > 0 Then
-            .DataBodyRange.Columns(BD_CriT_Añejo).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
+        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aneja")
+        RegsAnejo = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        If RegsAnejo > 0 Then
+            .DataBodyRange.Columns(BD_CriT_Anejo).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
         End If
     
@@ -139,7 +140,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-_Contab_Ant_--------------------------------------------------------------------------------------------------------
         '-Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="<" & APP_AñoCont
+        .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="<" & APP_AnoCont
         RegsContabAnt = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsContabAnt > 0 Then
             .DataBodyRange.Columns(BD_CriT_ContabAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "_Contab_Ant_"
@@ -201,7 +202,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
 Debug.Print "RegsSinTipo", RegsSinTipo
         RegsCanTot = .ListRows.Count
 Debug.Print "RegsCanTot", , Format(RegsCanTot, "#,##0")
-        RegsNOCUADRA = RegsCanTot - (RegsEmitido + RegsEjeAnt + RegsAñejo + RegsAplazado + RegsADxAplz + RegsSinTipo)
+        RegsNOCUADRA = RegsCanTot - (RegsEmitido + RegsEjeAnt + RegsAnejo + RegsAplazado + RegsADxAplz + RegsSinTipo)
 Debug.Print "RegsNOCUADRA", RegsNOCUADRA
         'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Left("Reg. Sin Clasificar: " & String(35, "_"), 35) & _
                 Right(String(15, "_") & Format(RegsNOCUADRA, "#,##0") & " reg.", 15), LastTimeLap)

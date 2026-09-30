@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_314_Find_Rec_INSS"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -16,7 +17,7 @@ Debug.Print ">>> RuT_Find_Rec_INSS_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim T_Filas         As Long:        T_Filas = Lo_ClsBk.ListRows.Count
     Dim RowsDel         As Long
     Dim CantRecINSS     As Long
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
@@ -91,15 +92,15 @@ Debug.Print ">>> RuT_Find_Rec_INSS_C_Acad" & Prog__APP.Range("APP_CursAcad")
     '- Borrar Recibos de C_Acad_Ant y Cobrados en Año_Cont_Ant. -----------------
     With Lo_ClsBk
         rowfind = .ListRows.Count
-        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" & AñoCont - 1, _
+        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_ClsBk, LS06_ACont_Cob, "=" & AnoCont - 1, _
                                                 LS06_C_Acad, "=" & C_Acad_Ant)
         RowsDel = rowfind - .ListRows.Count
         If RowsDel > 0 Then
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "Del de LSace06 Rec.INSS F_Cob=" & AñoCont - 1, 0, _
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "Del de LSace06 Rec.INSS F_Cob=" & AnoCont - 1, 0, _
                                                             Format(RowsDel, "#,##0") & " reg", _
                                                             "quedan " & Format(.ListRows.Count, "#,##0") & " reg")
         Else
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "No hay Rec. Rec.INSS F_Cob=" & AñoCont - 1, 0)
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "No hay Rec. Rec.INSS F_Cob=" & AnoCont - 1, 0)
         End If
     End With
         

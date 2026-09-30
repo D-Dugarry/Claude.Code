@@ -12,6 +12,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Last Rev. 2026-09-30 20:04
+
 Option Explicit
 
 '- Necesitamos poner estas 4 declaraciones y definir la constante GWL_Style, para poder quitar la barra de menú de la ventana de este UserForm. --------------------
@@ -21,10 +23,6 @@ Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLong
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 Private Const GWL_Style = (-16)
 Dim TaskIndice             As Variant
-
-Private Sub Lb_1_Click()
-
-End Sub
 
 ' ==================================================================================================================================
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
@@ -54,13 +52,13 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_Activate()
 Debug.Print "-.-.-.-.-.-.-.-.-.-.-.- >>> Form_Running_Rut UserForm_Activate()"
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange    '-
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange    '-
         TaskIndice = Application.Match(Prog__APP.Range("APP_Task_Rut"), .Columns(Task_Nombre_Rut), 0)
         If Not IsError(TaskIndice) Then    ' ¡¡¡ Existe la Rutina !!! ------------------------
             Prog__APP.Range("APP_Task_Index") = TaskIndice
-            Me.Lb_Tít_Informe.Caption = "Progreso de la Tarea: " & .Cells(TaskIndice, Task_Tarea)
+            Me.Lb_Tit_Informe.Caption = "Progreso de la Tarea: " & .Cells(TaskIndice, Task_Tarea)
         Else                            ' ¡¡¡ No Existe la Rutina !!!   ------------------------
-            Me.Lb_Tít_Informe = "¡ Error: la Rutina NO Existe !"
+            Me.Lb_Tit_Informe = "¡ Error: la Rutina NO Existe !"
             Me.TBx_Informe = "¡ Error: la Rutina NO Existe !"
             Btn_Eixir.Visible = True
             Me.Fnd_Tarea.BackColor = RGB(255, 145, 138)
@@ -85,21 +83,17 @@ Private Sub Btn_VerInf_Click()
 Debug.Print "Form_Running_Rut Btn_VerInf_Click() - Form_Inf_Rut"
     Btn_VerInf.Visible = False
     Btn_Eixir.Visible = True
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
         .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe
-        Me.Lb_Tít_Informe.Caption = "Informe Tarea realizada: " & .Cells(TaskIndice, Task_Tarea)
+        Me.Lb_Tit_Informe.Caption = "Informe Tarea realizada: " & .Cells(TaskIndice, Task_Tarea)
 '        Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")
     End With
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Btn_Eixir_Click()
     If IsError(TaskIndice) Then    ' ¡¡¡ No Existe la Rutina !!! ------------------------
-        Prog__Menú_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe
         Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe
     End If
     Unload Me
 End Sub
-
-
-
-

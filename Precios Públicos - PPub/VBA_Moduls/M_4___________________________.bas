@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_4___________________________"
+' Last Rev. 2026-09-30 19:16
 '   EN ESTE MÓDULO PROCESO TODO LO QUE PUEDO EN EL ClsBk PARA TRABAJAR AL MÁXIMO EN LA RAM
 
 ' M_410_Update_Lo_AE4
@@ -15,9 +16,9 @@ Attribute VB_Name = "M_4___________________________"
 '                 - Crear, si NO Existe ListObject Lo_ClsBk
 '                 - Comprobar que la Tabla Lo_ClsBk No está vacía
 '                 - Comprobar que la cabecera de la Tabla Lo_ClsBk corresponde con la establecida en la LoDefCol
-'         - Proceso ClsBk: (para transferir sólo los recibos del AñoCont y no los del C_Acad)
-'                 - Borrar Recibos ACont_Emi = AñoCont-1 y Acont_Cob <> AñoCont
-'                 - Borrar Recibos ACont_Emi > AñoCont
+'         - Proceso ClsBk: (para transferir sólo los recibos del AnoCont y no los del C_Acad)
+'                 - Borrar Recibos ACont_Emi = AnoCont-1 y Acont_Cob <> AnoCont
+'                 - Borrar Recibos ACont_Emi > AnoCont
 '                 - Borrar Datos de Rec. con F_Cob > APP_FechCierreCont: Vaciar/Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
 '         - Copy ClsBk:
 '                - Si SW_Del_LoData=true Borrar Lo_AE4x1 para iniciarlo
@@ -40,7 +41,7 @@ Attribute VB_Name = "M_4___________________________"
 
 
 '    Proceso: Importar Rec. AE4 - EFPyAFC Del Curso_Acad 2024-25 y 2025-26
-'    - Sólo los Recibos del Año Contable: 2025 (Del Acont_Cob = AñoCont-1), y añadir Rec. a tabla BDatos.
+'    - Sólo los Recibos del Año Contable: 2025 (Del Acont_Cob = AnoCont-1), y añadir Rec. a tabla BDatos.
 '
 '    Importarmos 1º: EFP_2024-25
 '    Excel Seleccionado: EFP_2024-25_BaseDatos_Liq_V2.4.xlsm.............883 reg

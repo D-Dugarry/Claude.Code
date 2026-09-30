@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_413_Assign_ImpAdm_AE4x1"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -22,7 +23,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Dim Fila            As Long
     Dim TF_Lo_ClsBk_AE4x1     As Long:        TF_Lo_ClsBk_AE4x1 = Lo_ClsBk_AE4x1.ListRows.Count
     Dim RowsDel         As Long
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
@@ -72,12 +73,12 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
         End If
 Sig_Reg:
         If Fila Mod 4000 = 0 Then
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Indentificados " & CantImpAdm & " new, + " & CantImpAdmAntig & " antiguos, de AE_4 y de " & AñoCont & ", con Imp.Adm. en: ", 0, _
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Indentificados " & CantImpAdm & " new, + " & CantImpAdmAntig & " antiguos, de AE_4 y de " & AnoCont & ", con Imp.Adm. en: ", 0, _
                                 Format(Fila, "#,##0") & "reg.", "de " & Format(TF_Lo_ClsBk_AE4x1, "#,##0") & "reg.", TxT_Progreso, True, , 2)
         End If
 Fin_Bucle:
     Next
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Adm. a " & CantImpAdm & " reg., + " & CantImpAdmAntig & " antiguos, de AE_4 y de " & AñoCont & _
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Adm. a " & CantImpAdm & " reg., + " & CantImpAdmAntig & " antiguos, de AE_4 y de " & AnoCont & _
                                             ", de un total de: ", 0, Format(TF_Lo_ClsBk_AE4x1, "#,##0") & "reg.", , TxT_Progreso, True, , 2)
     
 '- ------------------------------------------------------------------------------------------------------------------
@@ -121,7 +122,7 @@ Fin_Bucle:
 '    With Lo_ClsBk_AE4x1
 '        Call Rut_Lo_Filtros_Quitar(Lo_ClsBk_AE4x1)
 '        '- Visualizo el progreso ----------------------------------------------------------------------------------------
-'        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes del AñoCont_" & AñoCont & _
+'        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes del AñoCont_" & AnoCont & _
 '                             ", en: " & Format(TF_Lo_ClsBk_AE4x1, "#,##0") & "reg.", TimeLapSub, , , , , , 2)
 '        '- Sumatorios ---------
 '        With .DataBodyRange

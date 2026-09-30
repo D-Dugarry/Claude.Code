@@ -1,13 +1,14 @@
-Attribute VB_Name = "M_132_Añadir_Núm_JIs_al_Inf"
+Attribute VB_Name = "M_132_Anadir_Num_JIs_al_Inf"
+' Last Rev. 2026-09-30 20:04
 '2026-02-14
 Option Explicit
 
 '- Rellena la Tabla Informe_Recibos con todos los Números de JI's de BDatos. ------------------------
 
 ' ==================================================================================================================================
-Sub Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos()
+Sub Rut_Anadir_a_Inf_Recibos_JIs_de_BDatos()
 ' ==================================================================================================================================
-Debug.Print "Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos"
+Debug.Print "Rut_Anadir_a_Inf_Recibos_JIs_de_BDatos"
 
         Dim Nom_Inf         As String:          Nom_Inf = "Inf_Recibos"
         Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
@@ -16,7 +17,7 @@ Debug.Print "Rut_Añadir_a_Inf_Recibos_JIs_de_BDatos"
 
 Dim Tp_Rec          As String
 Dim Concept         As String
-Dim MenúAux_Msg     As String
+Dim MenuAux_Msg     As String
 Dim F_Inf           As Integer
 Dim rowfind         As Variant
 Dim RwJI            As ListRow
@@ -214,9 +215,9 @@ Finalizar:
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
     
 '    '- Visualizo el progreso ---------------------------------------------------------------------------------------
-'    MenúAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
+'    MenuAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
 '        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
-'    MsgBox MenúAux_Msg
+'    MsgBox MenuAux_Msg
     
     Lo_BD.ShowTotals = True
     Lo_Inf.ShowTotals = True

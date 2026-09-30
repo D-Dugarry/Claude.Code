@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_118_Actualiz_BD_con_BD_Ant24"
+' Last Rev. 2026-09-30 20:55
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -40,10 +41,11 @@ Debug.Print ">>> Rut_Actualizar_LoBDatos_con_LoBD_Ant"
     Lo_BD.DataBodyRange.Columns(BD_Obs_Conta).ClearContents
     Lo_BD.DataBodyRange.Columns(BD_JI_443_Adm).ClearContents
     Lo_BD.DataBodyRange.Columns(BD_JI_Emi_Acad).ClearContents
-    Lo_BD.DataBodyRange.Columns(BD_AD_0010).ClearContents
+    '- PENDIENTE: BD_AD_0010 se desdobla en BD_AD_Emi_Adm y BD_AD_Emi_Acad; resolver mas adelante.
+    'Lo_BD.DataBodyRange.Columns(BD_AD_0010).ClearContents
     
-    '- Todos los Rec. "Emitidos" del AñoCont_Anterior pasan a "EjeAnt" en el AñoCont corriente
-    '- Todos los Rec. "ADxAplz" del AñoCont Anterior pasan a "Aplazado" en el AñoCont corriente
+    '- Todos los Rec. "Emitidos" del AñoCont_Anterior pasan a "EjeAnt" en el AnoCont corriente
+    '- Todos los Rec. "ADxAplz" del AnoCont Anterior pasan a "Aplazado" en el AnoCont corriente
     Call Rut_Lo_Sort(Lo_BDant, BD_Tipo_Rec, xlAscending, True)   '- Ordenar primero accelera un montón el borrado -----
     With Lo_BDant.ListColumns(BD_Tipo_Rec).DataBodyRange
         .Replace What:="Emitido", Replacement:="EjeAnt", _
@@ -66,7 +68,8 @@ Debug.Print ">>> Rut_Actualizar_LoBDatos_con_LoBD_Ant"
                     Lo_BD.DataBodyRange.Cells(F_BD, BD_Rec_Imp_Adm) = .Cells(F_BDant, BD_Rec_Imp_Adm)      '- Sólo para comparar...
                     Lo_BD.DataBodyRange.Cells(F_BD, BD_Tipo_Rec) = .Cells(F_BDant, BD_Tipo_Rec)
                     Lo_BD.DataBodyRange.Cells(F_BD, BD_JI_Emi_Acad) = .Cells(F_BDant, BD_JI_Emi_Acad)
-                    Lo_BD.DataBodyRange.Cells(F_BD, BD_AD_0010) = .Cells(F_BDant, BD_AD_0010)
+                    '- PENDIENTE: BD_AD_0010 se desdobla en BD_AD_Emi_Adm y BD_AD_Emi_Acad; resolver mas adelante.
+                    'Lo_BD.DataBodyRange.Cells(F_BD, BD_AD_0010) = .Cells(F_BDant, BD_AD_0010)
 '                    Lo_BD.DataBodyRange.Cells(F_BD, 52) = .Cells(F_BDant, BD_AD_0010)
                     Found = Found + 1
                     If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For

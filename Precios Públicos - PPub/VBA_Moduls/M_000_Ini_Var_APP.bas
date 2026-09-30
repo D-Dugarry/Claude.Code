@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
+' Last Rev. 2026-09-30 20:04
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -43,7 +44,7 @@ Public Const BD_Tipo_Rec           As Integer = 36   ' col: aj
 Public Const BD_TIO_EP             As Integer = 37   ' col: ak
 Public Const BD_Cta_Ing            As Integer = 38   ' col: al
 Public Const BD_Coef_VRI           As Integer = 39   ' col: am
-Public Const BD_Orgánica           As Integer = 40   ' col: an
+Public Const BD_Organica           As Integer = 40   ' col: an
 Public Const BD_ExpAdm             As Integer = 41   ' col: ao
 Public Const BD_Liquidado          As Integer = 42   ' col: ap
 Public Const BD_RDT                As Integer = 43   ' col: aq
@@ -64,7 +65,7 @@ Public Const BD_EP_GestReg            As Integer = 54   ' col: bb
 ' - Columnas usadas como 'scratch' de marcado temporal por RuT_Clasif_Recibos (M_114) --------------
 Public Const BD_CriT_Emi               As Integer = 52   ' col: bz  (mismo indice fisico que BD_H_Incidencias, reusado como scratch)
 Public Const BD_CriT_EjeAnt            As Integer = 53   ' col: ba  (mismo indice fisico que BD_EP_Ctrl, reusado como scratch)
-Public Const BD_CriT_Añejo             As Integer = 54   ' col: bb  (mismo indice fisico que BD_EP_GestReg, reusado como scratch)
+Public Const BD_CriT_Anejo             As Integer = 54   ' col: bb  (mismo indice fisico que BD_EP_GestReg, reusado como scratch)
 Public Const BD_CriT_Aplazado          As Integer = 55   ' col: bc
 Public Const BD_CriT_ADxAplz           As Integer = 56   ' col: bd
 Public Const BD_CriT_ContabAnt         As Integer = 57   ' col: be
@@ -125,10 +126,10 @@ Public Const LS06_RecFound            As Integer = 29   ' col: ac
 ' Tabla Prog_EPplazos.ListObjects(1) --------------------------------
 Public Const IRs_Cod_Plan         As Integer = 1       ' col: a
 Public Const IRs_Curso_Acad       As Integer = 2       ' col: b
-Public Const IRs_Año_Emi          As Integer = 3       ' col: c
+Public Const IRs_Ano_Emi          As Integer = 3       ' col: c
 Public Const IRs_Plan_Curso       As Integer = 4       ' col: d
 Public Const IRs_NomPlan          As Integer = 5       ' col: e
-Public Const IRs_Orgánica         As Integer = 6       ' col: f
+Public Const IRs_Organica         As Integer = 6       ' col: f
 Public Const IRs_Ref_JI           As Integer = 7       ' col: g
 Public Const IRs_Concepto         As Integer = 8       ' col: h
 Public Const IRs_Incidencia       As Integer = 9       ' col: i
@@ -170,16 +171,16 @@ Public Const Eplz_Fech_P1             As Integer = 4    ' col: d
 Public Const Eplz_Fech_P2             As Integer = 5    ' col: e
 Public Const Eplz_Fech_P3             As Integer = 6    ' col: f
 Public Const Eplz_Fech_P4             As Integer = 7    ' col: g
-Public Const Eplz_Año_P1              As Integer = 8    ' col: h
-Public Const Eplz_Año_P2              As Integer = 9    ' col: i
-Public Const Eplz_Año_P3              As Integer = 10   ' col: j
-Public Const Eplz_Año_P4              As Integer = 11   ' col: k
+Public Const Eplz_Ano_P1              As Integer = 8    ' col: h
+Public Const Eplz_Ano_P2              As Integer = 9    ' col: i
+Public Const Eplz_Ano_P3              As Integer = 10   ' col: j
+Public Const Eplz_Ano_P4              As Integer = 11   ' col: k
 Public Const Eplz_Plazos              As Integer = 12   ' col: l
 Public Const Eplz_PlazoAD             As Integer = 13   ' col: m
 
 ' Tabla Prog_JIs.ListObjects(1) --------------------------------
 Public Const JIs_TipRec               As Integer = 1    ' col: a
-Public Const JIs_Enseñanza            As Integer = 2    ' col: b
+Public Const JIs_Ensenanza            As Integer = 2    ' col: b
 Public Const JIs_ConcptNom            As Integer = 3    ' col: c
 Public Const JIs_Tot_Emi              As Integer = 4    ' col: d
 Public Const JIs_Tot_Cob              As Integer = 5    ' col: e
@@ -200,7 +201,7 @@ Public Const JIs_Descrip_JI           As Integer = 19   ' col: s
 
 ' Tabla Prog_Inf_Recibos.ListObjects(1) --------------------------------
 Public Const InfRec_TipRec            As Integer = 1    ' col: a
-Public Const InfRec_Enseñanza         As Integer = 2    ' col: b
+Public Const InfRec_Ensenanza         As Integer = 2    ' col: b
 Public Const InfRec_ConcptNom         As Integer = 3    ' col: c
 
 Public Const InfRec_Tot_Emi           As Integer = 4    ' col: d
@@ -241,7 +242,7 @@ Public Const InfRec_ImpAcad_Pdte         As Integer = 33   ' col: ag
 Public Const InfRec_ADxAplz              As Integer = 34   ' col: ah
 Public Const InfRec_Aplazado             As Integer = 35   ' col: ai
 
-' Tabla Prog__Menú_Aux.ListObjects(1) --------------------------------
+' Tabla Prog__Menu_Aux.ListObjects(1) --------------------------------
 Public Const DR_Ref                   As Integer = 1    ' col: a
 Public Const DR_C_Acad                As Integer = 2    ' col: b
 Public Const DR_Cod_Activ             As Integer = 3    ' col: c
@@ -262,9 +263,9 @@ Public Const DR_H_Imp_Cob             As Integer = 17   ' col: q
 Public Const DR_H_Imp_Adm             As Integer = 18   ' col: r
 Public Const DR_H_Cod_F_Pag           As Integer = 19   ' col: s
 Public Const DR_H_Invalid             As Integer = 20   ' col: t
-Public Const DR_H_AñoMes_Emi          As Integer = 21   ' col: u
-Public Const DR_H_AñoMes_Rem          As Integer = 22   ' col: v
-Public Const DR_H_AñoMes_Cob          As Integer = 23   ' col: w
+Public Const DR_H_AnoMes_Emi          As Integer = 21   ' col: u
+Public Const DR_H_AnoMes_Rem          As Integer = 22   ' col: v
+Public Const DR_H_AnoMes_Cob          As Integer = 23   ' col: w
 Public Const DR_Ape_1                 As Integer = 24   ' col: x
 Public Const DR_Ape_2                 As Integer = 25   ' col: y
 Public Const DR_Nombre                As Integer = 26   ' col: z
@@ -301,11 +302,11 @@ Public Const DefC_Sort            As Integer = 14      ' col: n
 Public Const DefC_LoTAdmAcad      As Integer = 15      ' col: o
 Public Const DefC_RefreshBdAnt    As Integer = 16      ' col: p
 
-' Tabla Prog__Menú_Aux.ListObjects(1) --------------------------------
+' Tabla Prog__Menu_Aux.ListObjects(1) --------------------------------
 Public Const Task_Tarea              As Integer = 1       ' col: a
 Public Const Task_Usuario            As Integer = 2       ' col: b
 Public Const Task_Nombre_Rut         As Integer = 3       ' col: c
-Public Const Task_Descripción        As Integer = 4       ' col: d
+Public Const Task_Descripcion        As Integer = 4       ' col: d
 Public Const Task_Rut_Informe        As Integer = 5       ' col: e
 Public Const Task_Imagen             As Integer = 6       ' col: f
 Public Const Task_Uribbon_Tags       As Integer = 7       ' col: g

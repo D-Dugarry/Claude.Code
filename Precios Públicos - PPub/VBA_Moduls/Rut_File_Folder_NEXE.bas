@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
+' Last Rev. 2026-09-30 19:16
 Option Explicit
 
 '###################################################################################################################################
@@ -27,14 +28,14 @@ Sub Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem As String, O
 End Sub             ' Fnc_Format_Referencia
 '###################################################################################################################################
    'call Rut_File_Select ("Título...", NomFich, ["Excel"], ["*.xls?"])      '- NomFich = "Cancel"
-Sub Rut_File_Select(Título As String, _
+Sub Rut_File_Select(Titulo As String, _
                     NomFich As String, _
                     Optional TipoFich_Txt As String = "Cualquier Fichero", _
                     Optional TipoFich As String = "*.*")
 ' ==================================================================================================================================
 Debug.Print ">>> Rut_File_Select"
     With Application.FileDialog(msoFileDialogFilePicker)
-            .Title = Título
+            .Title = Titulo
             .InitialFileName = Fnc_NEXE_RutaAPP & "\" & NomFich & "*"
             .InitialView = msoFileDialogViewDetails
             .ButtonName = "Seleccionar" ' o "Aceptar" o ...
@@ -52,7 +53,7 @@ Debug.Print "<<< Rut_File_Select"
 End Sub
 '###################################################################################################################################
    'call Rut_File_Select ("Título...", NameFile, ["Excel"], ["*.xls?"])      '- NameFile = "Cancel"
-Sub Rut_File_Select_V2(Título As String, _
+Sub Rut_File_Select_V2(Titulo As String, _
                         NameFile As String, _
                         Optional TipoFich_Txt As String = "Cualquier Fichero", _
                         Optional TipoFich As String = "*.*", _
@@ -60,7 +61,7 @@ Sub Rut_File_Select_V2(Título As String, _
 ' ==================================================================================================================================
 Debug.Print ">>> Rut_File_Select_V2"
     With Application.FileDialog(msoFileDialogFilePicker)
-            .Title = Título
+            .Title = Titulo
             .InitialFileName = Fnc_NEXE_RutaAPP & "\" & NameFile & "*"
             .InitialView = msoFileDialogViewDetails
             .ButtonName = "Seleccionar" ' o "Aceptar" o ...
@@ -76,25 +77,6 @@ Debug.Print ">>> Rut_File_Select_V2"
     End With
 Debug.Print "<<< Rut_File_Select_V2"
 End Sub
-'###################################################################################################################################
-Sub Rut_Folder_Select(Título As String, ByRef Directorio As String)     ' Seleccionar una ruta (carpeta) del explorador
-' ==================================================================================================================================
-    With Application.FileDialog(msoFileDialogFolderPicker)
-            .Title = Título
-            .InitialFileName = Application.Workbooks(ThisWorkbook.Name).Path & "\"
-            .InitialView = msoFileDialogViewDetails
-            .AllowMultiSelect = False
-            .ButtonName = "Seleccionar Carpeta" ' o "Aceptar" o ...
-            .Filters.Clear
-        If .Show = True Then
-            Directorio = .SelectedItems(1)
-        Else
-            MsgBox "Ha pulsado el botón <Cancelar>.", vbOKOnly, "Proceso: " & Título
-            Directorio = "Cancel"
-        End If
-    End With
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
 '-----------------------------------------------------------------------------------------------------------------------------------
 Sub Rut_TimeLap_Inf(ActivForm As Object, _
                     Kontrol As String, _

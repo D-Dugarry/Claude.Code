@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_195_Add_UXXIdata_in_BDatos"
+' Last Rev. 2026-09-30 21:12
 '- M_195_Import_a_BD_Ant -----------------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -9,7 +10,7 @@ Debug.Print "------------------------- >>> RuT_Add_UXXIdata_in_BDatos()"
     Dim TimeLapSub      As Single:      TimeLapSub = LastTimeLap
     Dim TxT_Progreso    As String
     Dim TxT_ProgIni     As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
     
@@ -17,7 +18,7 @@ Debug.Print "------------------------- >>> RuT_Add_UXXIdata_in_BDatos()"
     Dim Lo_BD               As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
     Dim Lo_BD_Ant           As ListObject:      Set Lo_BD_Ant = Sht__BD_Ant.ListObjects(1)
     Dim Lo_DefCol_BD        As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
-    Dim Lo_DefCol_BD_Ant    As ListObject:      Set Lo_DefCol_BD_Ant = Prog_DefCol_BD_Ant.ListObjects(1)
+    Dim Lo_DefCol_BD_Ant    As ListObject:      Set Lo_DefCol_BD_Ant = Prog_DefCol_BD.ListObjects(1)
     
     '- Setting Sheets ------------------------------------
     Sht__BD.Visible = xlSheetVisible
@@ -84,7 +85,7 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar Datos Contables UXXI de BD_Ant a BDatos 
     With Lo_BD_Ant.DataBodyRange
     
         F_BD = 1
-        For F_BDant = 1 To TF_BDAnt
+        For F_BDant = 1 To TF_BDant
             Select Case Lo_BD.DataBodyRange.Cells(F_BD, BD_Ref)
                 Case Is < .Cells(F_BDant, BD_Ref) '- Ref_BD  NO-EXISTE-EN  Sht__BD_Ant
                     If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
@@ -120,7 +121,7 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar Datos Contables UXXI de BD_Ant a BDatos 
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "  Reg. Añadidos datos", 0, _
                         " Found: " & Format(Found, "#,##0") & " REG.")
 '''    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "  Reg. Añadidos datos del curso " & C_Acad_Ant & ", emitidos en " & _
-                        AñoCont & Right(String(10, " .") & " Found: " & Format(Found, "#,##0") & " REG.", 30), 0)
+                        AnoCont & Right(String(10, " .") & " Found: " & Format(Found, "#,##0") & " REG.", 30), 0)
     End With        '-  Lo_BD.DataBodyRange
     
     Lo_BD.ShowTotals = True
@@ -147,9 +148,3 @@ Rut_On_Functions
 Debug.Print "------------------------- <<< Sub RuT_Update_LSGES04_IAdm_CAcadAnt()"
 End Sub     ' RuT_Update_LSGES04_IAdm_CAcadAnt   --------------------------------------------------------------------------------------------
 '===================================================================================================================================
-
-
-
-
-
-

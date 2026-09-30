@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_1____________________________"
+' Last Rev. 2026-09-30 19:16
 '    Importar Última Consulta de LSGES04_GE, Actualizar registros existentes y Añadir Nuevos.
 '
 '    - Rut_Lo_Import_LoData_LoDefCol, Import LSGES04 del Año_Contable en Sht_BD
@@ -13,7 +14,7 @@ Attribute VB_Name = "M_1____________________________"
 '        - Borrar Recibos NO Martrícula
 '        - Borrar Recibos INVALIDADOS
 '        - Borrar Recibos con fechas FUERA DEL PERÍODO CONTABLE, ¡¡ o Borrar Datos del cobro !!
-'        - Borrar Recibos Emitidos en Años Posteriores a AñoCont
+'        - Borrar Recibos Emitidos en Años Posteriores a AnoCont
 '        - Borrar Incongruencias de Fechas
 '    - M_112, Gestionar Duplicados
 '    - M_113_Assign_Concept_Eco:

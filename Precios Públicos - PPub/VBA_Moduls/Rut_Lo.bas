@@ -1,50 +1,6 @@
 Attribute VB_Name = "Rut_Lo"
+' Last Rev. 2026-09-30 18:25
 Option Explicit
-
-'###################################################################################################################################
-            Sub Rut_Lo_Buscar_Duplicados_ByHand()
-                                        Call Rut_Lo_Buscar_Duplicados(ActiveSheet.ListObjects(1), 11, 44, True) '- (ListObject, Colbusc, [ColNota]=0, [ClearColNota]=False)
-            End Sub
-'###################################################################################################################################
-Sub Rut_Lo_Buscar_Duplicados(ByRef Lo_Tb As ListObject, ColBusc As Integer, Optional ColNota As Integer = 0, Optional ClearBeforeColNota As Boolean = False)
-Dim Lin         As Long
-Dim ContDupl    As Long:    ContDupl = 0
-Dim CantReg     As Long:    CantReg = Lo_Tb.ListRows.Count
-Dim Ref_Ant     As Variant      '- Así da igual que sea Núm o Texto....
-
-    Call Rut_Lo_Sort(Lo_Tb, ColBusc, xlAscending, True)
-    Debug.Print "CantReg: " & CantReg
-    With Lo_Tb.DataBodyRange
-        Ref_Ant = .Cells(1, ColBusc)
-        If ColNota > 0 Then
-            If ClearBeforeColNota Then .Columns(ColNota).ClearContents
-            For Lin = 2 To CantReg
-                If .Cells(Lin, ColBusc) = Ref_Ant Then
-                    ContDupl = ContDupl + 1
-                    .Cells(Lin, ColBusc).Interior.ColorIndex = 34
-                    .Cells(Lin - 1, ColBusc).Interior.ColorIndex = 35
-                        .Cells(Lin - 1, ColNota) = "Ojo Duplicado_1"
-                        .Cells(Lin, ColNota) = "Ojo Duplicado_2"
-                Else
-                    Ref_Ant = .Cells(Lin, ColBusc)
-                End If
-            Next Lin
-        Else
-            For Lin = 2 To CantReg
-                If .Cells(Lin, ColBusc) = Ref_Ant Then
-                    ContDupl = ContDupl + 1
-                    .Cells(Lin, ColBusc).Interior.ColorIndex = 34
-                    .Cells(Lin - 1, ColBusc).Interior.ColorIndex = 35
-                Else
-                    Ref_Ant = .Cells(Lin, ColBusc)
-                End If
-            Next Lin
-        End If
-    End With
-MsgBox "FIN"
-Debug.Print "ContDupl: " & ContDupl
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
 
 '###################################################################################################################################
 Sub Rut_Lo_Columns_Show_Hide(WrkSht As Worksheet, WsDefCol As Worksheet, Col_HiddenSw As Integer, Optional Reset As Boolean = False)
@@ -92,65 +48,6 @@ Debug.Print "Rut_Lo_Columns_Show_Hide"
 
 End Sub
 
-'###################################################################################################################################
-Sub Rut_Lo_Columns_Show_Hide_OLD(WrkSht As Worksheet, WsDefCol As Worksheet, Col_HiddenSw As Integer, Optional Reset As Boolean = False)
-Debug.Print "Rut_Lo_Columns_Show_Hide"
-    Dim Lo_DefCol       As ListObject:      Set Lo_DefCol = WsDefCol.ListObjects(1)
-    Dim Lo_Table        As ListObject:      Set Lo_Table = WrkSht.ListObjects(1)
-    Dim Cont_Col        As Integer
-    Dim ColEnBlco       As Integer:         ColEnBlco = Lo_Table.Range.Columns(1).Column - 1    '- Por si hay columnas en blanco a la derecha de la ListObject.
-    Dim HiddenCol       As Boolean
-    '- Si activo el Reset, lo único que hago es volver Mostrar/Ocultar tal como deberían estar (por si alguien las ha tocado)
-    If Reset Then
-        WrkSht.Columns.Hidden = False  ' WrkSht.Columns.EntireColumn.Hidden = False
-        Lo_DefCol.TotalsRowRange(Col_HiddenSw).Value = False
-    End If
-    '- Procedo a mostrar u ocultar las columnas.
-    If Prog__APP.Range("SW_Col_Hide_" & WrkSht.CodeName) = True Then
-        For Cont_Col = 1 To Lo_Table.ListColumns.Count
-            WrkSht.Columns(ColEnBlco + Cont_Col).Hidden = False
-        Next Cont_Col
-    Else
-        For Cont_Col = 1 To Lo_Table.ListColumns.Count
-            HiddenCol = Lo_DefCol.DataBodyRange.Cells(Cont_Col, Col_HiddenSw)      '.Value2
-            WrkSht.Columns(ColEnBlco + Cont_Col).Hidden = HiddenCol
-        Next Cont_Col
-    End If
-    Lo_DefCol.TotalsRowRange(Col_HiddenSw) = Not Lo_DefCol.TotalsRowRange(Col_HiddenSw)
-    Prog__APP.Range("SW_Col_Hide_" & WrkSht.CodeName) = Not Prog__APP.Range("SW_Col_Hide_" & WrkSht.CodeName)
-FinSub:
-End Sub
-'###################################################################################################################################
-Sub Rut_Lo_Columns_Show_Hide_VeryOLD(WrkSht As Worksheet, WsDefCol As Worksheet, Optional Reset As Boolean = False)
-Debug.Print "Rut_Lo_Columns_Show_Hide"
-    Dim Lo_DefCol       As ListObject:      Set Lo_DefCol = WsDefCol.ListObjects(1)
-    Dim Lo_Table        As ListObject:      Set Lo_Table = WrkSht.ListObjects(1)
-    Dim Cont_Col        As Integer
-'    Dim Col_HiddenSw    As Integer:         Col_HiddenSw = Lo_DefCol.ListColumns("HiddenCol").Range.Column
-    Dim Col_HiddenSw    As Integer:         Col_HiddenSw = Lo_DefCol.ListColumns("HiddenCol").Range.Column
-    Dim ColEnBlco       As Integer:         ColEnBlco = Lo_Table.Range.Columns(1).Column - 1    '- Por si hay columnas en blanco a la derecha de la ListObject.
-    Dim HiddenCol       As Boolean
-    '- Si activo el Reset, lo único que hago es volver Mostrar/Ocultar tal como deberían estar (por si alguien las ha tocado)
-    If Reset Then Lo_DefCol.TotalsRowRange(Col_HiddenSw) = Not Lo_DefCol.TotalsRowRange(Col_HiddenSw)
-    '- Procedo a mostrar u ocultar las columnas.
-    If Lo_DefCol.TotalsRowRange(Col_HiddenSw) = True Then
-        For Cont_Col = 1 To Lo_Table.ListColumns.Count
-            WrkSht.Columns(ColEnBlco + Cont_Col).Hidden = False
-        Next Cont_Col
-    Else
-        For Cont_Col = 1 To Lo_Table.ListColumns.Count
-            HiddenCol = Lo_DefCol.DataBodyRange.Cells(Cont_Col, Col_HiddenSw)      '.Value2
-            WrkSht.Columns(ColEnBlco + Cont_Col).Hidden = HiddenCol
-        Next Cont_Col
-    End If
-    Lo_DefCol.TotalsRowRange(Col_HiddenSw) = Not Lo_DefCol.TotalsRowRange(Col_HiddenSw)
-End Sub
-'###################################################################################################################################
-        Sub Func_LstObj_ListColumns_DefCol_Check_OK_ByHand()  '--- Solo hace falta cambiar las variables de la Rutina -----------------------
-            MsgBox "La comparación de columnas de la tabla ha resultado ser: " & vbLf & vbLf & _
-                   "                        " & Func_LstObj_ListColumns_DefCol_Check_OK(Sht__BD.ListObjects(1), Prog_DefCol_BD.ListObjects(1), DefC_TitColLstObj) _
-                   , , "Procedimiento: Comparación Fila de Títulos de tablas"
-        End Sub
 ' ==================================================================================================================================
 Function Func_LstObj_ListColumns_DefCol_Check_OK(ByRef Lo_Data As ListObject, ByRef LoDefCol As ListObject, Col_TitColCompare As Integer) As Boolean
 ' ==================================================================================================================================
@@ -238,34 +135,6 @@ Sub Rut_Lo_ListColumns_ClearContents_DefC_ProtectData(Lo_Data As ListObject, _
      Next
 End Sub
 ' ==================================================================================================================================
-'###################################################################################################################################
-' Copia el DataBodyRange de Lo_Source en Lo_Target,      Opcional: DelFirstLoTarget primero contenido de Lo_Target
-Sub Rut_Lo_DataBodyRange_Copy(Lo_Source As ListObject, _
-                                  Lo_Target As ListObject, _
-                                  Optional DelFirstLoTarget As Boolean = False, _
-                                  Optional DelAfterLoSource As Boolean = False, _
-                                  Optional WithFormat As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
-    If Not Lo_Target.DataBodyRange Is Nothing And DelFirstLoTarget Then Lo_Target.DataBodyRange.Delete
-    Lo_Source.DataBodyRange.Copy
-    If WithFormat Then
-        If Lo_Target.DataBodyRange Is Nothing Then
-            Lo_Target.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteAll
-        Else
-            Lo_Target.DataBodyRange.Offset(Lo_Target.DataBodyRange.Rows.Count, 0).PasteSpecial Paste:=xlPasteAll
-        End If
-    Else
-        If Lo_Target.DataBodyRange Is Nothing Then
-            Lo_Target.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues
-        Else
-            Lo_Target.DataBodyRange.Offset(Lo_Target.DataBodyRange.Rows.Count, 0).PasteSpecial Paste:=xlPasteValues
-        End If
-    End If
-    '- Del Source Range if required -----------------------------------
-    If DelAfterLoSource Then Lo_Source.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
-    Application.CutCopyMode = False
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
 '''    '###################################################################################################################################
 '''    ' Copia el DataBodyRange FILTRADO de Lo_Source en Lo_Target,      Opcional: Borrar primero contenido de Lo_Target
 '''    ' Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_Source,Lo_Target,[DelFirstLoTarget=False])
@@ -330,66 +199,6 @@ Debug.Print "Rut_Lo_DataBodyRange_Filtered_Copy"
     Application.CutCopyMode = False
 End Sub
 ' ----------------------------------------------------------------------------------------------------------------------------------
-'###################################################################################################################################
-    ' Call Rut_Lo_DataBodyRange_Filter_Copy_Del(Lo_Source,Lo_Target,ColSearch1, Criterio1,ColSearch2, Criterio2,RngCriteria,DelFirstLoTarget,DelAfterLoSource)
-Sub Rut_Lo_DataBodyRange_Filter_Copy_Del(Lo_Source As ListObject, _
-                                           Lo_Target As ListObject, _
-                                           Optional ColSearch1 As Integer = 0, Optional Criterio1 As String = "", _
-                                           Optional ColSearch2 As Integer = 0, Optional Criterio2 As String = "", _
-                                           Optional RngCriteria As String = "", _
-                                           Optional DelFirstLoTarget As Boolean = False, _
-                                           Optional DelAfterLoSource As Boolean = False)
-'------------------------------------------------------------------------------------------------------------------------------------
-Debug.Print "Rut_Lo_DataBodyRange_Filter_Copy_Del"
-    Dim RowsFind  As Variant
-    If Lo_Source.DataBodyRange Is Nothing Then Exit Sub
-    Lo_Source.ShowTotals = False
-    Lo_Target.ShowTotals = False
-    '- Borrar Target before copy ---------------------------
-    If Not Lo_Target.DataBodyRange Is Nothing And DelFirstLoTarget Then Lo_Target.DataBodyRange.Delete
-    
-    Call Rut_Lo_Filtros_Quitar(Lo_Source)                '- Quitar filtros
-    If ColSearch1 <> 0 Then
-                                Call Rut_Lo_Sort(Lo_Source, ColSearch1, xlAscending, True)     '- Ordenar primero accelera un montón el borrado -----
-        If ColSearch2 <> 0 Then Call Rut_Lo_Sort(Lo_Source, ColSearch2, xlAscending, False)
-    End If
-    With Lo_Source
-        '- Hay Rango-Criterio ---------------------------------
-        If RngCriteria <> "" Then
-            .Range.AdvancedFilter xlFilterInPlace, Range(RngCriteria)
-            'RowsFind = .Range.SpecialCells(xlCellTypeVisible).Rows.Count - 1 '- Falla a veces y no he averiguado porque, habiendo celdas filtradas, no funciona!!!
-            RowsFind = .Range.Columns(ColSearch1).SpecialCells(xlCellTypeVisible).Cells.Count - 1 '2 + .ShowTotals  '- Si tiene TotalsRowRange .ShowTotals = -1 (True = -1, False = 0)
-            If RowsFind = 0 Then GoTo Terminar
-        '- NO Hay Rango-Criterio ---------------------------------
-        Else
-            .Range.AutoFilter Field:=ColSearch1, Criteria1:=Criterio1       '- Filtrar
-            If Criterio2 <> "" Then
-                .Range.AutoFilter Field:=ColSearch2, Criteria1:=Criterio2       '- Filtrar
-            End If
-            'RowsFind = .Range.SpecialCells(xlCellTypeVisible).Rows.Count - 1 '- Falla a veces y no he averiguado porque, habiendo celdas filtradas, no funciona!!!
-            RowsFind = .Range.Columns(ColSearch1).SpecialCells(xlCellTypeVisible).Cells.Count - 1 '2 + .ShowTotals  '- Si tiene TotalsRowRange .ShowTotals = -1 (True = -1, False = 0)
-            If RowsFind = 0 Then GoTo Terminar
-        End If
-        '- Copy Filtered Range --------------------------------------------
-        If Lo_Target.DataBodyRange Is Nothing Then
-            .DataBodyRange.SpecialCells(xlCellTypeVisible).Copy Destination:=Lo_Target.Range.Cells(1, 1).Offset(1, 0)
-        Else
-            .DataBodyRange.SpecialCells(xlCellTypeVisible).Copy Destination:=Lo_Target.DataBodyRange.Cells(Lo_Target.DataBodyRange.Rows.Count, 1).Offset(1, 0)
-        End If
-    End With    '- Lo_Source
-    '- Del Source Range if required -----------------------------------
-    If DelAfterLoSource Then Lo_Source.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
-    Application.CutCopyMode = False
-    
-Terminar:
-    Call Rut_Lo_Filtros_Quitar(Lo_Source)                '- Quitar filtros
-End Sub
-' ----------------------------------------------------------------------------------------------------------------------------------
-
-            Sub Rut_Lo_DataBodyRange_Filter_y_DEL_ByHand()
-                Call Rut_Lo_DataBodyRange_Filter_y_DEL(ActiveSheet.ListObjects(1), _
-                                LS06_C_Acad, "<>2025-26", LS06_C_Acad, "<>2024-25")
-            End Sub
 '###################################################################################################################################
     ' Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, ColSearch1, Criterio1)    ¡¡¡ QUITA FILTROS SI HAY  !!!
 Sub Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data As ListObject, _
@@ -498,23 +307,6 @@ Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, Columna As Integer, VarOrden As Strin
         .Apply
     End With
 End Sub
-'###################################################################################################################################
-    'call Rut_Lo_Sort_By2Cols( LstObj , Columna1 , Columna2 , xlAscending/xlDescending ,  True/False )
-Sub Rut_Lo_Sort_By2Cols(ByRef LstObj As ListObject, Columna1 As Integer, Columna2 As Integer, VarOrden As Long, Optional SW_Clear As Boolean = False)
-    
-    With LstObj.Sort
-        If SW_Clear Then .SortFields.Clear
-        .SortFields.Add Key:=LstObj.ListColumns(Columna1).Range, SortOn:=xlSortOnValues, Order:=VarOrden, DataOption:=xlSortNormal
-        .SortFields.Add Key:=LstObj.ListColumns(Columna2).Range, SortOn:=xlSortOnValues, Order:=VarOrden, DataOption:=xlSortNormal
-        .Header = xlYes
-        .MatchCase = False
-        .Orientation = xlTopToBottom
-        .SortMethod = xlPinYin
-        .Apply
-    End With
-    End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
-
 ' ==================================================================================================================================
 Sub Rut_Lo_FreezePanes_InmovilizaFxCx(Optional XCol As Integer = 1)
     'Call Rut_Lo_FreezePanes_InmovilizaFxCx(2)  '- Inmoviliza la Fila de Cabecera y la Xcol de la LstObj de la ActiveSheet.
@@ -548,18 +340,6 @@ End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 
 '###################################################################################################################################
-Sub Rut_Lo_Filtro(ByRef Lo_Tb As ListObject, Columna As Integer, Criterio As String, Optional SW_Clear As Boolean = False)
-' ----------------------------------------------------------------------------------------------------------------------------------
-    If SW_Clear And Not Lo_Tb.AutoFilter Is Nothing Then Lo_Tb.AutoFilter.ShowAllData
-    Lo_Tb.Range.AutoFilter Field:=Columna, Criteria1:=Criterio
-End Sub
-' -------------------------------------------------------------------------------------------------------------------------------<<<
-
-                            '#######################################################################################################
-                            Sub Rut_Filtros_Quitar_ActivSheet_LstObj()      ' Muestra Todas las Solicitudes y Activar Filtros >>>>>>
-                                    Call Rut_Lo_Filtros_Quitar(ActiveSheet.ListObjects(1))
-                            End Sub     ' ---------------------------------------------------------------------------------------<<<
-'###################################################################################################################################
 Sub Rut_Lo_Filtros_Quitar(Lo_Tb As ListObject)      ' Muestra Todas las Solicitudes y Activar Filtros >>>>>>>>>>>>>>>>>>>>
 ' ----------------------------------------------------------------------------------------------------------------------------------
     With Lo_Tb
@@ -573,12 +353,6 @@ Sub Rut_Lo_Filtros_Quitar(Lo_Tb As ListObject)      ' Muestra Todas las Solicitu
     End With
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
-
-Sub Rut_Copiar_EntireRow_LstObjct() '- Rut_Añade_Row_entera, DataBodyRange.Rows(2) ES OBLIGATORIO sino no funciona
-                
-ActiveSheet.ListObjects("Tab_INI").DataBodyRange.Rows(2).Copy ActiveSheet.ListObjects("Tab_FIN").ListRows(3).Range '
-                
-End Sub
 
 
 

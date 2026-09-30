@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -38,7 +39,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSace06_CAcad_ImpAdm_INSS(
     Dim RutaFichLsace06 As String
     Dim TxT_Progreso    As String
     Dim Arch_New_Name   As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     
@@ -75,6 +76,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSace06 Del Curso_Acad " & C_Acad_Ant &
     '- Import LSace06 del Curso_Acad_Ant ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
     Arch_New_Name = "LSACE06_" & C_Acad_Ant
+    Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
     Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
         Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)

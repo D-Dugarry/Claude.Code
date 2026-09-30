@@ -1,4 +1,5 @@
-Attribute VB_Name = "M_000_Menú_Usuario"
+Attribute VB_Name = "M_000_Menu_Usuario"
+' Last Rev. 2026-09-30 20:04
 Option Explicit
 
 ' ==================================================================================================================================
@@ -17,9 +18,9 @@ Sub Rut_Filtrar_Tareas()
     Dim SheetBtn_OK         As Boolean
     Dim Usuario_ID          As String:      Usuario_ID = UCase(Prog__APP.Range("APP_User_ID"))
     
-    Call Rut_Lo_Sort(Prog__Menú_Aux.ListObjects(1), 1, xlAscending, True)
+    Call Rut_Lo_Sort(Prog__Menu_Aux.ListObjects(1), 1, xlAscending, True)
     
-    With Prog__Menú_Aux.ListObjects(1).DataBodyRange
+    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
         For Cont_Row = 1 To .Rows.Count
             
             Users = UCase(.Cells(Cont_Row, Task_Usuario))

@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -20,7 +21,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Dim Fila            As Long
     Dim TF_LoBDatos     As Long:        TF_LoBDatos = LoBDatos.ListRows.Count
     Dim RowsDel         As Long
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
@@ -81,13 +82,13 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
         End If
 Sig_Reg:
         If Fila Mod 4000 = 0 Then
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Indentificados " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AñoCont & ", con Imp.Adm. en: ", 0, _
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Indentificados " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AnoCont & ", con Imp.Adm. en: ", 0, _
                                 Format(Fila, "#,##0") & "reg.", "de " & Format(TF_LoBDatos, "#,##0") & "reg.", TxT_Progreso, True, , 2)
         End If
 Fin_Bucle:
     Next
     
-    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Adm. a " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AñoCont & ", de un total de: ", 0, _
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Adm. a " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AnoCont & ", de un total de: ", 0, _
                         Format(TF_LoBDatos, "#,##0") & "reg.", , TxT_ProgIni, True, , 2)
     
 '''    '- ------------------------------------------------------------------------------------------------------------------
@@ -164,7 +165,7 @@ Fin_Bucle:
     With LoBDatos
         .AutoFilter.ShowAllData            ' Elimina los filtros
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes del AñoCont_" & AñoCont & _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes del AñoCont_" & AnoCont & _
                              ", en: " & Format(TF_LoBDatos, "#,##0") & "reg.", TimeLapSub, , , , , , 2)
         '- Sumatorios ---------
         With .DataBodyRange
@@ -191,72 +192,5 @@ Debug.Print "<<< Rut_Assign_Imp_AdmAcad_C_Acad_Pos" & C_Acad
 End Sub     ' -------------------------------------------------------------------------------------------------------------------------<<<
 ' ========================================================================================================================================
 
-Sub kk()
-'- ------------------------------------------------------------------------------------------------------------------
-'- Asignar en Recibos Plan="M013": Imp.Rec.Adm. = Imp.Adm. ----------------------------------------------------------
-    Dim Fila        As Long
-    Dim PlanDNI_Ant As String
-    Dim PlanDNI_New As String
-    Dim RowData     As ListRow
-    Dim RowDataCab  As ListRow
-    Dim NumRecAnt   As Integer
-    Dim ImpADMAnt   As Currency
-    Dim LoBDatos    As ListObject
-    Set LoBDatos = Sht__BD_Pruebas_VBA.ListObjects(1)
-    Sht__BD_Pruebas_VBA.Select
-        Call Rut_Lo_Filtros_Quitar(LoBDatos)
-        LoBDatos.ShowTotals = False
-    
-    Call Rut_Lo_Filtros_Quitar(LoBDatos)
-    LoBDatos.DataBodyRange.Columns(BD_Matricula).ClearContents
-    LoBDatos.DataBodyRange.Columns(BD_Anul).ClearContents
-    LoBDatos.DataBodyRange.Columns(BD_RegMov).ClearContents
-    ' Ordenar por columnas  ------------------------------
-        Call Rut_Lo_Sort(LoBDatos, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_NumRec, xlDescending, False)    '- Ordenar primero accelera un montón el borrado -----
-    
-    '- Recorro toda la tabla LoBDatos -----------------------------------------------------------------
-    Set RowDataCab = LoBDatos.ListRows(1)
-    ImpADMAnt = RowDataCab.Range(BD_ImpAdm)
-    For Fila = 1 To LoBDatos.ListRows.Count  '--- Bucle para recorrer todas la filas de LoBDatos
-        Set RowData = LoBDatos.ListRows(Fila)
-        If RowData.Range(BD_ActivEco) < 6 Then GoTo Sig_Reg
-        If RowData.Range(BD_ActivEco) > 6 Then Fila = LoBDatos.ListRows.Count: GoTo Sig_Reg
-        PlanDNI_New = RowData.Range(BD_Plan) & "_" & RowData.Range(BD_DNI)
-        If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)
-           PlanDNI_Ant = PlanDNI_New
-                RowData.Range(BD_Matricula) = RowData.Range(BD_NumRec)      '- Núm.Rec. Mayor
-                RowDataCab.Range(BD_Anul) = NumRecAnt                   '- Núm.Rec. Menor
-                Set RowDataCab = LoBDatos.ListRows(Fila)
-                ImpADMAnt = RowDataCab.Range(BD_ImpAdm)
-        End If
-        If ImpADMAnt <> RowData.Range(BD_ImpAdm) Then RowDataCab.Range(BD_RegMov) = RowData.Range(BD_ImpAdm)
-        NumRecAnt = RowData.Range(BD_NumRec)
-Sig_Reg:
-    Next
-    
-        LoBDatos.ShowTotals = True
-    
- Application.Speech.Speak "Proceso completado."
-        Call Rut_Lo_Filtros_Quitar(LoBDatos)
-End Sub
-
-
-Sub kk3kkl()
-Dim Lo_ClsBk As ListObject: Set Lo_ClsBk = Sht__BD.ListObjects(1)
-    Call Rut_Lo_Filtros_Quitar(Lo_ClsBk)
-    ' Ordenar por columnas  ------------------------------
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-
-
-End Sub
 
 

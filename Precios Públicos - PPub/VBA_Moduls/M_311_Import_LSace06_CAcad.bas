@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
+' Last Rev. 2026-09-30 21:12
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -57,7 +58,7 @@ Rut_Off_Functions
     Dim RutaFichLsace06 As String
     Dim Ccol            As Integer
     Dim FichNameINSS    As String
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim Wh_INSS         As Worksheet:   Set Wh_INSS = Lo_INSS.Parent
@@ -74,6 +75,7 @@ Rut_Off_Functions
             Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
             '- Visualizo el progreso  <<<<>>>>
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
+            Rut_On_Functions
             Exit Sub
         End If
         Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
@@ -86,6 +88,7 @@ Rut_Off_Functions
             '- Visualizo el progreso
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
             Arch_New_Name = "Cancel"
+            Rut_On_Functions
             Exit Sub
         End If
             '- Visualizo el progreso
@@ -126,6 +129,7 @@ Rut_Off_Functions
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
     End If
@@ -152,6 +156,7 @@ Rut_Off_Functions
         ClosedBook.Close SaveChanges:=False
         Set ClosedBook = Nothing
         Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Rut_On_Functions
         Exit Sub
     End If
     '- Comprobar que la cabecera de la Tabla Lo_ClsBk_LSace06 corresponde con la establecida en la LoDefCol ---------------------
@@ -166,6 +171,7 @@ Rut_Off_Functions
         ClosedBook.Close SaveChanges:=False
         Set ClosedBook = Nothing
         Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Rut_On_Functions
         Exit Sub
     End If
     
@@ -236,6 +242,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
             Set Lo_ClsBk_LSace06 = Nothing
             Set Ws_ClsBk_LSace06 = Nothing
             Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Rut_On_Functions
             Exit Sub
         End If
     End If
@@ -353,6 +360,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
     Sht__BD_INSS.Range("c2") = "Úlitma Importación LSace06 C_Acad_Ant - " & C_Acad_Ant & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadAnt")
     Sht__BD_INSS.Range("c3") = "Úlitma Importación LSace06 C_Acad_Pos - " & C_Acad_Pos & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadPos")
 
+Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
 

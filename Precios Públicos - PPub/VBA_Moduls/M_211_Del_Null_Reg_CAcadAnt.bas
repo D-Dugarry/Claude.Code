@@ -1,4 +1,5 @@
 Attribute VB_Name = "M_211_Del_Null_Reg_CAcadAnt"
+' Last Rev. 2026-09-30 21:12
 '2026-01-23
 '- M_211_Remove_Null_Reg_CAcad
 Option Explicit
@@ -23,12 +24,6 @@ Option Explicit
                 Dim Lo_BD_ErrDate           As ListObject:      Set Lo_BD_ErrDate = Sht__BD_ErrDate.ListObjects(1)
                 Dim Lo_DefCol_BD        As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
                 
-                Dim Lo_DrWrk            As ListObject:      Set Lo_DrWrk = Prog_DrWrk.ListObjects(1)
-                
-                Dim Lo_BdM013           As ListObject:      Set Lo_BdM013 = Sht__BD_M013.ListObjects(1)
-                Dim Lo_BdPNB1           As ListObject:      Set Lo_BdPNB1 = Sht__BD_PNB1.ListObjects(1)
-                Dim Lo_BdAdmP           As ListObject:      Set Lo_BdAdmP = Sht__BD_AdmP.ListObjects(1)
-                
                 Call RuT_Remove_Null_Reg_CAcad(ActiveSheet.ListObjects(1))
                 
             End Sub
@@ -39,7 +34,7 @@ Sub RuT_Remove_Null_Reg_CAcad(Lo_G04 As ListObject)
                         
 Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
     Dim rowfind         As Variant
-    Dim AñoCont         As String:      AñoCont = Prog__APP.Range("APP_AñoCont")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
 
     Call Rut_Lo_Filtros_Quitar(Lo_G04)                '- Quitar filtros
@@ -128,7 +123,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatrículaCero") Then
+            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero Subvencionada", 0, _
