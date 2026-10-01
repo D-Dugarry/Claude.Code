@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-01 10:00
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -248,7 +248,7 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar el ImpAdm C_Acad_Ant a BDatos ?") Then G
     Call Rut_Copy_ImpAdm_CAcadAnt_a_BDatos   '¡¡¡ Quizás preguntar si no hay que actualizar antes con el módúlo Update_LSGES04_C_Acad_Ant !!!
         
 Rut_Copy_ImpINSS_en_BDatos:
-If Not Func_MsgBox_vbYesNo("¿ Trasladar el Imp_INSS del C_Acad_Ant/Pos a BDatos ?") Then GoTo Rut_Lo_Import_WorkSheet
+If Not Func_MsgBox_vbYesNo("¿ Trasladar el Imp_INSS del C_Acad_Ant/Pos a BDatos ?") Then GoTo Rut_Actualizar_LoBDatos_con_LoBD_Ant
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_315_Copy_INSS_a_BD, Trasladar el importe INSS a los recibos de BDatos ----------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
@@ -257,22 +257,12 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar el Imp_INSS del C_Acad_Ant/Pos a BDatos 
 
 SaltoAqui:
 
-Rut_Lo_Import_WorkSheet:
-If Not Func_MsgBox_vbYesNo("¿ Importar Datos del Mes Anterior ?") Then GoTo Rut_Actualizar_LoBDatos_con_LoBD_Ant
-    '- ----------------------------------------------------------------------------------------------------------------------------
-    '- M_118_Actualiz_BD_con_BD_Ant -------------------------------------------------------------------------------------
-    '- ----------------------------------------------------------------------------------------------------------------------------
-    Dim Ws_BD_Ant   As Worksheet:   Set Ws_BD_Ant = Sht__BD_Ant
-    Arch_New_Name = "PPub_BDatos_Prog-RibbonX V-"
-    Call Rut_Lo_Import_WorkSheet(Ws_BD_Ant, Arch_New_Name, Sht__BD.Name)
-        If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-        
 Rut_Actualizar_LoBDatos_con_LoBD_Ant:
 If Not Func_MsgBox_vbYesNo("¿ Actualizams BDatos con BDatos del Mes Anterior ?") Then GoTo Terminar
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_118_Actualiz_BD_con_BD_Ant -------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Set Ws_BD_Ant = Sht__BD_Ant
+    Dim Ws_BD_Ant   As Worksheet:   Set Ws_BD_Ant = Sht__BD_Ant
     Arch_New_Name = "PPub_BDatos_Prog-RibbonX V-"
     Call Rut_Lo_Import_WorkSheet(Ws_BD_Ant, Arch_New_Name, Sht__BD.Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
