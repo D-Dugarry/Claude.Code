@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Wb_State_Manager"
-' Last Rev. 2026-09-30 15:05
+' Last Rev. 2026-10-01 08:38
 '===================================================================================================
 ' Rut_Wb_State_Manager  (skill excel-state-manager, adaptado a PPub)
 '
@@ -33,7 +33,7 @@ If m_NestLevel = 0 Then Debug.Print "Rut_Off_Functions"
     m_NestLevel = m_NestLevel + 1
     Application.Calculation = xlCalculationManual
     Application.ScreenUpdating = False
-    Application.EnableEvents = False:     Prog__APP.Range("SW_Events") = False               ' DesHABILITA LOS EVENTOS (SIEMPRE, sin depender del switch)
+    Application.EnableEvents = False:     Prog__APP_Switch.Range("Sw_Events") = False               ' DesHABILITA LOS EVENTOS (SIEMPRE, sin depender del switch)
 End Sub
 
 '---------------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ End Function
 ' Rut_Restaurar_Estado: política de restauración de PPub (cuerpo del antiguo Rut_On_Functions).
 '---------------------------------------------------------------------------------------------------
 Private Sub Rut_Restaurar_Estado()
-    If Prog__APP.Range("SW_App_Calculation") Then
+    If Prog__APP_Switch.Range("Sw_App_Calculation") Then
         Application.Calculation = xlCalculationAutomatic
     Else
          Application.Calculation = xlCalculationManual
@@ -76,11 +76,11 @@ Private Sub Rut_Restaurar_Estado()
     Application.DisplayAlerts = True
     Application.ScreenUpdating = True
     
-    If Prog__APP.Range("SW_Events") Then
+    If Prog__APP_Switch.Range("Sw_Events") Then
         Application.EnableEvents = True
     Else
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-        Prog__APP.Range("SW_Events") = True
+        Prog__APP_Switch.Range("Sw_Events") = True
     End If
 Debug.Print "Rut_On_Functions"
 End Sub

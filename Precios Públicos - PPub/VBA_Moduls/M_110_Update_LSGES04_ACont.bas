@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -106,7 +106,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
 '    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
-    Prog__APP.Range("SW_Col_Hide_Sht__BD") = False
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     Sht__BD.Unprotect
     Lo_BD.ShowTotals = False
     Lo_DefCol_BD.ShowTotals = False
@@ -114,7 +114,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Dim Lo_BD_Ant           As ListObject:      Set Lo_BD_Ant = Sht__BD_Ant.ListObjects(1)
     Sht__BD_Ant.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_Ant)
-    Prog__APP.Range("SW_Col_Hide_Sht__BD_Ant") = Not Prog__APP.Range("SW_Col_Hide_Sht__BD_Ant")
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant")
     Sht__BD_Ant.Unprotect
     Lo_BD_Ant.ShowTotals = False
     
@@ -150,7 +150,7 @@ Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
     '    '- ----------------------------------------------------------------------------------------------------------------------------
     '    '- Rut_Lo: Borrar por protección de Datos, Información sensible y no necesarias -------------------------------------------------------
     '    '- ----------------------------------------------------------------------------------------------------------------------------
-    '    If Prog__APP.Range("SW_ProteccionDatosActivado") Then
+    '    If Prog__APP_Switch.Range("Sw_ProteccionDatosActivado") Then
     '        Call Rut_Lo_ListColumns_ClearContents_DefC_ProtectData(Lo_BD, Lo_DefCol_BD, DefC_ProtectData)    '- Borrar por protección de Datos, Información sensible y no necesarios
     '            '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
     '            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Eliminada Información sensible.", LastTimeLap)
@@ -187,7 +187,7 @@ RuT_Remove_Reg_No_Valid:
     Dim Lo_BD_ErrDate       As ListObject:      Set Lo_BD_ErrDate = Sht__BD_ErrDate.ListObjects(1)
             Sht__BD_ErrDate.Visible = xlSheetVisible
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_ErrDate)
-            Prog__APP.Range("SW_Col_Hide_Sht__BD_ErrDate") = False
+            Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_ErrDate") = False
             Sht__BD_ErrDate.Unprotect
             Lo_BD_ErrDate.ShowTotals = False
             TimeLap2 = LastTimeLap
@@ -204,7 +204,7 @@ RuT_Duplicates_Search:
     Dim Lo_BD_Dpl           As ListObject:      Set Lo_BD_Dpl = Sht__BD_Dupl.ListObjects(1)
             Sht__BD_Dupl.Visible = xlSheetVisible
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_Dupl)
-            Prog__APP.Range("SW_Col_Hide_Sht__BD_Dupl") = False
+            Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Dupl") = False
             Sht__BD_Dupl.Unprotect
             Lo_BD_Dpl.ShowTotals = False
     Call RuT_Duplicates_Search(Lo_BD, Lo_DefCol_BD, Lo_BD_Dpl, BD_Ref, BD_Incidencias, BD_H_Incidencias)

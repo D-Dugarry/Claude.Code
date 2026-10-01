@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -48,7 +48,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
                 
 '- ------------------------------------------------------------------------------------------------------------------
 '- Borrar Recibos AE4 Enseñanzas Propias -----------------------------------------------------------------------------------
-        If Prog__APP.Range("SW_DelRegAE4") Then
+        If Prog__APP_Switch.Range("Sw_DelRegAE4") Then
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             rowfind = .ListRows.Count
             Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, BD_ActivEco, "=4")
@@ -69,7 +69,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- ------------------------------------------------------------------------------------------------------------------
 '- Borrar Recibos con Imp.Rec. < 0 -----------------------------------------------------------------------------------
-        If Prog__APP.Range("SW_DelRegNeg") Then
+        If Prog__APP_Switch.Range("Sw_DelRegNeg") Then
             Call Rut_Lo_Filtros_Quitar(Lo_Data)
             rowfind = .ListRows.Count
             Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, BD_ImpRec, "<0")
@@ -99,7 +99,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
+            If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero A Coste Cero", 0, _
@@ -123,7 +123,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
+            If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero Subvencionada", 0, _
@@ -275,7 +275,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '                Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_Data, Lo_BD_ErrDate, True)
 '            End If
             Call Rut_Lo_DataBodyRange_Filtered_Copy(Lo_Data, Lo_BD_ErrDate, True)
-            If Prog__APP.Range("SW_DelRegErrDate") Then
+            If Prog__APP_Switch.Range("Sw_DelRegErrDate") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. con Fechas Incongruentes. ", 0, _

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -45,7 +45,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
 '    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
-    Prog__APP.Range("SW_Col_Hide_Sht__BD") = False
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     Sht__BD.Unprotect
     Lo_BD.ShowTotals = False
     

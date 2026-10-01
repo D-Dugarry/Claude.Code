@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -103,7 +103,7 @@ Rut_Off_Functions
     '-            3º Comprobar que la Tabla Lo_ClsBk_LSace06 tiene datos
     '-            4º Comprobar que la cabecera de la Tabla Lo_ClsBk_LSace06 corresponde con la establecida en la LoDefCol
     '- --------------------------------------------------------------------------------------------------------------
-    Prog__APP.Range("SW_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim SheetIndx       As Integer:         SheetIndx = 1
     Dim ClosedBook      As Workbook
     Dim Ws_ClsBk_LSace06    As Worksheet
@@ -128,7 +128,7 @@ Rut_Off_Functions
             Arch_New_Name = "Cancel"
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -155,7 +155,7 @@ Rut_Off_Functions
         Arch_New_Name = "Cancel"
         ClosedBook.Close SaveChanges:=False
         Set ClosedBook = Nothing
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Rut_On_Functions
         Exit Sub
     End If
@@ -170,7 +170,7 @@ Rut_Off_Functions
         Arch_New_Name = "Cancel"
         ClosedBook.Close SaveChanges:=False
         Set ClosedBook = Nothing
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Rut_On_Functions
         Exit Sub
     End If
@@ -241,7 +241,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
             Set ClosedBook = Nothing
             Set Lo_ClsBk_LSace06 = Nothing
             Set Ws_ClsBk_LSace06 = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -346,7 +346,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
     Next Ccol
     
     
-    Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
             Dim TimeLap2              As Single
             TimeLap2 = LastTimeLap

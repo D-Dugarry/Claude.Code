@@ -26,7 +26,8 @@ Los ficheros `.bas`/`.cls`/`.frm` son **Windows-1252 (CP1252), no UTF-8**, con f
 - **`Prog_*.cls`** — code-behind de **hojas de configuración/catálogo** (`VB_Name` = CodeName de la hoja), casi siempre vacío salvo `Worksheet_Activate/Deactivate`. El contenido funcional vive en el `ListObject` (tabla Excel) de esa hoja, no en la clase. Dos subtipos:
   - `Prog_DefCol_*` → definición de columnas (nombre, formato, ancho, orden, ocultar/proteger) usada por las rutinas genéricas de formateo/import de `Rut_Lo_*`.
   - Catálogos de dominio (`Prog_Concept`, `Prog_ClasifEco`, `Prog_TipoRec`, `Prog_Bco`, `Prog_Organicas`, `Prog_CodActiv`, `Prog_Tipo_EPE`, `Prog_RetVRI`, `Prog_TitOf_Plazos`...) → tablas maestras de lookup.
-  - `Prog__APP`, `Prog__Usuarios`, `Prog__Menu_Aux` (doble guion bajo) → configuración de la aplicación: switches (`SW_*`), rutas, usuario activo, textos de `Form_MsgBox`, tabla de tareas del menú/Ribbon con visibilidad por usuario.
+  - `Prog__APP_Switch` → hoja `SwitchsAPP` con la tabla `Lo_SwitchsAPP`: **todos los switches** (nombres de Excel `Sw_*`, columnas NombreRango/Switch/Descripción; cada nombre apunta a su celda de la columna Switch). Se leen con `Prog__APP_Switch.Range("Sw_X")`.
+  - `Prog__APP`, `Prog__Usuarios`, `Prog__Menu_Aux` (doble guion bajo) → configuración de la aplicación: rutas, usuario activo, textos de `Form_MsgBox`, tabla de tareas del menú/Ribbon con visibilidad por usuario.
 - **`Sht__*.cls`** — mismo patrón que `Prog_*` (wrapper vacío de hoja), pero para las **hojas de datos**: `Sht__BD` (tabla maestra de recibos), `Sht__BD_Ant` (versión/ejercicio anterior), `Sht__BD_Dupl`, `Sht__BD_ErrDate`, `Sht__BD_RegAnul`, `Sht__BD_AE4x4`, `Sht__BD_INSS`, `Sht__BD_JIs_AE4`, `Sht__BD_IAdm_CAcadAnt`, hojas `Sht__Inf_*` (informes), `Sht__Buffer` (hoja de trabajo temporal). Se referencian por CodeName (`Sht__BD.ListObjects(1)`) para no depender del nombre visible de la pestaña.
 - **`Rut_*.bas`** (y variante `RuT_*.bas`) — librería transversal de utilidades reutilizables agrupada por objeto Excel: `Rut_Wb*` (Workbook — incluye `Rut_Wb_CopSegTimed_USB_HD.bas`, copias de seguridad con marca de tiempo en USB+disco local), `Rut_Ws*` (Worksheet), `Rut_Lo*` (ListObject: import/export/formato/orden/duplicados — el núcleo del framework de tablas), `Rut_UserForms`, `Rut_Hipervinculos`, `Rut_Filtro_Avanzado_VBA`, `Rut_File_Folder_NEXE`.
 - **`Form_*.frm/.frx`** — UserForms.
@@ -35,7 +36,7 @@ Los ficheros `.bas`/`.cls`/`.frm` son **Windows-1252 (CP1252), no UTF-8**, con f
 ### Flujo de arranque (`ThisWorkbook.cls` → `Workbook_Open`)
 
 1. Minimiza otras ventanas/instancias de Excel, oculta la app y desactiva pantalla.
-2. Activa eventos, fija switches iniciales (`SW_Events`, `SW_Test`, `SW_RightClickMenú_Visible`, `SW_WB_Deactivate`) en `Prog__APP`.
+2. Activa eventos, fija switches iniciales (`Sw_Events`, `Sw_Test`, `Sw_RightClickMenu_Visible`, `Sw_WB_Deactivate`) en `Prog__APP_Switch`.
 3. Muestra `Form_Usuario` (login) y carga datos de tareas (`RuT_Load_Task_Data`).
 4. Oculta el menú contextual nativo dejando solo las opciones custom (`Rut_Context_Buttons_Hide`) y oculta el Ribbon nativo.
 5. Activa `Sht__BD`, quita filtros, muestra todas las hojas, inmoviliza paneles.

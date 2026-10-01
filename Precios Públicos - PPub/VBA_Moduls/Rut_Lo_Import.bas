@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '2026-01-18
 Option Explicit
 
@@ -72,7 +72,7 @@ Rut_Off_Functions
     '- --------------------------------------------------------------------------------------------------------------
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importando: " & NomArch, 0, , , , , , 4)
-    Prog__APP.Range("SW_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim Ws              As Worksheet
     Dim ClosedBook      As Workbook
     On Error Resume Next
@@ -86,7 +86,7 @@ Rut_Off_Functions
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
         Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Rut_On_Functions
         Exit Sub
     End If
@@ -111,7 +111,7 @@ Rut_Off_Functions
                 Arch_New_Name = "Cancel"
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
-                Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
                 Rut_On_Functions
                 Exit Sub
             End If
@@ -148,7 +148,7 @@ Rut_Off_Functions
             Arch_New_Name = "Cancel"
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -167,7 +167,7 @@ Rut_Off_Functions
                     Set ClosedBook = Nothing
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -180,7 +180,7 @@ Rut_Off_Functions
                 Set ClosedBook = Nothing
                 Set Ws_ClsBk = Nothing
                 Set Lo_ClsBk = Nothing
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
                 Dim TimeLap2              As Single
                 TimeLap2 = LastTimeLap
@@ -271,7 +271,7 @@ Rut_Off_Functions
     '- --------------------------------------------------------------------------------------------------------------
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importando: " & NomArch, 0, , , , , , 4)
-    Prog__APP.Range("SW_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim Ws              As Worksheet
     Dim ClosedBook      As Workbook
     On Error Resume Next
@@ -285,7 +285,7 @@ Rut_Off_Functions
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
         Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Rut_On_Functions
         Exit Sub
     End If
@@ -310,7 +310,7 @@ Rut_Off_Functions
                 Arch_New_Name = "Cancel"
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
-                Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
                 Rut_On_Functions
                 Exit Sub
             End If
@@ -344,7 +344,7 @@ Rut_Off_Functions
             Arch_New_Name = "Cancel"
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -363,7 +363,7 @@ Rut_Off_Functions
                     Set ClosedBook = Nothing
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
-            Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             Rut_On_Functions
             Exit Sub
         End If
@@ -376,7 +376,7 @@ Rut_Off_Functions
                 Set ClosedBook = Nothing
                 Set Ws_ClsBk = Nothing
                 Set Lo_ClsBk = Nothing
-        Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
                 Dim TimeLap2              As Single
                 TimeLap2 = LastTimeLap

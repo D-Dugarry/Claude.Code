@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-10-01 08:38
 'Option Explicit
 
 Private Sub Worksheet_Activate()
@@ -29,7 +30,7 @@ Sub Worksheet_Change(ByVal Target As Range) '>>>>>>>>>>>> SI CAMBIA EL CONTENIDO
 '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-If Not Prog__APP.Range("SW_Events") Then Exit Sub
+If Not Prog__APP_Switch.Range("Sw_Events") Then Exit Sub
 
     ' ============ Cambiar Plan  ==========================================================================
     If Not Application.Intersect(Target, Range("TP_Cod_Plan")) Is Nothing Then

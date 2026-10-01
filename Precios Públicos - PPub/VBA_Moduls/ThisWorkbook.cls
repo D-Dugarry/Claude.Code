@@ -7,7 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 Option Explicit
 
 Private myRibUI             As IRibbonUI
@@ -22,7 +22,7 @@ End Property
 'Private Sub Workbook_Activate()
 'Debug.Print "Sub Workbook_Activate"
 ''    Application.ErrorCheckingOptions.NumberAsText = False ' Desactiva el indicador de error para números almacenados como texto
-'    Debug.Print Prog__APP.Range("SW_Events")
+'    Debug.Print Prog__APP_Switch.Range("Sw_Events")
 '    Call RefreshRibbon
 '        Call Rut_ConfigExcel_Establecer
 'End Sub
@@ -30,7 +30,7 @@ End Property
 Private Sub Workbook_Deactivate()
 Debug.Print "Workbook_Deactivate"
 ''    Application.ErrorCheckingOptions.NumberAsText = True
-    If Prog__APP.Range("SW_WB_Deactivate") Then
+    If Prog__APP_Switch.Range("Sw_WB_Deactivate") Then
         Debug.Print "Sub Workbook_Deactivate"
         Call Rut_ConfigExcel_RESTABLECER
     End If
@@ -44,10 +44,10 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     Application.Visible = False
     Application.ScreenUpdating = False
     Application.DisplayFullScreen = True
-    Application.EnableEvents = True:        Prog__APP.Range("SW_Events") = True
-    Prog__APP.Range("SW_Test") = False
-    Prog__APP.Range("SW_RightClickMenu_Visible") = True
-    Prog__APP.Range("SW_WB_Deactivate") = True     '- Cambiarlo a True para los usuarios
+    Application.EnableEvents = True:        Prog__APP_Switch.Range("Sw_Events") = True
+    Prog__APP_Switch.Range("Sw_Test") = False
+    Prog__APP_Switch.Range("Sw_RightClickMenu_Visible") = True
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = True     '- Cambiarlo a True para los usuarios
     
 '    Application.ErrorCheckingOptions.NumberAsText = False
     Form_Usuario.Show
@@ -59,7 +59,7 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     Sht__BD.Visible = xlSheetVisible
     Sht__BD.Select
     Call Rut_Lo_Filtros_Quitar(Sht__BD.ListObjects(1))
-    Prog__APP.Range("SW_Col_Hide_Sht__BD") = False
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     
         Dim WrkSht      As Worksheet
     For Each WrkSht In Worksheets
@@ -81,7 +81,7 @@ Debug.Print "Workbook_BeforeClose ------------------------- ThisWorkbook --- FIN
     Sht__BD.Select
     Call Rut_Context_Buttons_Restore    '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     
-    Application.EnableEvents = True:        Prog__APP.Range("SW_Events") = True
+    Application.EnableEvents = True:        Prog__APP_Switch.Range("Sw_Events") = True
     Application.ScreenUpdating = True
     Application.DisplayStatusBar = True                              'Muestra/Oculta la barra de estado
     ActiveWindow.DisplayHeadings = True                              'Muestra/Oculta títulos de filas y columnas
@@ -108,13 +108,13 @@ End Sub
 '- Please, copy the following event code in ThisWorkbook code module:
 ' ==================================================================================================================================
 Sub Workbook_SheetBeforeRightClick(ByVal SheetX As Object, ByVal Target As Range, Hide_RightClickMenu As Boolean)
-    Hide_RightClickMenu = Not Prog__APP.Range("SW_RightClickMenu_Visible")  '- Si Falso: NO hay Right-Click...
+    Hide_RightClickMenu = Not Prog__APP_Switch.Range("Sw_RightClickMenu_Visible")  '- Si Falso: NO hay Right-Click...
 Debug.Print "Workbook_SheetBeforeRightClick:   Hide_RightClickMenú = ", Hide_RightClickMenu
 ' ==================================================================================================================================
 '- Para una hoja en concreto, introducir este código en la misma hoja...
 ' ==================================================================================================================================
 '''Sub Worksheet_BeforeRightClick(ByVal Target As Range, Cancel As Boolean)
-'''        Cancel = Not Prog__APP.Range("SW_RightClick")     '- Si Cancela: NO hay Right-Click...
+'''        Cancel = Not Prog__APP_Switch.Range("Sw_RightClick")     '- Si Cancela: NO hay Right-Click...
 '''End Sub
 ' ==================================================================================================================================
 End Sub

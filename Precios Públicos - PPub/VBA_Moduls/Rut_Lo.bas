@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-09-30 18:25
+' Last Rev. 2026-10-01 08:38
 Option Explicit
 
 '###################################################################################################################################
@@ -11,8 +11,8 @@ Debug.Print "Rut_Lo_Columns_Show_Hide"
     Dim ColEnBlco       As Integer:         ColEnBlco = Lo_Table.Range.Columns(1).Column - 1    '- Por si hay columnas en blanco a la derecha de la ListObject.
     Dim HiddenCol       As Boolean
     Dim SetHidden       As Variant
-    Dim SW_Col_Hide_Name  As String:        SW_Col_Hide_Name = "SW_Col_Hide_" & WrkSht.CodeName
-    Dim SW_Col_Hide     As Boolean:         SW_Col_Hide = Prog__APP.Range(SW_Col_Hide_Name).Value2
+    Dim SW_Col_Hide_Name  As String:        SW_Col_Hide_Name = "Sw_Col_Hide_" & WrkSht.CodeName
+    Dim SW_Col_Hide     As Boolean:         SW_Col_Hide = Prog__APP_Switch.Range(SW_Col_Hide_Name).Value2
     'Rango completo de columnas afectadas
     Dim RngCols         As Range:           Set RngCols = WrkSht.Range(WrkSht.Columns(ColEnBlco + 1), WrkSht.Columns(ColEnBlco + Lo_Table.ListColumns.Count))
 
@@ -44,7 +44,7 @@ Debug.Print "Rut_Lo_Columns_Show_Hide"
     With Lo_DefCol.TotalsRowRange(Col_HiddenSw)
         .Value = Not .Value
     End With
-    Prog__APP.Range(SW_Col_Hide_Name).Value = Not SW_Col_Hide
+    Prog__APP_Switch.Range(SW_Col_Hide_Name).Value = Not SW_Col_Hide
 
 End Sub
 
@@ -286,7 +286,7 @@ Sub Rut_Lo_WrkSht_Preparar(WrkSht As Worksheet)
     With WrkSht
         .Unprotect
         .Columns.EntireColumn.Hidden = False        '-1º Mostrar todas las Columnas
-        If Fnc_Range_Exist("SW_Col_Hide_" & WrkSht.CodeName) Then Prog__APP.Range("SW_Col_Hide_" & WrkSht.CodeName) = False
+        If Fnc_Range_Exist("Sw_Col_Hide_" & WrkSht.CodeName) Then Prog__APP_Switch.Range("Sw_Col_Hide_" & WrkSht.CodeName) = False
         .Rows.EntireRow.Hidden = False              '-2º Mostrar todas las Filas
         Call Rut_Lo_Filtros_Quitar(.ListObjects(1)) '-3º Quitar Filtros
 '        .Protect allowFiltering:=True, DrawingObjects:=True, allowSorting:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_APP"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '- M00_Ini_APP --------
 Option Explicit    ' Para obligar a definir todas las variable.  'lo he quitado porque me genera muchos errores.
 
@@ -29,7 +29,7 @@ On Error Resume Next
     ActiveWindow.DisplayHorizontalScrollBar = True                                      ' Show the Horizontal Scroll Bar
     ActiveWindow.DisplayVerticalScrollBar = True                                        ' Show the Vertical Scroll Bar
 '    Application.EnableCancelKey = False                                                 ' Permito o NO utilizar Ctrl+Pausa
-    Application.EnableEvents = True:        Prog__APP.Range("SW_Events") = True
+    Application.EnableEvents = True:        Prog__APP_Switch.Range("Sw_Events") = True
     Application.ScreenUpdating = False
     Application.DisplayFullScreen = False                                                'Ves pantalla completa
     Application.DisplayFormulaBar = False                                               'Muestra/Oculta la barra de formulas
@@ -44,7 +44,7 @@ End Sub
 Sub Rut_ConfigExcel_RESTABLECER()
 Debug.Print "Rut_ConfigExcel_RESTABLECER"
     Call Rut_Context_Buttons_Restore    '- Restaura las opciones genéricas del Context-Menú / Right-ClicK para dejar sólo visible las opciones Custom
-    Application.EnableEvents = True:        Prog__APP.Range("SW_Events") = True
+    Application.EnableEvents = True:        Prog__APP_Switch.Range("Sw_Events") = True
     Application.ScreenUpdating = True
     Application.DisplayStatusBar = True                             'Muestra/Oculta la barra de estado
     ActiveWindow.DisplayHeadings = True                             'Muestra/Oculta títulos de filas y columnas
@@ -160,7 +160,7 @@ Dim CommBarItem        As CommandBarControl
             End If
         Next Count
     Next ib
-    Prog__APP.Range("SW_RightClickMenu_Restricted") = True
+    Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted") = True
 End Sub
 ' ==================================================================================================================================
 Sub Rut_Context_Buttons_Restore()  '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
@@ -175,29 +175,29 @@ Debug.Print "Rut_Context_Buttons_Restore"
     'La barra de comandos "List Range Popup" es la que aparece cuando haces clic derecho en un rango de celdas que forma parte de una lista o tabla en Excel. _
      Al restablecerla, se eliminan cualquier personalización o cambio que se haya hecho a esta barra de comandos, y se vuelve a su estado predeterminado.
     
-    Prog__APP.Range("SW_RightClickMenu_Restricted") = False
+    Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted") = False
 End Sub
 ' ==================================================================================================================================
 '===================================================================================================================================
 Sub Rut_OnOff_SW_WB_Deactivate()
-    If Prog__APP.Range("SW_WB_Deactivate") Then
-        Prog__APP.Range("SW_WB_Deactivate") = False
+    If Prog__APP_Switch.Range("Sw_WB_Deactivate") Then
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = False
         Form_Menu.Lb_SW_WB_Deactivate.Visible = False
         Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - DesActivado  -  " & Now
     Else
-        Prog__APP.Range("SW_WB_Deactivate") = True
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True
         Form_Menu.Lb_SW_WB_Deactivate.Visible = True
         Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - Activado  -  " & Now
     End If
 End Sub
 '===================================================================================================================================
 Sub Rut_Right_Click_Control_KK()
-    If Prog__APP.Range("SW_WB_Deactivate") Then
-        Prog__APP.Range("SW_WB_Deactivate") = False
+    If Prog__APP_Switch.Range("Sw_WB_Deactivate") Then
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = False
         Form_Menu.Lb_SW_WB_Deactivate.Visible = False
         Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - DesActivado  -  " & Now
     Else
-        Prog__APP.Range("SW_WB_Deactivate") = True
+        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True
         Form_Menu.Lb_SW_WB_Deactivate.Visible = True
         Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - Activado  -  " & Now
     End If

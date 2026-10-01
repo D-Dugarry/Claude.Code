@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -192,7 +192,7 @@ Function Func_STip_CtrlTab_Value(CtrlTag As String)
         Lin_Lst = Application.Match(CtrlTag, .Columns(Task_Uribbon_Tags), 0)
         If Not IsError(Lin_Lst) Then
             Func_STip_CtrlTab_Value = .Cells(Lin_Lst, Task_Descripcion)
-            If Prog__APP.Range("SW_Boss") Then
+            If Prog__APP_Switch.Range("Sw_Boss") Then
                 Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & vbLf & vbLf & _
                                      "BOSS_Rut: " & vbLf & .Cells(Lin_Lst, Task_Nombre_Rut) & vbLf & vbLf
                 If (Len(.Cells(Lin_Lst, Task_Rut_Informe)) + Len(Func_STip_CtrlTab_Value)) > 1000 Then
@@ -663,8 +663,8 @@ End Sub
 '-----------------------------
 Sub GetLbl_ShowHide_Lo_Cols_Group(control As IRibbonControl, ByRef LabelVal)
     LabelVal = "Table: " & ActiveSheet.Name
-    If Not Fnc_Range_Exist("SW_Col_Hide_" & ActiveSheet.CodeName) Then GoTo FinRut
-    If Prog__APP.Range("SW_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Not Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then GoTo FinRut
+    If Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
         LabelVal = LabelVal & ", Cols Hidden"
     Else
         LabelVal = LabelVal & ", Cols Showed"
@@ -675,10 +675,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ShowHide_Lo_Cols(control As IRibbonControl, ByRef LabelVal)
     Application.ScreenUpdating = False
-    If Not Fnc_Range_Exist("SW_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Not Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
         LabelVal = "¿?":            GoTo FinRut
     End If
-    If Prog__APP.Range("SW_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
         LabelVal = "Show Cols"
     Else
         LabelVal = "Hide Cols"
@@ -716,9 +716,9 @@ End Sub
 '-----------------------------
 Sub OnAct_ShowHide_Lo_Cols_Row1x(control As IRibbonControl)
     Application.ScreenUpdating = False
-    If Fnc_Range_Exist("SW_Col_Hide_" & ActiveSheet.CodeName) Then
-        Prog__APP.Range("SW_Col_Hide_" & ActiveSheet.CodeName) = Not Prog__APP.Range("SW_Col_Hide_" & ActiveSheet.CodeName)
-        SW_ShowHide_Col = Prog__APP.Range("SW_Col_Hide_" & ActiveSheet.CodeName)
+    If Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
+        Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) = Not Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName)
+        SW_ShowHide_Col = Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName)
     Else
         SW_ShowHide_Col = Not SW_ShowHide_Col
     End If
@@ -926,7 +926,7 @@ End Sub
 '- SW_WB_Deactivate_Group
 '------------------------------------------------------------------------------------------
 Sub GetLbl_SW_WB_Deactivate(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_WB_Deactivate") Then
+    If Prog__APP_Switch.Range("Sw_WB_Deactivate") Then
         LabelVal = "Deactivate ON"
     Else
         LabelVal = "Deactivate OFF"
@@ -936,7 +936,7 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_SW_WB_DeactivateOnOff(control As IRibbonControl)
 Debug.Print "OnAct_SW_WB_DeactivateOnOff"
-    Prog__APP.Range("SW_WB_Deactivate") = Not Prog__APP.Range("SW_WB_Deactivate")
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = Not Prog__APP_Switch.Range("Sw_WB_Deactivate")
     Call RefreshRibbon
 End Sub
 '------------------------------------------------------------------------------------------
@@ -981,16 +981,16 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub GetVsbl_SW_PruebaONOFF(control As IRibbonControl, ByRef Visible)
     If control.ID = "BtnSW_PruebaON" Then
-        Visible = Not Prog__APP.Range("SW_Test")
+        Visible = Not Prog__APP_Switch.Range("Sw_Test")
     Else
-        Visible = Prog__APP.Range("SW_Test")
+        Visible = Prog__APP_Switch.Range("Sw_Test")
     End If
 Debug.Print "GetVsbl_BtnSW_PruebaONOFF", control.ID, Visible
 End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_SW_PruebaONOFF(control As IRibbonControl)
 Debug.Print "OnAct_SW_PruebaONOFF"
-    Prog__APP.Range("SW_Test") = Not Prog__APP.Range("SW_Test")
+    Prog__APP_Switch.Range("Sw_Test") = Not Prog__APP_Switch.Range("Sw_Test")
     Call RefreshRibbon
 End Sub
 '------------------------------------------------------------------------------------------
@@ -1188,20 +1188,20 @@ End Function
 '- RightClickMenúVisible_Group ------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_RightClickMenuVisible_Group(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenu_Visible") Then LabelVal = "Showed" Else LabelVal = "Hidden"
+    If Prog__APP_Switch.Range("Sw_RightClickMenu_Visible") Then LabelVal = "Showed" Else LabelVal = "Hidden"
 Debug.Print "GetLbl_RightClickMenuVisible_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_CCtxtRightClickMenuVisible(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenu_Visible") Then LabelVal = "Context Menú on Right-Click is Showed, Press to Hide" _
+    If Prog__APP_Switch.Range("Sw_RightClickMenu_Visible") Then LabelVal = "Context Menú on Right-Click is Showed, Press to Hide" _
                                                     Else LabelVal = "Context Menú on Right-Click is hidden, Press to Show"
 Debug.Print "GetLbl_CCtxtRightClickMenuVisible", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_RightClickMenuVisible(control As IRibbonControl)
-    Prog__APP.Range("SW_RightClickMenu_Visible") = Not Prog__APP.Range("SW_RightClickMenu_Visible")
+    Prog__APP_Switch.Range("Sw_RightClickMenu_Visible") = Not Prog__APP_Switch.Range("Sw_RightClickMenu_Visible")
     MyRibbon.InvalidateControl "RightClickMenúVisible_Group"    '- Actualiza solo este Control_ID
-Debug.Print "OnAct_RightClickMenuVisible,  SW_RightClickMenu_Visible = ", Prog__APP.Range("SW_RightClickMenu_Visible")
+Debug.Print "OnAct_RightClickMenuVisible,  SW_RightClickMenu_Visible = ", Prog__APP_Switch.Range("Sw_RightClickMenu_Visible")
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -1214,24 +1214,24 @@ End Sub
 '- RightClickMenúRestrictOptions_Group ----------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_RightClickMenuRestrictOptions_Group(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then LabelVal = "Restricted" Else LabelVal = "Not Restricted"
+    If Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted") Then LabelVal = "Restricted" Else LabelVal = "Not Restricted"
 Debug.Print "GetLbl_RightClickMenuRestrictOptions_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_CCtxtRightClickMenuRestrictOptions(control As IRibbonControl, ByRef LabelVal)
-    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then LabelVal = "Right-Click is Restricted, Press to Release" _
+    If Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted") Then LabelVal = "Right-Click is Restricted, Press to Release" _
                                                        Else: LabelVal = "Right-Click is Non Restricted, Press to Restrict"
 Debug.Print "GetLbl_CCtxtRightClickMenuRestrictOptions", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_RightClickMenuRestrictOptions(control As IRibbonControl)
-    If Prog__APP.Range("SW_RightClickMenu_Restricted") Then
+    If Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted") Then
         Call Rut_Context_Buttons_Restore    '- Restaura las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     Else
         Call Rut_Context_Buttons_Hide   '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     End If
     MyRibbon.InvalidateControl "RightClickMenúRestrictOptions_Group"    '- Actualiza solo este Control_ID
-Debug.Print "OnAct_RightClickMenuRestrictOptions,  SW_RightClickMenu_Restricted = ", Prog__APP.Range("SW_RightClickMenu_Restricted")
+Debug.Print "OnAct_RightClickMenuRestrictOptions,  SW_RightClickMenu_Restricted = ", Prog__APP_Switch.Range("Sw_RightClickMenu_Restricted")
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________

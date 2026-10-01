@@ -12,6 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Last Rev. 2026-10-01 08:38
 'Form_Usuario
 Option Explicit
 
@@ -77,8 +78,8 @@ Debug.Print "UserForm_Activate - Form_Usuario"
     Prog__APP.Range("APP_User_Unid_Red") = ""
     Prog__APP.Range("APP_User_Mail") = ""
     Prog__APP.Range("APP_User_RutaAPP") = ""
-    Prog__APP.Range("SW_Boss") = False
-    Prog__APP.Range("SW_Test") = False
+    Prog__APP_Switch.Range("Sw_Boss") = False
+    Prog__APP_Switch.Range("Sw_Test") = False
     App_RutaAPP = ""
     If Func_CapsLock_State() Then Lb_CapsLock_ON.Visible = True
     Me.TBx_Usuario_ID.SetFocus
@@ -124,7 +125,7 @@ Debug.Print "Btn_Validar_Click - Form_Usuario"
         Debug.Print "Nuevo Usuario: " & Prog__APP.Range("APP_User_Name") & vbLf & "Email: " & Prog__APP.Range("APP_User_Mail") & vbLf & "Etx.: " & Prog__APP.Range("APP_User_Ext")
         Prog__APP.Range("APP_User_RutaAPP") = Fnc_NEXE_RutaAPP
         Tbx_Unidad_NEXE = Prog__APP.Range("APP_User_Unid_Red")
-        If Prog__APP.Range("APP_User_ID") = "Boss" Then Prog__APP.Range("SW_Boss") = True Else Prog__APP.Range("SW_Boss") = False
+        If Prog__APP.Range("APP_User_ID") = "Boss" Then Prog__APP_Switch.Range("Sw_Boss") = True Else Prog__APP_Switch.Range("Sw_Boss") = False
         Btn_Eixir.Visible = True
         Exit Sub
     End With    ' Prog__Usuarios.ListObjects(1).DataBodyRange

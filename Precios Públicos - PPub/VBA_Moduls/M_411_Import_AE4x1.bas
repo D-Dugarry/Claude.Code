@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_411_Import_AE4x1"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '2026-01-25
 Option Explicit
 
@@ -96,7 +96,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
     '            - Comprobar que la Tabla Lo_ClsBk No está vacía
     '            - Comprobar que la cabecera de la Tabla Lo_ClsBk corresponde con la establecida en la LoDefCol
     '- --------------------------------------------------------------------------------------------------------------
-    Prog__APP.Range("SW_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim SheetIndx       As Integer:         SheetIndx = 1
     Dim ClosedBook      As Workbook
     Dim Ws_ClsBk    As Worksheet
@@ -312,7 +312,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
     RowsFind = Lo_ClsBk.ListRows.Count
     ClosedBook.Close SaveChanges:=False
     Set ClosedBook = Nothing
-    Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
             Dim TimeLap2              As Single
             TimeLap2 = LastTimeLap
@@ -328,7 +328,7 @@ Cancel_Rut:
     Arch_New_Name = "Cancel"
     ClosedBook.Close SaveChanges:=False
     Set ClosedBook = Nothing
-    Prog__APP.Range("SW_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+    Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
 End Sub
 '-----------------------------------------------------------------------------------------------------------------------------------
 

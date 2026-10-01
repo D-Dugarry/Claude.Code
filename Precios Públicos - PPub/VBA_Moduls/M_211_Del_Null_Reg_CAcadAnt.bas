@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_211_Del_Null_Reg_CAcadAnt"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '2026-01-23
 '- M_211_Remove_Null_Reg_CAcad
 Option Explicit
@@ -44,7 +44,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
                 
 '- ------------------------------------------------------------------------------------------------------------------
 '- Borrar Recibos AE4 Enseñanzas Propias -----------------------------------------------------------------------------------
-        If Prog__APP.Range("SW_DelRegAE4") Then
+        If Prog__APP_Switch.Range("Sw_DelRegAE4") Then
             rowfind = .ListRows.Count
             Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_G04, BD_ActivEco, "=4")
             rowfind = rowfind - .ListRows.Count
@@ -123,7 +123,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
-            If Prog__APP.Range("SW_DelRegMatriculaCero") Then
+            If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso --------
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero Subvencionada", 0, _

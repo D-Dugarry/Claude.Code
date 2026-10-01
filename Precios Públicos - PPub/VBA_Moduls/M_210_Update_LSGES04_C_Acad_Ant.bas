@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
 '    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Lo_DefCol_BD.ShowTotals = True
     Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
-    Prog__APP.Range("SW_Col_Hide_Sht__BD_IAdm_CAcadAnt") = False
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_IAdm_CAcadAnt") = False
     Sht__BD_IAdm_CAcadAnt.Unprotect
     Lo_ImpAdmCAcadAnt.ShowTotals = False
     
@@ -100,7 +100,7 @@ Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Rut_Lo: Borrar por protección de Datos, Información sensible y no necesarias -------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    If Prog__APP.Range("SW_ProteccionDatosActivado") Then
+    If Prog__APP_Switch.Range("Sw_ProteccionDatosActivado") Then
         Call Rut_Lo_ListColumns_ClearContents_DefC_ProtectData(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_ProtectData)
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Eliminada Información sensible.", LastTimeLap)

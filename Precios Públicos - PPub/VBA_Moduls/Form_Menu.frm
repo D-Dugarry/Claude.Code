@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-09-30 23:09
+' Last Rev. 2026-10-01 08:38
 
 ' Last Rev. 2026-09-30 19:16
 Option Explicit
@@ -91,10 +91,10 @@ Debug.Print "Sub UserForm_Activate() - Form_menu"
     Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_C_Acad_Ant")
     Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_C_Acad_Pos")
     
-    Me.Lb_SW_Test.Visible = Prog__APP.Range("SW_Test")
-    Me.Lb_SW_Boss.Visible = Prog__APP.Range("SW_Boss")
-    Me.Lb_SW_WB_Deactivate.Visible = Prog__APP.Range("SW_WB_Deactivate")
-    Me.Lb_SW_DelRegNeg.Visible = Prog__APP.Range("SW_DelRegNeg")
+    Me.Lb_SW_Test.Visible = Prog__APP_Switch.Range("Sw_Test")
+    Me.Lb_SW_Boss.Visible = Prog__APP_Switch.Range("Sw_Boss")
+    Me.Lb_SW_WB_Deactivate.Visible = Prog__APP_Switch.Range("Sw_WB_Deactivate")
+    Me.Lb_SW_DelRegNeg.Visible = Prog__APP_Switch.Range("Sw_DelRegNeg")
     
     If Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Ant") Then
         Me.FrOpBt_CAcadAnt.Value = True
@@ -108,7 +108,7 @@ Debug.Print "Sub UserForm_Activate() - Form_menu"
 '        Me.FrOpBt_Curs.Value = True
 '    End If
 
-    If Prog__APP.Range("SW_Boss") Then
+    If Prog__APP_Switch.Range("Sw_Boss") Then
         Me.Lb_Tarea_Name.Visible = True
         Me.TBx_Tarea_Name.Visible = True
         Me.Lb_Rutina_Name.Visible = True
@@ -162,7 +162,7 @@ Dim Users_Allowed       As Boolean
 Dim SheetBtn            As String
 Dim SheetBtn_OK         As Boolean
 Dim Usuario_ID          As String:      Usuario_ID = UCase(Prog__APP.Range("APP_User_ID"))
-Dim Rng_SW_Boss          As Range:      Set Rng_SW_Boss = Prog__APP.Range("SW_Boss")
+Dim Rng_SW_Boss          As Range:      Set Rng_SW_Boss = Prog__APP_Switch.Range("Sw_Boss")
 
 
     Call Rut_Lo_Sort(Lo_Tareas, 1, xlAscending, True)

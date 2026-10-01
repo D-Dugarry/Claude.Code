@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-01 08:38
 Option Explicit
 
 '==================================================================================================================================
@@ -107,7 +107,7 @@ Debug.Print "Rut_Lo_Export_Bdatos"
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Sht__BD.Unprotect
     Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
-    Prog__APP.Range("SW_Col_Hide_Sht__BD") = Not Prog__APP.Range("SW_Col_Hide_Sht__BD")
+    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD")
     Lo_BD.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -155,24 +155,24 @@ Sub Rut_RibbonX_ShowAll()
 End Sub
 '===================================================================================================================================
 Sub Rut_OnOff_SW_Probando()
-    If Prog__APP.Range("SW_Test") Then
-        Prog__APP.Range("SW_Test") = False
+    If Prog__APP_Switch.Range("Sw_Test") Then
+        Prog__APP_Switch.Range("Sw_Test") = False
         Form_Menu.Lb_SW_Test.Visible = False
         Prog__APP.Range("APP_Task_Inf") = "SW-B DesActivado" & vbCrLf & Now
     Else
-        Prog__APP.Range("SW_Test") = True
+        Prog__APP_Switch.Range("Sw_Test") = True
         Form_Menu.Lb_SW_Test.Visible = True
         Prog__APP.Range("APP_Task_Inf") = "SW-B Activado" & vbCrLf & Now
     End If
 End Sub
 '===================================================================================================================================
 Sub Rut_OnOff_SW_DelRegNeg()
-    If Prog__APP.Range("SW_DelRegNeg") Then
-        Prog__APP.Range("SW_DelRegNeg") = False
+    If Prog__APP_Switch.Range("Sw_DelRegNeg") Then
+        Prog__APP_Switch.Range("Sw_DelRegNeg") = False
         Form_Menu.Lb_SW_DelRegNeg.Visible = False
         Prog__APP.Range("APP_Task_Inf") = "SW-B DesActivado" & vbCrLf & Now
     Else
-        Prog__APP.Range("SW_DelRegNeg") = True
+        Prog__APP_Switch.Range("Sw_DelRegNeg") = True
         Form_Menu.Lb_SW_DelRegNeg.Visible = True
         Prog__APP.Range("APP_Task_Inf") = "SW-B Activado" & vbCrLf & Now
     End If
@@ -210,11 +210,11 @@ End Sub
 Sub Rut_Events_Status_Change()        ' Para permitir las rutinas que se activan cuando ocurre un evento
     If Application.EnableEvents Then
         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
-        Prog__APP.Range("SW_Events") = False
+        Prog__APP_Switch.Range("Sw_Events") = False
         Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
     Else
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-        Prog__APP.Range("SW_Events") = True
+        Prog__APP_Switch.Range("Sw_Events") = True
         Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
     End If
 End Sub
@@ -225,20 +225,20 @@ Sub Rut_Events_Status_Choose(Optional Choose As String = "CHANGE")      ' Para p
         Case "CHANGE"
                         If Application.EnableEvents Then
                             Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
-                            Prog__APP.Range("SW_Events") = False
+                            Prog__APP_Switch.Range("Sw_Events") = False
                             Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
                         Else
                             Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-                            Prog__APP.Range("SW_Events") = True
+                            Prog__APP_Switch.Range("Sw_Events") = True
                             Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
                         End If
         Case "ON"
                         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
-                        Prog__APP.Range("SW_Events") = True
+                        Prog__APP_Switch.Range("Sw_Events") = True
                         Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
         Case "OFF"
                         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
-                        Prog__APP.Range("SW_Events") = False
+                        Prog__APP_Switch.Range("Sw_Events") = False
                         Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
     End Select
 End Sub
