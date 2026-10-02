@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_WS"
-' Last Rev. 2026-09-21 19:05
+' Last Rev. 2026-10-02 13:55
 Option Explicit
 
 ' ==================================================================================================
@@ -60,9 +60,9 @@ Sub Rut_WrkSheet_Vaciar(WrkSht As Worksheet)      '--- Borra Toda la Hoja inclus
         
     With WrkSht
             Dim Visual_Status   As Variant:  Visual_Status = .Visible   '--- para dejar la hoja en el mismo estado de Visibilidad ---
-            Dim Protect_Status   As Boolean:  Protect_Status = .ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
+            Dim Prot_Estado     As T_Prot_Estado   '--- para dejar la hoja en el mismo estado de protección, con los mismos permisos (Rut_Ws_Protect_Status) ---
         .Visible = xlHidden
-        .Unprotect
+        Call Rut_Prot_Save(WrkSht, Prot_Estado)             '- anota sus permisos y la desprotege
         Call Rut_WrkSheet_Preparar(WrkSht)
         ' Limpiar filtros de todas las tablas
         Dim tbl As ListObject
@@ -72,7 +72,7 @@ Sub Rut_WrkSheet_Vaciar(WrkSht As Worksheet)      '--- Borra Toda la Hoja inclus
             .Columns.Delete     ' --- con esto se borran hasta los "Shapes"
             Dummy_UsedRange = .UsedRange.Address   ' Para restablecer el rango de celdas en uso (hay que LEER la propiedad para que surta efecto)
         .Visible = Visual_Status
-        If Protect_Status Then .Protect
+        Call Rut_Prot_Restore(WrkSht, Prot_Estado, True)    '- la reprotege con los mismos permisos; True = UserInterfaceOnly
         Sheets(WrkSht_Activa).Select
         
     End With

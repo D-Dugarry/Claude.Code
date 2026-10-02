@@ -1,6 +1,11 @@
 Attribute VB_Name = "M90_Rutinas_Menú_Aux"
-' Last Rev. 2026-09-21 12:12
+' Last Rev. 2026-10-02 13:55
 Option Explicit
+
+'- Estado de protección de las hojas desprotegidas con Rut_ProtectUnProtect_ActivSheet (una entrada por
+'  hoja, por CodeName), para devolverlas con los mismos permisos. Ver Rut_Ws_Protect_Status.
+Private Prot_Hojas(1 To 60)    As String
+Private Prot_Estados(1 To 60)  As T_Prot_Estado
 
 
 ' ==================================================================================================
@@ -96,14 +101,45 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 'End Sub     ' RuT_Mostrar_Ocultar_Col     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ' ==================================================================================================
 Sub Rut_ProtectUnProtect_ActivSheet()
-    If ActiveSheet.ProtectContents Then
-        ActiveSheet.Unprotect
-        Form_Menu.TB_Informe = "ActiveSheet.UnProtect"
-    Else
-        ActiveSheet.Protect
+    If Fnc_ProtectUnProtect_Hoja(ActiveSheet) Then          '- alterna conservando los permisos de la hoja
         Form_Menu.TB_Informe = "ActiveSheet.Protect"
+    Else
+        Form_Menu.TB_Informe = "ActiveSheet.UnProtect"
     End If
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+' ==================================================================================================
+'- Alterna la protección de una hoja SIN perder sus permisos (filtrar, ordenar...): al desprotegerla
+'  los anota (Rut_Prot_Save) y al volver a protegerla le devuelve esos mismos (Rut_Prot_Restore).
+'  El estado es POR HOJA (Prot_Hojas/Prot_Estados): desproteger una, cambiar a otra y proteger no
+'  mezcla sus permisos. Si no hay nada anotado de esa hoja (nunca se desprotegió por aquí, o un
+'  error + "Fin" vació las variables), aplica el esquema por defecto de la app.
+'  Devuelve True si la hoja queda protegida. La usa Rut_ProtectUnProtect_ActivSheet.
+Function Fnc_ProtectUnProtect_Hoja(ByVal Hoja As Worksheet) As Boolean
+    Dim Slot    As Long:    Slot = Fnc_Prot_Slot(Hoja.CodeName)
+    If Fnc_Prot_Hoja_Protegida(Hoja) Then                   '- no basta ProtectContents (ver Rut_Ws_Protect_Status)
+        If Slot > 0 Then
+            Call Rut_Prot_Save(Hoja, Prot_Estados(Slot))    '- anota los permisos de ESTA hoja y la desprotege
+        Else
+            Hoja.Unprotect
+        End If
+    Else
+        If Slot > 0 Then Call Rut_Prot_Restore(Hoja, Prot_Estados(Slot), True)    '- True = UserInterfaceOnly
+        If Not Fnc_Prot_Hoja_Protegida(Hoja) Then           '- nada anotado de esta hoja: esquema por defecto
+            Hoja.Protect AllowFiltering:=True, DrawingObjects:=False, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True
+        End If
+    End If
+    Fnc_ProtectUnProtect_Hoja = Fnc_Prot_Hoja_Protegida(Hoja)
+End Function
+'- Casilla de Prot_Estados de una hoja: la suya si ya tiene, si no la primera libre. 0 = tabla llena.
+Private Function Fnc_Prot_Slot(ByVal CodeName As String) As Long
+    Dim i As Long, Libre As Long
+    For i = LBound(Prot_Hojas) To UBound(Prot_Hojas)
+        If Prot_Hojas(i) = CodeName Then Fnc_Prot_Slot = i: Exit Function
+        If Libre = 0 And Len(Prot_Hojas(i)) = 0 Then Libre = i
+    Next i
+    If Libre > 0 Then Prot_Hojas(Libre) = CodeName
+    Fnc_Prot_Slot = Libre
+End Function
 ' ==================================================================================================
 Sub Rut_Sheets_Show()
 Dim WrkSht          As Worksheet
