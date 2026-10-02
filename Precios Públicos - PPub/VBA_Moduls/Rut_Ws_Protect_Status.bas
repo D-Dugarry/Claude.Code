@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Ws_Protect_Status"
-'Last Rev. 2026-10-02 11:54
+'Last Rev. 2026-10-02 12:44
 Option Explicit
 
 '===================================================================================================
@@ -31,10 +31,10 @@ Option Explicit
 ' nombre, del hook del libro, etc.). Cadena vacía = hoja sin contraseña.
 '
 ' LIMITACIONES conocidas (de Excel, no de este módulo):
-'   - UserInterfaceOnly no es una propiedad legible: si la hoja estaba protegida con
-'     UserInterfaceOnly:=True, al restaurar se perdería ese flag. Por eso Rut_Prot_Restore admite
-'     el parámetro opcional UserInterfaceOnly, que el llamador puede poner a True si sabe que la
-'     hoja lo usaba.
+'   - UserInterfaceOnly SÍ se puede leer, con Worksheet.ProtectionMode (no con Protection.*):
+'     se guarda y Rut_Prot_Restore lo reaplica solo. Su parámetro opcional UserInterfaceOnly se
+'     mantiene por compatibilidad: True lo fuerza aunque la hoja no lo tuviera. Lo que Excel NO
+'     hace es conservarlo al guardar el libro: hay que reaplicarlo en cada sesión (Workbook_Open).
 '   - AllowSelectingLockedCells / AllowSelectingUnlockedCells tampoco son legibles desde
 '     Worksheet.Protection; no se guardan ni se restauran.
 '   - "Protegida" NO es ProtectContents: una hoja protegida sin la casilla "Proteger hoja y
@@ -54,6 +54,7 @@ Public Type T_Prot_Estado
     Guardado                    As Boolean   ' True tras un Rut_Prot_Save (evita restaurar sin haber guardado)
     Protegida                   As Boolean   ' la hoja estaba protegida
     Contents                    As Boolean   ' celdas bloqueadas protegidas (False es posible con la hoja protegida)
+    UserInterfaceOnly           As Boolean   ' ProtectionMode: solo protege la interfaz (el VBA puede escribir)
     Password                    As String
     DrawingObjects              As Boolean
     Scenarios                   As Boolean
@@ -88,6 +89,7 @@ Public Sub Rut_Prot_Save(ByVal Ws As Worksheet, ByRef Estado As T_Prot_Estado, O
     If Estado.Protegida Then
         Estado.Password = Password
         Estado.Contents = Ws.ProtectContents
+        Estado.UserInterfaceOnly = Ws.ProtectionMode
         Estado.DrawingObjects = Ws.ProtectDrawingObjects
         Estado.Scenarios = Ws.ProtectScenarios
         Estado.AllowFormattingCells = Ws.Protection.AllowFormattingCells
@@ -117,9 +119,10 @@ End Sub     ' Rut_Prot_Save
 '---------------------------------------------------------------------------------------------------
 ' Rut_Prot_Restore
 '   Vuelve a proteger la hoja con los mismos permisos y contraseña que tenía. Si no estaba
-'   protegida, la deja desprotegida. UserInterfaceOnly:=True protege la hoja de cara al usuario
-'   pero permite que el código VBA siga escribiendo en ella (Excel no lo conserva al guardar el
-'   libro: hay que volver a aplicarlo en cada sesión).
+'   protegida, la deja desprotegida. Reaplica UserInterfaceOnly si la hoja lo tenía al guardar
+'   (ProtectionMode), o si el llamador pasa True. UserInterfaceOnly protege la hoja de cara al
+'   usuario pero deja escribir al VBA (Excel no lo conserva al guardar el libro: hay que volver
+'   a aplicarlo en cada sesión).
 '---------------------------------------------------------------------------------------------------
 Public Sub Rut_Prot_Restore(ByVal Ws As Worksheet, ByRef Estado As T_Prot_Estado, _
                             Optional ByVal UserInterfaceOnly As Boolean = False)
@@ -136,7 +139,7 @@ Public Sub Rut_Prot_Restore(ByVal Ws As Worksheet, ByRef Estado As T_Prot_Estado
                DrawingObjects:=Estado.DrawingObjects, _
                Contents:=Estado.Contents, _
                Scenarios:=Estado.Scenarios, _
-               UserInterfaceOnly:=UserInterfaceOnly, _
+               UserInterfaceOnly:=(UserInterfaceOnly Or Estado.UserInterfaceOnly), _
                AllowFormattingCells:=Estado.AllowFormattingCells, _
                AllowFormattingColumns:=Estado.AllowFormattingColumns, _
                AllowFormattingRows:=Estado.AllowFormattingRows, _
