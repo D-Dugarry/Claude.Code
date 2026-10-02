@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Ws"
-' Last Rev. 2026-09-30 18:25
+' Last Rev. 2026-10-02 13:55
 Option Explicit
 
 '###################################################################################################################################
@@ -41,16 +41,16 @@ Debug.Print ">>> Rut_WrkSheet_Vaciar, WrkSht=" & WrkSht.Name
 
     With Application.Workbooks(ThisWorkbook.Name).Sheets(WrkSht.Name)
             Dim Visual_Status   As Variant:  Visual_Status = .Visible   '--- para dejar la hoja en el mismo estado de Visibilidad ---
-            Dim Protect_Status   As Boolean:  Protect_Status = .ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
+            Dim Prot_Estado     As T_Prot_Estado   '--- para dejar la hoja en el mismo estado de protección, con los mismos permisos (Rut_Ws_Protect_Status) ---
         .Visible = xlHidden
-        .Unprotect
+        Call Rut_Prot_Save(WrkSht, Prot_Estado)             '- anota sus permisos y la desprotege
             .Columns.Delete     ' --- con esto se borran hasta los "Shapes"
             Dim Dummy As String: Dummy = .UsedRange.Address   ' Restablece el rango de celdas en uso (hay que LEER la propiedad)
         .Visible = Visual_Status
-        If Protect_Status Then .Protect
+        Call Rut_Prot_Restore(WrkSht, Prot_Estado, True)    '- la reprotege con los mismos permisos; True = UserInterfaceOnly
         .Select
     End With
-Debug.Print ">>> Rut_WrkSheet_Vaciar, WrkSht=" & WrkSht.Name, "Protect_Status = " & Protect_Status
+Debug.Print ">>> Rut_WrkSheet_Vaciar, WrkSht=" & WrkSht.Name, "Protect_Status = " & Prot_Estado.Protegida
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 

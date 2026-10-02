@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-02 13:55
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -945,7 +945,8 @@ End Sub
 '- Protect / UnProtect ActiveSheet
 '------------------------------------------------------------------------------------------
 Sub GetLbl_SheetProtect(control As IRibbonControl, ByRef LabelVal)
-    Dim Protect_Status   As Boolean:  Protect_Status = ActiveSheet.ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
+    On Error Resume Next        '- un fallo aqui no debe tumbar el pintado del ribbon
+    Dim Protect_Status   As Boolean:  Protect_Status = Fnc_Prot_Hoja_Protegida(ActiveSheet)   '- no basta ProtectContents (ver Rut_Ws_Protect_Status)
     If Protect_Status Then
         LabelVal = "UnProtect Sheet"
     Else
@@ -955,7 +956,8 @@ Debug.Print "GetLbl_SheetProtect,  LabelVal=", LabelVal
 End Sub
 '------------------------
 Sub GetVsbl_SheetProtect(control As IRibbonControl, ByRef Visible)
-    Dim Protect_Status   As Boolean:  Protect_Status = ActiveSheet.ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
+    On Error Resume Next        '- un fallo aqui no debe tumbar el pintado del ribbon
+    Dim Protect_Status   As Boolean:  Protect_Status = Fnc_Prot_Hoja_Protegida(ActiveSheet)   '- no basta ProtectContents (ver Rut_Ws_Protect_Status)
     If control.ID = "BtnSheetProtect" Then
         If Protect_Status Then Visible = False Else Visible = True
     Else
@@ -965,12 +967,8 @@ Debug.Print "GetVsbl_SheetProtect,  control.ID=", control.ID, Visible
 End Sub
 '----------------------
 Sub OnAct_SheetProtect(control As IRibbonControl)
-    Dim Protect_Status   As Boolean:  Protect_Status = ActiveSheet.ProtectContents   '--- para dejar la hoja en el mismo estado de protección ---
-    If Protect_Status Then
-        ActiveSheet.Unprotect
-    Else
-        ActiveSheet.Protect
-    End If
+    Dim Protect_Status   As Boolean:  Protect_Status = Fnc_Prot_Hoja_Protegida(ActiveSheet)   '- no basta ProtectContents (ver Rut_Ws_Protect_Status)
+    Call Fnc_ProtectUnProtect_Hoja(ActiveSheet)         '- alterna conservando los permisos de ESTA hoja (M_90_Rutinas_Menu_Aux)
     MyRibbon.InvalidateControl "BtnSheetProtect"        '- Actualiza solo este Control_ID
     MyRibbon.InvalidateControl "BtnSheetUnProtect"      '- Actualiza solo este Control_ID
 Debug.Print "OnAct_SheetProtect,  Protect_Status=", Protect_Status
