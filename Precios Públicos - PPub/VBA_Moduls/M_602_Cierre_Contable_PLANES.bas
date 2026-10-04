@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_602_Cierre_Contable_PLANES"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 22:17
 '2026-01-27
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -56,7 +56,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant_y_Pos()
 
 Ciclo_1:
     ' 1) =============  IIº Ciclo EFP 2024-25 =================================================================
-    Sht__BD.Unprotect:     Lo_BD.ShowTotals = False
+    Sht__BD.Unprotect
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     ' 2) Ordenaciones
     Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)
@@ -91,7 +91,7 @@ Ciclo_1:
     
 Ciclo_2:
     ' 1) =============  Iº Ciclo EFP 2025-26 =================================================================
-    Sht__BD.Unprotect:     Lo_BD.ShowTotals = False
+    Sht__BD.Unprotect
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     ' 2) Ordenaciones
     Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)
@@ -126,7 +126,7 @@ Ciclo_2:
     
 Ciclo_3:
     ' 1) =============  IIº Ciclo CFCyAFC 2024-25 =================================================================
-    Sht__BD.Unprotect:     Lo_BD.ShowTotals = False
+    Sht__BD.Unprotect
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     ' 2) Ordenaciones
     Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)
@@ -161,7 +161,7 @@ Ciclo_3:
     
 Ciclo_4:
     ' 1) =============  Iº Ciclo CFCyAFC 2025-26 =================================================================
-    Sht__BD.Unprotect:     Lo_BD.ShowTotals = False
+    Sht__BD.Unprotect
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     ' 2) Ordenaciones
     Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)

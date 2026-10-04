@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -97,7 +97,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True, Aplicar:=False)
         Call Rut_Lo_Sort(Lo_Data, BD_ImpDto, xlAscending, False)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
@@ -121,7 +121,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
@@ -223,7 +223,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '-Filtra Recibos con F_Cob > APP_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob -------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AutoFilter Field:=BD_FCob, Criteria1:=">" & FechCierreCriteria  '- ¡¡¡ EL FORMATO DEBE SER MM/DD/YYYY !!!)
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_FCob).SpecialCells(xlCellTypeVisible).ClearContents
             .DataBodyRange.Columns(BD_ImpCob).SpecialCells(xlCellTypeVisible).ClearContents
@@ -265,7 +265,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- ---------------------------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Obs_Conta).SpecialCells(xlCellTypeVisible).Cells.Value = "Tb_CriT_Err_Date"
 '            ' Preguntar si se desea guardar los registros considerados erróneos y borrados, antes de borralos. ------------------

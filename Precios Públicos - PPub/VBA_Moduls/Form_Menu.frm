@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-04 13:55
+' Last Rev. 2026-10-04 21:08
 
 Option Explicit
 
@@ -226,6 +226,7 @@ Sub Btn_Ejec_Tarea_Click()
             Application.Run Rut_Name
         End If
         If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
+        Call Rut_Lo_Totales_Mostrar         '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
         Me.Lb_Tit_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Tarea)
         
         If Prog__APP.Range("APP_Task_Inf") <> "" Then Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")

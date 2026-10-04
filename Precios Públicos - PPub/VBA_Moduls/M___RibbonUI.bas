@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-04 14:47
+' Last Rev. 2026-10-04 21:08
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -1439,6 +1439,7 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         Application.Run Rut_Name
         If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
+        Call Rut_Lo_Totales_Mostrar         '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
         Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf").Value
     Loop While Len(Rutinas_Name) > 0
     Application.ScreenUpdating = True

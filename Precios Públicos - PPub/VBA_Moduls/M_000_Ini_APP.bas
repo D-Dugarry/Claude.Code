@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_APP"
-' Last Rev. 2026-10-04 17:32
+' Last Rev. 2026-10-04 21:08
 '- M00_Ini_APP --------
 Option Explicit    ' Para obligar a definir todas las variable.  'lo he quitado porque me genera muchos errores.
 
@@ -17,7 +17,7 @@ Debug.Print "------------------------------------------->>> RuT_Al_Abrir_WorkBoo
     Sht__BD.Visible = xlSheetVisible
     Sht__BD.Select
     Sht__BD.Unprotect
-    Sht__BD.ListObjects(1).ShowTotals = True
+    Call Rut_Lo_Totales_Mostrar         '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
         Sht__BD.Protect , allowFiltering:=True, DrawingObjects:=False, Scenarios:=True, Contents:=True, UserInterfaceOnly:=True        '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
     ActiveWindow.DisplayWorkbookTabs = False
     Rut_On_Functions

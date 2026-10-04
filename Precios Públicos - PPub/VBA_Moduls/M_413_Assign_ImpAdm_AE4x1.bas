@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_413_Assign_ImpAdm_AE4x1"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -109,7 +109,7 @@ Fin_Bucle:
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_Rec_Imp_Adm, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_ImpAdm, Criteria1:="<0"
         .Range.AutoFilter Field:=BD_Anul, Criteria1:="=S"
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_ClsBk_AE4x1, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RowsFind > 0 Then
             ImpTAdmNeg = Application.Sum(.DataBodyRange.Columns(BD_ImpAdm).SpecialCells(xlCellTypeVisible))
             '.DataBodyRange.Columns(BD_Rec_Imp_Adm).SpecialCells(xlCellTypeVisible).ClearContents

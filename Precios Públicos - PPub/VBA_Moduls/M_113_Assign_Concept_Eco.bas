@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_113_Assign_Concept_Eco"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-22
 '                           ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. por 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
@@ -46,7 +46,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
     '- Año_Vto = AnoCont -------------------------------------------------------------------------------------------------------
         '- Cuando F_Vto anterior al 1-Ene del AnoCont-1, Es decir que es un Rec. Añejo Pongo F_Vto = AnoCont
                 .Range.AutoFilter Field:=BD_FVto, Criteria1:="<01/01/" & AnoCont - 1
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont
         End If
@@ -59,7 +59,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
                                  Operator:=xlAnd, Criteria2:="<01/01/" & AnoCont + 1
                                  'Operator:=xlAnd, Criteria2:="<=12/31/" & AnoCont   ¡¡¡ OJO !!! así no funciona seguramente porque habría que poner algo como por ejemplo 12/31/2025 23:59:59
         '.Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_FVto_Act")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont
         End If
@@ -71,7 +71,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
                 .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AnoCont - 1, _
                                  Operator:=xlAnd, Criteria2:="<01/01/" & AnoCont
 '        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_FVto_Ant")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont - 1
         End If
@@ -81,7 +81,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
         '- Cuando F_Vto corresponde al AnoCont + 1, Es decir que es un Rec. ADxAplz, pongo Año_Vto = AnoCont + 1 ------------
         .AutoFilter.ShowAllData            ' Elimina los filtros
                 .Range.AutoFilter Field:=BD_FVto, Criteria1:=">=01/01/" & AnoCont + 1
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_ACont_Vto).SpecialCells(xlCellTypeVisible).Cells.Value = AnoCont + 1
         End If
@@ -280,7 +280,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-1º Recibos Cod_Activ = 6 - Grado -----------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_AE6")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1310.00"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "Grado"
@@ -290,7 +290,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-2º Recibos Cod_Activ = 5 - Master -----------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AutoFilter Field:=BD_ActivEco, Criteria1:=5
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1310.01"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "Master"
@@ -300,7 +300,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-3º Recibos Cod_Activ = 2 - Doctorado -----------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AutoFilter Field:=BD_ActivEco, Criteria1:=2
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1310.02"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "Doctorado"
@@ -310,7 +310,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-4º Recibos - EFP - Estudios de Formación Permanente: Máster, Especialista, Experto. -------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_EFP")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.00"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "EFP"
@@ -321,7 +321,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-5º Recibos - CFC - Cursos de Formación Contínua -------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_CFC")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.03"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "CFC"
@@ -332,7 +332,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-5º Recibos - AFC - Actividades de Formación Complementaria -------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_AFC")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1311.03"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "AFC"
@@ -343,7 +343,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-6º Recibos Cod_Activ = 80 - Pruebas de aptitud para acceso a la Universidad -----------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AutoFilter Field:=BD_ActivEco, Criteria1:=80
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1315.00"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "PruebasAccesoUni"
@@ -353,7 +353,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-7º Recibos - TNCT-M013 AE300 - Cursos NO Contabilizables como EFP (M013) sino como Rec.Mov. por Secretaría de Acceso ---------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_M013")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1312.00"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "TNCT_M013"
@@ -365,7 +365,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-8º _UPUA_ Recibos - CFC-TUP - _UPUA_ Universidad Permanente, Cursos de Formación Contínua (TUP) -------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TUP")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1312.02"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "CFC_UPUA"
@@ -376,7 +376,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-9º Recibos - TNCT-PNB1 - Cursos NO Contabilizables como Títulos Propios Universidad (PNB1) -------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_TNCT_PNB1")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1303.01"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "TNCT_PNB1"
@@ -388,7 +388,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '-10º Recibos de Movimiento - Rec_Adm - Recibos de Actividad Administrativa, SIN relación con Matrícula Académica ---
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_RecAdm")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "1303.00"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "Rec_Adm"
@@ -400,7 +400,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_EURLE")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "EURLElda"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "EURLElda"
@@ -412,7 +412,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 
 '- Recibos de Matrículas de coste CERO - ImpMatCero - Recibos Matrícula de Actividad Académica a Coste CERO. ------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "NoContab"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "ImpMatCero"
@@ -423,7 +423,7 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
 '- Recibos Sin Concepto o Tipo ---------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         .Range.AutoFilter Field:=BD_TIO_EP, Criteria1:="="
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_Data, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Concepto).SpecialCells(xlCellTypeVisible).Cells.Value = "NoContab"
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "NoContab"

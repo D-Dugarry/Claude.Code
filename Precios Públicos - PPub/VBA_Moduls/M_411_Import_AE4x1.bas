@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_411_Import_AE4x1"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 21:07
 '2026-01-25
 Option Explicit
 
@@ -240,7 +240,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
         Lo_ClsBk.ShowTotals = False
         Call Rut_Lo_Sort(Lo_ClsBk, BD_Plan, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_Plan, Criteria1:="=M013"
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_ClsBk, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RowsFind > 0 Then
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "M013"
         End If
@@ -254,7 +254,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
         Lo_ClsBk.ShowTotals = False
         Call Rut_Lo_Sort(Lo_ClsBk, BD_Plan, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_Plan, Criteria1:="=UPUA"
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_ClsBk, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         Rng_Informe = Rng_Informe & ", Assign 'CFC_UPUA' a Tipo_EP " & Format(RowsFind, "#,##0") & " reg."
         If RowsFind > 0 Then
             .DataBodyRange.Columns(BD_TIO_EP).SpecialCells(xlCellTypeVisible).Cells.Value = "CFC_UPUA"
@@ -269,7 +269,7 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_AE4x1"
     With Lo_ClsBk
         Call Rut_Lo_Filtros_Quitar(Lo_ClsBk)
         .Range.AutoFilter Field:=BD_FCob, Criteria1:=">" & Mid(FechCierreCont, 4, 3) & Left(FechCierreCont, 3) & Right(FechCierreCont, 4)  '- ¡¡¡ EL FORMATO DEBE SER MM/DD/YYYY !!!)
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_ClsBk, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         Rng_Informe = Rng_Informe & ", Clear " & Format(RowsFind, "#,##0") & " reg. F_Cob > " & FechCierreCont
         If RowsFind > 0 Then
             .DataBodyRange.Columns(BD_FCob).SpecialCells(xlCellTypeVisible).Cells.ClearContents

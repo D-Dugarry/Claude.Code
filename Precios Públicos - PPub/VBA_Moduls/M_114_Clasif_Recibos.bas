@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 22:17
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -44,10 +44,8 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-'    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     Sht__BD.Unprotect
-    Lo_BD.ShowTotals = False
     
         '- Visualizo el progreso
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificación de Recibos, Estadística:", 0, , , , , , 2)
@@ -74,7 +72,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-Rec. Emitidos -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Emitido")
-        RegsEmitido = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsEmitido = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
 
         If RegsEmitido > 0 Then
             .DataBodyRange.Columns(BD_CriT_Emi).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
@@ -84,7 +82,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-Rec. EjeAnt -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_EjeAnt")
-        RegsEjeAnt = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsEjeAnt = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsEjeAnt > 0 Then
             .DataBodyRange.Columns(BD_CriT_EjeAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
@@ -93,7 +91,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-Rec. Añejos -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aneja")
-        RegsAnejo = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsAnejo = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsAnejo > 0 Then
             .DataBodyRange.Columns(BD_CriT_Anejo).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
@@ -102,7 +100,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-Rec. Aplazado -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aplazado")
-        RegsAplazado = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsAplazado = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsAplazado > 0 Then
             .DataBodyRange.Columns(BD_CriT_Aplazado).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
@@ -111,7 +109,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     '-Rec. ADxAplz -------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ADxAplz")
-        RegsADxAplz = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsADxAplz = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsADxAplz > 0 Then
             .DataBodyRange.Columns(BD_CriT_ADxAplz).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
@@ -124,7 +122,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
         '-Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="<0"
-        RegsDevolucion = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsDevolucion = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsDevolucion > 0 Then
             .DataBodyRange.Columns(BD_CriT_DevEP).SpecialCells(xlCellTypeVisible).Cells.Value = "_Dev_EP_"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Dev_EP_"
@@ -132,7 +130,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
         
     '-Filtra Recibos Anulados, NO Matrícula o Invalidados -------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Anul")
-        RegsAnulado = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsAnulado = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsAnulado > 0 Then
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Reg_Anul_"
         End If
@@ -141,7 +139,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
         '-Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="<" & APP_AnoCont
-        RegsContabAnt = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsContabAnt = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsContabAnt > 0 Then
             .DataBodyRange.Columns(BD_CriT_ContabAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "_Contab_Ant_"
             .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Contab_Ant_"
@@ -182,7 +180,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
         '---------------------------------------------------------------------------------------------------------
         '-Filtra Recibos ErrDate - Cobradas en Años anteriores al de Emisión -------------------------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")
-        RegsErrDate = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsErrDate = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RegsErrDate > 0 Then
             .DataBodyRange.Columns(BD_Incidencias).SpecialCells(xlCellTypeVisible).Cells.Value = "_ERR_Date_"
         End If
@@ -198,7 +196,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
         '-Filtra Recibos Sin Tipo ---------------------------------------------------------------------------------
         Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="="
-        RegsSinTipo = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RegsSinTipo = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
 Debug.Print "RegsSinTipo", RegsSinTipo
         RegsCanTot = .ListRows.Count
 Debug.Print "RegsCanTot", , Format(RegsCanTot, "#,##0")

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 22:17
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -83,18 +83,14 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Prog_DefCol_BD.Visible = xlSheetVisible
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-'    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     Sht__BD.Unprotect
-    Lo_BD.ShowTotals = False
-    Lo_DefCol_BD.ShowTotals = False
     
     Dim Lo_BD_Ant           As ListObject:      Set Lo_BD_Ant = Sht__BD_Ant.ListObjects(1)
     Sht__BD_Ant.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_Ant)
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant")
     Sht__BD_Ant.Unprotect
-    Lo_BD_Ant.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
@@ -167,7 +163,6 @@ RuT_Remove_Reg_No_Valid:
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_ErrDate)
             Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_ErrDate") = False
             Sht__BD_ErrDate.Unprotect
-            Lo_BD_ErrDate.ShowTotals = False
             TimeLap2 = LastTimeLap
     Call RuT_Remove_Reg_No_Valid(Lo_BD, Lo_BD_ErrDate)
             Set Lo_BD_ErrDate = Nothing
@@ -184,7 +179,6 @@ RuT_Duplicates_Search:
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_Dupl)
             Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Dupl") = False
             Sht__BD_Dupl.Unprotect
-            Lo_BD_Dpl.ShowTotals = False
     Call RuT_Duplicates_Search(Lo_BD, Lo_DefCol_BD, Lo_BD_Dpl, BD_Ref, BD_Incidencias, BD_H_Incidencias)
             Set Lo_BD_Dpl = Nothing
         

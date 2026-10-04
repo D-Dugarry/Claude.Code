@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 22:51
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -32,7 +32,6 @@ Debug.Print "------------------------- >>> RuT_Update_LSace06_CAcad_ImpAdm_INSS(
     Sht__BD_INSS.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_INSS)
     Sht__BD_INSS.Unprotect
-    Lo_INSS.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
@@ -80,7 +79,7 @@ Terminar:
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
-    Lo_INSS.ShowTotals = True
+    '- Sin 'Lo_INSS.ShowTotals = True' (2026-10-04, decisión del usuario): sus totales no se requieren, y volver a mostrarlos obligaba a ocultarlos en la siguiente ejecución, que es lo que falla tras M_110/M_210 (ver CLAUDE.md).
     Sht__BD_INSS.Calculate
 
 Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

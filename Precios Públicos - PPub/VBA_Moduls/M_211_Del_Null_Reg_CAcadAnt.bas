@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_211_Del_Null_Reg_CAcadAnt"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 21:07
 '2026-01-23
 '- M_211_Remove_Null_Reg_CAcad
 Option Explicit
@@ -102,7 +102,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
         Call Rut_Lo_Sort(Lo_G04, BD_ImpRec, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado ---------------------
         Call Rut_Lo_Sort(Lo_G04, BD_ImpDto, xlAscending, False)    '- Ordenar primero accelera un montón el borrado ---------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
             '- Visualizo el progreso --------
@@ -121,7 +121,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
         Call Rut_Lo_Filtros_Quitar(Lo_G04)
         Call Rut_Lo_Sort(Lo_G04, BD_ImpRec, xlAscending, True)
         .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="=0"
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_G04, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
                 .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete

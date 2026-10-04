@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 22:17
 '2026-01-23
 Option Explicit
 
@@ -38,8 +38,8 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     Dim Lo_BD               As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
     Dim Lo_BD_CAcad_Ant     As ListObject:      Set Lo_BD_CAcad_Ant = Sht__BD_IAdm_CAcadAnt.ListObjects(1)
     
-    Sht__BD.Visible = xlSheetVisible:                   Sht__BD.Unprotect:                  Lo_BD.ShowTotals = False
-    Sht__BD_IAdm_CAcadAnt.Visible = xlSheetVisible:     Sht__BD_IAdm_CAcadAnt.Unprotect:    Lo_BD_CAcad_Ant.ShowTotals = False
+    Sht__BD.Visible = xlSheetVisible:                   Sht__BD.Unprotect
+    Sht__BD_IAdm_CAcadAnt.Visible = xlSheetVisible:     Sht__BD_IAdm_CAcadAnt.Unprotect
     
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_IAdm_CAcadAnt)
@@ -61,7 +61,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     With Lo_BD_CAcad_Ant
         Call Rut_Lo_Sort(Lo_BD_CAcad_Ant, BD_C_Acad, xlAscending, True)                     '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_Obs_Conta, Criteria1:="RecNegCab"                       '- Filtro los Recibos con ImpAdm <= 0
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD_CAcad_Ant, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             ImpTAdmNeg = Application.Sum(.DataBodyRange.Columns(BD_Rec_Imp_Adm).SpecialCells(xlCellTypeVisible))
             .DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
@@ -75,7 +75,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     With Lo_BD
         Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)                           '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad_Ant                     '- Filtro los Recibos del Curso-Acad-Ant
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Rec_Imp_Acad).SpecialCells(xlCellTypeVisible).ClearContents
             .DataBodyRange.Columns(BD_Rec_Imp_Adm).SpecialCells(xlCellTypeVisible).ClearContents

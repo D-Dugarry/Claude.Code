@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_415_Copy_AE4_a_BD"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 22:17
 '2026-01-01
 '-M_415_Copy_AE4_a_BD
 Option Explicit
@@ -36,7 +36,7 @@ Debug.Print ">>> Rut_Copy_AE4x4_en_BDatos"
     Dim TF_BD           As Long:            TF_BD = Lo_BD.ListRows.Count
     Dim TF_AE4          As Long:            TF_AE4 = Lo_AE4.ListRows.Count
     
-    Sht__BD.Visible = xlSheetVisible:           Sht__BD.Unprotect:          Lo_BD.ShowTotals = False
+    Sht__BD.Visible = xlSheetVisible:           Sht__BD.Unprotect
     Sht__BD_AE4x4.Visible = xlSheetVisible:     Sht__BD_AE4x4.Unprotect ':    Lo_AE4.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -71,7 +71,7 @@ Debug.Print ">>> Rut_Copy_AE4x4_en_BDatos"
     Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, False)      '- Ordenar primero accelera un montón el borrado
     Lo_BD.Range.AutoFilter Field:=BD_ActivEco, Criteria1:="=4"
     Lo_BD.Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad_Ant, Operator:=xlOr, Criteria2:="=" & C_Acad_Pos   '- Filtro los Recibos del Curso-Acad-Ant/Pos
-    rowfind = Lo_BD.Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+    rowfind = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
     If rowfind > 0 Then
         Dim RngDel      As Range
         Set RngDel = Lo_BD.DataBodyRange.SpecialCells(xlCellTypeVisible)

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_410_Update_BD_AE4x4"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 22:17
 '2026-01-017
 '- M_410_Update_Lo_AE4 -----------------------------------------------------------------------------------------------------------
 
@@ -37,7 +37,6 @@ Debug.Print "------------------------- >>> RuT_Update_AE4x4()"
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_AE4x4)
     Sht__BD_AE4x4.Unprotect
     Sht__BD_AE4x4.Select
-    Lo_AE4.ShowTotals = False
     Sht__BD_AE4x4.Range("f2:g5").ClearContents
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso

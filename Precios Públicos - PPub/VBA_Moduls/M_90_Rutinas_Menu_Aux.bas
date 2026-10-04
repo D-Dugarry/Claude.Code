@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 22:17
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
@@ -40,6 +40,7 @@ Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal
     If Len(Tag) > 0 Then Call Rut_RibbonUI_Guardar_Informe(Tag)
     If Volver_Hoja Then ThisWorkbook.Sheets(Progreso_Hoja).Select
     If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la rutina se salto algun Rut_On_Functions
+    Call Rut_Lo_Totales_Mostrar                 '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
     Application.ScreenUpdating = True
     Form_Running_Rut.Rut_Finalizada             '- fondo verde y boton de salida
     Call RefreshRibbon                          '- rotulos (fecha de la ultima importacion...) y supertips al dia
@@ -92,9 +93,7 @@ Debug.Print "Rut_Lo_Export_Bdatos"
     Sht__BD.Select
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Sht__BD.Unprotect
-    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD")
-    Lo_BD.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios

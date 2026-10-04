@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 22:17
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -57,7 +57,8 @@ Dim Lo_Inf          As ListObject:      Set Lo_Inf = Sht_Inf.ListObjects(1)
 
 Dim RwJI            As ListRow
 
-Dim UltFila     As Integer:     UltFila = Lo_Inf.TotalsRowRange.Row + 2
+'- 2 filas por debajo de la de totales, se vea o no (si está oculta, de donde estaría): Docs/Plan_ShowTotals.md, fase 2.
+Dim UltFila     As Integer:     UltFila = Lo_Inf.Range.Row + Lo_Inf.Range.Rows.Count + IIf(Lo_Inf.ShowTotals, 1, 2)
 Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.Count + 2
 
     Application.ScreenUpdating = False
@@ -68,7 +69,6 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     
     Sht__BD.Visible = xlSheetVisible
     Sht__BD.Unprotect
-    Lo_BD.ShowTotals = False
     Prog_Concept.Visible = xlSheetHidden
     Prog_TipoRec.Visible = xlSheetHidden
     Sht_Inf.Visible = xlSheetVisible
@@ -85,7 +85,6 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     Call Rut_Lo_Sort(Lo_BD, BD_Concepto, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
     
     Sht_Inf.Select
-    Lo_Inf.ShowTotals = False
     
     '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
     If Not Lo_Inf.DataBodyRange Is Nothing Then Lo_Inf.DataBodyRange.Delete
@@ -435,7 +434,7 @@ SiguienteColumna:
     UltFila = Lo_Inf.TotalsRowRange.Row + 3
     TRows_LoTipoRec = Prog_TipoRec.ListObjects(1).ListRows.Count
 '    Prog_TipoRec.ListObjects(1).ListColumns(1).Range.Resize(, 2).Copy Destination:=Cells(UltFila , 3) ' Resize to include the second column
-    Prog_TipoRec.ListObjects(1).ListColumns(1).Range.Resize(, 2).Copy            '- Resize to include the second column
+    Prog_TipoRec.ListObjects(1).ListColumns(1).Range.Resize(TRows_LoTipoRec + 1, 2).Copy    '- cabecera + datos, 2 Col. (sin la fila de totales aunque se vea)
     Cells(UltFila, ColIni).PasteSpecial Paste:=xlPasteFormats
     Cells(UltFila, ColIni).PasteSpecial Paste:=xlPasteValues
     Application.CutCopyMode = False
@@ -504,7 +503,7 @@ SiguienteColumna:
     With Lo_Inf
         .Range.AutoFilter Field:=InfRec_ConcptNom, Criteria1:="EURLE*"       '- Filtrar
         Sht_Inf.Calculate
-        RowsFind = .Range.Columns(InfRec_ConcptNom).SpecialCells(xlCellTypeVisible).Cells.Count - 2 '2 + .ShowTotals  '- Si tiene TotalsRowRange .ShowTotals = -1 (True = -1, False = 0)
+        RowsFind = Fnc_Lo_Contar_Visibles(Lo_Inf, InfRec_ConcptNom)
         If RowsFind > 0 Then
             Set Rng = Range("e2:r2")
             Rng.Copy Destination:=Cells(UltFila + TRows_LoTipoRec + 3, 5)

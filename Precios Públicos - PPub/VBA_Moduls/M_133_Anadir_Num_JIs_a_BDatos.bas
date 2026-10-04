@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_133_Anadir_Num_JIs_a_BDatos"
-' Last Rev. 2026-09-30 20:04
+' Last Rev. 2026-10-04 22:17
 '2026-02-14
 Option Explicit
 
@@ -31,7 +31,6 @@ Dim Celda           As Range
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
     
     Sht__BD.Unprotect
-    Lo_BD.ShowTotals = False
     Sht_Inf.Visible = xlSheetVisible
     Sht_Inf.Select
     Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
@@ -39,11 +38,9 @@ Dim Celda           As Range
     '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------------------
     Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-    Lo_BD.ShowTotals = False
     Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, True)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
     Call Rut_Lo_Sort(Lo_BD, BD_Concepto, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
     Sht_Inf.Select
-    Lo_Inf.ShowTotals = False
     Call Rut_Lo_Sort(Lo_Inf, InfRec_TipRec, xlAscending, True)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
     Call Rut_Lo_Sort(Lo_Inf, InfRec_ConcptEco, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
     
@@ -60,7 +57,7 @@ Dim Celda           As Range
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         Lo_BD.Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="=" & Tp_Rec
         Lo_BD.Range.AutoFilter Field:=BD_Concepto, Criteria1:="=" & Val(Concept)
-        rowfind = Lo_BD.Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)   '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             Lo_BD.ListColumns(BD_JI_Emi_Acad).DataBodyRange.SpecialCells(xlCellTypeVisible).Cells.Value = RwJI.Range(InfRec_JI_Emi_Acad)
             Lo_BD.ListColumns(BD_JI_Emi_Adm).DataBodyRange.SpecialCells(xlCellTypeVisible).Cells.Value = RwJI.Range(InfRec_JI_Emi_Adm)

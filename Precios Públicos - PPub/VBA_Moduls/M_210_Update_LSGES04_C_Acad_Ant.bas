@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 22:17
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -43,12 +43,9 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
     '- Setting Sheets ------------------------------------
     Sht__BD_IAdm_CAcadAnt.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_IAdm_CAcadAnt)
-'    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Lo_DefCol_BD.ShowTotals = True
-    Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_IAdm_CAcadAnt") = False
     Sht__BD_IAdm_CAcadAnt.Unprotect
-    Lo_ImpAdmCAcadAnt.ShowTotals = False
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios

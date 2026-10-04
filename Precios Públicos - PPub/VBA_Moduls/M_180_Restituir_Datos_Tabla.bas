@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_180_Restituir_Datos_Tabla"
-' Last Rev. 2026-09-30 15:05
+' Last Rev. 2026-10-04 22:17
 '- M_180_Restituir_Datos_Tabla -----------------------------------------------------------------------------------------------------
 
 Option Explicit
@@ -33,7 +33,6 @@ Rut_Off_Functions
 
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-    Sht__BD.ListObjects(1).ShowTotals = False
     
 '   Borrar el contenido de la Tabla     --------------------------------------------------------------------------------------------
     If Not Sht__BD.ListObjects(1).DataBodyRange Is Nothing Then Sht__BD.ListObjects(1).DataBodyRange.Delete

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_315_Copy_INSS_a_BD"
-' Last Rev. 2026-10-04 18:55
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -56,7 +56,7 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
     With Lo_BD
         Call Rut_Lo_Sort(Lo_BD, BD_C_Acad, xlAscending, True)                           '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad_Ant, Operator:=xlOr, Criteria2:="=" & C_Acad_Pos   '- Filtro los Recibos del Curso-Acad-Ant/Pos
-        rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then
             .DataBodyRange.Columns(BD_Rec_Imp_INSS).SpecialCells(xlCellTypeVisible).ClearContents
         End If

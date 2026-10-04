@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -44,7 +44,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Call Rut_Lo_Filtros_Quitar(LoBDatos)
     With LoBDatos
         .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad_Pos
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(LoBDatos, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RowsFind > 0 Then
             .DataBodyRange.Columns(BD_Rec_Imp_Acad).SpecialCells(xlCellTypeVisible).ClearContents
             .DataBodyRange.Columns(BD_Rec_Imp_Adm).SpecialCells(xlCellTypeVisible).ClearContents
@@ -158,7 +158,7 @@ Sig_Reg:
         Call Rut_Lo_Sort(LoBDatos, BD_Rec_Imp_Adm, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         .Range.AutoFilter Field:=BD_ImpAdm, Criteria1:="<0"
         .Range.AutoFilter Field:=BD_Anul, Criteria1:="=S"
-        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        RowsFind = Fnc_Lo_Contar_Visibles(LoBDatos, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RowsFind > 0 Then
             ImpTAdmNeg = Application.Sum(.DataBodyRange.Columns(BD_ImpAdm).SpecialCells(xlCellTypeVisible))
             '.DataBodyRange.Columns(BD_Rec_Imp_Adm).SpecialCells(xlCellTypeVisible).ClearContents

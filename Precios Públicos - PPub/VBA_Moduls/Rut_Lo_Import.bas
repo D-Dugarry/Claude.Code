@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 21:06
 '2026-01-18
 Option Explicit
 
@@ -62,6 +62,9 @@ Rut_Off_Functions
     
     '- --------------------------------------------------------------------------------------------------------------
     '   Borrar el contenido de la Tabla -----------------------------------------------------------------------------
+    '- Sin la fila de totales: con ella visible, el PasteSpecial de más abajo (Lo_Data.Range.Offset(1, 0)) la pisaría y dejaría
+    '- los datos fuera de la tabla (el fallo de Lo_TPV en JyC). Se deja como estaba en cada salida (Docs/Plan_ShowTotals.md, fase 2).
+    Dim Totales_Visibles    As Boolean:     Totales_Visibles = Fnc_Lo_Totales_Ocultar(Lo_Data)
     If Not Lo_Data.DataBodyRange Is Nothing Then Lo_Data.DataBodyRange.Delete
     Call Rut_WrkSheet_LstObj_LiberarEspacio(WrkSht)
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
@@ -87,6 +90,7 @@ Rut_Off_Functions
         Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
         Rut_On_Functions
         Exit Sub
     End If
@@ -112,6 +116,7 @@ Rut_Off_Functions
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
                 Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
                 Rut_On_Functions
                 Exit Sub
             End If
@@ -149,6 +154,7 @@ Rut_Off_Functions
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
             Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
             Rut_On_Functions
             Exit Sub
         End If
@@ -168,6 +174,7 @@ Rut_Off_Functions
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
             Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
             Rut_On_Functions
             Exit Sub
         End If
@@ -190,6 +197,7 @@ Rut_Off_Functions
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
+    Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
@@ -263,6 +271,9 @@ Rut_Off_Functions
     
     '- --------------------------------------------------------------------------------------------------------------
     '   Borrar el contenido de la Tabla -----------------------------------------------------------------------------
+    '- Sin la fila de totales: con ella visible, el PasteSpecial de más abajo (Lo_Data.Range.Offset(1, 0)) la pisaría y dejaría
+    '- los datos fuera de la tabla (el fallo de Lo_TPV en JyC). Se deja como estaba en cada salida (Docs/Plan_ShowTotals.md, fase 2).
+    Dim Totales_Visibles    As Boolean:     Totales_Visibles = Fnc_Lo_Totales_Ocultar(Lo_Data)
     If Not Lo_Data.DataBodyRange Is Nothing Then Lo_Data.DataBodyRange.Delete
     Call Rut_WrkSheet_LstObj_LiberarEspacio(WrkSht)
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
@@ -288,6 +299,7 @@ Rut_Off_Functions
         Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
         Rut_On_Functions
         Exit Sub
     End If
@@ -313,6 +325,7 @@ Rut_Off_Functions
                 ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
                 Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+                Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
                 Rut_On_Functions
                 Exit Sub
             End If
@@ -347,6 +360,7 @@ Rut_Off_Functions
             ClosedBook.Close SaveChanges:=False
             Set ClosedBook = Nothing
             Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
             Rut_On_Functions
             Exit Sub
         End If
@@ -366,6 +380,7 @@ Rut_Off_Functions
                     Set Ws_ClsBk = Nothing
                     Set Lo_ClsBk = Nothing
             Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+            Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
             Rut_On_Functions
             Exit Sub
         End If
@@ -402,6 +417,7 @@ Rut_Off_Functions
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
+    Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub

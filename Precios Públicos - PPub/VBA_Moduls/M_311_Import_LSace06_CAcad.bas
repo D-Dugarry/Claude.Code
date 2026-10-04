@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 21:07
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -238,7 +238,7 @@ Rut_Off_Functions
     Call Rut_Lo_Filtros_Quitar(Lo_ClsBk_LSace06)
     Call Rut_Lo_Sort(Lo_ClsBk_LSace06, LS06_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---------------------
     Lo_ClsBk_LSace06.Range.AutoFilter Field:=LS06_C_Acad, Criteria1:="<>" & C_Acad_Ant, Operator:=xlAnd, Criteria2:="<>" & C_Acad_Pos
-    rowfind = Lo_ClsBk_LSace06.Range.Columns(LS06_C_Acad).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+    rowfind = Fnc_Lo_Contar_Visibles(Lo_ClsBk_LSace06, LS06_C_Acad)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
     If rowfind > 0 Then
         Lo_ClsBk_LSace06.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
         '- Comprobar que a la Tabla Lo_ClsBk_LSace06 le quedan datos ---------------------
@@ -268,7 +268,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
     Call Rut_Lo_Filtros_Quitar(Lo_ClsBk_LSace06)
     Call Rut_Lo_Sort(Lo_ClsBk_LSace06, LS06_Concept_Nom, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---------------------
     Lo_ClsBk_LSace06.Range.AutoFilter Field:=LS06_Concept_Nom, Criteria1:="<>*INSS*"    ', Operator:=xlAnd, Criteria2:="<>"
-    rowfind = Lo_ClsBk_LSace06.Range.Columns(LS06_C_Acad).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+    rowfind = Fnc_Lo_Contar_Visibles(Lo_ClsBk_LSace06, LS06_C_Acad)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
     If rowfind > 0 Then
         Lo_ClsBk_LSace06.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
         '- Comprobar que a la Tabla Lo_ClsBk_LSace06 le quedan datos ---------------------
@@ -334,7 +334,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
         Else
             Lo_INSS.Range.AutoFilter Field:=LS06_C_Acad, Criteria1:="=" & CStr(CursoArray(0))
         End If
-        rowfind = Lo_INSS.Range.Columns(LS06_C_Acad).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        rowfind = Fnc_Lo_Contar_Visibles(Lo_INSS, LS06_C_Acad)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If rowfind > 0 Then Lo_INSS.DataBodyRange.SpecialCells(xlCellTypeVisible).Delete
                 '- Visualizo el progreso
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del de BD_INSS Rec. con " & Text, LastTimeLap, Format(rowfind, "#,##0") & " reg", _

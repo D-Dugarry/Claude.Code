@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan: control de la fila de totales (ShowTotals) de las tablas</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>Plan: control de la fila de totales (<code>ShowTotals</code>) de las tablas</h1>
+<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-04 17:40 · <strong>Revisado:</strong> 2026-10-04 22:25 · <strong>Modelos:</strong> Jornadas y Congresos (patrón de escritura en tablas con fila de totales, nacido del fallo de <code>Lo_TPV</code> del 2026-08-26; ver <code>../Jornadas_y_Congresos/CLAUDE.md</code>, apartado «Escribir en un <code>ListObject</code> que tiene FILA DE TOTALES») y Enseñanzas Propias (<code>Rut_Lo_WrkSht_Preparar</code> oculta los totales, commit <code>1f9cb9cc</code> del 2026-09-27; <code>Fnc_Lo_Contar_Visibles</code>, commit <code>f79d4c4d</code> del 2026-09-28).</p>
+<p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · 🧪 <strong>Aplicado, falta probarlo en Excel</strong> · ⏳ <strong>Pendiente</strong> · ⏸️ <strong>Postergado</strong></p>
+<h2>Estado: ✅ FASES 1 A 5 HECHAS Y VERIFICADAS (commit del 2026-10-04 23:35); fase 6 postergada</h2>
+<p>Pruebas 5 a 7 de «Cómo probarlo» no hechas: el usuario las dio por opcionales (cambios menores, ya cubiertos por la doble ejecución). <code>M_310</code> ya no vuelve a mostrar los totales de <code>Tb_INSS</code>.</p>
+<p>Están escritas y verificadas en el texto (bytes cp1252/CRLF, mismo balance de bloques que en <code>HEAD</code> en los 28 módulos), reimportadas en el libro (olevba: libro = repo, <code>M_310</code> incluido) y con la <strong>doble ejecución superada</strong> (libro de las 23:04: <code>M_110</code> Sí/Sí/Sí/No a las 22:56 y <code>M_210</code> a las 23:02, contra <code>PPub_BDatos_2026 - Antes_ShowTotals.xlsm</code>). <code>BDatos</code>, <code>BD_Dupl</code>, <code>BD_ErrDate</code>, <code>BD_ImpAdm</code> y <code>BD_INSS</code> salen <strong>idénticas</strong> (valores, rellenos y formatos), y los logs también, salvo el bloque de <code>M_215</code> en el de <code>M_110</code>: en ANTES, <code>M_110</code> se ejecutó antes de reimportar <code>BD_ImpAdm</code> (1.463 filas) y aquí después (1.584); el resultado final es el mismo. La política de la fase 4 actuó: <code>Tb_DefCols172146</code> pasó a tener totales y <code>Tb_DefCols_BD</code> los conserva tras <code>M_110</code>. Faltan las pruebas 5 a 7 de «Cómo probarlo» (<code>M_195</code>, botón de columnas, cancelar <code>M_110</code>).</p>
+<div class="tw"><table><thead><tr><th>Fase</th><th>Qué</th><th>¿Cambia el resultado?</th><th>Estado</th></tr></thead><tbody><tr><td>0</td><td>Cerrar la tanda pendiente del 2026-10-04</td><td>—</td><td>✅ Hecho (otra sesión: <code>68c48d66</code> y siguientes, doble ejecución superada)</td></tr><tr><td>1</td><td><code>M_195</code> (error 91), el «flag» muerto de las <code>DefCol</code> y su único <code>ShowTotals = False</code></td><td>Sí: <code>M_195</code> deja de fallar</td><td>✅ Hecho</td></tr><tr><td>2</td><td>Escrituras y copias que se protegen solas (patrón de JyC)</td><td>No</td><td>✅ Hecho</td></tr><tr><td>3</td><td><code>Fnc_Lo_Contar_Visibles</code> en los 57 recuentos</td><td>Solo en <code>M_115</code> sin recibos del curso Pos</td><td>✅ Hecho</td></tr><tr><td>4</td><td>Política de cierre: 10 tablas siempre con totales</td><td>Sí: <code>DefCol</code> e informe siempre con totales</td><td>✅ Hecho</td></tr><tr><td>5</td><td><code>Rut_Lo_WrkSht_Preparar</code> oculta los totales (pieza de EP) y limpieza</td><td>No</td><td>✅ Hecho</td></tr><tr><td>6</td><td>Estudio: estado de la fila de totales configurable para las 39 tablas</td><td>—</td><td>⏸️ Postergado (plan propio)</td></tr><tr><td>—</td><td>Exportación a <code>.xlsx</code> con la fila de totales (<code>Rut_Lo_Export_XlsX</code>)</td><td>—</td><td>⏸️ Postergado</td></tr></tbody></table></div>
+<h3>Decisiones del usuario (2026-10-04)</h3>
+<div class="tw"><table><thead><tr><th>#</th><th>Decisión</th><th>Respuesta</th></tr></thead><tbody><tr><td>1</td><td>Qué tablas quedan siempre con totales</td><td>✅ <strong>Solo <code>BDatos</code>, <code>Inf_Recibos_TIO</code> y todas las <code>DefCol</code></strong> («los únicos totales visibles que se requieren por ahora»). Detalle en la fase 4</td></tr><tr><td>2</td><td>¿Quitar los <code>ShowTotals = True</code> del final de las rutinas?</td><td>✅ <strong>De momento no.</strong> Antes, estudiar cómo configurar el estado de la fila de totales para todas las tablas (fase 6)</td></tr><tr><td>3</td><td>¿Se hace la fase 5?</td><td>✅ <strong>Sí</strong></td></tr></tbody></table></div>
+<h2>Qué hay en cada proyecto</h2>
+<p><strong>Jornadas y Congresos.</strong> No hay una rutina central: es una <strong>convención</strong>, documentada en su <code>CLAUDE.md</code> y aplicada en 9 sitios. Al escribir en una tabla con fila de totales:</p>
+<pre><code>TotalesVisibles = Lo.ShowTotals
+Lo.ShowTotals = False
+If Not Lo.DataBodyRange Is Nothing Then Lo.DataBodyRange.Delete
+Lo.HeaderRowRange.Offset(1, 0).Resize(N, N_Cols).Value = Datos
+Lo.Resize Lo.HeaderRowRange.Resize(N + 1, N_Cols)
+Lo.ShowTotals = TotalesVisibles</code></pre>
+<p>Se adoptó tras el 2026-08-26: escribir con la fila de totales visible la pisó y dejó 386 pagos de <code>Lo_TPV</code> fuera de la tabla. Los recuentos de filas visibles compensan el estado con <code>Count - 1 + .ShowTotals</code> (<code>True</code> vale -1).</p>
+<p><strong>Enseñanzas Propias</strong> (mismo framework <code>Rut_Lo</code> que PPub). Dos piezas: <code>Rut_Lo_WrkSht_Preparar</code> oculta la fila de totales al preparar la hoja, y <code>Fnc_Lo_Contar_Visibles(Lo, Col)</code> cuenta sobre <code>DataBodyRange</code> y devuelve 0 si <code>SpecialCells</code> falla.</p>
+<p><strong>PPub antes de este plan.</strong></p>
+<ul>
+<li>Unas 30 rutinas tocaban <code>ShowTotals</code>. Casi todas los apagaban al empezar, y las de proceso los encendían con <code>= True</code> al terminar: forzaban el valor, no restauraban el que había.</li>
+<li>Guardar y restaurar el estado solo lo hacían 2 rutinas de <code>Rut_Lo</code>.</li>
+<li><code>Rut_Lo_WrkSht_Preparar</code> no tocaba los totales.</li>
+<li>57 recuentos en 16 módulos usaban <code>.Range.Columns(X).SpecialCells(xlCellTypeVisible).Cells.Count - 1</code>, que solo acierta con los totales ocultos. <code>M_130</code> restaba 2 porque allí los tiene visibles.</li>
+</ul>
+<h3>Lo que hace distinto a PPub: la fila de totales alimenta los paneles resumen</h3>
+<p>En PPub la fila de totales no es estética. Las celdas de encima de varias tablas son fórmulas que la leen, y con los totales ocultos dan <code>#REF!</code>:</p>
+<div class="tw"><table><thead><tr><th>Hoja</th><th>Tabla</th><th>Celdas que leen <code>[#Totals]</code></th></tr></thead><tbody><tr><td><code>BDatos</code></td><td><code>Tb_BDatos</code></td><td>17 (<code>ACont_Emi</code>, <code>Ref</code>, <code>Imp_Rec</code>, <code>Rec_Imp_*</code>, <code>Emitido</code>...)</td></tr><tr><td><code>BD_Ant</code></td><td><code>Tb_BD_Ant</code></td><td>9</td></tr><tr><td><code>BD_ImpAdm_2025-26</code></td><td><code>Tabla21</code></td><td>5</td></tr><tr><td><code>BD_INSS</code></td><td><code>Tb_INSS</code></td><td>2</td></tr><tr><td><code>Inf_Recibos_TIO</code></td><td><code>Tb_JIs_Tasas425762</code></td><td>1</td></tr><tr><td><code>BD_AE4x4</code></td><td><code>Tb_AE4x4</code></td><td>1</td></tr></tbody></table></div>
+<p>Además, las hojas <code>_DefCol_*</code> generan las líneas <code>Public Const</code> con <code>Tb_DefCols_BD37[[#Totals],[LongNombre]]</code> (6 hojas), <code>Tb_DefCols_BD[[#Totals],[LongNombre]]</code> (3 hojas) y <code>Tb_Menu_Aux</code>/<code>Tabla22</code> (<code>_DefCol_BD_Aux</code>).</p>
+<p>Por eso a PPub no le basta el «restaurar el estado previo» de JyC: si una tabla estaba oculta, la deja oculta y su panel sigue en <code>#REF!</code>. Las rutinas compartidas restauran, porque no les toca imponer nada; pero al terminar cada tarea se aplica una <strong>política</strong>: las tablas de la lista quedan con los totales visibles. Es lo que ya hace <code>Rut_On_Functions</code>, que aplica la política de la app y no el estado previo.</p>
+<h2>Hallazgos (2026-10-04)</h2>
+<ol>
+<li><strong><code>M_195</code> daba error 91 si <code>Tb_DefCols_BD</code> tenía la fila de totales oculta.</strong> Escribía <code>Lo_DefCol_BD.TotalsRowRange(DefC_HiddenCol) = False</code>. <code>M_110</code> ocultaba esa fila en cada ejecución, y solo la volvían a mostrar <code>M_210</code>, <code>M_90</code> o el botón de mostrar/ocultar columnas (en el libro de las 17:24 estaba oculta; en el de las 20:36, visible). Ese «flag» se escribía en 6 sitios y <strong>no lo leía nadie</strong>: el botón decide con el switch <code>Sw_Col_Hide_&lt;CodeName&gt;</code>, y ninguna fórmula lo usa. Es el mismo estado muerto que JyC retiró el 2026-08-11. → Fase 1.</li>
+<li><strong><code>M_115</code> contaba con los totales visibles.</strong> <code>M_114</code> termina con <code>Lo_BD.ShowTotals = True</code> y <code>M_110</code> llama a <code>M_115</code> justo después: el recuento de su línea 47 salía 1 de más. Sin recibos del curso Pos habría dado 1, y el <code>ClearContents</code> sobre <code>SpecialCells</code>, error 1004. → Fase 3.</li>
+<li><strong>El fallo de <code>Lo_TPV</code>, latente en las importaciones.</strong> <code>Rut_Lo_Import_WorkSheet</code> y <code>Rut_Lo_Import_LoData_LoDefCol</code> vacían la tabla y pegan con <code>Lo_Data.Range.Offset(1, 0).PasteSpecial</code>. Con la fila de totales visible pegarían encima de ella. No pasaba solo porque los 5 llamadores apagaban antes los totales. <code>Rut_Lo_DataBodyRange_Filtered_Copy</code> los apagaba y no los restauraba. → Fase 2.</li>
+<li><strong>Paneles en <code>#REF!</code> tras algunas ejecuciones.</strong> <code>M_110</code> apaga los totales de <code>Tb_BD_Ant</code> y no los vuelve a encender; al cancelar el diálogo de fichero en <code>M_110</code>, <code>M_195</code>, <code>M_210</code> o <code>M_310</code> el <code>GoTo Restablecer_Valores</code> salta el <code>ShowTotals = True</code>; <code>M_180</code> los apaga y no los restaura. → Fase 4 para <code>BDatos</code>. En <code>BD_Ant</code>, <code>BD_ImpAdm</code>, <code>BD_INSS</code> y <code>BD_AE4x4</code> no se corrige: según la decisión 1, sus totales no se requieren por ahora.</li>
+<li><strong><code>M_130</code> necesitaba encontrar los totales visibles al entrar</strong> (línea 60: <code>Lo_Inf.TotalsRowRange.Row</code>, error 91 si una ejecución anterior se cortó con la fila oculta). → Fase 2.</li>
+<li><strong><code>M_130</code> copiaba la leyenda de tipos de recibo con la fila de totales incluida, si la hubiera</strong> (<code>ListColumns(1).Range</code> abarca también la fila de totales de <code>Tb_TipoRec</code>). → Fase 2.</li>
+<li><strong>Exportar a <code>.xlsx</code>.</strong> <code>Rut_Lo_Export_XlsX</code> (línea 53) copia <code>Lo_Data.Range</code>, con la fila de totales como una fila de valores más si se ve. JyC lo resolvió en <code>M_825</code>. → Postergado.</li>
+<li><strong><code>M_510</code> falla al empezar, sin relación con este plan.</strong> <code>Set Lo_PlanAE4 = Sht__BD_JIs_AE4.ListObjects(1)</code>, pero esa hoja no tiene ninguna tabla en el libro (comprobado en el <code>.xlsm</code>). No se ha tocado; queda como pendiente aparte.</li>
+</ol>
+<h2>Fases</h2>
+<h3>Fase 0: prerrequisito ✅</h3>
+<p>La hizo otra sesión el 2026-10-04: tanda commiteada (<code>68c48d66</code>, <code>1e155491</code>, <code>cf557e59</code>, <code>4114938b</code>) y pusheada, con la doble ejecución de <code>M_110</code> + <code>M_210</code> superada. El libro de las 20:36 coincide con el repo.</p>
+<h3>Fase 1: <code>M_195</code>, el flag muerto y el <code>ShowTotals = False</code> de las <code>DefCol</code> ✅</h3>
+<ul>
+<li>Quitadas las escrituras a <code>TotalsRowRange(DefC_HiddenCol)</code> (también las ya comentadas): <code>M_195</code> (2), <code>M_210</code> (2), <code>M_90_Rutinas_Menu_Aux</code> (1), <code>M_110</code> (1, comentada), <code>M_114</code> (1, comentada) y <code>Rut_Lo_Columns_Show_Hide</code> (la del <code>Reset</code> y el bloque que alternaba el flag).</li>
+<li>Quitado <code>Lo_DefCol_BD.ShowTotals = False</code> de <code>M_110</code>: era el único sitio que ocultaba los totales de una <code>DefCol</code>.</li>
+<li>Se quedan los <code>ShowTotals = True</code> de las <code>DefCol</code> (<code>M_210</code>, <code>M_90</code>, <code>Rut_Lo_Columns_Show_Hide</code>).</li>
+<li>El código que lee las <code>DefCol</code> usa <code>DataBodyRange</code> y <code>ListRows.Count</code>: no le afecta que la fila de totales esté visible.</li>
+</ul>
+<h3>Fase 2: escrituras y copias que se protegen solas (patrón de JyC) ✅</h3>
+<p>Dos ayudantes nuevos en <code>Rut_Lo</code>: <code>Fnc_Lo_Totales_Ocultar(Lo)</code> (oculta y devuelve cómo estaba) y <code>Rut_Lo_Totales_Restaurar(Lo, Visibles)</code>. Los dos <strong>solo cambian <code>ShowTotals</code> si hace falta</strong>: tras <code>M_110</code>/<code>M_210</code>, cambiarlo en <code>Tb_INSS</code> da -2147417848 (fallo abierto, ver <code>CLAUDE.md</code>).</p>
+<ul>
+<li><code>Rut_Lo_Import_WorkSheet</code> y <code>Rut_Lo_Import_LoData_LoDefCol</code>: ocultan justo antes del <code>DataBodyRange.Delete</code> y restauran en sus 5 salidas posteriores.</li>
+<li><code>Rut_Lo_DataBodyRange_Filtered_Copy</code>: restaura al final y en la salida temprana.</li>
+<li><code>Rut_Lo_DataBodyRange_Filter_y_DEL</code> y <code>..._Filter_x2Crit_Copy_ColSource_to_ColTarget</code>: ya guardaban y restauraban; ahora con los ayudantes (sin cambiar el valor si no hace falta), y sin el segundo <code>.ShowTotals = False</code> redundante de la primera.</li>
+<li><code>M_130</code>, línea 60: <code>UltFila</code> se calcula con <code>Lo_Inf.Range</code>, sin depender de que se vea la fila de totales.</li>
+<li><code>M_130</code>, línea 438: copia cabecera y datos de <code>Tb_TipoRec</code> (<code>Resize(TRows_LoTipoRec + 1, 2)</code>).</li>
+<li><code>M_180</code> no se toca aquí: ya oculta antes de pegar (con <code>Preparar</code>, fase 5), y lo que le faltaba, volver a mostrar los totales de <code>BDatos</code>, lo hace la fase 4.</li>
+<li><code>M_311</code> y <code>M_411</code> escriben en su tabla con <code>Rut_Lo_DataBodyRange_Filtered_Copy</code>, así que quedan cubiertas.</li>
+</ul>
+<h3>Fase 3: recuentos independientes de los totales ✅</h3>
+<ul>
+<li>Nueva <code>Fnc_Lo_Contar_Visibles(Lo, Col)</code> en <code>Rut_Lo</code>, <strong>adaptada</strong>, no copiada de EP: cuenta sobre <code>.Range</code> y descuenta la cabecera y, si se ve, la fila de totales (la fórmula de JyC). La de EP cuenta sobre <code>DataBodyRange</code> y devuelve 0 si <code>SpecialCells</code> falla. En PPub hay un fallo de Excel documentado que hace fallar a <code>SpecialCells</code> en todo Excel (<code>Tb_INSS</code>, ver <code>CLAUDE.md</code>). Con 0, <code>M_311</code> no borraría los recibos del curso y luego copiaría los nuevos, y quedarían duplicados sin avisar. Así, si <code>SpecialCells</code> falla, el error salta igual que antes.</li>
+<li>Tabla sin filas: 0 (el patrón viejo contaba 1, la fila de inserción).</li>
+<li>Sustituidos los 57 recuentos: <code>M_111</code> 4, <code>M_112</code> 5, <code>M_113</code> 18, <code>M_114</code> 10, <code>M_115</code> 2, <code>M_130</code> 1 (el que restaba 2), <code>M_132</code> 1, <code>M_133</code> 1, <code>M_211</code> 2, <code>M_215</code> 2, <code>M_311</code> 3, <code>M_315</code> 1, <code>M_411</code> 3, <code>M_413</code> 1, <code>M_415</code> 1 y <code>Rut_Lo</code> 2.</li>
+</ul>
+<h3>Fase 4: política de cierre, 10 tablas siempre con totales ✅</h3>
+<p>Nueva <code>Rut_Lo_Totales_Mostrar</code> (en <code>Rut_Lo</code>): muestra la fila de totales de las tablas de la lista que la tengan oculta.</p>
+<p><strong>Qué tablas entran (decisión 1).</strong> El libro tiene 39 tablas; 24 tienen fila de totales configurada y 15 no.</p>
+<p><em>A. Siempre visibles: entran en la política (10 tablas).</em></p>
+<div class="tw"><table><thead><tr><th>Tabla</th><th>Hoja (CodeName)</th><th>Por qué</th></tr></thead><tbody><tr><td><code>Tb_BDatos</code></td><td><code>BDatos</code> (<code>Sht__BD</code>)</td><td>Panel de 17 celdas</td></tr><tr><td><code>Tb_JIs_Tasas425762</code></td><td><code>Inf_Recibos_TIO</code> (<code>Sht__Inf_Recibos_TIO</code>)</td><td>Informe de <code>M_130</code>/<code>M_132</code>/<code>M_133</code>; 1 celda la lee</td></tr><tr><td><code>Tb_DefCols_BD</code></td><td><code>_DefCol_BDatos</code> (<code>Prog_DefCol_BD</code>)</td><td><code>DefCol</code>; <code>LongNombre</code> de 3 generadores</td></tr><tr><td><code>Tb_DefCols_BD37</code></td><td><code>_DefCol_INSS</code> (<code>Prog_DefCol_LSace06</code>)</td><td><code>DefCol</code>; <code>LongNombre</code> de 6 generadores</td></tr><tr><td><code>Tb_Menu_Aux</code></td><td><code>_DefCol_BD_Aux</code> (<code>Prog_DefCol_Aux</code>)</td><td><code>DefCol</code>; generador de su hoja</td></tr><tr><td><code>Tabla22</code></td><td><code>_DefCol_BD_Aux</code> (<code>Prog_DefCol_Aux</code>)</td><td><code>DefCol</code>; generador de su hoja</td></tr><tr><td><code>Tabla6</code></td><td><code>_DefCol_Inf_Recibos</code> (<code>Prog_DefCol_Inf_Recibos</code>)</td><td><code>DefCol</code></td></tr><tr><td><code>Tb_DefCols172146</code></td><td><code>_DefCol_Inf_Peter</code> (<code>Prog_DefCol_Inf_Peter</code>)</td><td><code>DefCol</code> (hoy oculta; la fila de debajo está libre)</td></tr><tr><td><code>Tb_DefCols17214658</code></td><td><code>_DefCol_Inf_PeterINSS</code> (<code>Prog_DefCol_Inf_PeterINSS</code>)</td><td><code>DefCol</code></td></tr><tr><td><code>Tabla10</code></td><td><code>_DefCol_JIs_AE4</code> (<code>Prog_DefCol_JIs_AE4</code>)</td><td><code>DefCol</code></td></tr></tbody></table></div>
+<ul>
+<li>Las dos de datos van por el CodeName de su hoja (constante <code>Lo_Totales_Hojas</code> de <code>Rut_Lo</code>). Las <code>DefCol</code> van por <strong>regla</strong>: todas las tablas de las hojas cuyo CodeName empieza por <code>Prog_DefCol_</code>, así que entra sola cualquier <code>DefCol</code> nueva.</li>
+<li>La decisión vive en un único sitio, <code>Fnc_Lo_Totales_Siempre_Visibles</code>, para que la fase 6 solo cambie de dónde la lee.</li>
+</ul>
+<p><em>B. Sin gestionar: se quedan como las dejen sus rutinas (14 tablas).</em></p>
+<div class="tw"><table><thead><tr><th>Tabla</th><th>Hoja (CodeName)</th><th>Nota</th></tr></thead><tbody><tr><td><code>Tb_BD_Ant</code></td><td><code>BD_Ant</code> (<code>Sht__BD_Ant</code>)</td><td>Panel de 9 celdas: en <code>#REF!</code> mientras la fila esté oculta (decisión 1)</td></tr><tr><td><code>Tabla21</code></td><td><code>BD_ImpAdm_2025-26</code> (<code>Sht__BD_IAdm_CAcadAnt</code>)</td><td>Panel de 5 celdas; <code>M_210</code>/<code>M_215</code> la dejan visible al terminar</td></tr><tr><td><code>Tb_INSS</code></td><td><code>BD_INSS</code> (<code>Sht__BD_INSS</code>)</td><td>Panel de 2 celdas; es la del fallo -2147417848. Desde el 2026-10-04 22:51 <code>M_310</code> ya no vuelve a mostrar sus totales al terminar (decisión del usuario), así que, una vez ocultos, nadie los vuelve a cambiar</td></tr><tr><td><code>Tb_AE4x4</code></td><td><code>BD_AE4x4</code> (<code>Sht__BD_AE4x4</code>)</td><td>Panel de 1 celda; <code>M_410</code>/<code>M_415</code> la dejan visible al terminar</td></tr><tr><td><code>Tb_BD_Duplic</code>, <code>Tb_BD_Err</code>, <code>Tb_BD_Err51</code></td><td><code>BD_Dupl</code>, <code>BD_ErrDate</code>, <code>BD_RegAnul</code></td><td>Reciben registros del proceso; ninguna fórmula lee su fila de totales</td></tr><tr><td><code>Tb_JIs_Tasas4257625</code>, <code>Tb_JIs_Tasas425762617</code>, <code>Tabla5</code></td><td><code>Inf_RecibosJIs</code>, <code>Inf_Felipe</code>, <code>Inf_Rec_Mov</code></td><td>Informes que no toca ningún código</td></tr><tr><td><code>Tb_JIs_Tasas4257623</code></td><td><code>Inf_Recibos_TIO y EP</code> (<code>Hoja1</code>)</td><td>Hoja residual</td></tr><tr><td><code>Tb_Conceptos</code>, <code>Tb_Clasif_Eco</code></td><td>catálogos</td><td>El código solo lee su <code>DataBodyRange</code></td></tr><tr><td><code>Tb_TipoRec</code></td><td><code>Tb_TiposRec</code> (<code>Prog_TipoRec</code>)</td><td>Desde la fase 2, <code>M_130</code> ya no copia su fila de totales aunque se vea</td></tr></tbody></table></div>
+<p><em>C. Fuera del alcance: sin fila de totales configurada (15 tablas).</em> <code>Tb_APP</code>, <code>Tb_Usuarios</code>, <code>Tb_Tareas</code>, <code>Lo_RibbonUI</code>, <code>Lo_SwitchsAPP</code>, <code>Tabla94</code> (<code>Sheet_Buffer</code>), <code>Tb_Sheets_List</code>, <code>Tabla13</code>, <code>Tb_Bancos</code>, <code>Tabla42</code>, <code>Table1</code>, <code>Tb_Tipo_Ensenanzas</code>, <code>Tabla252</code>, <code>Tab_Organicas</code> y <code>Lo_Num_Formulas</code>.</p>
+<p><strong>Cómo funciona.</strong></p>
+<ul>
+<li>En hoja protegida desprotege con <code>Rut_Prot_Save</code> y reprotege con <code>Rut_Prot_Restore</code>, con los mismos permisos.</li>
+<li>Cada tabla con su propio control de errores: un fallo se anota en Inmediato (<code>!!! Rut_Lo_Totales_Mostrar: ...</code>) y sigue con las demás.</li>
+<li>Se llama en los cuatro sitios de la red de seguridad de <code>Rut_Reset_State</code>: <code>Rut_Progreso_Cerrar</code> (<code>M_90</code>), el final de tarea de <code>Form_Menu</code>, el del menú dinámico (<code>OnAction_Dynamic_Task</code>, <code>M___RibbonUI</code>) y <code>RuT_Al_Abrir_WorkBook</code>, donde sustituye el <code>ShowTotals = True</code> de <code>BDatos</code>.</li>
+<li>Los <code>ShowTotals = True</code> del final de cada rutina se quedan (decisión 2), salvo el de <code>Tb_INSS</code> en <code>M_310</code>, que se quitó a petición del usuario (22:51).</li>
+</ul>
+<h3>Fase 5: <code>Rut_Lo_WrkSht_Preparar</code> oculta los totales (pieza de EP) ✅</h3>
+<ul>
+<li><code>Rut_Lo_WrkSht_Preparar</code> oculta la fila de totales, <strong>solo si se ve</strong>. Nunca se llama sobre las <code>DefCol</code>.</li>
+<li>Quitadas 28 líneas <code>ShowTotals = False</code> redundantes (misma tabla, <code>Preparar</code> en la misma rutina y nada entre medias que la vuelva a mostrar): <code>M_110</code> 4, <code>M_112</code> 1, <code>M_114</code> 1, <code>M_130</code> 2, <code>M_132</code> 3, <code>M_133</code> 3, <code>M_180</code> 1, <code>M_195</code> 2, <code>M_210</code> 1, <code>M_215</code> 2, <code>M_310</code> 1, <code>M_410</code> 1, <code>M_415</code> 1, <code>M_602</code> 4 y <code>M_90</code> 1. En <code>M_215</code>, <code>M_415</code> y <code>M_602</code> era el final de una línea con varias sentencias.</li>
+<li>Se quedan los de las rutinas que reciben la tabla ya preparada (<code>M_111</code>, <code>M_113</code>, <code>M_115</code>, <code>M_211</code>, <code>M_311</code>, <code>M_411</code>, <code>M_413</code>), el de <code>M_315</code> (no llama a <code>Preparar</code>), los de la tabla del libro importado (<code>Rut_Lo_Import</code>), y los de <code>M_118</code> (su llamada está comentada) y <code>M_510</code> (hallazgo 8), que no se han tocado.</li>
+</ul>
+<h3>Fase 6: estudio, estado de la fila de totales configurable para las 39 tablas ⏸️</h3>
+<p>Pedido por el usuario al decidir el punto 2. Tendrá su propio plan; aquí van los puntos que debería resolver.</p>
+<p><strong>Objetivo.</strong> Un único sitio que diga, para cada tabla del libro, cómo debe quedar su fila de totales fuera de los procesos: <strong>Visible</strong>, <strong>Oculta</strong> o <strong>Libre</strong> (no se toca). Con eso la lista de la fase 4 pasa a ser datos, y se pueden quitar los <code>ShowTotals = True</code> del final de las rutinas (decisión 2).</p>
+<p><strong>Puntos a estudiar.</strong></p>
+<ol>
+<li><strong>Dónde.</strong> Una tabla nueva, p. ej. <code>Lo_Totales</code> en una hoja <code>Prog_*</code> (como <code>Lo_SwitchsAPP</code> o <code>Lo_RibbonUI</code>), con una fila por tabla: <code>Tabla</code>, <code>Hoja</code> (CodeName), <code>Totales</code> (Visible/Oculta/Libre) y <code>Motivo</code>. No sirve <code>Tb_Sheets_List</code> (<code>Prog_HojasName</code>): va por hoja, y hay hojas con dos tablas, y <code>RuT_WrkBook_Sheets_List</code> la borra y la rehace entera, así que perdería cualquier columna escrita a mano.</li>
+<li><strong>Clave.</strong> El nombre de la tabla, que es único en el libro. Conviene renombrar antes las que conservan el nombre por defecto (<code>Tabla21</code>, <code>Tabla22</code>, <code>Tabla6</code>, <code>Tabla10</code>, <code>Tabla5</code>, <code>Tb_DefCols172146</code>...). Excel actualiza solo las fórmulas que las usan; el código que las nombra (<code>ListObjects("Tb_Conceptos")</code>...) hay que revisarlo a mano.</li>
+<li><strong>Alta.</strong> Una rutina que recorra todas las tablas y añada las que falten <strong>sin tocar</strong> las filas existentes (fusionar, no reconstruir), con un valor propuesto: Visible si alguna fórmula lee su <code>[#Totals]</code> o es una <code>DefCol</code>; Oculta si el código copia rangos que incluirían la fila de totales; Libre en el resto.</li>
+<li><strong>Aplicación.</strong> <code>Fnc_Lo_Totales_Siempre_Visibles</code> pasa a leer la tabla. ¿Se aplica también <strong>Oculta</strong>, o solo Visible? (<code>Tb_INSS</code>: mejor Libre o Oculta, por su fallo.)</li>
+<li><strong>Reglas además de filas.</strong> ¿Se mantiene la regla «todas las <code>Prog_DefCol_*</code>» o se convierte en filas explícitas?</li>
+<li><strong>Validación sin abrir Excel.</strong> Un <code>Herramientas/Validar_Totales.py</code> (o una ampliación de <code>CustomUI/Validar_Ribbon.py</code>) que cruce <code>xl/tables/*.xml</code> del <code>.xlsm</code> con la tabla de configuración: tablas sin fila, filas de tablas que ya no existen, tablas con fórmulas que leen <code>[#Totals]</code> que no están en Visible, y tablas en Visible sin funciones de totales.</li>
+<li><strong>Volcado a CSV para git</strong>, como <code>Tb_Tareas</code> y <code>Lo_RibbonUI</code> (<code>Volcar_Tareas_y_Ribbon.py</code>).</li>
+<li><strong>Después</strong>, quitar los <code>ShowTotals = True</code> del final de las rutinas, empezando por los pasos intermedios de <code>M_110</code> (<code>M_112</code> a <code>M_114</code>), que encienden y apagan los totales de <code>BDatos</code> (160.000 filas) entre paso y paso.</li>
+<li><strong>Portabilidad.</strong> El mismo diseño serviría en JyC y EP; candidato a skill, como <code>vba-ws-protect-status</code>.</li>
+</ol>
+<h2>Cómo probarlo</h2>
+<p><strong>Módulos a reimportar (28):</strong> <code>Form_Menu</code> (con su <code>.frx</code>), <code>M_000_Ini_APP</code>, <code>M_110_Update_LSGES04_ACont</code>, <code>M_111_Del_Null_Reg_G04_ACont</code>, <code>M_112_Manage_Duplicates</code>, <code>M_113_Assign_Concept_Eco</code>, <code>M_114_Clasif_Recibos</code>, <code>M_115_Assign_ImpAdm_CAcad</code>, <code>M_130_Gen_Inf_Recibos</code>, <code>M_132_Anadir_Num_JIs_al_Inf</code>, <code>M_133_Anadir_Num_JIs_a_BDatos</code>, <code>M_180_Restituir_Datos_Tabla</code>, <code>M_195_Add_UXXIdata_in_BDatos</code>, <code>M_210_Update_LSGES04_C_Acad_Ant</code>, <code>M_211_Del_Null_Reg_CAcadAnt</code>, <code>M_215_Copy_ImpAdm_CAcadAnt</code>, <code>M_310_Update_LSace06_INSS</code>, <code>M_311_Import_LSace06_CAcad</code>, <code>M_315_Copy_INSS_a_BD</code>, <code>M_410_Update_BD_AE4x4</code>, <code>M_411_Import_AE4x1</code>, <code>M_413_Assign_ImpAdm_AE4x1</code>, <code>M_415_Copy_AE4_a_BD</code>, <code>M_602_Cierre_Contable_PLANES</code>, <code>M_90_Rutinas_Menu_Aux</code>, <code>M___RibbonUI</code>, <code>Rut_Lo</code> y <code>Rut_Lo_Import</code>.</p>
+<ol>
+<li><strong>Antes de reimportar</strong>, copiar el libro tal como está (ya procesado con el código actual) como <code>PPub_BDatos_2026 - Antes_ShowTotals.xlsm</code>. La copia <code>PPub_BDatos_2026 - Antes.xlsm</code> de las 20:13 se conserva para el fallo de <code>M_310</code>.</li>
+<li>Reimportar los 28 módulos y compilar (Depuración → Compilar).</li>
+<li>Guardar, cerrar y volver a abrir: <code>BDatos</code> y <code>Inf_Recibos_TIO</code> con totales, y <code>_DefCol_Inf_Peter</code> también (hasta ahora oculta). En Inmediato, ningún <code>!!! Rut_Lo_Totales_Mostrar</code>.</li>
+<li><strong>Doble ejecución:</strong> <code>M_110</code> (Sí/Sí/Sí/No) y <code>M_210</code> con los mismos ficheros que la última vez, guardar y comparar: <code>python Herramientas/Comparar_Libros_BD.py "PPub_BDatos_2026 - Antes_ShowTotals.xlsm" PPub_BDatos_2026.xlsm --hojas Sht__BD,Sht__BD_Dupl,Sht__BD_ErrDate,Sht__BD_IAdm_CAcadAnt,Sht__BD_INSS --por C_Acad</code>. Resultado esperado: <strong>idénticos</strong>, datos y logs.</li>
+<li><code>M_195</code>: ocultar la fila de totales de <code>Tb_DefCols_BD</code> (en Inmediato: <code>Prog_DefCol_BD.ListObjects(1).ShowTotals = False</code>) y lanzar la tarea con el formulario de progreso abierto, también desde Inmediato y línea a línea: <code>Rut_Progreso_Abrir "Prueba M_195"</code>, <code>RuT_Add_UXXIdata_in_BDatos</code> (contestar «No» a las dos preguntas) y <code>Rut_Progreso_Cerrar</code>. No sirve <code>Form_Menu</code>: no lista las tareas con «INTERNO» en el nombre, y <code>M_195</code> necesita un formulario abierto para escribir su progreso. Debe terminar sin error, y tras <code>Rut_Progreso_Cerrar</code> la <code>DefCol</code> vuelve a tener totales. Ojo: aun contestando «No», <code>M_195</code> escribe la fecha actual en <code>APP_Last_Import</code> y en <code>BD_Ant!D1</code> (comportamiento de siempre).</li>
+<li>El botón de mostrar/ocultar columnas de <code>BDatos</code> sigue alternando.</li>
+<li>Cancelar el diálogo de fichero de <code>M_110</code>: al cerrar, <code>BDatos</code> con totales (antes se quedaba sin ellos y el panel en <code>#REF!</code>).</li>
+</ol>
+</article></main>
+<footer>Generado desde <code>Plan_ShowTotals.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>
