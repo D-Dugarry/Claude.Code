@@ -4,6 +4,14 @@
 (fases F3–F4 de agosto de 2026 y cambio de `Form_Running_Rut` del 2026-08-17; ver
 `../Jornadas_y_Congresos/docs/Informe_Ribbon.md` e `Informe_Rutinas_Botones_Unicos.md`).
 
+## Estado: HECHO (2026-10-04)
+
+Las seis fases están aplicadas en el libro, probadas por el usuario en Excel y validadas con
+`CustomUI/Validar_Ribbon.py` (0 errores). Commits: `fa59c6fa` (fase 0), `318a97b2` (fases 1–4),
+`9fe2300a` (volcado tras la fase 1), `fa1ce549` (fase 5) y el de cierre, con los 3 callbacks de los
+menús contextuales que faltaban y la documentación. `Tb_Tareas` pasó de 65 a 8 filas; `Lo_RibbonUI`
+tiene 26. El módulo de un solo uso `Z_Migrar_RibbonUI` se quitó del libro y del repo.
+
 ## Objetivo
 
 1. Quitar de la tabla `Tb_Tareas` (hoja `_Menú_Aux`, CodeName `Prog__Menu_Aux`) las filas que

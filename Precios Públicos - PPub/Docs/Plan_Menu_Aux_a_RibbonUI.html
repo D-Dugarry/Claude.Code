@@ -64,6 +64,8 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <main><article>
 <h1>Plan: botones fuera de <code>_Menú_Aux</code>, metadatos del Ribbon en <code>Lo_RibbonUI</code></h1>
 <p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-04 · <strong>Modelo:</strong> Jornadas y Congresos (fases F3–F4 de agosto de 2026 y cambio de <code>Form_Running_Rut</code> del 2026-08-17; ver <code>../Jornadas_y_Congresos/docs/Informe_Ribbon.md</code> e <code>Informe_Rutinas_Botones_Unicos.md</code>).</p>
+<h2>Estado: HECHO (2026-10-04)</h2>
+<p>Las seis fases están aplicadas en el libro, probadas por el usuario en Excel y validadas con <code>CustomUI/Validar_Ribbon.py</code> (0 errores). Commits: <code>fa59c6fa</code> (fase 0), <code>318a97b2</code> (fases 1–4), <code>9fe2300a</code> (volcado tras la fase 1), <code>fa1ce549</code> (fase 5) y el de cierre, con los 3 callbacks de los menús contextuales que faltaban y la documentación. <code>Tb_Tareas</code> pasó de 65 a 8 filas; <code>Lo_RibbonUI</code> tiene 26. El módulo de un solo uso <code>Z_Migrar_RibbonUI</code> se quitó del libro y del repo.</p>
 <h2>Objetivo</h2>
 <ol>
 <li>Quitar de la tabla <code>Tb_Tareas</code> (hoja <code>_Menú_Aux</code>, CodeName <code>Prog__Menu_Aux</code>) las filas que corresponden a un botón del Ribbon.</li>

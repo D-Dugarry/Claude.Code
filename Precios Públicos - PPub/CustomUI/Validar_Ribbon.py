@@ -22,7 +22,7 @@ AVISOS:
 
 Uso:  python CustomUI/Validar_Ribbon.py [ruta_libro.xlsm]
 """
-# Last Rev. 2026-10-04 13:00
+# Last Rev. 2026-10-04 14:48
 import glob
 import os
 import re
@@ -34,8 +34,10 @@ from Volcar_Tareas_y_Ribbon import LIBRO, RAIZ, leer_tabla
 VBA_DIR = os.path.join(RAIZ, 'VBA_Moduls')
 # Controles que hoy quedan ocultos a proposito por no tener fila (menus contextuales sin uso).
 TAGS_SIN_FILA = {'change_usuario', 'liq_titprop_cctxt_helpcomments', 'liq_titprop_helpcomments'}
-# Callbacks del XML sin rutina, pendientes de decidir (ver memoria del proyecto, 2026-10-01).
-CALLBACKS_PENDIENTES = {'getlbl_cctxtbtnsw_pruebaonoff', 'onact_change_usuario', 'onact_groupsavetimer_usb'}
+# Callbacks del XML sin rutina que se toleran como aviso. Vacio desde el 2026-10-04, cuando se
+# crearon los tres que faltaban (GetLbl_CCtxtBtnSW_PruebaONOFF, OnAct_Change_Usuario y
+# OnAct_GroupSaveTimer_USB): uno nuevo que falte debe salir como ERROR.
+CALLBACKS_PENDIENTES = set()
 HOJAS_COMODIN = {'no'}          # elemento de SheetsNames que oculta el control en todas las hojas
 ATRIB_CALLBACK = ('onAction', 'getVisible', 'getLabel', 'getSupertip', 'getContent', 'getText',
                   'onChange', 'getPressed', 'getEnabled', 'getImage', 'onLoad', 'getScreentip')

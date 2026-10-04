@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-04 13:55
+' Last Rev. 2026-10-04 14:47
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -213,6 +213,12 @@ End Sub
 Sub OnAct_ChangeUser(control As IRibbonControl)
 Debug.Print "OnAct_ChangeUser"
     Call Rut_Usuario_Chg            '- Form_Usuario + informe en Lo_RibbonUI + RefreshRibbon (M_000_Menu_Usuario)
+End Sub
+'------------------------------------------------------------------------------------------
+'- (2026-10-04) Callback que el XML pedia desde los menus contextuales y no existia: Excel daba
+'  "No se puede ejecutar la macro" al abrir el menu del clic derecho.
+Sub OnAct_Change_Usuario(control As IRibbonControl)      '- menus contextuales: igual que el boton
+    Call Rut_Usuario_Chg
 End Sub
 '__________________________________________________________________________________________
 '
@@ -934,6 +940,17 @@ Debug.Print "OnAct_SW_PruebaONOFF"
     Call RefreshRibbon
 End Sub
 '------------------------------------------------------------------------------------------
+'- (2026-10-04) Callback que el XML pedia desde los menus contextuales y no existia: Excel daba
+'  "No se puede ejecutar la macro" al abrir el menu del clic derecho.
+Sub GetLbl_CCtxtBtnSW_PruebaONOFF(control As IRibbonControl, ByRef LabelVal)
+    On Error Resume Next        '- un fallo aqui no debe tumbar el pintado del menu
+    If Prog__APP_Switch.Range("Sw_Test") Then
+        LabelVal = "Prueba ON, Press to switch OFF"
+    Else
+        LabelVal = "Prueba OFF, Press to switch ON"
+    End If
+End Sub
+'------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
 '
 '   Show/Hide Excels Tag's Buttons   ------------------------------------------------------
@@ -1192,6 +1209,15 @@ End Sub
 Sub OnAct_SaveVBA_Timer_USB(control As IRibbonControl)
 Debug.Print "OnAct_BtnSaveVBA_Timer_USB"
     Call Rut_WrkBook_CopSegTimed_USB("_VBA")
+    SaveUSB = Format(Now(), "dd-mmm-yy hh:mm")
+    Call RefreshRibbon
+End Sub
+'------------------------------------------------------------------------------------------
+'- (2026-10-04) Callback que el XML pedia desde los menus contextuales y no existia: Excel daba
+'  "No se puede ejecutar la macro" al abrir el menu del clic derecho.
+Sub OnAct_GroupSaveTimer_USB(control As IRibbonControl)  '- sin Tipo, como la antigua tarea de Tb_Tareas
+Debug.Print "OnAct_GroupSaveTimer_USB"
+    Call Rut_WrkBook_CopSegTimed_USB
     SaveUSB = Format(Now(), "dd-mmm-yy hh:mm")
     Call RefreshRibbon
 End Sub
