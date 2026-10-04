@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-02 20:15
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -28,7 +28,6 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Dim PlanDNI_New     As String:
     Dim TxT_ProgIni     As String
     Dim TxT_Progreso    As String
-    Dim RowData         As ListRow
     Dim RowsFind        As Variant
     Dim Sh_Data         As Worksheet:   Set Sh_Data = LoBDatos.Parent
 
@@ -61,22 +60,23 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
         Call Rut_Lo_Sort(LoBDatos, BD_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
-    '- Recorro toda la tabla LoBDatos -----------------------------------------------------------------
+    '- Recorro toda la tabla LoBDatos, en RAM (Rut_Lo_TablaRam): celda a celda con ListRows(Fila) tardaba ~1 min. --------
+    '- Se carga con .Value2: las Col. Rec_Imp_* se devuelven enteras a la hoja y así las filas que no se tocan quedan idénticas.
+    Dim T_BD            As T_TablaRam
+    Call Rut_TablaRam_Cargar(T_BD, LoBDatos, Array(BD_C_Acad, BD_ActivEco, BD_Plan, BD_DNI, BD_Anul, _
+                                                  BD_ImpAcad, BD_ImpAdm, BD_ImpDto, _
+                                                  BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
     For Fila = 1 To TF_LoBDatos   '--- Bucle para recorrer todas la filas de LoBDatos
-        Set RowData = LoBDatos.ListRows(Fila)
-        If RowData.Range(BD_C_Acad) <> C_Acad Then GoTo Sig_Reg         '- NO tenemos en cuenta loas Recibos de Otros C_Acad, porque NO tenemos toda la información
-        If RowData.Range(BD_ActivEco) = 4 Then GoTo Sig_Reg             '- NO tenemos en cuenta los Recibos de AE4,  ya vienen con sus ImpAdm de AE4x4
-        If RowData.Range(BD_ActivEco) > 6 Then                          '- NO tenemos en cuenta los Recibos de Movimiento
-                                                Fila = TF_LoBDatos
-                                                GoTo Fin_Bucle
-                                                End If
-        PlanDNI_New = RowData.Range(BD_Plan) & "_" & RowData.Range(BD_DNI)
+        If T_BD.Datos(Fila, BD_C_Acad) <> C_Acad Then GoTo Sig_Reg         '- NO tenemos en cuenta loas Recibos de Otros C_Acad, porque NO tenemos toda la información
+        If T_BD.Datos(Fila, BD_ActivEco) = 4 Then GoTo Sig_Reg             '- NO tenemos en cuenta los Recibos de AE4,  ya vienen con sus ImpAdm de AE4x4
+        If T_BD.Datos(Fila, BD_ActivEco) > 6 Then Exit For                 '- NO tenemos en cuenta los Recibos de Movimiento (ordenada por AE, ya no quedan más)
+        PlanDNI_New = T_BD.Datos(Fila, BD_Plan) & "_" & T_BD.Datos(Fila, BD_DNI)
         If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)
            PlanDNI_Ant = PlanDNI_New
-                    If RowData.Range(BD_Anul) <> "S" Then
-                            RowData.Range(BD_Rec_Imp_Acad) = RowData.Range(BD_ImpAcad)
-                            RowData.Range(BD_Rec_Imp_Adm) = RowData.Range(BD_ImpAdm)
-                            RowData.Range(BD_Rec_Imp_Dto) = RowData.Range(BD_ImpDto)
+                    If T_BD.Datos(Fila, BD_Anul) <> "S" Then
+                            T_BD.Datos(Fila, BD_Rec_Imp_Acad) = T_BD.Datos(Fila, BD_ImpAcad)
+                            T_BD.Datos(Fila, BD_Rec_Imp_Adm) = T_BD.Datos(Fila, BD_ImpAdm)
+                            T_BD.Datos(Fila, BD_Rec_Imp_Dto) = T_BD.Datos(Fila, BD_ImpDto)
                             CantImpAdm = CantImpAdm + 1
                 End If
         End If
@@ -85,8 +85,12 @@ Sig_Reg:
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Indentificados " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AnoCont & ", con Imp.Adm. en: ", 0, _
                                 Format(Fila, "#,##0") & "reg.", "de " & Format(TF_LoBDatos, "#,##0") & "reg.", TxT_Progreso, True, , 2)
         End If
-Fin_Bucle:
     Next
+    T_BD.Modificada(BD_Rec_Imp_Acad) = True
+    T_BD.Modificada(BD_Rec_Imp_Adm) = True
+    T_BD.Modificada(BD_Rec_Imp_Dto) = True
+    Call Rut_TablaRam_Volcar(T_BD, LoBDatos)                            '- Devuelvo a la hoja las 3 Col. Rec_Imp_*
+    Erase T_BD.Datos                                                    '- Libero la RAM
     
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Adm. a " & CantImpAdm & " Rec. de AE_2/5y6 y de " & AnoCont & ", de un total de: ", 0, _
                         Format(TF_LoBDatos, "#,##0") & "reg.", , TxT_ProgIni, True, , 2)
