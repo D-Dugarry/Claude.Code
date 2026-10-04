@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-04 20:27
 '='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='=
 ' Rut_Wb_CopSegTimed_USB_HD  -  Copias de seguridad del libro con marca de tiempo
 '
@@ -8,6 +8,7 @@ Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
 ' La copia HD se lanza desde Workbook_Open cuando han pasado APP_CopSeg_HD_Frecuency días
 ' (o más) desde la última (Fnc_CopSeg_HD_Toca); al hacerse, purga las copias del libro
 ' con más de APP_CopSeg_HD_FrecPurga meses (los backups manuales se conservan).
+' La carpeta CopiaSeguridad/ se crea sola si no existe (no viaja con el libro al copiarlo).
 ' Toda la configuración vive en rangos con nombre de ámbito Libro en la hoja ConfigCopSeg;
 ' Rut_CopSeg_Asegurar_Config crea hoja y rangos si faltan, así que el módulo es autoinstalable
 ' en cualquier libro. Los rangos se leen vía Fnc_CopSeg_Rng (por nombre, sin CodeName de hoja).
@@ -34,6 +35,7 @@ Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
 '   Fnc_CopSeg_Range_Exist (Private)          - Comprueba si existe un nombre definido a nivel de libro
 '   Fnc_CopSeg_Cfg_Long (Private)             - Lee un parámetro numérico de la config, con valor por defecto
 '   Fnc_CopSeg_HD_Purgar (Private)            - Elimina de CopiaSeguridad/ las copias con más de APP_CopSeg_HD_FrecPurga meses
+'   Fnc_CopSeg_Crear_Carpeta (Private)        - Crea CopiaSeguridad/ si no existe; True si la ha creado
 '   Rut_CopSeg_Asegurar_Config                - Setup idempotente: hoja ConfigCopSeg y sus rangos de configuración
 '   Fnc_CopSeg_Ruta (Private)                 - Hook opcional: adapta la ruta vía Fnc_Format_Ruta del anfitrión si existe
 '   Rut_CopSeg_Cfg_Rango (Private)            - Crea un rango de configuración (nombre + etiqueta + defecto) si falta
@@ -112,7 +114,9 @@ Sub Rut_WrkBook_CopSegTimed_WB_HD()   '- Guarda copia del libro en CopiaSegurida
     '- Indicar Nombre del Archivo y Ruta para almacenar --------------
     Dim IntialName As String
     IntialName = FPath & FichNom & " - " & Format(FechaDatos, "(yymmdd_hhmm)") & FichExt
+    Dim CarpetaCreada                       As Boolean
             On Error GoTo GestError
+            CarpetaCreada = Fnc_CopSeg_Crear_Carpeta(FPath)     ' CopiaSeguridad/ no viaja con el libro: crearla si falta
             Application.DisplayAlerts = False
             ThisWorkbook.SaveCopyAs Filename:=IntialName
             Application.DisplayAlerts = True
@@ -124,6 +128,7 @@ Sub Rut_WrkBook_CopSegTimed_WB_HD()   '- Guarda copia del libro en CopiaSegurida
 
     Call Fnc_CopSeg_Log( _
         "Copia de Seguridad realizada en " & Round(Timer - T_Inicio, 2) & " seg.: " & IntialName & _
+        IIf(CarpetaCreada, "  |  Creada la carpeta (no existía)", "") & _
         IIf(Purgadas > 0, "  |  Eliminadas " & Purgadas & " copias antiguas", "") & "  -  " & Now())
     GoTo Salir_Sub
 GestError:
@@ -206,6 +211,29 @@ Private Function Fnc_CopSeg_HD_Purgar(FPath As String, FichNom As String, FichEx
     Next RutaFich
     If Fnc_CopSeg_HD_Purgar > 0 Then Debug.Print "Fnc_CopSeg_HD_Purgar: eliminadas " & Fnc_CopSeg_HD_Purgar & " copias anteriores a " & FechaLimite
 End Function     ' Fnc_CopSeg_HD_Purgar
+' ------------------------------------------------------------------------------
+
+' ==============================================================================
+Private Function Fnc_CopSeg_Crear_Carpeta(FPath As String) As Boolean   '- Crea la carpeta de las copias HD si no existe; True si la ha creado
+' ==============================================================================
+' La carpeta CopiaSeguridad/ no viaja con el libro: falta la 1ª vez y cada vez que el libro se
+' abre desde otra carpeta, y sin ella SaveCopyAs falla. Solo crea el último nivel (la carpeta
+' del libro ya existe). Sin control de errores a propósito: un fallo (p.ej. sin permiso de
+' escritura) llega al GestError del llamador con la descripción de FSO.
+' Una ruta URL (https://..., anfitrión sin Fnc_Format_Ruta) no se toca: FSO no sabe crearla,
+' y se deja que SaveCopyAs lo intente como siempre.
+    Dim Carpeta         As String
+    If InStr(1, FPath, "://") > 0 Then Exit Function
+    Carpeta = Replace(FPath, "/", "\")                     ' FPath llega con "/" (ThisWorkbook.Path & "/CopiaSeguridad/")
+    Do While Right(Carpeta, 1) = "\"
+        Carpeta = Left(Carpeta, Len(Carpeta) - 1)
+    Loop
+    Dim FSO             As Object:      Set FSO = CreateObject("Scripting.FileSystemObject")
+    If FSO.FolderExists(Carpeta) Then Exit Function
+    FSO.CreateFolder Carpeta
+    Fnc_CopSeg_Crear_Carpeta = True
+    Debug.Print "Fnc_CopSeg_Crear_Carpeta: creada " & Carpeta
+End Function     ' Fnc_CopSeg_Crear_Carpeta
 ' ------------------------------------------------------------------------------
 
 ' ==============================================================================
