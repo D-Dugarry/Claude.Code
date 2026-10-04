@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_APP"
-' Last Rev. 2026-10-04 13:55
+' Last Rev. 2026-10-04 14:59
 '- M00_Ini_APP --------
 Option Explicit    ' Para obligar a definir todas las variable.  'lo he quitado porque me genera muchos errores.
 
@@ -179,16 +179,5 @@ Debug.Print "Rut_Context_Buttons_Restore"
 End Sub
 ' ==================================================================================================================================
 '===================================================================================================================================
-Sub Rut_Right_Click_Control_KK()
-    If Prog__APP_Switch.Range("Sw_WB_Deactivate") Then
-        Prog__APP_Switch.Range("Sw_WB_Deactivate") = False
-        Form_Menu.Lb_SW_WB_Deactivate.Visible = False
-        Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - DesActivado  -  " & Now
-    Else
-        Prog__APP_Switch.Range("Sw_WB_Deactivate") = True
-        Form_Menu.Lb_SW_WB_Deactivate.Visible = True
-        Prog__APP.Range("APP_Task_Inf") = "SW_WB_Deactivate - Activado  -  " & Now
-    End If
-End Sub
 
 
