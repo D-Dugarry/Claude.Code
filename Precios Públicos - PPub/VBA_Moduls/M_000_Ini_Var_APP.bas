@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 13:55
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -310,9 +310,8 @@ Public Const Task_Descripcion        As Integer = 4       ' col: d
 Public Const Task_Rut_Informe        As Integer = 5       ' col: e
 Public Const Task_Imagen             As Integer = 6       ' col: f
 Public Const Task_Uribbon_Tags       As Integer = 7       ' col: g
-Public Const Task_Visible            As Integer = 8       ' col: h
-Public Const Task_Emails             As Integer = 9       ' col: i
-Public Const Task_SheetsButton       As Integer = 10      ' col: j
+Public Const Task_Emails             As Integer = 8       ' col: h   (la columna Visible se retiro el 2026-10-04)
+Public Const Task_SheetsButton       As Integer = 9       ' col: i
 
 ' Tabla Prog__RibbonUI.ListObjects(1) = Lo_RibbonUI (visibilidad y supertips del Ribbon) -------
 Public Const Rib_Tag                 As Integer = 1       ' col: a  Uribbon-Tags

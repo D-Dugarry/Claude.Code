@@ -1,5 +1,5 @@
 Attribute VB_Name = "Z_Migrar_RibbonUI"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 13:55
 '==================================================================================================
 ' Z_Migrar_RibbonUI - modulo de UN SOLO USO (2026-10-04). Quitarlo del libro al terminar la fase 5.
 '
@@ -8,6 +8,11 @@ Attribute VB_Name = "Z_Migrar_RibbonUI"
 ' grupo van fijados aqui; la descripcion y el informe se copian de la fila de Tb_Tareas de ese tag
 ' (columna Uribbon-Tags), para que viajen enteros, con sus saltos de linea y tildes.
 ' Ejecutar desde la ventana Inmediato:   Z_Fase1_Rellenar_RibbonUI
+'
+' Z_Fase5_Podar_Tareas: borra de Tb_Tareas las filas de botones (las que tienen Uribbon-Tags), las
+' tareas sin tag cuya rutina tiene boton (grupo C) y las que apuntan a rutinas que no existen
+' (grupo D), 57 en total, y la columna Visible. Deben quedar 8 filas. Ejecutar DESPUES de
+' reimportar la tanda 2 (M_000_Ini_Var_APP ya con Task_SheetsButton = 9).
 '==================================================================================================
 Option Explicit
 
@@ -85,3 +90,72 @@ Private Sub Z_Fila(Tag As String, Usuario As String, Hojas As String, NomRut As 
         .Cells(1, Rib_Group_Tag).Value = Grupo
     End With
 End Sub
+'==================================================================================================
+Public Sub Z_Fase5_Podar_Tareas()
+    Dim Lo          As ListObject:      Set Lo = Prog__Menu_Aux.ListObjects(1)
+    Dim Col         As ListColumn
+    Dim C_Tarea     As Long
+    Dim C_Tag       As Long
+    Dim C_Rut       As Long
+    Dim Fila        As Long
+    Dim i           As Long
+    Dim Rut         As String
+    Dim Borrar      As New Collection
+    Dim Grupo_C     As Variant
+    Dim Grupo_D     As Variant
+
+    Grupo_C = Array("Rut_Recalcular_Tabla_JIs_AE4", "Rut_Activar_Programacion", "Rut_WrkBook_CopSegTimed_USB", _
+                    "Rut_RibbonX_ShowAll", "Rut_Context_Buttons_Hide", "Rut_Context_Buttons_Restore", _
+                    "Rut_ProtectUnProtect_ActivSheet", "Rut_OnOff_SW_Probando", "Rut_Sheets_ShowAll")
+    Grupo_D = Array("Rut_Cerrar_Menu", "Rut_LstObj_Export_WS_XlsM", "Rut_Lo_Export_WS_ByHand", _
+                    "Rut_Recalcular_Tabla_JIs_303", "Rut_Recalcular_Tabla_JIs_PPb", "Rut_Genero_LIQx_PDF", _
+                    "Rut_Genero_LIQxn_PDF", "Rut_Cambiar_Contrase*", "RuT_Listar_Planes", _
+                    "RuT_Restituir_Tabla_Prog_TitPH", "Rut_Exportar_Saldo_Liquidacion", _
+                    "Rut_Resumen_Tab_TitPropios_UNO", "Rut_Generar_Tabla_AD_TitPropios", _
+                    "Rut_Generar_Tabla_Saldos_TitPropios", "RuT_Marcar_Plazos_AD", "Rut_Resumen_Tab_TitPropios", _
+                    "Rut_Reset_ToolsBar", "Rut_Prueba_Rut_Progreso")
+
+    C_Tarea = Lo.ListColumns("Tarea").Index
+    C_Tag = Lo.ListColumns("Uribbon-Tags").Index
+    C_Rut = Lo.ListColumns("Nombre_Rut").Index
+    Debug.Print "Z_Fase5_Podar_Tareas - filas a borrar:"
+    For Fila = 1 To Lo.ListRows.Count
+        Rut = Trim$(CStr(Lo.DataBodyRange.Cells(Fila, C_Rut).Value))
+        If Len(Trim$(CStr(Lo.DataBodyRange.Cells(Fila, C_Tag).Value))) > 0 _
+           Or Z_En_Lista(Rut, Grupo_C) Or Z_En_Lista(Rut, Grupo_D) Then
+            Borrar.Add Fila
+            Debug.Print Fila, Lo.DataBodyRange.Cells(Fila, C_Tarea).Value, Rut
+        End If
+    Next Fila
+
+    If MsgBox("Se borran " & Borrar.Count & " de las " & Lo.ListRows.Count & " filas de " & Lo.Name & _
+              " (quedan " & Lo.ListRows.Count - Borrar.Count & "; se esperaban 57 y 8) y la columna Visible." & _
+              vbLf & vbLf & "La lista está en la ventana Inmediato." & vbLf & vbLf & "¿Seguimos?", _
+              vbYesNo + vbQuestion, "Fase 5: podar Tb_Tareas") <> vbYes Then Exit Sub
+    On Error Resume Next
+    Prog__Menu_Aux.Unprotect                   '- las hojas de este libro no llevan contrasena
+    Set Col = Lo.ListColumns("Visible")
+    On Error GoTo 0
+
+    For i = Borrar.Count To 1 Step -1             '- de abajo arriba, para no mover las que faltan
+        Lo.ListRows(Borrar(i)).Delete
+    Next i
+    If Not Col Is Nothing Then Col.Delete
+
+    If Lo.ListColumns("SheetsButton").Index <> Task_SheetsButton Or Lo.ListColumns("Emails").Index <> Task_Emails Then
+        MsgBox "¡ Las columnas de " & Lo.Name & " no casan con las constantes Task_* !" & vbLf & _
+               "¿Se reimportó M_000_Ini_Var_APP de la tanda 2?", vbExclamation, "Fase 5"
+    Else
+        MsgBox "Hecho: quedan " & Lo.ListRows.Count & " filas en " & Lo.Name & "." & vbLf & vbLf & _
+               "Ya puedes quitar el módulo Z_Migrar_RibbonUI del proyecto.", vbInformation, "Fase 5"
+    End If
+    Call RefreshRibbon
+End Sub
+'==================================================================================================
+Private Function Z_En_Lista(ByVal Rut As String, ByVal Lista As Variant) As Boolean
+    Dim Nom         As Variant
+    If Len(Rut) = 0 Then Exit Function
+    For Each Nom In Lista
+        If LCase$(Rut) Like LCase$(CStr(Nom)) Then Z_En_Lista = True: Exit Function
+    Next Nom
+End Function

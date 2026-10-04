@@ -12,9 +12,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 13:55
 
-' Last Rev. 2026-09-30 19:16
 Option Explicit
 
 Dim TaskIndice   As Integer
@@ -157,9 +156,7 @@ Dim Cant_Tareas         As Integer:     Cant_Tareas = 0
 Dim Ancho_Tareas        As Integer:     Ancho_Tareas = 0
 Dim Nombre_Rut          As String
 Dim Task_NotInterno     As Boolean
-Dim Users               As String
 Dim Users_Allowed       As Boolean
-Dim SheetBtn            As String
 Dim SheetBtn_OK         As Boolean
 Dim Usuario_ID          As String:      Usuario_ID = UCase(Prog__APP.Range("APP_User_ID"))
 Dim Rng_SW_Boss          As Range:      Set Rng_SW_Boss = Prog__APP_Switch.Range("Sw_Boss")
@@ -172,11 +169,9 @@ Dim Rng_SW_Boss          As Range:      Set Rng_SW_Boss = Prog__APP_Switch.Range
     With Lo_Tareas.DataBodyRange
     For Cont_Row = 1 To .Rows.Count
     
-            Users = UCase(.Cells(Cont_Row, Task_Usuario))
-            Users_Allowed = (Users = "" Or InStr(Users, Usuario_ID) > 0)
+            Users_Allowed = Fnc_Lista_Contiene(CStr(.Cells(Cont_Row, Task_Usuario)), Usuario_ID)   '- elemento completo
             
-            SheetBtn = UCase(.Cells(Cont_Row, Task_SheetsButton))
-            SheetBtn_OK = (SheetBtn = "" Or InStr(SheetBtn, UCase(ActiveSheet.Name)) > 0)
+            SheetBtn_OK = Fnc_Lista_Contiene(CStr(.Cells(Cont_Row, Task_SheetsButton)), ActiveSheet.Name)
             
             Task_NotInterno = (InStr(UCase(.Cells(Cont_Row, Task_Tarea)), "INTERNO") = 0)
             
@@ -230,6 +225,7 @@ Sub Btn_Ejec_Tarea_Click()
         Else
             Application.Run Rut_Name
         End If
+        If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
         Me.Lb_Tit_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Tarea)
         
         If Prog__APP.Range("APP_Task_Inf") <> "" Then Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")

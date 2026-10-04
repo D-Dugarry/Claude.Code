@@ -1,8 +1,8 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 13:55
 Option Explicit
 
-'- Estado de protección de las hojas desprotegidas con Rut_ProtectUnProtect_ActivSheet o el botón
+'- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
 '  del Ribbon (una entrada por hoja, por CodeName), para devolverlas con los mismos permisos.
 '  Ver Rut_Ws_Protect_Status.
 Private Prot_Hojas(1 To 60)    As String
@@ -46,11 +46,6 @@ Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal
     On Error GoTo 0
 End Sub
 '==================================================================================================================================
-'===================================================================================================================================
-Sub Rut_Chg_Usuario()
-Debug.Print "Rut_Chg_Usuario"
-    Call Rut_Usuario_Chg        '- (2026-10-04) solo para la fila "__Activar Usuario" de Tb_Tareas; se va en la fase 5
-End Sub
 '===================================================================================================================================
 Sub Rut_Activar_Programacion()
 Debug.Print "Rut_Activar_Programacion"
@@ -116,7 +111,6 @@ Sub Rut_Reset_App()
 End Sub
 ' ==================================================================================================================================
 Sub Rut_RibbonRefresh()
-    Call Rut_Filtrar_Tareas
     Call RefreshRibbon
     Prog__APP.Range("APP_Task_Inf") = "RibbonX Refreshed " & Now
 End Sub
@@ -131,23 +125,6 @@ Sub Rut_Columns_Show_All()
     Columns.EntireColumn.Hidden = False
     Call Rut_Protect_Status_Restore(ThisWorkbook.ActiveSheet)
     Prog__APP.Range("APP_Task_Inf") = "All columns are visible" & vbCrLf & Now
-End Sub
-'===================================================================================================================================
-Sub Rut_RibbonX_ShowAll()
-    Call Rut_Menu_ShowAll
-    Prog__APP.Range("APP_Task_Inf") = "RibbonX Showed" & vbCrLf & Now
-End Sub
-'===================================================================================================================================
-Sub Rut_OnOff_SW_Probando()
-    If Prog__APP_Switch.Range("Sw_Test") Then
-        Prog__APP_Switch.Range("Sw_Test") = False
-        Form_Menu.Lb_SW_Test.Visible = False
-        Prog__APP.Range("APP_Task_Inf") = "SW-B DesActivado" & vbCrLf & Now
-    Else
-        Prog__APP_Switch.Range("Sw_Test") = True
-        Form_Menu.Lb_SW_Test.Visible = True
-        Prog__APP.Range("APP_Task_Inf") = "SW-B Activado" & vbCrLf & Now
-    End If
 End Sub
 '===================================================================================================================================
 Sub Rut_OnOff_SW_DelRegNeg()
@@ -181,20 +158,12 @@ Dim WrkSht          As Worksheet
     Prog__APP.Range("APP_Task_Inf") = "All sheets Hide" & vbCrLf & Now
 End Sub
 '===================================================================================================================================
-Sub Rut_ProtectUnProtect_ActivSheet()
-    If Fnc_ProtectUnProtect_Hoja(ActiveSheet) Then          '- alterna conservando los permisos de la hoja
-        Prog__APP.Range("APP_Task_Inf") = "ActiveSheet.Protect" & vbCrLf & Now
-    Else
-        Prog__APP.Range("APP_Task_Inf") = "ActiveSheet.UnProtect" & vbCrLf & Now
-    End If
-End Sub
-'===================================================================================================
 '- Alterna la protección de una hoja SIN perder sus permisos (filtrar, ordenar...): al desprotegerla
 '  los anota (Rut_Prot_Save) y al volver a protegerla le devuelve esos mismos (Rut_Prot_Restore).
 '  El estado es POR HOJA (Prot_Hojas/Prot_Estados): desproteger una, cambiar a otra y proteger no
 '  mezcla sus permisos. Si no hay nada anotado de esa hoja (nunca se desprotegió por aquí, o un
 '  error + "Fin" vació las variables), aplica el esquema por defecto de la app.
-'  Devuelve True si la hoja queda protegida. La usan esta tarea y el botón Protect/UnProtect
+'  Devuelve True si la hoja queda protegida. La usa el botón Protect/UnProtect
 '  del Ribbon (OnAct_SheetProtect, M___RibbonUI).
 Function Fnc_ProtectUnProtect_Hoja(ByVal Hoja As Worksheet) As Boolean
     Dim Slot    As Long:    Slot = Fnc_Prot_Slot(Hoja.CodeName)

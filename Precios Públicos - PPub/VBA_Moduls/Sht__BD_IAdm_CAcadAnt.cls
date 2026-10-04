@@ -7,11 +7,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+' Last Rev. 2026-10-04 13:55
 'Option Explicit
 
 Private Sub Worksheet_Activate()
 Debug.Print "Worksheet_Activate - " & ActiveSheet.Name
-    Call Rut_Filtrar_Tareas
 '        Call Rut_Context_Buttons_Hide   '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     Call RefreshRibbon
 End Sub

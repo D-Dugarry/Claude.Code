@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-04 13:55
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -18,7 +18,6 @@ Public MyRibbon                 As IRibbonUI
 Public MyTag                    As String
 '---------------------------------------------
 Public SaveUSB                  As String           '- Controla si se ha hecho una copia
-Public SW_Tag_Visible           As Boolean          '- Controla visualización de Tags
 Public SW_TabExcelVisible       As Boolean          '- Para visualizar los Tags de Excel
 Public SW_TrafficLight1         As Boolean
 Public SW_TrafficLight2         As Boolean
@@ -66,7 +65,6 @@ Debug.Print "--------------------------------------------------- >>> OnLoad_MyRi
     
     BtnGrabarSiVisible = False
     BtnExportSiVisible = False
-    Call Rut_Filtrar_Tareas
     MyRibbon.ActivateTab ("TabUserMenu")        '- Para mostrar este Tab -------------
     'MyRibbon.ActivateTab ("TabProgMenu")       '- Para mostrar este Tab -------------
     'MyRibbon.InvalidateControl "Control_ID"    '- Actualiza solo este Control_ID
@@ -1383,7 +1381,9 @@ End Sub
         '- Recorremos toda la tabla de Tareas y seleccionamos las que empiezan por "9_ "
         With Prog__Menu_Aux.ListObjects(1).DataBodyRange
             For Cont_Row = 1 To .Rows.Count
-                If (InStr((.Cells(Cont_Row, 2)), (Prog__APP.Range("APP_User_ID"))) > 0 And Len(Prog__APP.Range("APP_User_ID")) > 3 Or .Cells(Cont_Row, 2) = "") And Left(.Cells(Cont_Row, 1), 3) = "9_ " Then
+                '- Usuario por elemento completo (2026-10-04; antes InStr, "Rafa" casaba con "RafaG")
+                If Fnc_Lista_Contiene(CStr(.Cells(Cont_Row, Task_Usuario)), CStr(Prog__APP.Range("APP_User_ID").Value)) _
+                   And Left(.Cells(Cont_Row, Task_Tarea), 3) = "9_ " Then
                     If Num_Tarea > 1 Then xml = xml & "<menuSeparator  id='Separ" & Num_Tarea & "' />"
                     xml = xml & "<button id='button" & Num_Tarea & "' tag='Task-Row_" & Format(Cont_Row, "00") & _
                                 "' label='" & Mid(.Cells(Cont_Row, 1), 4) & "' imageMso='GoToNextAppointment'" & _
@@ -1412,6 +1412,7 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
         Rut_Name = Left(Rutinas_Name, Pos_Delimitador - 1)
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         Application.Run Rut_Name
+        If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
         Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf").Value
     Loop While Len(Rutinas_Name) > 0
     Application.ScreenUpdating = True
