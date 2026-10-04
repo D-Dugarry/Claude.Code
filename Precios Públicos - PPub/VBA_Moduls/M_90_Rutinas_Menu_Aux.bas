@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 13:09
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con Rut_ProtectUnProtect_ActivSheet o el botón
@@ -7,71 +7,49 @@ Option Explicit
 '  Ver Rut_Ws_Protect_Status.
 Private Prot_Hojas(1 To 60)    As String
 Private Prot_Estados(1 To 60)  As T_Prot_Estado
+Private Progreso_Hoja           As String     '- hoja activa al abrir el progreso (Rut_Progreso_Cerrar con Volver_Hoja)
 
 '==================================================================================================================================
 '===================================================================================================================================
-Sub RuT_Ejecutar_Rut(TaskRut As String, Optional Show_Msg As Boolean = True)
-Debug.Print "RuT_Ejecutar_Rut"
-    Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
-    If IsError(TaskIndice) Then     ' ¡¡¡ NO Existe la Rutina !!! ------------------------
-        MsgBx_Msg = "¡ No Existe la Tarea o su nombre ha cambiado !"
-    Else                            ' ¡¡¡ Existe la Rutina !!! ------------------------
-        Prog__APP.Range("APP_Task_Rut") = TaskRut
-        Prog__APP.Range("APP_Task_Index") = TaskIndice
-        '--------------
-        Application.Run Prog__APP.Range("APP_Task_Rut").Value
-        If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- Red de seguridad: la tarea se saltó algún Rut_On_Functions
-        '--------------
-        MsgBx_Msg = Prog__APP.Range("APP_Task_Inf")
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
-    End If
-    If Show_Msg Then
-        MsgBx_Title = "Informe del Proceso de Ejecutar la Tarea:  " & TaskRut
-        Load Form_MsgBox: Call Form_MsgBox.SetParameter(16, True, "OK"): Form_MsgBox.Show  '- ([Font-Size]=16, [Red-Border]=False, [Buttons]="Ok", [Default-Button]=1, [Image]="Msg")
-    End If
+'- Formulario de progreso de los botones del Ribbon (2026-10-04, patron de Jornadas y Congresos).
+'  El boton abre Form_Running_Rut, llama DIRECTAMENTE a su rutina y lo cierra:
+'
+'      Call Rut_Progreso_Abrir("Titulo de la tarea")
+'      Call RuT_Update_LSGES04_ACont               '- escribe su progreso en ActivForm (= Form_Running_Rut)
+'      Call Rut_Progreso_Cerrar(control.Tag)       '- informe a APP_Task_Inf y a Lo_RibbonUI, fondo verde
+'
+'  Sustituye a RuT_Ejecutar_Rut, RuT_Load_Task_Data y RuT_Save_Task_Data, y al camino viejo: el
+'  boton dejaba el nombre de la rutina en APP_Task_Rut y Form_Running_Rut la buscaba en Tb_Tareas
+'  (_Menu_Aux) y la lanzaba con Application.Run. Como el cierre lo hace el boton, cualquier salida
+'  de la rutina (cancelar un dialogo incluido) deja visible el boton de salida del formulario.
+Public Sub Rut_Progreso_Abrir(ByVal Titulo As String)
+    Progreso_Hoja = ThisWorkbook.ActiveSheet.Name
+    Application.ScreenUpdating = False          '- ANTES del Show: si se apaga justo despues (lo hacen las
+                                                '  rutinas al empezar) el formulario no llega a pintarse
+    Load Form_Running_Rut
+    Set ActivForm = Form_Running_Rut
+    Form_Running_Rut.Lb_Tit_Informe.Caption = "Progreso de la Tarea: " & Titulo
+    Form_Running_Rut.TBx_Informe = ""
+    Form_Running_Rut.Show vbModeless            '- vbModeless: el Show devuelve el control al boton
+    DoEvents                                    '- que se pinte antes del proceso largo
 End Sub
-'==================================================================================================================================
-'===================================================================================================================================
-Sub RuT_Load_Task_Data(TaskRut As String)
-Debug.Print "RuT_Load_Task_Data"
-    Dim Rutinas_Name    As String
-    Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
-        Prog__APP.Range("APP_Task_Rut") = TaskRut
-        Prog__APP.Range("APP_Task_Index") = TaskIndice
-        
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
-End Sub
-'==================================================================================================================================
-'===================================================================================================================================
-Sub RuT_Save_Task_Data(TaskRut As String, Optional Task_Inf As String = "")
-Debug.Print "RuT_Save_Task_Data"
-    Dim Rutinas_Name    As String
-    Dim TaskIndice      As Variant
-    TaskIndice = Application.Match(TaskRut, Prog__Menu_Aux.ListObjects(1).DataBodyRange.Columns(Task_Nombre_Rut), 0)
-    If IsError(TaskIndice) Then
-        Debug.Print "RuT_Save_Task_Data - ERROR - Task NOT FOUND -------------------<<<"
-    Else
-        Prog__APP.Range("APP_Task_Rut") = TaskRut
-        Prog__APP.Range("APP_Task_Index") = TaskIndice
-        If Task_Inf = "" Then
-            Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
-        Else
-            Debug.Print Task_Inf
-        Dim Rng     As Range:     Set Rng = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe)
-            Rng.Value = Task_Inf
-        End If
-    End If
+'==================================================================================================
+Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal Volver_Hoja As Boolean = False)
+    On Error Resume Next                        '- el cierre no debe fallar aunque la rutina haya dejado algo a medias
+    Prog__APP.Range("APP_Task_Inf") = Form_Running_Rut.TBx_Informe.Text   '- .Text: con el control, 1004 en logs largos
+    If Len(Tag) > 0 Then Call Rut_RibbonUI_Guardar_Informe(Tag)
+    If Volver_Hoja Then ThisWorkbook.Sheets(Progreso_Hoja).Select
+    If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la rutina se salto algun Rut_On_Functions
+    Application.ScreenUpdating = True
+    Form_Running_Rut.Rut_Finalizada             '- fondo verde y boton de salida
+    Call RefreshRibbon                          '- rotulos (fecha de la ultima importacion...) y supertips al dia
+    On Error GoTo 0
 End Sub
 '==================================================================================================================================
 '===================================================================================================================================
 Sub Rut_Chg_Usuario()
 Debug.Print "Rut_Chg_Usuario"
-    Form_Usuario.Show
-    Call RuT_Load_Task_Data("Rut_Chg_Usuario")
-    MyRibbon.InvalidateControl "Btn_ChangeUser"     '- 1º el Botón, Actualiza solo este Control_ID
-    MyRibbon.InvalidateControl "GroupChangeUser"    '- 2º el Grupo, Actualiza solo este Control_ID
+    Call Rut_Usuario_Chg        '- (2026-10-04) solo para la fila "__Activar Usuario" de Tb_Tareas; se va en la fase 5
 End Sub
 '===================================================================================================================================
 Sub Rut_Activar_Programacion()
@@ -84,7 +62,7 @@ End Sub
 '===================================================================================================================================
 Sub Rut_Lo_Export_WorkSheet()
 Debug.Print "Rut_Lo_Export_WorkSheet"
-    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+    Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir)
     Call Rut_Lo_Export_WS_Xlsx(Sheets(ActiveSheet.Name), ActiveSheet.Name & "__" & _
                         Format(Prog__APP.Range("APP_FechCierreCont"), "yyyy-mmm-dd") & "__" & Format(Now(), "(dd-mm-yy hh.mm)"), True, False)
     Prog__APP.Range("APP_Last_Exp_JIsPPub") = Format(Now(), "dd-mmm-yy hh:mm")
@@ -92,7 +70,7 @@ End Sub
 '===================================================================================================================================
 Sub Rut_Lo_Export_Hist_Bdatos()
 Debug.Print "Rut_Lo_Export_Hist_Bdatos"
-    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+    Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir)
 '    Call Rut_Lo_Export(Sht__BD, "Histórico_BDatos")
     Call Rut_Lo_Export_WS_Xlsx(Sht__BD, "Histórico_BDatos__a_" & _
                         Format(Prog__APP.Range("APP_FechCierreCont"), "yyyy-mmm") & "__" & Format(Now(), "(yyyy-mm-dd hhmm)"), False)
@@ -102,7 +80,7 @@ End Sub
 '===================================================================================================================================
 Sub Rut_Lo_Import_Hist_Bdatos()
 Debug.Print "Rut_Lo_Export_Bdatos"
-    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+    Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir)
     Application.ScreenUpdating = False
     Dim Lo_BD               As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
     Dim Lo_DefCol_BD        As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
@@ -134,7 +112,7 @@ Sub Rut_Reset_App()
     Call Rut_Reset_State            '- Deja a 0 el contador de Rut_Off/On_Functions
     Call RuT_Al_Abrir_WorkBook
     Prog__APP.Range("APP_Task_Inf") = "App Reset" & vbCrLf & Now
-    Call RuT_Load_Task_Data("Rut_Reset_App")
+    Call Rut_RibbonUI_Guardar_Informe("Reset")     '- informe en Lo_RibbonUI (supertip de Boss)
 End Sub
 ' ==================================================================================================================================
 Sub Rut_RibbonRefresh()

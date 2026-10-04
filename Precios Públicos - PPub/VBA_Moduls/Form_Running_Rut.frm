@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 13:09
 
 Option Explicit
 
@@ -22,7 +22,19 @@ Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLong
 Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 Private Const GWL_Style = (-16)
-Dim TaskIndice             As Variant
+
+'==================================================================================================
+' Form_Running_Rut - formulario de progreso de las tareas largas de los botones del Ribbon
+'
+' USO (2026-10-04, patron de Jornadas y Congresos): el boton lo abre, llama a su rutina y lo cierra:
+'      Call Rut_Progreso_Abrir("Titulo")          '- M_90_Rutinas_Menu_Aux: Load + titulo + Show vbModeless
+'      Call RuT_Update_LSGES04_ACont             '- escribe su progreso en ActivForm.Controls("TBx_Informe")
+'      Call Rut_Progreso_Cerrar(control.Tag)     '- informe a APP_Task_Inf y Lo_RibbonUI + Rut_Finalizada
+'
+' Antes el boton dejaba el nombre de la rutina en APP_Task_Rut y abria este formulario en modal; su
+' UserForm_Activate la buscaba en Tb_Tareas (_Menu_Aux), ponia de titulo el nombre de la tarea y la
+' lanzaba con Application.Run. Ese camino se ha retirado: el formulario ya no busca ni lanza nada.
+'==================================================================================================
 
 ' ==================================================================================================================================
 Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
@@ -32,6 +44,7 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_Initialize()       ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 Debug.Print "............... >>> Form_Running_Rut - UserForm_Initialize() - "
+    Btn_VerInf.Visible = False      '- se quedo sin codigo (2026-10-04): que no estorbe
     With Application
         .WindowState = xlMaximized
         Zoom = Int(.Width / Me.Width * 100)
@@ -50,50 +63,18 @@ Debug.Print "............... >>> Form_Running_Rut - UserForm_Initialize() - "
 Debug.Print "............... <<< Form_Running_Rut - UserForm_Initialize() - "
 End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
-Sub UserForm_Activate()
-Debug.Print "-.-.-.-.-.-.-.-.-.-.-.- >>> Form_Running_Rut UserForm_Activate()"
-    With Prog__Menu_Aux.ListObjects(1).DataBodyRange    '-
-        TaskIndice = Application.Match(Prog__APP.Range("APP_Task_Rut"), .Columns(Task_Nombre_Rut), 0)
-        If Not IsError(TaskIndice) Then    ' ¡¡¡ Existe la Rutina !!! ------------------------
-            Prog__APP.Range("APP_Task_Index") = TaskIndice
-            Me.Lb_Tit_Informe.Caption = "Progreso de la Tarea: " & .Cells(TaskIndice, Task_Tarea)
-        Else                            ' ¡¡¡ No Existe la Rutina !!!   ------------------------
-            Me.Lb_Tit_Informe = "¡ Error: la Rutina NO Existe !"
-            Me.TBx_Informe = "¡ Error: la Rutina NO Existe !"
-            Btn_Eixir.Visible = True
-            Me.Fnd_Tarea.BackColor = RGB(255, 145, 138)
-            Me.Fnd_Tit.BackColor = RGB(255, 145, 138)
-            Exit Sub
-        End If
-        '---
-        Application.Run Prog__APP.Range("APP_Task_Rut").Value
-            DoEvents ' Permite que Excel procese eventos pendientes
-            Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe.Text    ' .Text: si se pasa el control (objeto), Excel da 1004 con textos largos
-            .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
-    End With
-    
-    '---
-    Btn_Eixir.Visible = True
-        Me.Fnd_Tarea.BackColor = RGB(192, 255, 192)
-        Me.Fnd_Tit.BackColor = RGB(192, 255, 192)
-Debug.Print "-.-.-.-.-.-.-.-.-.-.-.- <<< Form_Running_Rut UserForm_Activate()"
-End Sub     ' UserForm_Activate    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-' ------------------------------------------------------------------------------------------------------
-Private Sub Btn_VerInf_Click()
-Debug.Print "Form_Running_Rut Btn_VerInf_Click() - Form_Inf_Rut"
+Public Sub Rut_Finalizada()    '- remate visual: fondo verde + boton de salida (lo llama Rut_Progreso_Cerrar)
     Btn_VerInf.Visible = False
     Btn_Eixir.Visible = True
-    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
-        .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
-        Me.Lb_Tit_Informe.Caption = "Informe Tarea realizada: " & .Cells(TaskIndice, Task_Tarea)
-'        Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")
-    End With
+    Me.Fnd_Tarea.BackColor = RGB(192, 255, 192)
+    Me.Fnd_Tit.BackColor = RGB(192, 255, 192)
+    Me.Repaint
+    DoEvents                                 '- que el remate verde se vea de inmediato
 End Sub
-' ------------------------------------------------------------------------------------------------------
+' --------------------------------------------------------------------------------------------------
+'- Btn_VerInf_Click se elimino el 2026-10-04: volcaba el informe a la fila de Tb_Tareas de la tarea,
+'  que las rutinas con boton ya no tienen. El boton sigue en el .frx, oculto.
+' --------------------------------------------------------------------------------------------------
 Private Sub Btn_Eixir_Click()
-    If IsError(TaskIndice) Then    ' ¡¡¡ No Existe la Rutina !!! ------------------------
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
-        Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe.Text
-    End If
     Unload Me
 End Sub

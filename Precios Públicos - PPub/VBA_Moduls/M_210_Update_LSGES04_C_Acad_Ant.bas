@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 13:09
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -22,30 +22,8 @@ Option Explicit
 '    - M_212, Gestionar Duplicados
 '    - M_214_Find_IAdm_CAcad_Ant, Identificar Reg. de ImpAcad. ImpAdm. e ImpDto - Y - Borrar Reg SIN esos Datos
 
-            ' ==================================================================================================================================
-            Sub Call_RuT_Update_LSGES04_IAdm_CAcadAnt()
-                Debug.Print "================== >>> Call_RuT_Update_LSGES04_IAdm_CAcadAnt"
-                Dim ActivSheet  As String:  ActivSheet = ThisWorkbook.ActiveSheet.Name
-                Prog__APP.Range("APP_Task_Rut") = "RuT_Update_LSGES04_IAdm_CAcadAnt"
-            On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-            On Error GoTo 0
-                ThisWorkbook.Sheets(ActivSheet).Select
-                Debug.Print "================== <<< Call_RuT_Update_LSGES04_IAdm_CAcadAnt"
-            Exit Sub
-ManejoError:
-                Static Intentos As Integer
-                If Err.Number = -2147417848 And Intentos < 5 Then
-                    Intentos = Intentos + 1
-                    Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-                    Resume ' Reintenta la línea que falló
-                Else
-                    MsgBox "Error: " & Err.Description & vbCrLf & "Intentos: " & Intentos, vbCritical
-                    Intentos = 0
-                End If
-                MsgBox "<<< Err_Rut Form_Running_Rut >>>"
-            End Sub
+'- (2026-10-04) Call_RuT_Update_LSGES04_IAdm_CAcadAnt eliminado: el boton del Ribbon abre el formulario de progreso
+'  (Rut_Progreso_Abrir/Cerrar, M_90_Rutinas_Menu_Aux) y llama a la rutina directamente.
 '==================================================================================================================================
 Sub RuT_Update_LSGES04_IAdm_CAcadAnt()  '- Importar LSGES04_GE por Curso-Acad., para hallar Imp.Acad. Imp.TAdm. e Imp.Dto del CAcad.Ant pagadas este AnoCont.
 '==================================================================================================================================
@@ -55,7 +33,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
     
-    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+    Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
     Application.ScreenUpdating = False
     
     '- Setting ListObjects ------------------------------------

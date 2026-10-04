@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-04 11:42
+' Last Rev. 2026-10-04 13:09
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -75,6 +75,7 @@ Debug.Print "--------------------------------------------------- <<< OnLoad_MyRi
 End Sub
 '------------------------------------------------------------------------------------------
 Sub RefreshRibbon()
+    Call Rules_Reset      '- relee Lo_RibbonUI (M___RibbonUI_Rules): los cambios de la tabla se ven al refrescar
 Debug.Print "---------------------------------------->>> RefreshRibbon ---"
     On Error GoTo RestartExcel
     
@@ -150,65 +151,44 @@ Debug.Print "GetVisibleTabExcel", "ID: " & control.ID, "Tag: " & control.Tag
     Visible = SW_TabExcelVisible
 End Sub
 '------------------------------------------------------------------------------------------
-Sub GetVsbl_CtextMenuCell(control As IRibbonControl, ByRef Visible)
-    Visible = Func_CtrlTab_View(control.Tag)
-Debug.Print "GetVsbl_CtextMenuCell", control.ID, Visible
-End Sub
-
-'------------------------------------------------------------------------------------------
+'- Visibilidad de los controles con getVisible="GetVsbl_CtrlTab": la decide la fila de su Tag en
+'  la tabla Lo_RibbonUI (hoja RibbonUI), via Ribbon_IsVisible (M___RibbonUI_Rules). Hasta el
+'  2026-10-04 la decidia la columna Visible de Tb_Tareas (_Menu_Aux), que Func_CtrlTab_View leia
+'  casando el Tag por prefijo; se retiro junto con GetVsbl_CtextMenuCell, que ningun control usaba.
 Sub GetVsbl_CtrlTab(control As IRibbonControl, ByRef Visible)
-    Visible = Func_CtrlTab_View(control.Tag)
+    On Error Resume Next        '- un fallo aqui no debe tumbar el pintado del ribbon
+    Visible = Ribbon_IsVisible(control.Tag)
 End Sub
-'------------------------------------------------------------------------------------------
-Function Func_CtrlTab_View(Ctrl As String)
-    Dim Cont_Row    As Integer
-    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
-        For Cont_Row = 1 To .Rows.Count     '- Recorre la Tabla para ver los que deben verse.
-            MyTag = .Cells(Cont_Row, Task_Uribbon_Tags)
-            If MyTag <> "" Then MyTag = MyTag & "*"         '- única diff ----
-            SW_Tag_Visible = .Cells(Cont_Row, Task_Visible)
-            If Ctrl Like MyTag Then
-                Func_CtrlTab_View = SW_Tag_Visible
-                Debug.Print "GetVsbl_UserCtrlTabs", "Func_CtrlTab_View        Tag: " & MyTag, Ctrl, SW_Tag_Visible
-                Exit Function
-            End If
-            If Ctrl Like MyTag & "_Separ" Then
-                Func_CtrlTab_View = SW_Tag_Visible
-                Debug.Print "GetVsbl_UserCtrlTabs", "Func_CtrlTab_View     _Separ: ", Ctrl, SW_Tag_Visible
-                Exit Function
-            End If
-        Next Cont_Row
-    End With
-End Function
 '------------------------------------------------------------------------------------------
 Sub getStip_CtrlTab(control As IRibbonControl, ByRef Supertip)
+    On Error Resume Next        '- un fallo aqui no debe tumbar el pintado del ribbon
     Supertip = Func_STip_CtrlTab_Value(control.Tag)
 Debug.Print "getStip_CtrlTab", control.Tag, "Largo Supertip: " & Len(Supertip)
 End Sub
 '------------------------------------------------------------------------------------------
+'- Supertip: la Descripion de la fila del Tag en Lo_RibbonUI y, para Boss, tambien Nom_Rut e
+'  Informe_Rut (informe de la ultima ejecucion). Office corta el supertip hacia los 1024
+'  caracteres: de ahi el recorte a la parte final del informe.
 Function Func_STip_CtrlTab_Value(CtrlTag As String)
-    Dim Lin_Lst     As Variant
-    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
-        Lin_Lst = Application.Match(CtrlTag, .Columns(Task_Uribbon_Tags), 0)
-        If Not IsError(Lin_Lst) Then
-            Func_STip_CtrlTab_Value = .Cells(Lin_Lst, Task_Descripcion)
-            If Prog__APP_Switch.Range("Sw_Boss") Then
-                Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & vbLf & vbLf & _
-                                     "BOSS_Rut: " & vbLf & .Cells(Lin_Lst, Task_Nombre_Rut) & vbLf & vbLf
-                If (Len(.Cells(Lin_Lst, Task_Rut_Informe)) + Len(Func_STip_CtrlTab_Value)) > 1000 Then
-'                    Func_STip_CtrlTab_Value = Left(Func_STip_CtrlTab_Value, 980) & "Informe:" & vbLf & "¡¡ Informe demasiado extenso !!"
-                    Func_STip_CtrlTab_Value = Left(Func_STip_CtrlTab_Value, 980) & "Informe:" & vbLf & "¡¡ Informe demasiado extenso !!" & vbLf & _
-                            "Informe (parte final):" & vbLf & "..." & vbLf & Right(.Cells(Lin_Lst, Task_Rut_Informe), 950 - Len(Func_STip_CtrlTab_Value))
-                Else
-                    Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & "Informe:" & vbLf & .Cells(Lin_Lst, Task_Rut_Informe)
-                End If
-                'Debug.Print CtrlTag, "____________________________BOSS_Rut: " & .Cells(Lin_Lst, Task_Nombre_Rut)
-            End If
+    Dim Datos       As Variant          '- array(Descripion, Nom_Rut, Informe_Rut) de M___RibbonUI_Rules
+    Dim Informe     As String
+    Datos = Fnc_SuperTip_Data(CtrlTag)
+    If IsEmpty(Datos) Then
+        Func_STip_CtrlTab_Value = "¡ Control.Tag, NO encontrado !"
+        Exit Function
+    End If
+    Func_STip_CtrlTab_Value = Datos(0)
+    If Prog__APP_Switch.Range("Sw_Boss") Then
+        Informe = Datos(2)
+        Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & vbLf & vbLf & _
+                                 "BOSS_Rut: " & vbLf & Datos(1) & vbLf & vbLf
+        If (Len(Informe) + Len(Func_STip_CtrlTab_Value)) > 1000 Then
+            Func_STip_CtrlTab_Value = Left(Func_STip_CtrlTab_Value, 980) & "Informe:" & vbLf & "¡¡ Informe demasiado extenso !!" & vbLf & _
+                    "Informe (parte final):" & vbLf & "..." & vbLf & Right(Informe, Application.Max(0, 950 - Len(Func_STip_CtrlTab_Value)))
         Else
-            Func_STip_CtrlTab_Value = "¡ Control.Tag, NO encontrado !"
+            Func_STip_CtrlTab_Value = Func_STip_CtrlTab_Value & "Informe:" & vbLf & Informe
         End If
-    End With
-'Debug.Print "Largo Func_STip_CtrlTab_Value: " & CtrlTag, Len(Func_STip_CtrlTab_Value)
+    End If
 End Function
 
 ' ==================================================================================================================================
@@ -234,10 +214,7 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ChangeUser(control As IRibbonControl)
 Debug.Print "OnAct_ChangeUser"
-'    Rut_Chg_Usuario
-    Call RuT_Ejecutar_Rut("Rut_Chg_Usuario")
-'    Form_Usuario.Show
-    Call RefreshRibbon
+    Call Rut_Usuario_Chg            '- Form_Usuario + informe en Lo_RibbonUI + RefreshRibbon (M_000_Menu_Usuario)
 End Sub
 '__________________________________________________________________________________________
 '
@@ -255,11 +232,11 @@ End Sub
 Sub OnAct_RibbView(control As IRibbonControl)
     Select Case control.Tag
         Case "RibbViewNone"
-            Call RuT_Ejecutar_Rut("Rut_Menu_HideAll", False)
+            Call Rut_Menu_HideAll
         Case "RibbViewMin"
-            Call RuT_Ejecutar_Rut("Rut_Menu_ShowAll_Short", False)
+            Call Rut_Menu_ShowAll_Short
         Case "RibbViewMax"
-            Call RuT_Ejecutar_Rut("Rut_Menu_ShowAll", False)
+            Call Rut_Menu_ShowAll
     End Select
 Debug.Print "OnAct_RibbView"
 End Sub
@@ -324,21 +301,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ExportBDatos(control As IRibbonControl)
 Debug.Print "================== >>> OnAct_ExportBDatos"
-        Prog__APP.Range("APP_Task_Rut") = "Rut_LstObj_Export_Bdatos"
-        On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-        On Error GoTo 0
+    Call Rut_Progreso_Abrir("Exportar BDatos para Histórico")
+    Call Rut_Lo_Export_Hist_Bdatos      '- antes pedia Rut_LstObj_Export_Bdatos, que no existe
+    Call Rut_Progreso_Cerrar(control.Tag)
 Debug.Print "================== <<< OnAct_ExportBDatos"
-Exit Sub
-ManejoError:
-    If Err.Number = -2147417848 Then
-        Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-        Resume ' Reintenta la línea que falló
-    Else
-        MsgBox "Error: " & Err.Description
-    End If
-    MsgBox "<<< Err_Rut Form_Running_Rut >>>"
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -350,23 +316,11 @@ Debug.Print "GetLbl_ImportBDatos", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ImportBDatos(control As IRibbonControl)
-Debug.Print "================== >>> OnAct_ExportBDatos"
-        Prog__APP.Range("APP_Task_Rut") = "Rut_LstObj_Import_Bdatos"
-        On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-        On Error GoTo 0
-Debug.Print "================== <<< OnAct_ExportBDatos"
-Exit Sub
-
-ManejoError:
-    If Err.Number = -2147417848 Then
-        Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-        Resume ' Reintenta la línea que falló
-    Else
-        MsgBox "Error: " & Err.Description
-    End If
-    MsgBox "<<< Err_Rut Form_Running_Rut >>>"
+Debug.Print "================== >>> OnAct_ImportBDatos"
+    Call Rut_Progreso_Abrir("Importar Histórico de BDatos")
+    Call Rut_Lo_Import_Hist_Bdatos      '- antes pedia Rut_LstObj_Import_Bdatos, que no existe
+    Call Rut_Progreso_Cerrar(control.Tag)
+Debug.Print "================== <<< OnAct_ImportBDatos"
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -379,22 +333,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_RestoreBDatos(control As IRibbonControl)
 Debug.Print "================== >>> OnAct_RestoreBDatos"
-        Prog__APP.Range("APP_Task_Rut") = "RuT_LstObj_Restore_BD"
-        On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-        On Error GoTo 0
+    Call Rut_Progreso_Abrir("Restituir BDatos")
+    Call RuT_LstObj_Restore_BD
+    Call Rut_Progreso_Cerrar(control.Tag)
 Debug.Print "================== <<< OnAct_RestoreBDatos"
-Exit Sub
-
-ManejoError:
-    If Err.Number = -2147417848 Then
-        Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-        Resume ' Reintenta la línea que falló
-    Else
-        MsgBox "Error: " & Err.Description
-    End If
-    MsgBox "<<< Err_Rut Form_Running_Rut >>>"
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -413,7 +355,9 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_Import_G04_ACont(control As IRibbonControl)
 Debug.Print "OnAct_Import_G04_ACont"
-    Call Call_RuT_Update_LSGES04_ACont
+    Call Rut_Progreso_Abrir("1º. Import LSGes04_AñoCont  =  Crea/Procesa BDatos")
+    Call RuT_Update_LSGES04_ACont
+    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 '    MyRibbon.InvalidateControl "Import_G04_ACont"    '- Actualiza solo este Control_ID
 End Sub
 '__________________________________________________________________________________________
@@ -427,7 +371,9 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_Import_G04_CAcadAnt(control As IRibbonControl)
 Debug.Print "OnAct_Import_G04_CAcadAnt"
-    Call Call_RuT_Update_LSGES04_IAdm_CAcadAnt
+    Call Rut_Progreso_Abrir("4º. Import LSGes04_CAcadAnt  =  ImpAdm_CAcadAnt")
+    Call RuT_Update_LSGES04_IAdm_CAcadAnt
+    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 '    MyRibbon.InvalidateControl "BtnImport_G04_CAcadAnt"    '- Actualiza solo este Control_ID
 End Sub
 '------------------------------------------------------------------------------------------
@@ -448,7 +394,9 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_Import_LSace06(control As IRibbonControl)
 Debug.Print "OnAct_Import_LSace06"
-    Call Call_RuT_Update_LSace06_CAcad_ImpAdm_INSS
+    Call Rut_Progreso_Abrir("3º. Import LSace06  =  Imp. Rec. INSS")
+    Call RuT_Update_LSace06_CAcad_ImpAdm_INSS
+    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 '    MyRibbon.InvalidateControl "BtnImport_LSace06"    '- Actualiza solo este Control_ID
 End Sub
 '------------------------------------------------------------------------------------------
@@ -468,7 +416,9 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_Import_AE4(control As IRibbonControl)
 Debug.Print "OnAct_Import_AE4"
-    Call Call_RuT_Update_AE4x4
+    Call Rut_Progreso_Abrir("2º. Import AE-4x4  =  añadir Rec. AE4 a BDatos")
+    Call RuT_Update_AE4x4
+    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 '    MyRibbon.InvalidateControl "BtnImport_AE4"    '- Actualiza solo este Control_ID
 End Sub
 '------------------------------------------------------------------------------------------
@@ -589,8 +539,14 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ReCalculate_ListObj_Sht(control As IRibbonControl)
 Debug.Print "OnAct_ReCalculate_ListObj_Sht"
-    Application.Run "Rut_Recalcular_Tabla_" & ActiveSheet.Name
-    MyRibbon.InvalidateControl "BtnCalculate_JIs"    '- Actualiza solo este Control_ID
+    '- Por CodeName (2026-10-04): antes era Application.Run "Rut_Recalcular_Tabla_" & ActiveSheet.Name,
+    '  y en Inf_Recibos_TIO, la unica hoja donde se veia el boton, esa rutina no existe.
+    Select Case ActiveSheet.CodeName
+        Case Sht__Inf_Recibos_TIO.CodeName:     Call Rut_Recalcular_Tabla_Inf_Recibos
+        Case Sht__Inf_Inf_Rsm.CodeName:         Call Rut_Recalcular_Tabla_Inf_RSm
+        Case Sht__BD_JIs_AE4.CodeName:          Call Rut_Recalcular_Tabla_JIs_AE4
+    End Select
+    Call RefreshRibbon                          '- rotulo con la fecha del ultimo calculo
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -623,23 +579,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_ExportWorkSheet(control As IRibbonControl)
 Debug.Print "================== >>> OnAct_ExportWorkSheet"
-    Prog__APP.Range("APP_Task_Rut") = "Rut_Lo_Export_WorkSheet"
-    On Error GoTo ManejoError
-            DoEvents ' Permite que Excel procese eventos pendientes
-            Form_Running_Rut.Show
-    On Error GoTo 0
-    MyRibbon.InvalidateControl "BtnExportWorkSheet"    '- Actualiza solo este Control_ID
+    Call Rut_Progreso_Abrir("Exportar la hoja " & ActiveSheet.Name)
+    Call Rut_Lo_Export_WorkSheet
+    Call Rut_Progreso_Cerrar(control.Tag)
 Debug.Print "================== <<< OnAct_ExportWorkSheet"
-Exit Sub
-
-ManejoError:
-    If Err.Number = -2147417848 Then
-        Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-        Resume ' Reintenta la línea que falló
-    Else
-        MsgBox "Error: " & Err.Description
-    End If
-    MsgBox "<<< Err_Rut Form_Running_Rut >>>"
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
@@ -889,7 +832,6 @@ End Sub
 Sub OnAct_ModeProg(control As IRibbonControl)
 Debug.Print "-------------------------------- >>> Sub OnAct_ModeProg <<< -----------------"
     Call Rut_Activar_Programacion
-    Call RuT_Load_Task_Data("Rut_Activar_Programacion")
 Debug.Print "-------------------------------- <<< Sub OnAct_ModeProg >>> -----------------"
 End Sub
 '------------------------------------------------------------------------------------------
@@ -908,7 +850,8 @@ End Sub
 '- OnAct_RibbonRefresh
 '------------------------------------------------------------------------------------------
 Sub OnAct_RibbonRefresh(control As IRibbonControl)
-    Call RuT_Ejecutar_Rut("Rut_RibbonRefresh", False)
+    Call Rut_RibbonRefresh
+    Call Rut_RibbonUI_Guardar_Informe(control.Tag)
 Debug.Print "OnAct_RefreshRibbon"
 End Sub
 '------------------------------------------------------------------------------------------
@@ -917,7 +860,8 @@ End Sub
 '- OnAct_SearchVinculos
 '------------------------------------------------------------------------------------------
 Sub OnAct_SearchVinculos(control As IRibbonControl)
-    Call RuT_Ejecutar_Rut("Rut_ListarHipervinculos", False)
+    Call Rut_ListarHipervinculos
+    Call Rut_RibbonUI_Guardar_Informe(control.Tag, "Hipervínculos listados  -  " & Now)
 Debug.Print "OnAct_SearchVinculos"
 End Sub
 '------------------------------------------------------------------------------------------
@@ -1142,39 +1086,22 @@ End Sub
 '- RunRutPrueba_Group ------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub OnAct_RunRutPrueba(control As IRibbonControl)
-Debug.Print "OnAct_RunRutPrueba"
 Debug.Print "================== >>> OnAct_RunRutPrueba"
-        Prog__APP.Range("APP_Task_Rut") = Func_Rut_CtrlTab_Value(control.Tag)
-        If Prog__APP.Range("APP_Task_Rut") = "NotFound" Then Exit Sub
-        On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-        On Error GoTo 0
-Debug.Print "================== <<< OnAct_ExportBDatos"
-Exit Sub
-
-ManejoError:
-    If Err.Number = -2147417848 Then
-        Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-        Resume ' Reintenta la línea que falló
-    Else
-        MsgBox "Error: " & Err.Description
-    End If
-    MsgBox "<<< Err_Rut OnAct_RunRutPrueba >>>"
+    Dim NomRut      As String:      NomRut = Fnc_RibbonUI_Rut(control.Tag)     '- columna Nom_Rut de Lo_RibbonUI
+    If NomRut = "" Then Exit Sub
+    Call Rut_Progreso_Abrir("Probar Rutina: " & NomRut)
+    On Error GoTo Fallo
+    Application.Run NomRut              '- por nombre a proposito: la rutina a probar se cambia en Lo_RibbonUI
+    On Error GoTo 0
+Cerrar:
+    Call Rut_Progreso_Cerrar(control.Tag)
+Debug.Print "================== <<< OnAct_RunRutPrueba"
+    Exit Sub
+Fallo:
+    Form_Running_Rut.TBx_Informe = Form_Running_Rut.TBx_Informe.Text & vbLf & _
+                                   "Error al ejecutar " & NomRut & ": " & Err.Description
+    Resume Cerrar
 End Sub
-'------------------------------------------------------------------------------------------
-Function Func_Rut_CtrlTab_Value(CtrlTag As String)  '- Busca el nombre de la Rutina en Menú_Aux
-    Dim Lin_Lst     As Variant
-    With Prog__Menu_Aux.ListObjects(1).DataBodyRange
-        Lin_Lst = Application.Match(CtrlTag, .Columns(Task_Uribbon_Tags), 0)
-        If Not IsError(Lin_Lst) Then
-            Func_Rut_CtrlTab_Value = .Cells(Lin_Lst, Task_Nombre_Rut)
-        Else
-            Func_Rut_CtrlTab_Value = "NotFound"
-        End If
-    End With
-'Debug.Print "Largo Func_Rut_CtrlTab_Value: " & CtrlTag, Len(Func_Rut_CtrlTab_Value)
-End Function
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
 '

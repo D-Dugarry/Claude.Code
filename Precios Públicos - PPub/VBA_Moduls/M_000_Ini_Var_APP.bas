@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-09-30 20:04
+' Last Rev. 2026-10-04 13:09
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -313,6 +313,15 @@ Public Const Task_Uribbon_Tags       As Integer = 7       ' col: g
 Public Const Task_Visible            As Integer = 8       ' col: h
 Public Const Task_Emails             As Integer = 9       ' col: i
 Public Const Task_SheetsButton       As Integer = 10      ' col: j
+
+' Tabla Prog__RibbonUI.ListObjects(1) = Lo_RibbonUI (visibilidad y supertips del Ribbon) -------
+Public Const Rib_Tag                 As Integer = 1       ' col: a  Uribbon-Tags
+Public Const Rib_User                As Integer = 2       ' col: b  Usuario
+Public Const Rib_SheetsNames         As Integer = 3       ' col: c  SheetsNames
+Public Const Rib_Rut                 As Integer = 4       ' col: d  Nom_Rut
+Public Const Rib_Rut_Descrip         As Integer = 5       ' col: e  Descripion
+Public Const Rib_Rut_Informe         As Integer = 6       ' col: f  Informe_Rut
+Public Const Rib_Group_Tag           As Integer = 7       ' col: g  Group-Tag
 
 '    Public Usuario_ID               As String
 '    Public Usuario_Name             As String

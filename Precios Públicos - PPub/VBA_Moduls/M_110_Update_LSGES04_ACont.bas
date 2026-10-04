@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-03 23:51
+' Last Rev. 2026-10-04 13:09
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -27,30 +27,8 @@ Option Explicit
 '    - Import BDatos de una versión anterior y Copiar en BDatos_Ant
 '        - Actualizar BDatos con BDatos_Ant
 
-' ==================================================================================================================================
-            Sub Call_RuT_Update_LSGES04_ACont()
-                Debug.Print "================== >>> Call_RuT_Update_LSGES04_ACont"
-                Dim ActivSheet  As String:  ActivSheet = ThisWorkbook.ActiveSheet.Name
-                Prog__APP.Range("APP_Task_Rut") = "RuT_Update_LSGES04_ACont"
-            On Error GoTo ManejoError
-                DoEvents ' Permite que Excel procese eventos pendientes
-                Form_Running_Rut.Show
-            On Error GoTo 0
-                ThisWorkbook.Sheets(ActivSheet).Select
-                Debug.Print "================== <<< Call_RuT_Update_LSGES04_ACont"
-            Exit Sub
-ManejoError:
-                Static Intentos As Integer
-                If Err.Number = -2147417848 And Intentos < 5 Then
-                    Intentos = Intentos + 1
-                    Application.Wait Now + TimeValue("0:00:02") ' Espera 2 segundos
-                    Resume ' Reintenta la línea que falló
-                Else
-                    MsgBox "Error: " & Err.Description & vbCrLf & "Intentos: " & Intentos, vbCritical
-                    Intentos = 0
-                End If
-                MsgBox "<<< Err_Rut Form_Running_Rut >>>"
-            End Sub
+'- (2026-10-04) Call_RuT_Update_LSGES04_ACont eliminado: el boton del Ribbon abre el formulario de progreso
+'  (Rut_Progreso_Abrir/Cerrar, M_90_Rutinas_Menu_Aux) y llama a la rutina directamente.
 '==================================================================================================================================
 Function Func_MsgBox_vbYesNo(Optional Msg As String = "¿ Seguimos ?") As Boolean
     Dim Respuesta    As VbMsgBoxResult
@@ -95,7 +73,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     
-    Set ActivForm = VBA.UserForms(VBA.UserForms.Count - 1)  '- Identificamos qué Formulario está Activo.  ----------
+    Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
     Application.ScreenUpdating = False
     
     '- Setting ListObjects ------------------------------------
