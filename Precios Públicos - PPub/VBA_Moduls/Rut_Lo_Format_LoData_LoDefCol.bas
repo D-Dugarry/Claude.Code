@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-04 11:58
+' Last Rev. 2026-10-04 12:32
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -73,26 +73,11 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             Case "F"
                With LoData.DataBodyRange
                     .Columns(Ccol).Select
-                    Selection.NumberFormat = "General"
-                    If LoData.ListColumns.Count = Ccol Then
-                        LoData.ListColumns.Add
-                    Else
-                        .Columns(Ccol + 1).Select
-                        Selection.ListObject.ListColumns.Add Position:=Ccol + 1
+                    If WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
+                        '- Convierto a fechas los textos de fecha, celda a celda en RAM: la Col. puede mezclar fechas y textos.
+                        '- Sustituye a la Col. auxiliar "=RC[-1]*1" + pegar valores + Replace "0" (5,8 seg. las 3 Col.).
+                        Call Rut_Col_Textos_a_Fechas(.Columns(Ccol))
                     End If
-                    .Cells(1, Ccol + 1).Select
-                         ActiveCell.FormulaR1C1 = "=RC[-1]*1"       '    ActiveCell.FormulaR1C1 = "=+[@FECHAEMISION]*1"
-                    .Columns(Ccol + 1).Select
-                    Selection.Copy
-                    .Cells(1, Ccol).Select
-                    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
-                    Application.CutCopyMode = False
-                    .Columns(Ccol + 1).Delete
-                    .Columns(Ccol).Select
-                    Selection.Replace What:="0", Replacement:="", LookAt:=xlWhole, _
-                        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-                        ReplaceFormat:=False ', FormulaVersion:=xlReplaceFormula2    '- Quitado porque da error según el ord de 32b o 64b... _
-                           "Error de compilación en el módulo oculto: <nombre del módulo>" Este error se produce normalmente cuando el código es incompatible con la versión o la arquitectura de esta aplicación (por ejemplo, el código de un documento está dirigido a aplicaciones de Microsoft Office de 32 bits pero se está intentando ejecutar en Office de 64 bits).
                     Selection.NumberFormat = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Format)
                End With
             Case "N"
@@ -215,6 +200,115 @@ Private Function Fnc_Texto_a_Numero(ByVal Txt As String, ByVal ComaDecimal As Bo
     If Negativo Then Num = -Num
     Fnc_Texto_a_Numero = True
 End Function    ' Fnc_Texto_a_Numero
+
+'- -------------------------------------------------------------------------------------------------
+'- Convierte en fecha (nº de serie de Excel) los textos de fecha de una Col., celda a celda en RAM. Sustituye a la Col. auxiliar
+'- "=RC[-1]*1" + pegar valores + Replace de "0" por "", con el mismo resultado salvo la hora, que se quita:
+'-      - textos "dd/mm/aaaa hh:mm:ss" (los del Robot y los de siempre), con o sin hora y con "/" o "-"; también "aaaa-mm-dd"
+'-        y los años de 2 cifras (00-29 -> 20xx, 30-99 -> 19xx, como Excel)
+'-      - SIN LA HORA: no se usa, y con ella un recibo del 31/12 a las 10:00 cuenta como posterior al cierre del 31/12
+'-        (M_111: F_Emi > cierre se borra, F_Cob > cierre se vacía)
+'-      - celdas vacías, textos vacíos y ceros -> celda vacía (lo que hacía el Replace)
+'-      - los números (fechas ya convertidas) se quedan como están, quitándoles la hora si la traen
+'- Un texto que no es una fecha se queda como texto (con "*1" daba #¡VALOR!). Cada texto distinto se convierte una sola vez: en
+'- un LSGES04 de 184.000 rec. hay unos 7.000 textos distintos en F_Emi y menos de 600 en F_Vto y en F_Cob.
+'- -------------------------------------------------------------------------------------------------
+Private Sub Rut_Col_Textos_a_Fechas(Rng As Range)
+    Dim Datos           As Variant
+    Dim Fila            As Long
+    Dim Txt             As String
+    Dim Serie           As Double
+    Dim Cambios         As Long
+    Dim DiccFechas      As Object:      Set DiccFechas = CreateObject("Scripting.Dictionary")     '- Texto -> fecha o Empty
+
+    If Rng.Cells.CountLarge = 1 Then
+        ReDim Datos(1 To 1, 1 To 1)
+        Datos(1, 1) = Rng.Value2
+    Else
+        Datos = Rng.Value2
+    End If
+    For Fila = 1 To UBound(Datos, 1)
+        Select Case VarType(Datos(Fila, 1))
+            Case vbString
+                Txt = Datos(Fila, 1)
+                If Not DiccFechas.Exists(Txt) Then
+                    If Fnc_Texto_a_Fecha(Txt, Serie) Then
+                        If Serie = 0 Then DiccFechas.Add Txt, Empty Else DiccFechas.Add Txt, Serie
+                    End If
+                End If
+                If DiccFechas.Exists(Txt) Then                  '- Si no está, no es una fecha: se queda como texto
+                    Datos(Fila, 1) = DiccFechas.Item(Txt)
+                    Cambios = Cambios + 1
+                End If
+            Case vbDouble
+                If Datos(Fila, 1) = 0 Then
+                    Datos(Fila, 1) = Empty
+                    Cambios = Cambios + 1
+                ElseIf Datos(Fila, 1) <> Int(Datos(Fila, 1)) Then  '- Fecha con hora: le quito la hora
+                    Datos(Fila, 1) = Int(Datos(Fila, 1))
+                    Cambios = Cambios + 1
+                End If
+        End Select
+    Next Fila
+    If Cambios > 0 Then Rng.Value2 = Datos
+End Sub     ' Rut_Col_Textos_a_Fechas
+'- -------------------------------------------------------------------------------------------------
+
+'- True (y el nº de serie, sin hora, en Serie) si Txt es una fecha o un texto vacío (Serie = 0) ----
+Private Function Fnc_Texto_a_Fecha(ByVal Txt As String, ByRef Serie As Double) As Boolean
+    Dim Partes      As Variant
+    Dim TxtDia      As String
+    Dim TxtMes      As String
+    Dim TxtAno      As String
+    Dim TxtHora     As String
+    Dim PosEsp      As Long
+    Dim Dia         As Long
+    Dim Mes         As Long
+    Dim Ano         As Long
+    Dim Fecha       As Date
+    Dim i           As Long
+
+    Txt = Trim$(Txt)
+    If Txt = "" Then Serie = 0: Fnc_Texto_a_Fecha = True: Exit Function
+    PosEsp = InStr(Txt, " ")                                    '- La hora va detrás de un espacio
+    If PosEsp > 0 Then
+        TxtHora = Trim$(Mid$(Txt, PosEsp + 1))
+        Txt = Left$(Txt, PosEsp - 1)
+    End If
+    Partes = Split(Replace(Txt, "-", "/"), "/")                 '- Fecha: 3 partes separadas por "/" o "-"
+    If UBound(Partes) <> 2 Then Exit Function
+    If Len(Partes(0)) = 4 Then                                  '- aaaa-mm-dd
+        TxtAno = Partes(0):     TxtMes = Partes(1):     TxtDia = Partes(2)
+    Else                                                        '- dd/mm/aaaa o dd/mm/aa
+        TxtDia = Partes(0):     TxtMes = Partes(1):     TxtAno = Partes(2)
+    End If
+    If Not (Fnc_Son_Cifras(TxtDia, 2) And Fnc_Son_Cifras(TxtMes, 2) And Fnc_Son_Cifras(TxtAno, 4)) Then Exit Function
+    Dia = CLng(TxtDia):     Mes = CLng(TxtMes):     Ano = CLng(TxtAno)
+    Select Case Len(TxtAno)
+        Case 4
+        Case 2:     Ano = Ano + IIf(Ano < 30, 2000, 1900)       '- Años de 2 cifras, como Excel
+        Case Else:  Exit Function
+    End Select
+    If Ano < 1900 Or Mes < 1 Or Mes > 12 Or Dia < 1 Or Dia > 31 Then Exit Function
+    Fecha = DateSerial(Ano, Mes, Dia)
+    If Day(Fecha) <> Dia Then Exit Function                     '- Día que no existe (31/02)
+    If TxtHora <> "" Then                                       '- Hora (hh:mm o hh:mm:ss): se comprueba, pero no se guarda
+        Partes = Split(TxtHora, ":")
+        If UBound(Partes) < 1 Or UBound(Partes) > 2 Then Exit Function
+        For i = 0 To UBound(Partes)
+            If Not Fnc_Son_Cifras(Partes(i), 2) Then Exit Function
+            If CLng(Partes(i)) > IIf(i = 0, 23, 59) Then Exit Function
+        Next i
+    End If
+    Serie = CDbl(Fecha)                                         '- Sin la hora
+    If Serie < 61 Then Serie = Serie - 1                        '- Excel cuenta el 29/02/1900, que no existió
+    Fnc_Texto_a_Fecha = True
+End Function    ' Fnc_Texto_a_Fecha
+
+'- True si Txt son solo cifras, de 1 a LenMax ------------------------------------------------------
+Private Function Fnc_Son_Cifras(ByVal Txt As String, ByVal LenMax As Long) As Boolean
+    Fnc_Son_Cifras = Len(Txt) >= 1 And Len(Txt) <= LenMax And Not Txt Like "*[!0-9]*"
+End Function    ' Fnc_Son_Cifras
 ' ==================================================================================================================================
 
 '''' ==================================================================================================================================

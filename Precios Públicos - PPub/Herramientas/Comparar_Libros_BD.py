@@ -9,18 +9,25 @@ Compara, celda a celda y dentro del rango de cada tabla:
     último decimal),
   - el color de relleno (lo que pinta M_112 en los duplicados),
   - el formato de número.
-Y además el log del proceso (nombre APP_Task_Inf), quitando las horas y los tiempos.
+Y además el log del proceso (nombre APP_Task_Inf), quitando las horas y los tiempos (también los de
+cada paso del formateo: "Col. 14 F_Emi (F)....1,34 seg.").
+
+Con --sin-hora, las columnas indicadas (por su cabecera) se comparan sin la hora: 46237,0034 y 46237
+cuentan como iguales, y las celdas que solo difieren en la hora se cuentan aparte. Es para comparar
+con un ANTES de cuando las fechas se guardaban con hora.
 
 Uso:
     python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm
     python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm --hojas Sht__BD --max 50
+    python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm --sin-hora F_Emi,F_Vto,F_Cob
 
 Las hojas se buscan por su CodeName (Sht__BD...), no por el nombre de la pestaña.
 Lee las hojas en streaming: con 177.000 filas tarda un par de minutos y no carga el libro en memoria.
 """
-# Last Rev. 2026-10-02 22:56
+# Last Rev. 2026-10-04 12:33
 
 import argparse
+import math
 import re
 import sys
 import zipfile
@@ -168,7 +175,16 @@ class Libro:
         return ""
 
 
-def comparar_hoja(A, B, codename, maximo):
+def quitar_hora(val):
+    """'n:46237.003368055557' -> 'n:46237' (la fecha sin la hora); el resto, tal cual."""
+    if val and val.startswith("n:"):
+        x = float(val[2:])
+        if x != math.floor(x):
+            return "n:%d" % math.floor(x)
+    return val
+
+
+def comparar_hoja(A, B, codename, maximo, sin_hora=()):
     print("\n" + "=" * 100 + "\n" + codename)
     if codename not in A.codename or codename not in B.codename:
         print("   No existe en los dos libros.")
@@ -187,6 +203,7 @@ def comparar_hoja(A, B, codename, maximo):
     f2, c2 = max(ta[3], tb[3]), max(ta[4], tb[4])
 
     difs = {"valor": 0, "relleno": 0, "formato": 0}
+    solo_hora = {}                                          # columna -> celdas que solo difieren en la hora
     por_col = {}
     mostradas = 0
     ga, gb = A.filas(ha, f1, c1, f2, c2), B.filas(hb, f1, c1, f2, c2)
@@ -208,6 +225,13 @@ def comparar_hoja(A, B, codename, maximo):
             if va == vb:
                 continue
             nombre = cab[col - ta[2]] if 0 <= col - ta[2] < len(cab) else "?"
+            if nombre in sin_hora:
+                va2, vb2 = (quitar_hora(va[0]),) + va[1:], (quitar_hora(vb[0]),) + vb[1:]
+                if va[0] != vb[0] and va2[0] == vb2[0]:
+                    solo_hora[nombre] = solo_hora.get(nombre, 0) + 1
+                va, vb = va2, vb2
+                if va == vb:
+                    continue
             for i, tipo in enumerate(("valor", "relleno", "formato")):
                 if va[i] != vb[i] and not (tipo == "formato" and (va[0] is None or vb[0] is None)):
                     difs[tipo] += 1
@@ -217,6 +241,8 @@ def comparar_hoja(A, B, codename, maximo):
                         print("   %s%-7d %-22s %-8s ANTES=%r  DESPUÉS=%r" % (
                             num2col(col), fila, nombre[:22], tipo, va[i], vb[i]))
     total = sum(difs.values())
+    for nombre, n in solo_hora.items():
+        print("   %-30s %d celdas iguales salvo la hora (no cuentan como diferencia)" % (nombre, n))
     if total == 0:
         print("   IDÉNTICAS (valores, rellenos y formatos de número).")
     else:
@@ -228,6 +254,7 @@ def comparar_hoja(A, B, codename, maximo):
 
 def limpiar_log(txt):
     txt = re.sub(r"\d\d:\d\d:\d\d Lap: +[\d.,]+ seg\. ", "", txt or "")
+    txt = re.sub(r"\.*\s*[\d.]*\d,\d+ seg\.", " <t> seg.", txt)    # tiempos de cada paso: "Col. 14 F_Emi (F)....1,34 seg."
     txt = re.sub(r"\d\d-\w{3}-\d\d \d\d:\d\d", "<fecha>", txt)
     return [l.rstrip() for l in txt.replace("\r", "").split("\n")]
 
@@ -238,12 +265,14 @@ def main():
     ap.add_argument("despues")
     ap.add_argument("--hojas", default=",".join(HOJAS_DEFECTO), help="CodeNames separados por comas")
     ap.add_argument("--max", type=int, default=30, help="diferencias a mostrar por hoja")
+    ap.add_argument("--sin-hora", default="", help="cabeceras de fecha a comparar sin la hora, separadas por comas")
     args = ap.parse_args()
 
     A, B = Libro(args.antes), Libro(args.despues)
+    sin_hora = {c.strip() for c in args.sin_hora.split(",") if c.strip()}
     total = 0
     for h in args.hojas.split(","):
-        total += comparar_hoja(A, B, h.strip(), args.max)
+        total += comparar_hoja(A, B, h.strip(), args.max, sin_hora)
 
     print("\n" + "=" * 100 + "\nLog del proceso (%s), sin horas ni tiempos" % NOMBRE_LOG)
     la, lb = limpiar_log(A.valor_nombre(NOMBRE_LOG)), limpiar_log(B.valor_nombre(NOMBRE_LOG))
