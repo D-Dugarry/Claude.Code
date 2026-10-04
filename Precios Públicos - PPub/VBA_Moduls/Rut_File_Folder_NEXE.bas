@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-09-30 19:16
+' Last Rev. 2026-10-04 17:08
 Option Explicit
 
 '###################################################################################################################################
@@ -14,6 +14,23 @@ Function Fnc_NEXE_RutaAPP() As String  ' Formatea la Ruta de RED del Excel Actua
     End If
 End Function        ' Fnc_Format_Referencia
 '###################################################################################################################################
+Function Fnc_Format_Ruta(Ruta_Red As String) As String  ' Cambia una ruta de la Red Nexe a la unidad local
+' =================================================================================================
+'- El mismo cambio que Fnc_NEXE_RutaAPP, pero para cualquier ruta. La llama por su nombre, con
+'  Application.Run, el módulo de copias Rut_Wb_CopSegTimed_USB_HD (skill excel-copseg-backup) antes de
+'  guardar en CopiaSeguridad\: si se renombra, deja de usarse sin avisar. Una ruta que no es de la Red
+'  Nexe se devuelve tal cual.
+    Dim Mail        As String
+    Dim PosMail     As Long
+    Fnc_Format_Ruta = Ruta_Red
+    If Left(Ruta_Red, 18) <> "https://nexe.ua.es" Then Exit Function
+    Mail = Prog__APP.Range("APP_User_Mail")
+    If Mail = "" Then Exit Function
+    PosMail = InStr(1, Ruta_Red, Mail)
+    If PosMail = 0 Then Exit Function
+    Fnc_Format_Ruta = Prog__APP.Range("App_User_Unid_Red") & ":" & Replace(Mid(Ruta_Red, PosMail + Len(Mail)), "/", "\")
+End Function        ' Fnc_Format_Ruta
+'##################################################################################################
         'call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem, [NomFich], [PathFich])
 Sub Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem As String, Optional NomFich As String = "", Optional RutaFich As String = "")
 ' ==================================================================================================================================

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_APP"
-' Last Rev. 2026-10-04 14:59
+' Last Rev. 2026-10-04 17:32
 '- M00_Ini_APP --------
 Option Explicit    ' Para obligar a definir todas las variable.  'lo he quitado porque me genera muchos errores.
 
@@ -8,6 +8,10 @@ Sub RuT_Al_Abrir_WorkBook()
 Debug.Print "------------------------------------------->>> RuT_Al_Abrir_WorkBook"
     Rut_Off_Functions
     Rut_ConfigExcel_Establecer
+    '- Copia de seguridad del libro en CopiaSeguridad\ si toca (por defecto, una al día y se purgan las de más de 3 meses;
+    '- módulo Rut_Wb_CopSegTimed_USB_HD, skill excel-copseg-backup). La 1ª vez crea la hoja ConfigCopSeg: por eso va antes
+    '- de seleccionar Sht__BD.
+    If Fnc_CopSeg_HD_Toca() Then Call Rut_WrkBook_CopSegTimed_WB_HD
     
     'Application.EnableEvents = True
     Sht__BD.Visible = xlSheetVisible

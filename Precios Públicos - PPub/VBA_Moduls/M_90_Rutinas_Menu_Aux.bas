@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-04 13:55
+' Last Rev. 2026-10-04 17:08
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
@@ -44,6 +44,13 @@ Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal
     Form_Running_Rut.Rut_Finalizada             '- fondo verde y boton de salida
     Call RefreshRibbon                          '- rotulos (fecha de la ultima importacion...) y supertips al dia
     On Error GoTo 0
+End Sub
+'==================================================================================================
+'- Feedback del modulo de copias Rut_Wb_CopSegTimed_USB_HD (skill excel-copseg-backup), que la llama
+'  por su nombre con Application.Run tras cada copia o error: lo deja en APP_Task_Inf, como hacia la
+'  copia USB antigua. Si se renombra, el modulo de copias deja de llamarla sin avisar.
+Public Sub Rut_CopSeg_Feedback_Host(Msg As String)
+    Prog__APP.Range("APP_Task_Inf") = Msg
 End Sub
 '==================================================================================================================================
 '===================================================================================================================================
