@@ -9,8 +9,14 @@ Compara, celda a celda y dentro del rango de cada tabla:
     último decimal),
   - el color de relleno (lo que pinta M_112 en los duplicados),
   - el formato de número.
-Y además el log del proceso (nombre APP_Task_Inf), quitando las horas y los tiempos (también los de
-cada paso del formateo: "Col. 14 F_Emi (F)....1,34 seg.").
+Y además el log del proceso (nombre APP_Task_Inf) y el informe de cada botón del Ribbon (columna
+Informe_Rut de Lo_RibbonUI, que guarda el log de la última ejecución de cada botón: así se comparan los
+de M_110, M_210 y M_310 aunque APP_Task_Inf solo tenga el último), quitando las horas y los tiempos.
+Las líneas de tiempos de cada paso del formateo ("Col. 14 F_Emi (F)....1,34 seg.") se quitan enteras,
+porque su texto cambia con el código (p. ej. "Col. 11 Ref (N, bloque 11-13)").
+
+Con --por, las diferencias de cada hoja se cuentan también por el valor de esa columna en la fila
+(p. ej. --por C_Acad: cuántas diferencias de cada columna caen en cada curso).
 
 Con --sin-hora, las columnas indicadas (por su cabecera) se comparan sin la hora: 46237,0034 y 46237
 cuentan como iguales, y las celdas que solo difieren en la hora se cuentan aparte. Es para comparar
@@ -20,11 +26,12 @@ Uso:
     python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm
     python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm --hojas Sht__BD --max 50
     python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm --sin-hora F_Emi,F_Vto,F_Cob
+    python Comparar_Libros_BD.py ANTES.xlsm DESPUES.xlsm --por C_Acad
 
 Las hojas se buscan por su CodeName (Sht__BD...), no por el nombre de la pestaña.
 Lee las hojas en streaming: con 177.000 filas tarda un par de minutos y no carga el libro en memoria.
 """
-# Last Rev. 2026-10-04 12:33
+# Last Rev. 2026-10-04 17:10
 
 import argparse
 import math
@@ -184,7 +191,7 @@ def quitar_hora(val):
     return val
 
 
-def comparar_hoja(A, B, codename, maximo, sin_hora=()):
+def comparar_hoja(A, B, codename, maximo, sin_hora=(), por=None):
     print("\n" + "=" * 100 + "\n" + codename)
     if codename not in A.codename or codename not in B.codename:
         print("   No existe en los dos libros.")
@@ -202,9 +209,13 @@ def comparar_hoja(A, B, codename, maximo, sin_hora=()):
     f1, c1 = min(ta[1], tb[1]), min(ta[2], tb[2])
     f2, c2 = max(ta[3], tb[3]), max(ta[4], tb[4])
 
+    col_por = cab.index(por) + ta[2] if por and por in cab else None
+    if por and col_por is None:
+        print("   (--por: la tabla no tiene la columna %r)" % por)
     difs = {"valor": 0, "relleno": 0, "formato": 0}
     solo_hora = {}                                          # columna -> celdas que solo difieren en la hora
     por_col = {}
+    por_grupo = {}                                          # (columna, tipo, valor de --por) -> celdas
     mostradas = 0
     ga, gb = A.filas(ha, f1, c1, f2, c2), B.filas(hb, f1, c1, f2, c2)
     ra, rb = next(ga, None), next(gb, None)
@@ -236,6 +247,10 @@ def comparar_hoja(A, B, codename, maximo, sin_hora=()):
                 if va[i] != vb[i] and not (tipo == "formato" and (va[0] is None or vb[0] is None)):
                     difs[tipo] += 1
                     por_col[(nombre, tipo)] = por_col.get((nombre, tipo), 0) + 1
+                    if col_por is not None:
+                        g = (ca.get(col_por) or cb.get(col_por) or (None,))[0]
+                        g = g[2:] if g else "(vacío)"
+                        por_grupo[(nombre, tipo, g)] = por_grupo.get((nombre, tipo, g), 0) + 1
                     if mostradas < maximo:
                         mostradas += 1
                         print("   %s%-7d %-22s %-8s ANTES=%r  DESPUÉS=%r" % (
@@ -249,14 +264,52 @@ def comparar_hoja(A, B, codename, maximo, sin_hora=()):
         print("   DIFERENCIAS: %s" % difs)
         for (nombre, tipo), n in sorted(por_col.items(), key=lambda x: -x[1])[:20]:
             print("      %-30s %-8s %d" % (nombre, tipo, n))
+        if por_grupo:
+            print("   Por %s:" % por)
+            for (nombre, tipo, g), n in sorted(por_grupo.items(), key=lambda x: (x[0][0], x[0][1], -x[1])):
+                print("      %-30s %-8s %-12s %d" % (nombre, tipo, g, n))
     return total
+
+
+# Líneas de tiempos de cada paso del formateo (Rut_Lo_Format_LoData_LoDefColData): fuera enteras
+RE_TIEMPOS_FORMATEO = re.compile(r"^\s*(Quitar formatos y validaciones|Col\. \d+ .*\((T|F|N)(,[^)]*)?\) <t> seg\.|Anchos, alineaci)")
 
 
 def limpiar_log(txt):
     txt = re.sub(r"\d\d:\d\d:\d\d Lap: +[\d.,]+ seg\. ", "", txt or "")
     txt = re.sub(r"\.*\s*[\d.]*\d,\d+ seg\.", " <t> seg.", txt)    # tiempos de cada paso: "Col. 14 F_Emi (F)....1,34 seg."
     txt = re.sub(r"\d\d-\w{3}-\d\d \d\d:\d\d", "<fecha>", txt)
-    return [l.rstrip() for l in txt.replace("\r", "").split("\n")]
+    txt = re.sub(r"\d\d/\d\d/\d{4} \d{1,2}:\d\d:\d\d", "<fecha>", txt)
+    return [l.rstrip() for l in txt.replace("\r", "").replace("_x000D_", "").split("\n")
+            if not RE_TIEMPOS_FORMATEO.search(l)]
+
+
+def informes_botones(L):
+    """{tag: informe} de la columna Informe_Rut de Lo_RibbonUI (hoja con CodeName Prog__RibbonUI)."""
+    hoja = L.codename.get("Prog__RibbonUI")
+    t = L.tabla_de(hoja) if hoja else None
+    if not t or "Uribbon-Tags" not in t[5] or "Informe_Rut" not in t[5]:
+        return {}
+    c_tag, c_inf = t[5].index("Uribbon-Tags") + t[2], t[5].index("Informe_Rut") + t[2]
+    out = {}
+    for nf, celdas in L.filas(hoja, t[1] + 1, t[2], t[3], t[4]):
+        tag = (celdas.get(c_tag) or (None,))[0]
+        if tag:
+            inf = (celdas.get(c_inf) or (None,))[0]
+            out[tag[2:]] = inf[2:] if inf else ""
+    return out
+
+
+def comparar_logs(la, lb, titulo):
+    """Compara dos logs ya limpios; devuelve 0 si son iguales."""
+    if la == lb:
+        print("   %-40s IDÉNTICO (%d líneas)." % (titulo, len(la)))
+        return 0
+    import difflib
+    print("   %-40s DIFERENTE:" % titulo)
+    for l in list(difflib.unified_diff(la, lb, "ANTES", "DESPUÉS", lineterm="", n=0))[:80]:
+        print("      " + l)
+    return 1
 
 
 def main():
@@ -266,23 +319,21 @@ def main():
     ap.add_argument("--hojas", default=",".join(HOJAS_DEFECTO), help="CodeNames separados por comas")
     ap.add_argument("--max", type=int, default=30, help="diferencias a mostrar por hoja")
     ap.add_argument("--sin-hora", default="", help="cabeceras de fecha a comparar sin la hora, separadas por comas")
+    ap.add_argument("--por", default=None, help="cabecera por cuyo valor se cuentan las diferencias (p. ej. C_Acad)")
     args = ap.parse_args()
 
     A, B = Libro(args.antes), Libro(args.despues)
     sin_hora = {c.strip() for c in args.sin_hora.split(",") if c.strip()}
     total = 0
     for h in args.hojas.split(","):
-        total += comparar_hoja(A, B, h.strip(), args.max, sin_hora)
+        total += comparar_hoja(A, B, h.strip(), args.max, sin_hora, args.por)
 
-    print("\n" + "=" * 100 + "\nLog del proceso (%s), sin horas ni tiempos" % NOMBRE_LOG)
-    la, lb = limpiar_log(A.valor_nombre(NOMBRE_LOG)), limpiar_log(B.valor_nombre(NOMBRE_LOG))
-    if la == lb:
-        print("   IDÉNTICO (%d líneas)." % len(la))
-    else:
-        import difflib
-        total += 1
-        for l in difflib.unified_diff(la, lb, "ANTES", "DESPUÉS", lineterm="", n=0):
-            print("   " + l)
+    print("\n" + "=" * 100 + "\nLogs, sin horas ni tiempos")
+    total += comparar_logs(limpiar_log(A.valor_nombre(NOMBRE_LOG)), limpiar_log(B.valor_nombre(NOMBRE_LOG)), NOMBRE_LOG)
+    ia, ib = informes_botones(A), informes_botones(B)
+    for tag in sorted(set(ia) | set(ib)):
+        if ia.get(tag) or ib.get(tag):
+            total += comparar_logs(limpiar_log(ia.get(tag)), limpiar_log(ib.get(tag)), "Informe_Rut de " + tag)
 
     print("\nRESULTADO: " + ("IDÉNTICOS" if total == 0 else "HAY DIFERENCIAS"))
     sys.exit(0 if total == 0 else 1)

@@ -63,13 +63,17 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <body>
 <main><article>
 <h1>Plan: botones fuera de <code>_Menú_Aux</code>, metadatos del Ribbon en <code>Lo_RibbonUI</code></h1>
-<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-04 · <strong>Modelo:</strong> Jornadas y Congresos (fases F3–F4 de agosto de 2026 y cambio de <code>Form_Running_Rut</code> del 2026-08-17; ver <code>../Jornadas_y_Congresos/docs/Informe_Ribbon.md</code> e <code>Informe_Rutinas_Botones_Unicos.md</code>).</p>
-<h2>Estado: HECHO (2026-10-04)</h2>
-<p>Las seis fases están aplicadas en el libro, probadas por el usuario en Excel y validadas con <code>CustomUI/Validar_Ribbon.py</code> (0 errores). Commits: <code>fa59c6fa</code> (fase 0), <code>318a97b2</code> (fases 1–4), <code>9fe2300a</code> (volcado tras la fase 1), <code>fa1ce549</code> (fase 5) y el de cierre, con los 3 callbacks de los menús contextuales que faltaban y la documentación. <code>Tb_Tareas</code> pasó de 65 a 8 filas; <code>Lo_RibbonUI</code> tiene 26. El módulo de un solo uso <code>Z_Migrar_RibbonUI</code> se quitó del libro y del repo.</p>
+<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-04 · <strong>Revisado:</strong> 2026-10-04 17:15 · <strong>Modelo:</strong> Jornadas y Congresos (fases F3–F4 de agosto de 2026 y cambio de <code>Form_Running_Rut</code> del 2026-08-17; ver <code>../Jornadas_y_Congresos/docs/Informe_Ribbon.md</code> e <code>Informe_Rutinas_Botones_Unicos.md</code>).</p>
+<p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · ⏳ <strong>Pendiente</strong> · ⏸️ <strong>Postergado</strong></p>
+<h2>Estado: ✅ HECHO (2026-10-04)</h2>
+<p>Las seis fases están aplicadas en el libro, probadas por el usuario en Excel y validadas con <code>CustomUI/Validar_Ribbon.py</code> (0 errores). Commits: <code>fa59c6fa</code> (fase 0), <code>318a97b2</code> (fases 1–4), <code>9fe2300a</code> (volcado tras la fase 1), <code>fa1ce549</code> (fase 5), <code>72a673aa</code> (cierre: 3 callbacks de los menús contextuales que faltaban y documentación) y <code>b32f24af</code> (borrada <code>Rut_Right_Click_Control_KK</code>). <code>Tb_Tareas</code> pasó de 65 a 8 filas; <code>Lo_RibbonUI</code> tiene 26. El módulo de un solo uso <code>Z_Migrar_RibbonUI</code> se quitó del libro y del repo.</p>
+<p><strong>Comprobación de la revisión (16:35):</strong> el libro guardado a las 16:25 tiene el mismo código que <code>VBA_Moduls/</code> en sus 113 módulos (leído con olevba). Las únicas diferencias son mayúsculas que el editor de VBA cambia por su cuenta, como <code>TBx_Informe</code> → <code>Tbx_Informe</code> o <code>allowFiltering</code> → <code>AllowFiltering</code>. <code>Validar_Ribbon.py</code> da 0 errores y 4 avisos, los cuatro intencionados. Los volcados de las dos tablas siguen al día: al regenerarlos solo cambia la hora de un informe.</p>
+<h3>Resumen</h3>
+<div class="tw"><table><thead><tr><th>Qué</th><th>Estado</th></tr></thead><tbody><tr><td>Objetivos 1 y 2</td><td>✅ Hecho</td></tr><tr><td>Fases 0 a 6</td><td>✅ Hecho</td></tr><tr><td>Fallos previos 1, 2, 4 y 5 (el 3 resultó no ser un fallo)</td><td>✅ Hecho</td></tr><tr><td>Decisiones 1 a 5</td><td>✅ Hecho</td></tr><tr><td>3 callbacks de los menús contextuales</td><td>✅ Hecho</td></tr><tr><td>Reimportar <code>M_000_Ini_APP</code> en el libro</td><td>✅ Hecho</td></tr><tr><td>Borrar el temporal de Excel <code>A1C24500</code></td><td>✅ Hecho</td></tr><tr><td>Confirmar que el libro compila tras la última reimportación</td><td>✅ Hecho (el usuario, 2026-10-04)</td></tr><tr><td>Revisar lo que sigue vigente de <code>Informes/Informe_RibbonX.html</code></td><td>⏸️ Postergado</td></tr><tr><td><code>M_520</code> (Recalcular JIs 303): restaurar sus hojas o borrar el módulo</td><td>⏸️ Postergado</td></tr></tbody></table></div>
 <h2>Objetivo</h2>
 <ol>
-<li>Quitar de la tabla <code>Tb_Tareas</code> (hoja <code>_Menú_Aux</code>, CodeName <code>Prog__Menu_Aux</code>) las filas que corresponden a un botón del Ribbon.</li>
-<li>Que una rutina con botón no pueda verse ni lanzarse desde <code>Form_Menu</code>, y que <code>Form_Running_Rut</code> deje de buscar rutinas en <code>_Menú_Aux</code> y de lanzarlas.</li>
+<li>✅ <strong>Hecho</strong> — Quitar de la tabla <code>Tb_Tareas</code> (hoja <code>_Menú_Aux</code>, CodeName <code>Prog__Menu_Aux</code>) las filas que corresponden a un botón del Ribbon.</li>
+<li>✅ <strong>Hecho</strong> — Que una rutina con botón no pueda verse ni lanzarse desde <code>Form_Menu</code>, y que <code>Form_Running_Rut</code> deje de buscar rutinas en <code>_Menú_Aux</code> y de lanzarlas.</li>
 </ol>
 <h2>Cómo queda</h2>
 <ul>
@@ -79,33 +83,47 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li><strong>El XML del Ribbon no cambia</strong>: <code>GetVsbl_CtrlTab</code> y <code>getStip_CtrlTab</code> conservan su nombre.</li>
 </ul>
 <h2>Dependencias de <code>_Menú_Aux</code> que había que cortar antes de borrar filas</h2>
-<div class="tw"><table><thead><tr><th>Para qué</th><th>Dónde</th><th>Si se borraba la fila</th></tr></thead><tbody><tr><td>Visibilidad</td><td><code>Rut_Filtrar_Tareas</code> (columna <code>Visible</code>, 19 llamadas) + <code>Func_CtrlTab_View</code> (por prefijo <code>Like Tag*</code>)</td><td>el botón desaparecía</td></tr><tr><td>Supertips</td><td><code>Func_STip_CtrlTab_Value</code></td><td>"¡ Control.Tag, NO encontrado !"</td></tr><tr><td>Lanzar por nombre</td><td><code>RuT_Ejecutar_Rut</code> (4 callbacks), <code>Form_Running_Rut</code> (9 botones), <code>Func_Rut_CtrlTab_Value</code></td><td>"No existe la Tarea" / "la Rutina NO Existe"</td></tr><tr><td>Informe</td><td><code>RuT_Load_Task_Data</code>, también desde <code>Workbook_Open</code></td><td>error 13 al abrir el libro</td></tr></tbody></table></div>
-<h2>Fallos previos encontrados (y qué se hace)</h2>
+<div class="tw"><table><thead><tr><th>Para qué</th><th>Dónde</th><th>Si se borraba la fila</th><th>Estado</th></tr></thead><tbody><tr><td>Visibilidad</td><td><code>Rut_Filtrar_Tareas</code> (columna <code>Visible</code>, 19 llamadas) + <code>Func_CtrlTab_View</code> (por prefijo <code>Like Tag*</code>)</td><td>el botón desaparecía</td><td>✅ Hecho: fases 2 y 5</td></tr><tr><td>Supertips</td><td><code>Func_STip_CtrlTab_Value</code></td><td>"¡ Control.Tag, NO encontrado !"</td><td>✅ Hecho: fase 2 (ahora lee <code>Lo_RibbonUI</code>)</td></tr><tr><td>Lanzar por nombre</td><td><code>RuT_Ejecutar_Rut</code> (4 callbacks), <code>Form_Running_Rut</code> (9 botones), <code>Func_Rut_CtrlTab_Value</code></td><td>"No existe la Tarea" / "la Rutina NO Existe"</td><td>✅ Hecho: fases 3 y 4</td></tr><tr><td>Informe</td><td><code>RuT_Load_Task_Data</code>, también desde <code>Workbook_Open</code></td><td>error 13 al abrir el libro</td><td>✅ Hecho: fase 4 (ahora <code>Rut_RibbonUI_Guardar_Informe</code>)</td></tr></tbody></table></div>
+<h2>Fallos previos encontrados (y qué se hizo)</h2>
 <ol>
-<li><strong>Export e Import BDatos no funcionaban</strong>: los callbacks pedían <code>Rut_LstObj_Export_Bdatos</code> / <code>Rut_LstObj_Import_Bdatos</code>, que no existen (las reales son <code>Rut_Lo_*_Hist_Bdatos</code>). → Se arreglan en la fase 4.</li>
-<li><strong>ReCalculate</strong> ejecutaba <code>"Rut_Recalcular_Tabla_" &amp; ActiveSheet.Name</code>: solo se veía en <code>Inf_Recibos_TIO</code>, la única hoja sin rutina con ese nombre. → Elige la rutina por CodeName y se ve en <code>Inf_Recibos_TIO</code>, <code>Inf_RSm</code> y <code>JIs_AE4</code>.</li>
-<li><del>Usuarios <code>Susan</code>/<code>Fanny</code> mal escritos</del> — <strong>falso</strong>: lo leí en un volcado recortado a 10 caracteres. Las listas dicen <code>Boss,SusanaC,FannyR;RafaG</code>, todo IDs correctos.</li>
-<li>El separador de <em>Restore</em> estaba oculto: la fila decía <code>RestoreBdatos</code> y <code>Like</code> distingue mayúsculas. → Desaparece con la comparación nueva.</li>
-<li>4 filas de botones que ya no existen en el XML y 18 tareas sin botón que apuntan a rutinas inexistentes. → Se borran (quedan en el historial de <code>CustomUI/Tb_Tareas_snapshot.csv</code>).</li>
+<li>✅ <strong>Hecho</strong> (fase 4) — <strong>Export e Import BDatos no funcionaban</strong>: los callbacks pedían <code>Rut_LstObj_Export_Bdatos</code> / <code>Rut_LstObj_Import_Bdatos</code>, que no existen (las reales son <code>Rut_Lo_*_Hist_Bdatos</code>).</li>
+<li>✅ <strong>Hecho</strong> (fase 4) — <strong>ReCalculate</strong> ejecutaba <code>"Rut_Recalcular_Tabla_" &amp; ActiveSheet.Name</code>: solo se veía en <code>Inf_Recibos_TIO</code>, la única hoja sin rutina con ese nombre. Ahora elige la rutina por CodeName y se ve en <code>Inf_Recibos_TIO</code>, <code>Inf_RSm</code> y <code>JIs_AE4</code>.</li>
+<li>✅ <strong>Hecho</strong> (descartado) — <del>Usuarios <code>Susan</code>/<code>Fanny</code> mal escritos</del>: <strong>no era un fallo</strong>. Lo leí en un volcado recortado a 10 caracteres. Las listas dicen <code>Boss,SusanaC,FannyR;RafaG</code>, todo IDs correctos.</li>
+<li>✅ <strong>Hecho</strong> — El separador de <em>Restore</em> estaba oculto: la fila decía <code>RestoreBdatos</code> y <code>Like</code> distingue mayúsculas. Desapareció con la comparación nueva.</li>
+<li>✅ <strong>Hecho</strong> (fase 5) — 4 filas de botones que ya no existen en el XML y 18 tareas sin botón que apuntaban a rutinas inexistentes: borradas (quedan en el historial de <code>CustomUI/Tb_Tareas_snapshot.csv</code>).</li>
 </ol>
 <h2>Decisiones (2026-10-04, el usuario: "de acuerdo con todo")</h2>
 <ol>
-<li>Se borran también las filas sin tag cuya rutina tiene botón (grupo C): Activar Modo Programación, Copia USB, Show RibbonX, Hide/Restore Context Menu, Protect/UnProtect, SW-Probando, Sheets Show all y JI's ActivEco4.</li>
-<li>El informe de la última ejecución se sigue guardando, ahora en <code>Lo_RibbonUI.Informe_Rut</code> (lo muestra el supertip de Boss).</li>
-<li>Sin efecto (ver fallo 3).</li>
-<li>Se arreglan los fallos 1 y 2.</li>
-<li>Se borran las 18 tareas muertas.</li>
+<li>✅ <strong>Hecho</strong> — Se borran también las filas sin tag cuya rutina tiene botón (grupo C): Activar Modo Programación, Copia USB, Show RibbonX, Hide/Restore Context Menu, Protect/UnProtect, SW-Probando, Sheets Show all y JI's ActivEco4.</li>
+<li>✅ <strong>Hecho</strong> — El informe de la última ejecución se sigue guardando, ahora en <code>Lo_RibbonUI.Informe_Rut</code> (lo muestra el supertip de Boss).</li>
+<li>✅ <strong>Hecho</strong> — Sin efecto (ver fallo 3).</li>
+<li>✅ <strong>Hecho</strong> — Se arreglan los fallos 1 y 2.</li>
+<li>✅ <strong>Hecho</strong> — Se borran las 18 tareas muertas.</li>
 </ol>
 <h2>Fases</h2>
 <p>Cada tanda termina con: reimportar, compilar (Depuración → Compilar), probar en Excel y commit.</p>
 <ul>
-<li><strong>Fase 0. Red de seguridad.</strong> <code>CustomUI/Volcar_Tareas_y_Ribbon.py</code> (volcados CSV de las dos tablas) y <code>CustomUI/Validar_Ribbon.py</code> (cruce XML ↔ VBA ↔ tablas, adaptado de JyC).</li>
-<li><strong>Fase 1. Rellenar <code>Lo_RibbonUI</code>.</strong> Macro de un solo uso <code>Z_Fase1_Rellenar_RibbonUI</code> (módulo <code>Z_Migrar_RibbonUI</code>): borra las filas de JyC y crea las 26 de PPub, copiando de <code>Tb_Tareas</code> la descripción y el informe.</li>
-<li><strong>Fase 2. Motor de reglas.</strong> <code>M___RibbonUI_Rules.bas</code> + constantes <code>Rib_*</code>; <code>GetVsbl_CtrlTab</code>/<code>getStip_CtrlTab</code> leen de él; <code>RefreshRibbon</code> llama a <code>Rules_Reset</code>.</li>
-<li><strong>Fase 3. Callbacks directos.</strong> Cambiar usuario, vista del Ribbon, Ribbon Refresh, Buscar vínculos, Modo Programación y Reset dejan de pasar por <code>_Menú_Aux</code>.</li>
-<li><strong>Fase 4. <code>Form_Running_Rut</code>.</strong> <code>Rut_Progreso_Abrir</code>/<code>Rut_Progreso_Cerrar</code>; fuera los <code>Call_RuT_*</code> y el camino viejo del formulario.</li>
-<li><strong>Fase 5. Podar</strong> (segunda tanda, tras probar la primera): borrar las 57 filas, quitar <code>Rut_Filtrar_Tareas</code> y sus llamadas, la columna <code>Visible</code> y <code>Task_Visible</code>; <code>Form_Menu</code> y el menú dinámico "9_ " pasan a <code>Fnc_Lista_Contiene</code>; borrar las rutinas que queden sin llamador.</li>
-<li><strong>Fase 6. Documentar</strong>: <code>CLAUDE.md</code>, memoria y volcados finales.</li>
+<li>✅ <strong>Hecho</strong> (<code>fa59c6fa</code>) — <strong>Fase 0. Red de seguridad.</strong> <code>CustomUI/Volcar_Tareas_y_Ribbon.py</code> (volcados CSV de las dos tablas) y <code>CustomUI/Validar_Ribbon.py</code> (cruce XML ↔ VBA ↔ tablas, adaptado de JyC).</li>
+<li>✅ <strong>Hecho</strong> (<code>318a97b2</code>, volcado en <code>9fe2300a</code>) — <strong>Fase 1. Rellenar <code>Lo_RibbonUI</code>.</strong> Macro de un solo uso <code>Z_Fase1_Rellenar_RibbonUI</code> (módulo <code>Z_Migrar_RibbonUI</code>): borra las filas de JyC y crea las 26 de PPub, copiando de <code>Tb_Tareas</code> la descripción y el informe. El módulo ya se quitó.</li>
+<li>✅ <strong>Hecho</strong> (<code>318a97b2</code>) — <strong>Fase 2. Motor de reglas.</strong> <code>M___RibbonUI_Rules.bas</code> + constantes <code>Rib_*</code>; <code>GetVsbl_CtrlTab</code>/<code>getStip_CtrlTab</code> leen de él; <code>RefreshRibbon</code> llama a <code>Rules_Reset</code>.</li>
+<li>✅ <strong>Hecho</strong> (<code>318a97b2</code>) — <strong>Fase 3. Callbacks directos.</strong> Cambiar usuario, vista del Ribbon, Ribbon Refresh, Buscar vínculos, Modo Programación y Reset dejan de pasar por <code>_Menú_Aux</code>.</li>
+<li>✅ <strong>Hecho</strong> (<code>318a97b2</code>) — <strong>Fase 4. <code>Form_Running_Rut</code>.</strong> <code>Rut_Progreso_Abrir</code>/ <code>Rut_Progreso_Cerrar</code>; fuera los <code>Call_RuT_*</code> y el camino viejo del formulario.</li>
+<li>✅ <strong>Hecho</strong> (<code>fa1ce549</code>) — <strong>Fase 5. Podar</strong> (segunda tanda, tras probar la primera): 57 filas borradas (65 → 8), fuera <code>Rut_Filtrar_Tareas</code> y sus llamadas, la columna <code>Visible</code> y <code>Task_Visible</code>; <code>Form_Menu</code> y el menú dinámico "9_ " pasan a <code>Fnc_Lista_Contiene</code>. Rutinas borradas por quedar sin llamador: <code>Rut_Chg_Usuario</code>, <code>Rut_OnOff_SW_WB_Deactivate</code>, <code>Rut_RibbonX_ShowAll</code>, <code>Rut_OnOff_SW_Probando</code> y <code>Rut_ProtectUnProtect_ActivSheet</code>. Se quedan <code>Rut_RibbonRefresh</code> (la llama <code>M___RibbonUI</code>) y <code>Rut_Btn_Menu_Aux</code> (la llaman dos formas de hoja).</li>
+<li>✅ <strong>Hecho</strong> (<code>72a673aa</code>) — <strong>Fase 6. Documentar</strong>: <code>CLAUDE.md</code>, memoria y volcados finales.</li>
+</ul>
+<h2>Después del cierre</h2>
+<ul>
+<li>✅ <strong>Hecho</strong> (<code>72a673aa</code>) — <strong>3 callbacks de los menús contextuales</strong> que el XML pedía y no existían: <code>GetLbl_CCtxtBtnSW_PruebaONOFF</code>, <code>OnAct_Change_Usuario</code> y <code>OnAct_GroupSaveTimer_USB</code>. El clic derecho daba "No se puede ejecutar la macro" y el menú salía sin ninguno de los elementos propios. Probado: los dos menús (tabla y celda) salen completos.</li>
+<li>✅ <strong>Hecho</strong> (<code>b32f24af</code>) — Borrada <code>Rut_Right_Click_Control_KK</code> (<code>M_000_Ini_APP</code>), copia sin uso de la ya borrada <code>Rut_OnOff_SW_WB_Deactivate</code>.</li>
+<li>✅ <strong>Hecho</strong> — <code>M_000_Ini_APP</code> reimportado en el libro (comprobado con olevba en el libro guardado a las 16:25).</li>
+<li>✅ <strong>Hecho</strong> — Borrado el temporal de Excel <code>A1C24500</code> (108 MB) de la carpeta del proyecto.</li>
+<li>✅ <strong>Hecho</strong> (decisión) — Avisos intencionados de <code>Validar_Ribbon.py</code>: los tags <code>Change_Usuario</code>, <code>Liq_TitProp_CCtxt_HelpComments</code> y <code>Liq_TitProp_HelpComments</code> no tienen fila en <code>Lo_RibbonUI</code> a propósito (quedan ocultos). <code>RunRutPrueba</code> apunta a <code>RuT_kkkk</code>, que no existe; es el botón de pruebas y su <code>Nom_Rut</code> se cambia según lo que se quiera probar.</li>
+<li>✅ <strong>Hecho</strong> — El libro compila (Depuración → Compilar) tras la última reimportación: confirmado por el usuario el 2026-10-04.</li>
+</ul>
+<h2>Relacionado, fuera de este plan</h2>
+<ul>
+<li>⏸️ <strong>Postergado</strong> — <strong><code>Informes/Informe_RibbonX.html</code></strong>, sin revisar entero. Este plan ya resolvió parte: R3, R4 y R5 con los 3 callbacks contextuales; R6 el 2026-09-30; y las mejoras sobre <code>Func_CtrlTab_View</code>, <code>Rut_Filtrar_Tareas</code> y la visibilidad duplicada dejaron de aplicar con <code>Lo_RibbonUI</code>. Falta ver si siguen vigentes R1, R2 y R7 a R10, y el resto de las mejoras. Del patrón de reintento sin límite (<code>Resume</code> tras el error -2147417848) queda una sola ocurrencia en <code>M___RibbonUI</code>, en <code>OnAct_MenuAux</code>; las demás desaparecieron al reescribir los callbacks.</li>
+<li>⏸️ <strong>Postergado</strong> — <strong><code>M_520_Calcular_JIs_PPub_1303</code></strong>: su fila de <code>Tb_Tareas</code> ("Recalcular JIs 303") se borró en la fase 5 como tarea muerta. El módulo sigue comentado entero y sin llamador, porque las hojas <code>Sht__BD_AdmP</code> y <code>Sht__BD_JIs_303</code> no existen. Hay que decidir si se restauran las hojas o se borra el módulo.</li>
 </ul>
 </article></main>
 <footer>Generado desde <code>Plan_Menu_Aux_a_RibbonUI.md</code> con <code>md2html.py</code> &middot;
