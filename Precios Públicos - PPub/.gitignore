@@ -3,3 +3,6 @@
 
 # Copias de seguridad con marca de tiempo (backups locales, no versionar)
 PPub_BDatos_2026_BACKUP_*/
+
+# Cache de Python de los scripts de Herramientas/
+__pycache__/
