@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-01 10:00
+' Last Rev. 2026-10-03 23:51
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -137,7 +137,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSGES04 por Año Contable --------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AnoCont
+    Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AnoCont & "|LsGes04_AñoCont_" & AnoCont     '- El de siempre o el de Robot_PPub_Fusión
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")

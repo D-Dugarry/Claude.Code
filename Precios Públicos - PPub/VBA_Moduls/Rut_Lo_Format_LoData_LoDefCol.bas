@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-09-30 18:25
+' Last Rev. 2026-10-04 08:25
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -18,11 +18,18 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     Dim Ccol                As Integer
     Dim Ws_Data             As Worksheet:   Set Ws_Data = LoData.Parent
     Dim HiddenCol           As Boolean
+    Dim T_Ini               As Single:      T_Ini = Timer                   '- Tiempos del formateo, para el informe
+    Dim T_Paso              As Single
+    Dim T_Quitar            As Single                                       '- Quitar formatos, validaciones y AutoFit
+    Dim T_Cols              As Single                                       '- Suma de las Col. formateadas
+    Dim Tiempos             As Collection:  Set Tiempos = New Collection    '- Array(Texto, Segundos) de cada paso
+    Dim Paso                As Variant
 
     If LoData.DataBodyRange Is Nothing Then
         MsgBox "¡¡¡ Tabla SIN DATOS !!!", vbOKOnly, "Proceso: Formatear Tabla ListObjects"
         GoTo ExitSub
     End If
+    T_Paso = Timer
     '--- Quitar todo formato -----------------------------------
     LoData.DataBodyRange.Select
     With Selection
@@ -42,6 +49,8 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
         ' Opcional: restablecer formato numérico estándar
         .Cells.NumberFormat = "General"
     End With
+    T_Quitar = Timer - T_Paso
+    Tiempos.Add Array("   Quitar formatos, validaciones y AutoFit", T_Quitar)
     
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
@@ -53,6 +62,7 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             CantFormatCol = CantFormatCol + 1
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "___________________ Formateando Col. " & Ccol & " (" & CantFormatCol & "ª.), de " & TotCantFormatCol & " Col.", 0, , , TxT_Prog, , , 2)
+        T_Paso = Timer
         Select Case LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar)
             Case "T"
                     LoData.DataBodyRange.Columns(Ccol).Select
@@ -89,11 +99,9 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
                With LoData.DataBodyRange
                     .Columns(Ccol).Select
                     If WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
-                        '- Convierto a números, texto con formato punto de millares y coma decimal. -------------------------------
-                        Selection.TextToColumns Destination:=Range(.Cells(1, Ccol).Address(False, False)), DataType:=xlDelimited, _
-                            TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
-                            Semicolon:=False, Comma:=False, Space:=False, Other:=False, _
-                            FieldInfo:=Array(1, 1), TrailingMinusNumbers:=True
+                        '- Convierto a números los textos numéricos, celda a celda en RAM: la Col. puede mezclar números y textos.
+                        '- Sustituye a TextToColumns, que con la config. española deja "443.73" como texto y lee "3867.9250" como 38.679.250.
+                        Call Rut_Col_Textos_a_Numeros(.Columns(Ccol))
                     End If
 '                    Dim Rc As Range '--- Si es un número muy grande lo muestra como 99999E+12, con el For-Next lo quitamos ------
 '                    For Each Rc In .Columns(1)
@@ -110,6 +118,9 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             Case Else
                 MsgBox "Error en Tipo de Variable, NO es T,F ó N ???", vbExclamation, "Procedimiento: Formatear Tabla."
         End Select
+        T_Paso = Timer - T_Paso
+        T_Cols = T_Cols + T_Paso
+        Tiempos.Add Array("   Col. " & Ccol & " " & LoData.ListColumns(Ccol).Name & " (" & LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar) & ")", T_Paso)
 NextCol:
 '        Ws_Data.Columns(LoData.ListColumns(Ccol).Range.Column).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
         LoData.Range.Columns(Ccol).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
@@ -118,10 +129,92 @@ NextCol:
         
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateadas: ", LastTimeLap, CantFormatCol & " de " & TotCantFormatCol & " col.", , TxT_Progreso)
+            '- Tiempo de cada paso del formateo (suman el total que da el llamador) -----------------------------------
+            Tiempos.Add Array("   Anchos, alineación y resto", (Timer - T_Ini) - T_Quitar - T_Cols)
+            For Each Paso In Tiempos
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", CStr(Paso(0)), 0, Format(Paso(1), "0.00") & " seg.")
+            Next Paso
         
 ExitSub:
 Debug.Print "<<< Rut_Lo_Format_LoData_LoDefColData"
 End Sub     ' Rut_Lo_Format_LoData_LoDefColData
+' ==================================================================================================================================
+
+'- ----------------------------------------------------------------------------------------------------------------------------
+'- Convierte en número los textos numéricos de una Col., celda a celda en RAM. La Col. puede mezclar números y textos: los
+'- números se dejan como están. Entiende los dos formatos de texto que llegan:
+'-      - el del Robot (Robot_PPub_Fusión): punto decimal y sin millares    -> "443.73", "3867.9250", "-300"
+'-      - el español: coma decimal y punto de millares                      -> "1.234,56", "-300,00"
+'- Si algún texto numérico de la Col. lleva coma, la coma es el decimal y el punto los millares; si ninguno la lleva, el punto
+'- es el decimal. El signo "-" puede ir delante o detrás ("300-"), como con el TrailingMinusNumbers de TextToColumns, y los
+'- textos vacíos quedan vacíos. Los textos que no son números ("FLY", un nombre de fichero...) se quedan como están.
+'- ----------------------------------------------------------------------------------------------------------------------------
+Private Sub Rut_Col_Textos_a_Numeros(Rng As Range)
+    Dim Datos           As Variant
+    Dim Fila            As Long
+    Dim ComaDecimal     As Boolean
+    Dim Num             As Double
+    Dim Cambios         As Long
+
+    If Rng.Cells.CountLarge = 1 Then
+        ReDim Datos(1 To 1, 1 To 1)
+        Datos(1, 1) = Rng.Value2
+    Else
+        Datos = Rng.Value2
+    End If
+    For Fila = 1 To UBound(Datos, 1)                        '- 1ª pasada: ¿algún texto numérico lleva coma decimal?
+        If VarType(Datos(Fila, 1)) = vbString Then
+            If InStr(Datos(Fila, 1), ",") > 0 Then
+                If Fnc_Texto_a_Numero(Datos(Fila, 1), True, Num) Then ComaDecimal = True: Exit For
+            End If
+        End If
+    Next Fila
+    For Fila = 1 To UBound(Datos, 1)                        '- 2ª pasada: conversión
+        If VarType(Datos(Fila, 1)) = vbString Then
+            If Datos(Fila, 1) = "" Then
+                Datos(Fila, 1) = Empty
+                Cambios = Cambios + 1
+            ElseIf Fnc_Texto_a_Numero(Datos(Fila, 1), ComaDecimal, Num) Then
+                Datos(Fila, 1) = Num
+                Cambios = Cambios + 1
+            End If
+        End If
+    Next Fila
+    If Cambios > 0 Then Rng.Value2 = Datos
+End Sub     ' Rut_Col_Textos_a_Numeros
+'- ----------------------------------------------------------------------------------------------------------------------------
+
+'- True (y el valor en Num) si Txt es un número escrito como texto. ComaDecimal: True = "1.234,56" / False = "1234.56" -------
+Private Function Fnc_Texto_a_Numero(ByVal Txt As String, ByVal ComaDecimal As Boolean, ByRef Num As Double) As Boolean
+    Dim SepDec      As String
+    Dim SepMil      As String
+    Dim PosDec      As Long
+    Dim Negativo    As Boolean
+
+    Txt = Trim$(Txt)
+    If Left$(Txt, 1) = "-" Then
+        Negativo = True
+        Txt = Mid$(Txt, 2)
+    ElseIf Right$(Txt, 1) = "-" Then
+        Negativo = True
+        Txt = Left$(Txt, Len(Txt) - 1)
+    End If
+    If Not Txt Like "*#*" Then Exit Function                    '- Sin ninguna cifra
+    If Txt Like "*[!0-9.,]*" Then Exit Function                 '- Algo que no es cifra ni separador
+    If ComaDecimal Then
+        SepDec = ",":   SepMil = "."
+    Else
+        SepDec = ".":   SepMil = ","
+    End If
+    PosDec = InStr(Txt, SepDec)
+    If PosDec > 0 Then
+        If InStr(PosDec + 1, Txt, SepDec) > 0 Then Exit Function    '- Dos separadores decimales
+        If InStr(PosDec + 1, Txt, SepMil) > 0 Then Exit Function    '- Millares detrás del decimal
+    End If
+    Num = Val(Replace(Replace(Txt, SepMil, ""), SepDec, "."))       '- Val usa siempre el punto como decimal, sea cual sea la config.
+    If Negativo Then Num = -Num
+    Fnc_Texto_a_Numero = True
+End Function    ' Fnc_Texto_a_Numero
 ' ==================================================================================================================================
 
 '''' ==================================================================================================================================

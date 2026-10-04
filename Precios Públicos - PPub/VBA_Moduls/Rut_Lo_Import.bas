@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-03 23:51
 '2026-01-18
 Option Explicit
 
@@ -213,7 +213,8 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol"
 Rut_Off_Functions
     Dim rowfind             As Variant
     Dim SheetIndx           As Integer:         SheetIndx = 1
-    Dim ArchRequest         As String:          ArchRequest = Arch_New_Name
+    Dim NombresValidos      As String:          NombresValidos = Arch_New_Name                      '- Nombre(s) admitidos, separados por "|"
+    Dim ArchRequest         As String:          ArchRequest = Replace(Arch_New_Name, "|", " o ")    '- Para mostrarlos en los avisos
     Dim TxT_Progreso        As String
     Dim NomArch             As String
     Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
@@ -223,9 +224,10 @@ Rut_Off_Functions
     LastTimeLap = Timer             '- Para saber tiempos intermedios
         
         '- Visualizo el progreso --------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Seleccionar el fichero y la ruta, para importar: " & Arch_New_Name, 0)
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Seleccionar el fichero y la ruta, para importar: " & ArchRequest, 0)
     '- Select File -------------------------------------------------------------------------------------
-    Call Rut_File_Select("Seleccionar el Nuevo Fichero Excel " & Arch_New_Name & ": ", Arch_New_Name, "Excel", "*.xls?")
+    Arch_New_Name = Fnc_Nombres_Prefijo_Comun(NombresValidos)                  '- El diálogo filtra por la parte común de los nombres
+    Call Rut_File_Select("Seleccionar el Nuevo Fichero Excel " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?")
         If Arch_New_Name = "Cancel" Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
@@ -240,7 +242,7 @@ Rut_Off_Functions
         End If
         NomArch = Dir(Arch_New_Name)
         '- Comprueba que se ha seleccionado el nombre adecuado de Excel. --------------------------
-        If Left(NomArch, Len(ArchRequest)) <> ArchRequest Then
+        If Not Fnc_Nombre_Fichero_Valido(NomArch, NombresValidos) Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado, el fichero debe ser un " & ArchRequest & " * !" & vbLf & vbLf & "  y se ha seleccionado:  " & NomArch
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
@@ -368,6 +370,19 @@ Rut_Off_Functions
             Exit Sub
         End If
         
+        '- Robot_PPub_Fusión añade al final de sus ficheros una Col. ORIGEN (el fichero del Robot de donde sale cada fila).
+        '- No es un dato del informe: si se copiara, caería encima de la primera Col. calculada de la tabla de destino.
+        Dim Lc_Origen       As ListColumn
+        Dim Quitada_Origen  As Boolean
+        On Error Resume Next
+        Set Lc_Origen = Lo_ClsBk.ListColumns("ORIGEN")
+        On Error GoTo 0
+        If Not Lc_Origen Is Nothing Then
+            Lc_Origen.Delete
+            Set Lc_Origen = Nothing
+            Quitada_Origen = True
+        End If
+
         '- La Tabla Lo_Data SÍ tiene datos -Y- las Columnas coinciden. ---------------------
         ClosedBook.Sheets(SheetIndx).ListObjects(1).DataBodyRange.Copy
         Lo_Data.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues    'xlPasteAll    xlPasteValues
@@ -383,10 +398,45 @@ Rut_Off_Functions
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importado: " & NomArch, 0, , , TxT_Progreso)
                 LastTimeLap = TimeLap2
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
+            If Quitada_Origen Then Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
 
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
+'- ----------------------------------------------------------------------------------------------------------------------------
+
+'- ----------------------------------------------------------------------------------------------------------------------------
+'- Nombres de fichero que admite una importación: uno o varios prefijos separados por "|", p.ej. el nombre de siempre y el de
+'- Robot_PPub_Fusión ("LSGES04_GE_SinDtos_Año_2026|LsGes04_AñoCont_2026"). Se comparan sin distinguir mayúsculas, como Windows.
+'- ----------------------------------------------------------------------------------------------------------------------------
+Function Fnc_Nombre_Fichero_Valido(ByVal NomArch As String, ByVal NombresValidos As String) As Boolean
+    Dim Nombre      As Variant
+    For Each Nombre In Split(NombresValidos, "|")
+        If Nombre <> "" Then
+            If LCase$(Left$(NomArch, Len(Nombre))) = LCase$(Nombre) Then
+                Fnc_Nombre_Fichero_Valido = True
+                Exit Function
+            End If
+        End If
+    Next Nombre
+End Function    ' Fnc_Nombre_Fichero_Valido
+
+'- Parte inicial común de los nombres admitidos (sin distinguir mayúsculas), para el filtro del diálogo de selección: --------
+'- "LSGES04_GE_SinDtos_Año_2026|LsGes04_AñoCont_2026" -> "LSGES04_", que en el diálogo encuentra los dos.
+Function Fnc_Nombres_Prefijo_Comun(ByVal NombresValidos As String) As String
+    Dim Nombres     As Variant
+    Dim Prefijo     As String
+    Dim i           As Long
+    If NombresValidos = "" Then Exit Function
+    Nombres = Split(NombresValidos, "|")
+    Prefijo = Nombres(0)
+    For i = 1 To UBound(Nombres)
+        Do While LCase$(Left$(Nombres(i), Len(Prefijo))) <> LCase$(Prefijo)
+            Prefijo = Left$(Prefijo, Len(Prefijo) - 1)
+        Loop
+    Next i
+    Fnc_Nombres_Prefijo_Comun = Prefijo
+End Function    ' Fnc_Nombres_Prefijo_Comun
 '- ----------------------------------------------------------------------------------------------------------------------------

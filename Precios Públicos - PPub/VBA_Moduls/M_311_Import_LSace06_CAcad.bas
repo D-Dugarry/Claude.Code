@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-03 23:51
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -51,7 +51,8 @@ Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol_LSace06"
 Rut_Off_Functions
 
     Dim rowfind         As Variant
-    Dim ArchRequest     As String:      ArchRequest = Arch_New_Name
+    Dim NombresValidos  As String:      NombresValidos = Arch_New_Name                      '- Nombre(s) admitidos, separados por "|"
+    Dim ArchRequest     As String:      ArchRequest = Replace(Arch_New_Name, "|", " o ")    '- Para mostrarlos en los avisos
     Dim TxT_ProgIni     As String:      TxT_ProgIni = ActivForm.Controls("TBx_Informe")
     Dim TxT_Progreso    As String
     Dim NomFichLSace06  As String
@@ -67,7 +68,8 @@ Rut_Off_Functions
     LastTimeLap = Timer             '- Para saber tiempos intermedios
         
     '- Select File -------------------------------------------------------------------------------------
-    Call Rut_File_Select_V2("Seleccionar el Nuevo Fichero Excel LSaces06 " & Arch_New_Name & ": ", Arch_New_Name, "Excel", "*.xls?")
+    Arch_New_Name = Fnc_Nombres_Prefijo_Comun(NombresValidos)                  '- El diálogo filtra por la parte común de los nombres
+    Call Rut_File_Select_V2("Seleccionar el Nuevo Fichero Excel LSaces06 " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?")
         If Arch_New_Name = "Cancel" Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
@@ -80,7 +82,7 @@ Rut_Off_Functions
         End If
         Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
         '- Comprueba que se ha seleccionado el nombre adecuado de Excel. --------------------------
-        If Left(NomFichLSace06, Len(ArchRequest)) <> ArchRequest Then
+        If Not Fnc_Nombre_Fichero_Valido(NomFichLSace06, NombresValidos) Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado, el fichero debe ser un " & ArchRequest & " * !" & vbLf & vbLf & "  y se ha seleccionado:  " & Arch_New_Name
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
@@ -175,6 +177,17 @@ Rut_Off_Functions
         Exit Sub
     End If
     
+    '- Robot_PPub_Fusión añade al final de sus ficheros una Col. ORIGEN (el fichero del Robot de donde sale cada fila).
+    '- No es un dato del informe: se quita antes de procesar, para que no llegue a Lo_INSS. -------------------------------
+    Dim Lc_Origen       As ListColumn
+    On Error Resume Next
+    Set Lc_Origen = Lo_ClsBk_LSace06.ListColumns("ORIGEN")
+    On Error GoTo 0
+    If Not Lc_Origen Is Nothing Then
+        Lc_Origen.Delete
+        Set Lc_Origen = Nothing
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
+    End If
     '- --------------------------------------------------------------------------------------------------------------
     '- Proceso ClsBk:
     '-            Formateo.

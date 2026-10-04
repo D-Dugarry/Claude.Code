@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-03 23:51
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 C_Acad_" & C_Acad_Ant & " ?" & 
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSGES04 del Curso_Acad_Ant ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Dim Arch_New_Name         As String:    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant & "_BD"
+    Dim Arch_New_Name         As String:    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant & "_BD" & "|LsGes04_C_Acad_" & C_Acad_Ant     '- El de siempre o el de Robot_PPub_Fusión
     Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores

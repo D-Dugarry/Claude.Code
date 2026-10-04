@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-03 23:51
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSace06 Del Curso_Acad " & C_Acad_Ant &
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSace06 del Curso_Acad_Ant ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSACE06_" & C_Acad_Ant
+    Arch_New_Name = "LSACE06_" & C_Acad_Ant & "|LSace06_C_Acad_" & C_Acad_Ant     '- El de siempre o el de Robot_PPub_Fusión
     Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
     Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
@@ -84,7 +84,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSace06 Del Curso_Acad " & C_Acad_Ant &
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSace06 del Curso_Acad_Pos ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSACE06_" & C_Acad_Pos
+    Arch_New_Name = "LSACE06_" & C_Acad_Pos & "|LSace06_C_Acad_" & C_Acad_Pos     '- El de siempre o el de Robot_PPub_Fusión
     Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
         Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
