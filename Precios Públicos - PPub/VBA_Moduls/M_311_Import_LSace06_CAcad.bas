@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-03 23:51
+' Last Rev. 2026-10-04 11:42
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -369,7 +369,7 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "en BD_INSS Rec. de " & Text, 0, _
                             Format(rowfind, "#,##0") & " reg", "Total: " & Format(Lo_INSS.ListRows.Count, "#,##0") & " reg")
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Sht__BD_INSS.Range("c2") = "Úlitma Importación LSace06 C_Acad_Ant - " & C_Acad_Ant & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadAnt")
     Sht__BD_INSS.Range("c3") = "Úlitma Importación LSace06 C_Acad_Pos - " & C_Acad_Pos & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadPos")
 

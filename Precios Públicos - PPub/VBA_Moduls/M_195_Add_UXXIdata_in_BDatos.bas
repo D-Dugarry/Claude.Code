@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_195_Add_UXXIdata_in_BDatos"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 11:42
 '- M_195_Import_a_BD_Ant -----------------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -128,7 +128,7 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar Datos Contables UXXI de BD_Ant a BDatos 
     Lo_BD_Ant.ShowTotals = True
 
 Terminar:
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_Ant.Range("d1") = "Traspasados Datos UXXI a BDatos: " & Format(Now(), "dd-mmm-yy hh:mm")
     Lo_BD_Ant.ShowTotals = True

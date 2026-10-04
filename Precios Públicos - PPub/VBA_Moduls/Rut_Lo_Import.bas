@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-03 23:51
+' Last Rev. 2026-10-04 11:42
 '2026-01-18
 Option Explicit
 
@@ -188,7 +188,7 @@ Rut_Off_Functions
                 LastTimeLap = TimeLap2
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
@@ -400,7 +400,7 @@ Rut_Off_Functions
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             If Quitada_Origen Then Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"

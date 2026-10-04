@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-03 23:51
+' Last Rev. 2026-10-04 11:42
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_IAdm_CAcadAnt.Range("d2") = "Úlitma Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD.Range("b3") = " Tabla Rec. Acad. TIO y EP  +  Imp.Adm Curso " & Prog__APP.Range("APP_C_Acad_Pos") & _

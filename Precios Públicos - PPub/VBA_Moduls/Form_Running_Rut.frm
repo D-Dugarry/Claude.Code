@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-09-30 20:04
+' Last Rev. 2026-10-04 11:42
 
 Option Explicit
 
@@ -68,8 +68,8 @@ Debug.Print "-.-.-.-.-.-.-.-.-.-.-.- >>> Form_Running_Rut UserForm_Activate()"
         '---
         Application.Run Prog__APP.Range("APP_Task_Rut").Value
             DoEvents ' Permite que Excel procese eventos pendientes
-            Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe
-            .Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+            Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe.Text    ' .Text: si se pasa el control (objeto), Excel da 1004 con textos largos
+            .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
     End With
     
     '---
@@ -84,7 +84,7 @@ Debug.Print "Form_Running_Rut Btn_VerInf_Click() - Form_Inf_Rut"
     Btn_VerInf.Visible = False
     Btn_Eixir.Visible = True
     With Prog__Menu_Aux.ListObjects(1).DataBodyRange
-        .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe
+        .Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
         Me.Lb_Tit_Informe.Caption = "Informe Tarea realizada: " & .Cells(TaskIndice, Task_Tarea)
 '        Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")
     End With
@@ -92,8 +92,8 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Btn_Eixir_Click()
     If IsError(TaskIndice) Then    ' ¡¡¡ No Existe la Rutina !!! ------------------------
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe
-        Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Me.TBx_Informe.Text
+        Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe.Text
     End If
     Unload Me
 End Sub

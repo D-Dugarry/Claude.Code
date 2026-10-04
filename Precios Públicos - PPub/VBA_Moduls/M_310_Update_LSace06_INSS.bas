@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-10-03 23:51
+' Last Rev. 2026-10-04 11:42
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Lo_INSS.ShowTotals = True
     Sht__BD_INSS.Calculate
 

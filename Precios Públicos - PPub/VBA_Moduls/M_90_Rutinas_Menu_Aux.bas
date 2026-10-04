@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-02 13:55
+' Last Rev. 2026-10-04 11:42
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con Rut_ProtectUnProtect_ActivSheet o el botón
@@ -24,7 +24,7 @@ Debug.Print "RuT_Ejecutar_Rut"
         If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- Red de seguridad: la tarea se saltó algún Rut_On_Functions
         '--------------
         MsgBx_Msg = Prog__APP.Range("APP_Task_Inf")
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
     End If
     If Show_Msg Then
         MsgBx_Title = "Informe del Proceso de Ejecutar la Tarea:  " & TaskRut
@@ -41,7 +41,7 @@ Debug.Print "RuT_Load_Task_Data"
         Prog__APP.Range("APP_Task_Rut") = TaskRut
         Prog__APP.Range("APP_Task_Index") = TaskIndice
         
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
 End Sub
 '==================================================================================================================================
 '===================================================================================================================================
@@ -56,7 +56,7 @@ Debug.Print "RuT_Save_Task_Data"
         Prog__APP.Range("APP_Task_Rut") = TaskRut
         Prog__APP.Range("APP_Task_Index") = TaskIndice
         If Task_Inf = "" Then
-            Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf")
+            Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe) = Prog__APP.Range("APP_Task_Inf").Value
         Else
             Debug.Print Task_Inf
         Dim Rng     As Range:     Set Rng = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(TaskIndice, Task_Rut_Informe)

@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-04 08:25
+' Last Rev. 2026-10-04 11:58
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     Dim HiddenCol           As Boolean
     Dim T_Ini               As Single:      T_Ini = Timer                   '- Tiempos del formateo, para el informe
     Dim T_Paso              As Single
-    Dim T_Quitar            As Single                                       '- Quitar formatos, validaciones y AutoFit
+    Dim T_Quitar            As Single                                       '- Quitar formatos y validaciones
     Dim T_Cols              As Single                                       '- Suma de las Col. formateadas
     Dim Tiempos             As Collection:  Set Tiempos = New Collection    '- Array(Texto, Segundos) de cada paso
     Dim Paso                As Variant
@@ -43,14 +43,14 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
         .Cells.FormatConditions.Delete
         ' Eliminar todo el formato (incluyendo fuentes, colores, bordes, alineación, etc.)
         .Cells.ClearFormats
-        ' Restaurar ancho/alto predeterminado
-        .Columns.AutoFit
-        .Rows.AutoFit
+        ' Sin AutoFit: los anchos se fijan después desde DefCol (NextCol). El alto de las filas se fija al estándar de la hoja:
+        ' con las filas en alto automático, las Col. N tardaban 5 seg. más (Excel recalcula el alto al escribir en ellas).
+        .RowHeight = Ws_Data.StandardHeight
         ' Opcional: restablecer formato numérico estándar
         .Cells.NumberFormat = "General"
     End With
     T_Quitar = Timer - T_Paso
-    Tiempos.Add Array("   Quitar formatos, validaciones y AutoFit", T_Quitar)
+    Tiempos.Add Array("   Quitar formatos y validaciones, alto de filas", T_Quitar)
     
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             TxT_Progreso = ActivForm.Controls("TBx_Informe")

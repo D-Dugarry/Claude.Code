@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_410_Update_BD_AE4x4"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 11:42
 '2026-01-017
 '- M_410_Update_Lo_AE4 -----------------------------------------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ If Not Func_MsgBox_vbYesNo("¿ Copiamos en BDatos los nuevos Rec. AE4 ?" & vbLf &
 Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", vbLf & String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe")
+    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     
     Prog__APP.Range("APP_Last_Import_AE4") = Format(Now(), "dd-mmm-yy hh:mm")
     Lo_AE4.ShowTotals = True

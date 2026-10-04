@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-02 13:55
+' Last Rev. 2026-10-04 11:42
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -1485,7 +1485,7 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
         Rut_Name = Left(Rutinas_Name, Pos_Delimitador - 1)
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         Application.Run Rut_Name
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf")
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf").Value
     Loop While Len(Rutinas_Name) > 0
     Application.ScreenUpdating = True
     DoEvents
