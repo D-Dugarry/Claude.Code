@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_113_Assign_Concept_Eco"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 17:08
 'Rev.: 2026-01-22
 '                           ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. por 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
@@ -266,15 +266,15 @@ Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
     '- ----------------------------------------------------------------------------------------------------------------------------------------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Asignación Concepto Económico y Tipo Ensañanza.", 0, , , , , , 2)
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
-    Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
     Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
     With Lo_Data
         .DataBodyRange.Columns(BD_Concepto).ClearContents   '- Se supone que está vacía...
         .DataBodyRange.Columns(BD_TIO_EP).ClearContents   '- Se supone que está vacía...
         
-    Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
     Call Rut_Lo_Sort(Lo_Data, BD_TipoCurso, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         
 '-1º Recibos Cod_Activ = 6 - Grado -----------------------------------------------------------------------

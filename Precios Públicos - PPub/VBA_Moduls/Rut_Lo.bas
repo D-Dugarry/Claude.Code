@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 17:08
 Option Explicit
 
 '###################################################################################################################################
@@ -295,8 +295,12 @@ End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 
 '###################################################################################################################################
-Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, Columna As Integer, VarOrden As String, Optional SW_Clear As Boolean = False)
+Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, Columna As Integer, VarOrden As String, Optional SW_Clear As Boolean = False, _
+                Optional Aplicar As Boolean = True)
 ' ----------------------------------------------------------------------------------------------------------------------------------
+'- Aplicar:=False solo añade la Col. a los criterios de ordenación, sin ordenar todavía. En una tanda de ordenaciones seguidas
+'- de la misma tabla basta con ordenar en la última, que ya lleva todas las Col.: la tabla se ordena una vez en lugar de una
+'- por Col., con el mismo resultado (la ordenación de Excel es estable).
     With Lo_Tb.Sort
         If SW_Clear Then .SortFields.Clear
         .SortFields.Add Key:=Lo_Tb.ListColumns(Columna).Range, SortOn:=xlSortOnValues, Order:=VarOrden, DataOption:=xlSortNormal
@@ -304,7 +308,7 @@ Sub Rut_Lo_Sort(ByRef Lo_Tb As ListObject, Columna As Integer, VarOrden As Strin
         .MatchCase = False
         .Orientation = xlTopToBottom
         .SortMethod = xlPinYin
-        .Apply
+        If Aplicar Then .Apply
     End With
 End Sub
 ' ==================================================================================================================================

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-10-02 20:15
+' Last Rev. 2026-10-04 17:08
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -22,7 +22,9 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Dim TF_LoBDatos     As Long:        TF_LoBDatos = LoBDatos.ListRows.Count
     Dim RowsDel         As Long
     Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
+    '- (2026-10-04) Curso Pos, como dice el nombre de la rutina. Antes leía el selector APP_CursAcad: con el selector en el
+    '- curso Ant calculaba el curso que M_215 borra justo después, y el curso Pos se quedaba sin Rec_Imp_*.
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
     Dim PlanDNI_New     As String:
@@ -34,14 +36,14 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     '- Visualizo el progreso ----------------------------------------------------------------------------------------
     TxT_ProgIni = ActivForm.Controls("TBx_Informe")
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Identificar ImpAcad ImpAdm e ImpDto del Curso: " & _
-                         C_Acad & ", en " & Format(LoBDatos.ListRows.Count, "#,##0") & " reg.", 0, , , , , , 2)
+                         C_Acad_Pos & ", en " & Format(LoBDatos.ListRows.Count, "#,##0") & " reg.", 0, , , , , , 2)
     TxT_Progreso = ActivForm.Controls("TBx_Informe")
     
     
-    '-ClearContents de Rec. BD_C_Acad = C_Acad -------------------------------------
+    '-ClearContents de Rec. BD_C_Acad = C_Acad_Pos -------------------------------------
     Call Rut_Lo_Filtros_Quitar(LoBDatos)
     With LoBDatos
-        .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad
+        .Range.AutoFilter Field:=BD_C_Acad, Criteria1:="=" & C_Acad_Pos
         RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
         If RowsFind > 0 Then
             .DataBodyRange.Columns(BD_Rec_Imp_Acad).SpecialCells(xlCellTypeVisible).ClearContents
@@ -53,11 +55,11 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     
     Call Rut_Lo_Filtros_Quitar(LoBDatos)
     ' Ordenar por columnas  ------------------------------
-        Call Rut_Lo_Sort(LoBDatos, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(LoBDatos, BD_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
     '- Recorro toda la tabla LoBDatos, en RAM (Rut_Lo_TablaRam): celda a celda con ListRows(Fila) tardaba ~1 min. --------
@@ -67,7 +69,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
                                                   BD_ImpAcad, BD_ImpAdm, BD_ImpDto, _
                                                   BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
     For Fila = 1 To TF_LoBDatos   '--- Bucle para recorrer todas la filas de LoBDatos
-        If T_BD.Datos(Fila, BD_C_Acad) <> C_Acad Then GoTo Sig_Reg         '- NO tenemos en cuenta loas Recibos de Otros C_Acad, porque NO tenemos toda la información
+        If T_BD.Datos(Fila, BD_C_Acad) <> C_Acad_Pos Then GoTo Sig_Reg         '- NO tenemos en cuenta loas Recibos de Otros C_Acad, porque NO tenemos toda la información
         If T_BD.Datos(Fila, BD_ActivEco) = 4 Then GoTo Sig_Reg             '- NO tenemos en cuenta los Recibos de AE4,  ya vienen con sus ImpAdm de AE4x4
         If T_BD.Datos(Fila, BD_ActivEco) > 6 Then Exit For                 '- NO tenemos en cuenta los Recibos de Movimiento (ordenada por AE, ya no quedan más)
         PlanDNI_New = T_BD.Datos(Fila, BD_Plan) & "_" & T_BD.Datos(Fila, BD_DNI)
@@ -192,7 +194,7 @@ Sig_Reg:
                             Format(ImpTAcad + ImpTAdm + ImpTDto, "#,##0.00€"))
         
 Call Rut_Lo_Filtros_Quitar(LoBDatos)
-Debug.Print "<<< Rut_Assign_Imp_AdmAcad_C_Acad_Pos" & C_Acad
+Debug.Print "<<< Rut_Assign_Imp_AdmAcad_C_Acad_Pos" & C_Acad_Pos
 End Sub     ' -------------------------------------------------------------------------------------------------------------------------<<<
 ' ========================================================================================================================================
 

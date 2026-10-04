@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_211_Del_Null_Reg_CAcadAnt"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 17:08
 '2026-01-23
 '- M_211_Remove_Null_Reg_CAcad
 Option Explicit
@@ -99,7 +99,7 @@ Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
 '--------- El importe del recibo es Cero, el importe Académico es Cero, y el importe Administrativo es Cero. -----
 '--------- Es decir que la Matrícula del estudio es gratuita, no tiene coste alguno. -----------------------------
 '- ---------------------------------------------------------------------------------------------------------------
-        Call Rut_Lo_Sort(Lo_G04, BD_ImpRec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado ---------------------
+        Call Rut_Lo_Sort(Lo_G04, BD_ImpRec, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado ---------------------
         Call Rut_Lo_Sort(Lo_G04, BD_ImpDto, xlAscending, False)    '- Ordenar primero accelera un montón el borrado ---------------------
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref

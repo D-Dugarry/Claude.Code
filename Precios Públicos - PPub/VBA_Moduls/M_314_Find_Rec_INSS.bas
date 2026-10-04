@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_314_Find_Rec_INSS"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 17:08
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -38,11 +38,11 @@ Debug.Print ">>> RuT_Find_Rec_INSS_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Call Rut_Lo_Filtros_Quitar(Lo_ClsBk)
     Lo_ClsBk.DataBodyRange.Columns(LS06_RecINSS).ClearContents
     ' Ordenar por columnas  ------------------------------
-    Call Rut_Lo_Sort(Lo_ClsBk, LS06_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, LS06_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, LS06_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, LS06_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-    Call Rut_Lo_Sort(Lo_ClsBk, LS06_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_ClsBk, LS06_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_ClsBk, LS06_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_ClsBk, LS06_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_ClsBk, LS06_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+    Call Rut_Lo_Sort(Lo_ClsBk, LS06_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
     Call Rut_Lo_Sort(Lo_ClsBk, LS06_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
 
     '- Recorro toda la tabla Lo_ClsBk -----------------------------------------------------------------

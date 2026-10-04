@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 17:08
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -54,8 +54,8 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     With Lo_BD
     
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Emi, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Vto, xlAscending, False)
+        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Emi, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Vto, xlAscending, False, Aplicar:=False)
         Call Rut_Lo_Sort(Lo_BD, BD_ACont_Cob, xlAscending, False)
                 
         '-ClearContents de Rec. BD_C_Acad = C_Acad -------------------------------------

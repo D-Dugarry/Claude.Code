@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-04 12:32
+' Last Rev. 2026-10-04 17:08
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -24,6 +24,9 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     Dim T_Cols              As Single                                       '- Suma de las Col. formateadas
     Dim Tiempos             As Collection:  Set Tiempos = New Collection    '- Array(Texto, Segundos) de cada paso
     Dim Paso                As Variant
+    Dim UltCol              As Integer:     UltCol = Application.Min(LoData.Range.Columns.Count, LoDefCol.ListRows.Count)
+    Dim N_Hasta             As Integer                                      '- Última Col. del bloque de Col. N ya convertido
+    Dim TxT_Bloque          As String                                       '- Para el informe de tiempos de las Col. N
 
     If LoData.DataBodyRange Is Nothing Then
         MsgBox "¡¡¡ Tabla SIN DATOS !!!", vbOKOnly, "Proceso: Formatear Tabla ListObjects"
@@ -57,12 +60,13 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateando el Excel. ", 0, , , TxT_Prog, , , 4)
             TxT_Prog = ActivForm.Controls("TBx_Informe")
     '--- Formatear las Columnas --------------------------------------------------------------------------------------
-    For Ccol = 1 To Application.Min(LoData.Range.Columns.Count, LoDefCol.ListRows.Count)
+    For Ccol = 1 To UltCol
         If Not LoDefCol.DataBodyRange.Cells(Ccol, DefC_FormatCol) Then GoTo NextCol    '- Sólo si se desea formatear la Col.
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             CantFormatCol = CantFormatCol + 1
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "___________________ Formateando Col. " & Ccol & " (" & CantFormatCol & "ª.), de " & TotCantFormatCol & " Col.", 0, , , TxT_Prog, , , 2)
         T_Paso = Timer
+        TxT_Bloque = ""
         Select Case LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar)
             Case "T"
                     LoData.DataBodyRange.Columns(Ccol).Select
@@ -82,11 +86,23 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
                End With
             Case "N"
                With LoData.DataBodyRange
-                    .Columns(Ccol).Select
-                    If WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
-                        '- Convierto a números los textos numéricos, celda a celda en RAM: la Col. puede mezclar números y textos.
-                        '- Sustituye a TextToColumns, que con la config. española deja "443.73" como texto y lee "3867.9250" como 38.679.250.
-                        Call Rut_Col_Textos_a_Numeros(.Columns(Ccol))
+                    '- Las Col. N seguidas se convierten de una vez, con una lectura y una escritura para todo el bloque: la 1ª Col.
+                    '- del bloque las convierte todas y las demás solo ponen su formato. (Col. a Col., las 11 Col. N tardaban 7,5 seg.)
+                    If Ccol > N_Hasta Then
+                        N_Hasta = Ccol
+                        Do While N_Hasta < UltCol
+                            If Not LoDefCol.DataBodyRange.Cells(N_Hasta + 1, DefC_FormatCol) Then Exit Do
+                            If LoDefCol.DataBodyRange.Cells(N_Hasta + 1, DefC_TipVar) <> "N" Then Exit Do
+                            N_Hasta = N_Hasta + 1
+                        Loop
+                        If WorksheetFunction.CountA(.Columns(Ccol).Resize(, N_Hasta - Ccol + 1)) > 0 Then
+                            '- Convierto a números los textos numéricos, celda a celda en RAM: la Col. puede mezclar números y textos.
+                            '- Sustituye a TextToColumns, que con la config. española deja "443.73" como texto y lee "3867.9250" como 38.679.250.
+                            Call Rut_Cols_Textos_a_Numeros(.Columns(Ccol).Resize(, N_Hasta - Ccol + 1))
+                        End If
+                        If N_Hasta > Ccol Then TxT_Bloque = ", bloque " & Ccol & "-" & N_Hasta
+                    Else
+                        TxT_Bloque = ", ya convertida en su bloque"
                     End If
 '                    Dim Rc As Range '--- Si es un número muy grande lo muestra como 99999E+12, con el For-Next lo quitamos ------
 '                    For Each Rc In .Columns(1)
@@ -96,16 +112,14 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
 '                            End If
 '                        End With
 '                    Next
-                    With Selection
-                        .NumberFormat = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Format)
-                    End With
+                    .Columns(Ccol).NumberFormat = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Format)
                 End With
             Case Else
                 MsgBox "Error en Tipo de Variable, NO es T,F ó N ???", vbExclamation, "Procedimiento: Formatear Tabla."
         End Select
         T_Paso = Timer - T_Paso
         T_Cols = T_Cols + T_Paso
-        Tiempos.Add Array("   Col. " & Ccol & " " & LoData.ListColumns(Ccol).Name & " (" & LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar) & ")", T_Paso)
+        Tiempos.Add Array("   Col. " & Ccol & " " & LoData.ListColumns(Ccol).Name & " (" & LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar) & TxT_Bloque & ")", T_Paso)
 NextCol:
 '        Ws_Data.Columns(LoData.ListColumns(Ccol).Range.Column).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
         LoData.Range.Columns(Ccol).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
@@ -126,20 +140,30 @@ End Sub     ' Rut_Lo_Format_LoData_LoDefColData
 ' ==================================================================================================================================
 
 '- ----------------------------------------------------------------------------------------------------------------------------
-'- Convierte en número los textos numéricos de una Col., celda a celda en RAM. La Col. puede mezclar números y textos: los
-'- números se dejan como están. Entiende los dos formatos de texto que llegan:
+'- Convierte en número los textos numéricos de un bloque de Col. seguidas, celda a celda en RAM, con una sola lectura y, casi
+'- siempre, una sola escritura para todo el bloque. Cada Col. puede mezclar números y textos: los números se dejan como están.
+'- Entiende los dos formatos de texto que llegan:
 '-      - el del Robot (Robot_PPub_Fusión): punto decimal y sin millares    -> "443.73", "3867.9250", "-300"
 '-      - el español: coma decimal y punto de millares                      -> "1.234,56", "-300,00"
-'- Si algún texto numérico de la Col. lleva coma, la coma es el decimal y el punto los millares; si ninguno la lleva, el punto
-'- es el decimal. El signo "-" puede ir delante o detrás ("300-"), como con el TrailingMinusNumbers de TextToColumns, y los
-'- textos vacíos quedan vacíos. Los textos que no son números ("FLY", un nombre de fichero...) se quedan como están.
+'- Se decide en cada Col.: si algún texto numérico de la Col. lleva coma, la coma es el decimal y el punto los millares; si
+'- ninguno la lleva, el punto es el decimal. El signo "-" puede ir delante o detrás ("300-"), como con el TrailingMinusNumbers de
+'- TextToColumns, y los textos vacíos quedan vacíos. Los textos que no son números ("FLY", un nombre de fichero...) se quedan como
+'- están.
+'- Se escribe el bloque entero salvo que alguna Col. sin cambios tenga textos: entonces solo las Col. con cambios, porque al
+'- reescribir un texto Excel lo interpreta como si se tecleara ("1/2" pasaría a fecha). Así queda igual que convirtiendo Col. a Col.
 '- ----------------------------------------------------------------------------------------------------------------------------
-Private Sub Rut_Col_Textos_a_Numeros(Rng As Range)
+Private Sub Rut_Cols_Textos_a_Numeros(Rng As Range)
     Dim Datos           As Variant
+    Dim ColDatos        As Variant
     Dim Fila            As Long
+    Dim Col             As Long
+    Dim NumCols         As Long
     Dim ComaDecimal     As Boolean
     Dim Num             As Double
-    Dim Cambios         As Long
+    Dim Cambios()       As Long                             '- (1 To NumCols): celdas convertidas en cada Col.
+    Dim ConTextos()     As Boolean                          '- (1 To NumCols): la Col. conserva textos que no son números
+    Dim TotCambios      As Long
+    Dim Bloque          As Boolean
 
     If Rng.Cells.CountLarge = 1 Then
         ReDim Datos(1 To 1, 1 To 1)
@@ -147,26 +171,53 @@ Private Sub Rut_Col_Textos_a_Numeros(Rng As Range)
     Else
         Datos = Rng.Value2
     End If
-    For Fila = 1 To UBound(Datos, 1)                        '- 1ª pasada: ¿algún texto numérico lleva coma decimal?
-        If VarType(Datos(Fila, 1)) = vbString Then
-            If InStr(Datos(Fila, 1), ",") > 0 Then
-                If Fnc_Texto_a_Numero(Datos(Fila, 1), True, Num) Then ComaDecimal = True: Exit For
+    NumCols = UBound(Datos, 2)
+    ReDim Cambios(1 To NumCols)
+    ReDim ConTextos(1 To NumCols)
+    For Col = 1 To NumCols
+        ComaDecimal = False
+        For Fila = 1 To UBound(Datos, 1)                    '- 1ª pasada: ¿algún texto numérico lleva coma decimal?
+            If VarType(Datos(Fila, Col)) = vbString Then
+                If InStr(Datos(Fila, Col), ",") > 0 Then
+                    If Fnc_Texto_a_Numero(Datos(Fila, Col), True, Num) Then ComaDecimal = True: Exit For
+                End If
             End If
-        End If
-    Next Fila
-    For Fila = 1 To UBound(Datos, 1)                        '- 2ª pasada: conversión
-        If VarType(Datos(Fila, 1)) = vbString Then
-            If Datos(Fila, 1) = "" Then
-                Datos(Fila, 1) = Empty
-                Cambios = Cambios + 1
-            ElseIf Fnc_Texto_a_Numero(Datos(Fila, 1), ComaDecimal, Num) Then
-                Datos(Fila, 1) = Num
-                Cambios = Cambios + 1
+        Next Fila
+        For Fila = 1 To UBound(Datos, 1)                    '- 2ª pasada: conversión
+            If VarType(Datos(Fila, Col)) = vbString Then
+                If Datos(Fila, Col) = "" Then
+                    Datos(Fila, Col) = Empty
+                    Cambios(Col) = Cambios(Col) + 1
+                ElseIf Fnc_Texto_a_Numero(Datos(Fila, Col), ComaDecimal, Num) Then
+                    Datos(Fila, Col) = Num
+                    Cambios(Col) = Cambios(Col) + 1
+                Else
+                    ConTextos(Col) = True
+                End If
             End If
-        End If
-    Next Fila
-    If Cambios > 0 Then Rng.Value2 = Datos
-End Sub     ' Rut_Col_Textos_a_Numeros
+        Next Fila
+        TotCambios = TotCambios + Cambios(Col)
+    Next Col
+    If TotCambios = 0 Then Exit Sub
+
+    Bloque = True
+    For Col = 1 To NumCols
+        If Cambios(Col) = 0 And ConTextos(Col) Then Bloque = False
+    Next Col
+    If Bloque Then
+        Rng.Value2 = Datos
+    Else
+        ReDim ColDatos(1 To UBound(Datos, 1), 1 To 1)
+        For Col = 1 To NumCols
+            If Cambios(Col) > 0 Then
+                For Fila = 1 To UBound(Datos, 1)
+                    ColDatos(Fila, 1) = Datos(Fila, Col)
+                Next Fila
+                Rng.Columns(Col).Value2 = ColDatos
+            End If
+        Next Col
+    End If
+End Sub     ' Rut_Cols_Textos_a_Numeros
 '- ----------------------------------------------------------------------------------------------------------------------------
 
 '- True (y el valor en Num) si Txt es un número escrito como texto. ComaDecimal: True = "1.234,56" / False = "1234.56" -------

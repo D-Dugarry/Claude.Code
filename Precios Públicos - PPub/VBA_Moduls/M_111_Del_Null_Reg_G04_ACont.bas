@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-04 17:08
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -94,7 +94,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '--------- Es decir que la Matrícula del estudio es gratuita, aunque tiene coste. -----------------------------
 '- ---------------------------------------------------------------------------------------------------------------
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
-        Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True)
+        Call Rut_Lo_Sort(Lo_Data, BD_ImpRec, xlAscending, True, Aplicar:=False)
         Call Rut_Lo_Sort(Lo_Data, BD_ImpDto, xlAscending, False)
         .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ImpMatCero")
         rowfind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref

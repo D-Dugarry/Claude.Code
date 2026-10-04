@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 17:08
 '2026-01-25
 Option Explicit
 
@@ -41,11 +41,11 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Lo_AE4x1.DataBodyRange.Columns(BD_Obs_Conta).ClearContents
     
     ' Ordenar por columnas  ------------------------------
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_AE4x1, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_AE4x1, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_AE4x1, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_AE4x1, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_AE4x1, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_AE4x1, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
     '- Recorro toda la tabla Lo_AE4x1 -----------------------------------------------------------------

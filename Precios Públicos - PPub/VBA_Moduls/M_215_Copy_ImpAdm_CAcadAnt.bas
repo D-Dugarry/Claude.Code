@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-04 17:08
 '2026-01-23
 Option Explicit
 
@@ -87,40 +87,53 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
    '- -----------------------------------------------------------------------------------------------------------------------
     Call Rut_Lo_Filtros_Quitar(Lo_BD_CAcad_Ant)
     Lo_BD_CAcad_Ant.DataBodyRange.Columns(BD_Incidencias).ClearContents
-    With Lo_BD_CAcad_Ant.DataBodyRange
-    
-        Call Rut_Lo_Sort(Lo_BD_CAcad_Ant, BD_Ref, xlAscending, True)   '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_BD, BD_Ref, xlAscending, True)          '- Ordenar primero accelera un montón el borrado -----
-        F_BD = 1
-        For F_BDAdm = 1 To TF_BDAdm
-            Select Case Lo_BD.DataBodyRange.Cells(F_BD, BD_Ref)
-                Case Is < .Cells(F_BDAdm, BD_Ref) '- Ref_BD  NO-EXISTE-EN  Sht__BD_Adm
-                    If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
-                    F_BDAdm = F_BDAdm - 1
-                Case Is = .Cells(F_BDAdm, BD_Ref)  '- Ref_BD  SÍ-EXISTE-EN  Sht__BD_Adm
-                    Lo_BD.DataBodyRange.Cells(F_BD, BD_Rec_Imp_Acad) = .Cells(F_BDAdm, BD_ImpAcad)
-                    Lo_BD.DataBodyRange.Cells(F_BD, BD_Rec_Imp_Adm) = .Cells(F_BDAdm, BD_ImpAdm)
-                    Lo_BD.DataBodyRange.Cells(F_BD, BD_Rec_Imp_Dto) = .Cells(F_BDAdm, BD_ImpDto)
-                    Found = Found + 1
-                    .Cells(F_BDAdm, BD_Incidencias) = "Found en BD."
-                    If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
-                Case Is > .Cells(F_BDAdm, BD_Ref)  '- Ref_BD_Adm  NO-EXISTE-EN  Sht__BD
-                    NotFound = NotFound + 1
-                    .Cells(F_BDAdm, BD_Incidencias) = "Not Found en BD."
-            End Select
-        
-            If (F_BDAdm Mod 5000 = 0 And F_BDAdm <> 0) Or F_BD Mod 5000 = 0 Then
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos de: " & _
-                            Format(Found, "#,##0") & " reg. de " & Format(F_BDAdm, "#,##0") & "/" & Format(TF_BDAdm, "#,##0") & "reg.,  entre " & _
-                            Format(F_BD, "#,##0") & "/" & Format(TF_BD, "#,##0") & "reg.", 0, , , TxT_Progreso, True, , 2)
-            End If
-        Next F_BDAdm
-        '- Visualizo el progreso ----------------------------------------------------------------------------------------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporado Imp.Adm. de C_Acad_Ant_" & C_Acad_Ant & _
-                                                       ", Cobrado en " & AnoCont & " a BDatos.", 0, , , TxT_ProgIni, , , 2)
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos a: " & _
-                            Format(Found, "#,##0") & " reg. de BDatos, de un total de " & Format(TF_BDAdm, "#,##0") & "reg. de " & Sht__BD_IAdm_CAcadAnt.Name, 0)
-    End With        '-  Lo_BD_CAcad_Ant.DataBodyRange
+
+    Call Rut_Lo_Sort(Lo_BD_CAcad_Ant, BD_Ref, xlAscending, True)   '- Las dos tablas por Ref, para cruzarlas en un solo recorrido
+    Call Rut_Lo_Sort(Lo_BD, BD_Ref, xlAscending, True)
+    '- El cruce se hace en RAM (Rut_Lo_TablaRam), con el mismo recorrido de siempre: celda a celda en la hoja era lento.
+    '- BD se carga con .Value2 (sus Col. Rec_Imp_* se devuelven enteras, y así las filas que no se tocan quedan idénticas) y la
+    '- tabla del C_Acad_Ant con .Value, que es lo que se copiaba antes con "Celda = Celda".
+    Dim T_BD            As T_TablaRam
+    Dim T_Adm           As T_TablaRam
+    Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref, BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
+    Call Rut_TablaRam_Cargar(T_Adm, Lo_BD_CAcad_Ant, Array(BD_Ref, BD_ImpAcad, BD_ImpAdm, BD_ImpDto, BD_Incidencias))
+    F_BD = 1
+    For F_BDAdm = 1 To TF_BDAdm
+        Select Case T_BD.Datos(F_BD, BD_Ref)
+            Case Is < T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD  NO-EXISTE-EN  Sht__BD_Adm
+                If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
+                F_BDAdm = F_BDAdm - 1
+            Case Is = T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD  SÍ-EXISTE-EN  Sht__BD_Adm
+                T_BD.Datos(F_BD, BD_Rec_Imp_Acad) = T_Adm.Datos(F_BDAdm, BD_ImpAcad)
+                T_BD.Datos(F_BD, BD_Rec_Imp_Adm) = T_Adm.Datos(F_BDAdm, BD_ImpAdm)
+                T_BD.Datos(F_BD, BD_Rec_Imp_Dto) = T_Adm.Datos(F_BDAdm, BD_ImpDto)
+                Found = Found + 1
+                T_Adm.Datos(F_BDAdm, BD_Incidencias) = "Found en BD."
+                If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
+            Case Is > T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD_Adm  NO-EXISTE-EN  Sht__BD
+                NotFound = NotFound + 1
+                T_Adm.Datos(F_BDAdm, BD_Incidencias) = "Not Found en BD."
+        End Select
+
+        If (F_BDAdm Mod 5000 = 0 And F_BDAdm <> 0) Or F_BD Mod 5000 = 0 Then
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos de: " & _
+                        Format(Found, "#,##0") & " reg. de " & Format(F_BDAdm, "#,##0") & "/" & Format(TF_BDAdm, "#,##0") & "reg.,  entre " & _
+                        Format(F_BD, "#,##0") & "/" & Format(TF_BD, "#,##0") & "reg.", 0, , , TxT_Progreso, True, , 2)
+        End If
+    Next F_BDAdm
+    T_BD.Modificada(BD_Rec_Imp_Acad) = True
+    T_BD.Modificada(BD_Rec_Imp_Adm) = True
+    T_BD.Modificada(BD_Rec_Imp_Dto) = True
+    T_Adm.Modificada(BD_Incidencias) = True
+    Call Rut_TablaRam_Volcar(T_BD, Lo_BD)                               '- Devuelvo a la hoja las 3 Col. Rec_Imp_*
+    Call Rut_TablaRam_Volcar(T_Adm, Lo_BD_CAcad_Ant)                    '- y las Incidencias
+    Erase T_BD.Datos                                                    '- Libero la RAM
+    Erase T_Adm.Datos
+    '- Visualizo el progreso ----------------------------------------------------------------------------------------
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporado Imp.Adm. de C_Acad_Ant_" & C_Acad_Ant & _
+                                                   ", Cobrado en " & AnoCont & " a BDatos.", 0, , , TxT_ProgIni, , , 2)
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos a: " & _
+                        Format(Found, "#,##0") & " reg. de BDatos, de un total de " & Format(TF_BDAdm, "#,##0") & "reg. de " & Sht__BD_IAdm_CAcadAnt.Name, 0)
     
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
     With Lo_BD
