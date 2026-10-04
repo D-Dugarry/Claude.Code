@@ -1,0 +1,63 @@
+﻿Fila_Excel;A;B;C;D;E;F;G
+1;Uribbon-Tags;Usuario;SheetsNames;Nom_Rut;Descripion;Informe_Rut;Group-Tag
+2;Btn_ChangeUser;;;Rut_Chg_Usuario;Abre el formulario que permite cambiar el Usuario, y su configuración.;Nuevo Usuario: Dugarry D.,  Email: dugarry@ua.es,  Ext. 3051;GroupChangeUser
+3;Btn_Cta_Export_Liquid;;;Rut_Cta_Export_Liquid;Exporta la Liquidación a un Excel;;GroupSheet_Cta_Liquid
+4;Btn_Cta_Load_Liquid;;;Rut_Cta_Load_Liquid;Carga los datos de una Liquidación y Rellena la Hoja.;;GroupSheet_Cta_Liquid
+5;Btn_Cta_N_Liq_Next;;;Rut_N_Liq_Proponer_Cta;Propone el siguiente Nº de Liquidación libre de la Sigla.;;GroupSheet_Cta_Liquid
+6;Btn_Cta_Save_Liquid;;;Rut_Cta_Save_Liquid;Graba los datos añadidos a la Liquidación.;;GroupSheet_Cta_Liquid
+7;Btn_Filter_Reapply;;;;Muestra los datos de la Tabla aplicando todos los filtros especificados.;;GroupSheet_Cta
+8;Btn_Filter_ShowAlData;;;;Muestra todos los datos de la Tabla quitando todos los filtros aplicados.;;GroupSheet_Cta
+9;Btn_Filtro_ShowAlData;;Inf_JyC_UXXI,Inf_JyC_UXXI_Liq;;Quitar todos los filtros;;Group_ShowHide_Lo_Cols
+10;Btn_ImportN43;;INICIO,Cta_Tb;Rut_Import_Cta_N43;Permite seleccionar el archivo en formato Norma-43 del extracto de la cuenta de Jornadas y Congresos.;;GroupImportData
+11;Btn_ImportTPV;;INICIO,TPV_Tb;Rut_Import_TPV_Pagos;Permite seleccionar el archivo del extracto de los ingresos por TPV o Bizum.;;GroupImportData
+12;Btn_JyC_List;;;;Consulta y mantenimiento de la lista de Jornadas y Congresos: datos de cada JyC, alta de nuevos y modificación de los existentes.;;GroupAPP
+13;Btn_Mail_Cta_DEV_Done;;;Rut_Mail_Cta_DEV_Done;Envía un e-mail Notificando que la Transferencia de Devolución ya está hecha, al Solicitante y a la Unidad de Facturación.;;GroupCta_Solic_Mails
+14;Btn_Mail_Cta_do_Devol;;;Rut_Mail_Cta_do_Devol;Envía un e-mail a Ingresos@ua para Contabilizar y hacer la Devolución.;;GroupCta_Solic_Mails
+15;Btn_Mail_Cta_do_RDT;;;Rut_Mail_Cta_do_RDT;Envía un e-mail a Ingresos@ua, para Contabilizar y Redistribuir.;;GroupCta_Solic_Mails
+16;Btn_Mail_Cta_RDT_Done;;;Rut_Mail_Cta_RDT_Done;Envía un e-mail Notificando la Liquidación Hecha, al Solicitante y a la Unidad de Facturación.;;GroupCta_Solic_Mails
+17;Btn_Mail_Liq_Pdte;;;OnAct_Btn_Mail_Liq_Pdte;"Envía el aviso de ingresos pendientes de liquidar al JI de cada JyC marcado con Mail = ""Si"" en el informe.";;GroupSheet_INICIO_Inf
+18;Btn_Mail_Solic_Anulada;;;Rut_Mail_Solic_Anulada;Envía un e-mail al Solicitante comunicando que la Solicitud de Liquidación ha sido ANULADA, indicando el motivo (Solicitado previamente).;;GroupCta_Solic_Mails
+19;Btn_Mail_TPV_DEV_Done;;;Rut_Mail_TPV_DEV_Done;Envía un e-mail Notificando que la Transferencia de Devolución ya está hecha, al Solicitante y a la Unidad de Facturación.;;GroupTPV_Solic_Mails
+20;Btn_Mail_TPV_do_Devol;;;Rut_Mail_TPV_do_Devol;Envía un e-mail a Ingresos@ua para Contabilizar y hacer la Devolución.;;GroupTPV_Solic_Mails
+21;Btn_Mail_TPV_do_RDT;;;Rut_Mail_TPV_do_RDT;Envía un e-mail a Ingresos@ua, para Contabilizar y Redistribuir.;;GroupTPV_Solic_Mails
+22;Btn_Mail_TPV_RDT_Done;;;Rut_Mail_TPV_RDT_Done;Envía un e-mail Notificando la Liquidación Hecha, al Solicitante y a la Unidad de Facturación.;;GroupTPV_Solic_Mails
+23;Btn_ModeProg;;;RuT_Al_Abrir_WorkBook, Rut_ConfigExcel_Restablecer;Ejecuta las rutinas: Al-Abrir-WorkBook y ConfigExcel-Restablecer.;;GroupMenuAux
+24;Btn_Reset;;INICIO;Rut_Reset_App;Resetea la Aplicación en caso de algún fallo funcional. / Resetea el programa y reinicializar los parámetros.;App Reset 30/07/2026 14:00:37;GroupMenuAux
+25;Btn_ResetExcelConfig;;;Rut_ConfigExcel_Restablecer;Restablece la configuración de Excel.;;GroupMenuAux
+26;Btn_RibbonRefresh;;;Rut_ConfigExcel_Restablecer;Restituir Configuración Excel completamente.;Estado de Programación Activado  -  02/10/2024 9:38:17;GroupMenuAux
+27;Btn_RibbViewMax;;;;Muestra el Ribbon completo;;GroupAPP
+28;Btn_RibbViewMin;;;;Muestra solamente la cabecera del Ribbon;;GroupAPP
+29;Btn_RibbViewNone;;;;Oculta totalmente el Ribbon;;GroupAPP
+30;Btn_SheetProtect;;;;Cambia la Protección de la ActiveSheet de UnProtect a Protect;;GroupMenuAux
+31;Btn_SheetUnProtect;;;;Cambia la Protección de la ActiveSheet de Protect a UnProtect;;GroupMenuAux
+32;Btn_ShowHide_Lo_Cols_DefCols;;;;Muestra u Oculta las columnas de la ListObject de la ActiveSheet según el criterio de la columna HiddenCol de la ListObject_DefCols;;Group_ShowHide_Lo_Cols
+33;Btn_ShowHide_Lo_Cols_Row1x;;;;Muestra u Oculta las columnas de la ListObject de la ActiveSheet según el criterio de la Fila HeaderRowRange-2;;Group_ShowHide_Lo_Cols
+34;Btn_Sw_DebugModeOnOff;;;;Activa o Desactiva los Debug.Print de todos los módulos, menos los módulos de RibbonUI;;GroupMenuAux
+35;Btn_Sw_DebugModeRibbonOnOff;;;;Activa o Desactiva los Debug.Print de todos los módulos de RibbonUI;;GroupMenuAux
+36;Btn_Sw_Wb_DeactivateOnOff;;;;"Allow do action when you change of WorkBook like: Rut_ConfigExel_Restablecer, etc. / -------IMPORTANTE------ /     SW_WB_Deactivate = True   ' para Desactivar en la Sub Workbook_Deactivate de la hoja ""ThisWorkBook"", que ejecute la rutina _ /                                     Call Rut_ConfigExcel_Restablecer() porque interfiere en la PasteSpecial de la Fnc_RangeToHTML()";;GroupMenuAux
+37;Btn_Sw_Wb_EnableEventsOff;;;;Application.EnableEvents en VBA controla si Excel dispara o no los eventos. / True: Excel ejecuta eventos como Workbook_Open, Worksheet_Change, SelectionChange, etc. / False: esos eventos no se disparan.;;GroupMenuAux
+38;Btn_Sw_Wb_EnableEventsOn;;;;Application.EnableEvents en VBA controla si Excel dispara o no los eventos. / True: Excel ejecuta eventos como Workbook_Open, Worksheet_Change, SelectionChange, etc. / False: esos eventos no se disparan.;;GroupMenuAux
+39;Btn_TPV_Export_Liquid;;;Rut_TPV_Export_Liquid;Exportar en un archivo Excel la Liquidación de Ingresos de TPV / Bizum de Jornadas y Congresos.;Por ahora, no se actualiza !!;GroupSheet_TPV_Liquid
+40;Btn_TPV_Import_Solic;;;Rut_TPV_Import_Solic;Importa un Excel de Solicitud de Liquidación de Ingresos de TPV / Bizum de Jornadas y Congresos. (Obtenido mediante consulta paramétrica en UXXI-Económico);Por ahora, no se actualiza !!;GroupSheet_TPV_Liquid
+41;Btn_TPV_Load_Liquid;;;Rut_TPV_Load_Liquid;Cargar los datos de una Liquidación de Ingresos de TPV / Bizum de Jornadas y Congresos.;Por ahora, no se actualiza !!;GroupSheet_TPV_Liquid
+42;Btn_TPV_Load_Solic;;;Rut_TPV_Load_Solic;Carga los datos del Excel importado de Solicitud de Liquidación de Ingresos de TPV / Bizum de Jornadas y Congresos. (Obtenido mediante consulta paramétrica en UXXI-Económico);Por ahora, no se actualiza !!;GroupSheet_TPV_Liquid
+43;Btn_TPV_N_Liq_Next;;;Rut_N_Liq_Proponer_TPV;Propone el siguiente Nº de Liquidación libre de la Sigla.;;GroupSheet_TPV_Liquid
+44;Btn_TPV_Save_Liquid;;;Rut_TPV_Save_Liquid;Grabar los datos añadidos o modificados de la Solicitud de Liquidación de Ingresos de TPV / Bizum de Jornadas y Congresos.;Por ahora, no se actualiza !!;GroupSheet_TPV_Liquid
+45;Dynmic_Mnu_LiqNum_CtaTPV;;;;Despliega los Nº de Liquidación ya existentes de esa Sigla (en Cta o TPV) y carga la elegida.;;GroupSheet_Cta_Nun_Liquid
+46;Dynmic_Mnu_Siglas_CtaTPV;;;;Despliega las Siglas de las Jornadas y Congresos dadas de alta y escribe la elegida en la cabecera de la liquidación.;;GroupSheet_Cta_Nun_Liquid
+47;Group_ShowHide_Lo_Cols;;;;;;Group_ShowHide_Lo_Cols
+48;GroupImportData;;;;Permite importar los ingresos de pagos de inscripciones a Jornadas y Congresos, tanto por transferencias como por TPV, Bizum o FLY.;;GroupImportData
+49;GroupSheet_Cta;;Cta_Tb;;;;GroupSheet_Cta
+50;GroupSheet_Cta_Liquid;;Cta_Liq;;;;GroupSheet_Cta_Liquid
+51;GroupSheet_Cta_Nun_Liquid;;Cta_Liq;;;;GroupSheet_Cta_Nun_Liquid
+52;GroupSheet_INICIO;;;;;;GroupSheet_INICIO
+53;GroupSheet_INICIO_Inf;;INICIO, Inf_JyC_UXXI, Inf_JyC_UXXI_Liq, Inf_JyC_Liq_Pdte, Inf_JyC_L43_UXXI;;;;GroupSheet_INICIO_Inf
+54;GroupSheet_TPV_Liquid;;TPV_Liq;;;;GroupSheet_TPV_Liquid
+55;GroupSheet_TPV_Nun_Liquid;;TPV_Liq;;;;GroupSheet_TPV_Nun_Liquid
+56;Inf_JyC_Liq_Pdte;;;OnAct_Inf_JyC_Liq_Pdte;Genera el informe de Jornadas y Congresos ya terminados que todavía tienen ingresos pendientes de liquidar, para avisar al JI de cada uno.;;GroupSheet_INICIO_Inf
+57;Inf_JyC_UXXI;;;OnAct_Inf_JyC_UXXI;Genera la Tabla Resumen de Ingresos en Cuenta de Jornadas y Congresos de importes UXXI / Pdte. (Liquidado y Pendiente de liquidar), desglosados mes a mes, solo de pagos por transferencia (Cta). / Después de generarlo, pregunta si queremos mandarlo por mail a ingresos@ua.es;;GroupSheet_INICIO_Inf
+58;Inf_JyC_UXXI_Liq;;;OnAct_Inf_JyC_UXXI_Liq;Genera la Tabla Resumen de Ingresos en Cuenta de Jornadas y Congresos de importes UXXI / Pdte. (Liquidado y Pendiente de liquidar), desglosados por Liquidaciones y mes a mes, solo de pagos por transferencia (Cta). / Después de generarlo, pregunta si queremos mandarlo por mail a ingresos@ua.es;;GroupSheet_INICIO_Inf
+59;Inf_JyC_L43_UXXI;;;OnAct_Inf_JyC_L43_UXXI;Genera la Tabla del Extracto de la Cta. de JyC, añadiendo los datos de UXXI (JI/JG/JF);;GroupSheet_INICIO_Inf
+60;Summary_x_JyC;;INICIO;OnAct_Summary_x_JyC;Genera la Tabla Resumen de cada Jornada o Congreso, tanto de pagos por transferencias como por TPV o Bizum.;;GroupSheet_INICIO
+61;Summary_x_Liq;;INICIO;OnAct_Summary_x_Liq;Genera la Tabla Resumen de cada Liquidación de Jornadas y Congresos, tanto de pagos por transferencias como por TPV o Bizum.;;GroupSheet_INICIO
+62;Summary_x_LiqMes;;INICIO;OnAct_Summary_x_LiqMes;Genera la Tabla Resumen de cada Liquidación de Jornadas y Congresos desglosada por Mes de cobro, solo de pagos por transferencia (Cta).;;GroupSheet_INICIO

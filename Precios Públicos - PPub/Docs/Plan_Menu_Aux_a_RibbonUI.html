@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan: botones fuera de _Menú_Aux, metadatos del Ribbon en Lo_RibbonUI</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>Plan: botones fuera de <code>_Menú_Aux</code>, metadatos del Ribbon en <code>Lo_RibbonUI</code></h1>
+<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-04 · <strong>Modelo:</strong> Jornadas y Congresos (fases F3–F4 de agosto de 2026 y cambio de <code>Form_Running_Rut</code> del 2026-08-17; ver <code>../Jornadas_y_Congresos/docs/Informe_Ribbon.md</code> e <code>Informe_Rutinas_Botones_Unicos.md</code>).</p>
+<h2>Objetivo</h2>
+<ol>
+<li>Quitar de la tabla <code>Tb_Tareas</code> (hoja <code>_Menú_Aux</code>, CodeName <code>Prog__Menu_Aux</code>) las filas que corresponden a un botón del Ribbon.</li>
+<li>Que una rutina con botón no pueda verse ni lanzarse desde <code>Form_Menu</code>, y que <code>Form_Running_Rut</code> deje de buscar rutinas en <code>_Menú_Aux</code> y de lanzarlas.</li>
+</ol>
+<h2>Cómo queda</h2>
+<ul>
+<li><strong><code>Lo_RibbonUI</code></strong> (hoja <code>RibbonUI</code>, CodeName <code>Prog__RibbonUI</code>, importada de JyC) es la única fuente de los metadatos del Ribbon: una fila por <code>tag</code>, con <code>Usuario</code>, <code>SheetsNames</code>, <code>Nom_Rut</code>, <code>Descripion</code>, <code>Informe_Rut</code> y <code>Group-Tag</code>. La lee <code>M___RibbonUI_Rules</code> (motor portado de <code>M_003_RibbonUI_Rules</code> de JyC), con el <code>tag</code> comparado entero y sin distinguir mayúsculas. Un <code>tag</code> sin fila queda oculto; si la tabla no se puede leer, se ve todo.</li>
+<li><strong><code>Tb_Tareas</code></strong> se queda solo con las tareas que no tienen botón (8).</li>
+<li><strong><code>Form_Running_Rut</code></strong> ya no lanza nada: el botón lo abre con <code>Rut_Progreso_Abrir</code>, llama a la rutina directamente y lo cierra con <code>Rut_Progreso_Cerrar</code> (<code>M_90_Rutinas_Menu_Aux</code>).</li>
+<li><strong>El XML del Ribbon no cambia</strong>: <code>GetVsbl_CtrlTab</code> y <code>getStip_CtrlTab</code> conservan su nombre.</li>
+</ul>
+<h2>Dependencias de <code>_Menú_Aux</code> que había que cortar antes de borrar filas</h2>
+<div class="tw"><table><thead><tr><th>Para qué</th><th>Dónde</th><th>Si se borraba la fila</th></tr></thead><tbody><tr><td>Visibilidad</td><td><code>Rut_Filtrar_Tareas</code> (columna <code>Visible</code>, 19 llamadas) + <code>Func_CtrlTab_View</code> (por prefijo <code>Like Tag*</code>)</td><td>el botón desaparecía</td></tr><tr><td>Supertips</td><td><code>Func_STip_CtrlTab_Value</code></td><td>"¡ Control.Tag, NO encontrado !"</td></tr><tr><td>Lanzar por nombre</td><td><code>RuT_Ejecutar_Rut</code> (4 callbacks), <code>Form_Running_Rut</code> (9 botones), <code>Func_Rut_CtrlTab_Value</code></td><td>"No existe la Tarea" / "la Rutina NO Existe"</td></tr><tr><td>Informe</td><td><code>RuT_Load_Task_Data</code>, también desde <code>Workbook_Open</code></td><td>error 13 al abrir el libro</td></tr></tbody></table></div>
+<h2>Fallos previos encontrados (y qué se hace)</h2>
+<ol>
+<li><strong>Export e Import BDatos no funcionaban</strong>: los callbacks pedían <code>Rut_LstObj_Export_Bdatos</code> / <code>Rut_LstObj_Import_Bdatos</code>, que no existen (las reales son <code>Rut_Lo_*_Hist_Bdatos</code>). → Se arreglan en la fase 4.</li>
+<li><strong>ReCalculate</strong> ejecutaba <code>"Rut_Recalcular_Tabla_" &amp; ActiveSheet.Name</code>: solo se veía en <code>Inf_Recibos_TIO</code>, la única hoja sin rutina con ese nombre. → Elige la rutina por CodeName y se ve en <code>Inf_Recibos_TIO</code>, <code>Inf_RSm</code> y <code>JIs_AE4</code>.</li>
+<li><del>Usuarios <code>Susan</code>/<code>Fanny</code> mal escritos</del> — <strong>falso</strong>: lo leí en un volcado recortado a 10 caracteres. Las listas dicen <code>Boss,SusanaC,FannyR;RafaG</code>, todo IDs correctos.</li>
+<li>El separador de <em>Restore</em> estaba oculto: la fila decía <code>RestoreBdatos</code> y <code>Like</code> distingue mayúsculas. → Desaparece con la comparación nueva.</li>
+<li>4 filas de botones que ya no existen en el XML y 18 tareas sin botón que apuntan a rutinas inexistentes. → Se borran (quedan en el historial de <code>CustomUI/Tb_Tareas_snapshot.csv</code>).</li>
+</ol>
+<h2>Decisiones (2026-10-04, el usuario: "de acuerdo con todo")</h2>
+<ol>
+<li>Se borran también las filas sin tag cuya rutina tiene botón (grupo C): Activar Modo Programación, Copia USB, Show RibbonX, Hide/Restore Context Menu, Protect/UnProtect, SW-Probando, Sheets Show all y JI's ActivEco4.</li>
+<li>El informe de la última ejecución se sigue guardando, ahora en <code>Lo_RibbonUI.Informe_Rut</code> (lo muestra el supertip de Boss).</li>
+<li>Sin efecto (ver fallo 3).</li>
+<li>Se arreglan los fallos 1 y 2.</li>
+<li>Se borran las 18 tareas muertas.</li>
+</ol>
+<h2>Fases</h2>
+<p>Cada tanda termina con: reimportar, compilar (Depuración → Compilar), probar en Excel y commit.</p>
+<ul>
+<li><strong>Fase 0. Red de seguridad.</strong> <code>CustomUI/Volcar_Tareas_y_Ribbon.py</code> (volcados CSV de las dos tablas) y <code>CustomUI/Validar_Ribbon.py</code> (cruce XML ↔ VBA ↔ tablas, adaptado de JyC).</li>
+<li><strong>Fase 1. Rellenar <code>Lo_RibbonUI</code>.</strong> Macro de un solo uso <code>Z_Fase1_Rellenar_RibbonUI</code> (módulo <code>Z_Migrar_RibbonUI</code>): borra las filas de JyC y crea las 26 de PPub, copiando de <code>Tb_Tareas</code> la descripción y el informe.</li>
+<li><strong>Fase 2. Motor de reglas.</strong> <code>M___RibbonUI_Rules.bas</code> + constantes <code>Rib_*</code>; <code>GetVsbl_CtrlTab</code>/<code>getStip_CtrlTab</code> leen de él; <code>RefreshRibbon</code> llama a <code>Rules_Reset</code>.</li>
+<li><strong>Fase 3. Callbacks directos.</strong> Cambiar usuario, vista del Ribbon, Ribbon Refresh, Buscar vínculos, Modo Programación y Reset dejan de pasar por <code>_Menú_Aux</code>.</li>
+<li><strong>Fase 4. <code>Form_Running_Rut</code>.</strong> <code>Rut_Progreso_Abrir</code>/<code>Rut_Progreso_Cerrar</code>; fuera los <code>Call_RuT_*</code> y el camino viejo del formulario.</li>
+<li><strong>Fase 5. Podar</strong> (segunda tanda, tras probar la primera): borrar las 57 filas, quitar <code>Rut_Filtrar_Tareas</code> y sus llamadas, la columna <code>Visible</code> y <code>Task_Visible</code>; <code>Form_Menu</code> y el menú dinámico "9_ " pasan a <code>Fnc_Lista_Contiene</code>; borrar las rutinas que queden sin llamador.</li>
+<li><strong>Fase 6. Documentar</strong>: <code>CLAUDE.md</code>, memoria y volcados finales.</li>
+</ul>
+</article></main>
+<footer>Generado desde <code>Plan_Menu_Aux_a_RibbonUI.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>
