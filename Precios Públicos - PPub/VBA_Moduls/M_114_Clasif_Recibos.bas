@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-05 23:11
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -15,202 +15,160 @@ Option Explicit
 '- Clasificar Recibos en Emitidos, Remesados, EjeAnt, ADxAplz, Añejas ---------------------------------------------------------------------------
 '- ----------------------------------------------------------------------------------------------------------------------------
 Sub RuT_Clasif_Recibos()
+'- Desde el 2026-10-05 trabaja en RAM (fase 3 del paso a RAM): los filtros se evalúan sobre la copia en memoria de la
+'- tabla (Rut_Lo_CriT_Ram, con las mismas reglas que los filtros de Excel) y las marcas se ponen en RAM. Después, en la
+'- hoja: se devuelven Tipo_Rec, Incidencias y las columnas de las marcas, y UNA ordenación con el mismo resultado que las
+'- dos de antes (M_115 da el importe al primer recibo de cada matrícula, así que el orden importa).
 Debug.Print ">>> RuT_Clasif_Recibos"
     Dim RegsEmitido         As Long
     Dim RegsEjeAnt          As Long
     Dim RegsAnejo           As Long
     Dim RegsAplazado        As Long
     Dim RegsADxAplz         As Long
-    Dim RegsADxAplzEPCurs   As Long
-    Dim RegsAplazadoEPCurs  As Long
     Dim RegsSinTipo         As Long
     Dim RegsErrDate         As Long
     Dim RegsAnulado         As Long
     Dim RegsContabAnt       As Long
     Dim RegsClasifs         As Long
     Dim RegsDevolucion      As Long
-    Dim CantDto             As Long
-    Dim CantDEV             As Long
     Dim RegsCanTot          As Long
     Dim RegsNOCUADRA        As Long
-    
-    Dim rowfind             As Variant
+
+    Dim rowfind             As Long
     Dim APP_AnoCont         As String:      APP_AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim TxT_Resumen         As String
     Dim TimeLapSub          As Single:      TimeLapSub = LastTimeLap
+    Dim T                   As T_TablaRam
+    Dim Cumple()            As Boolean
+    Dim Fila                As Long
 
     Dim Lo_BD               As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
-    Dim Lo_DefCol_BD        As ListObject:      Set Lo_DefCol_BD = Prog_DefCol_BD.ListObjects(1)
-    
+
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
     Sht__BD.Unprotect
-    
+
         '- Visualizo el progreso
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificación de Recibos, Estadística:", 0, , , , , , 2)
+    If Lo_BD.DataBodyRange Is Nothing Then GoTo Terminar
     With Lo_BD
-    
+
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Emi, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Vto, xlAscending, False, Aplicar:=False)
-        Call Rut_Lo_Sort(Lo_BD, BD_ACont_Cob, xlAscending, False)
-                
-        '-ClearContents de Rec. BD_C_Acad = C_Acad -------------------------------------
-'        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-'        .Range.AutoFilter Field:=BD_ActivEco, Criteria1:="<>4"  '- Los AE4 ya los tienen
-'        RowsFind = .Range.Columns(BD_Ref).SpecialCells(xlCellTypeVisible).Cells.Count - 1    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-'        If RowsFind > 0 Then
-'            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).ClearContents
-'        End If
-    
         .DataBodyRange.Columns(BD_Tipo_Rec).ClearContents
         .DataBodyRange.Columns(BD_CriT_Emi).Resize(, 56).ClearContents
         '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 1).ClearContents
         '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 2).ClearContents
 
-    '-Rec. Emitidos -------------------------------------------------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Emitido")
-        RegsEmitido = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+        '- Tipo_Rec y las columnas de las marcas (BD_CriT_*) se acaban de vaciar: no hace falta leerlas, valen Empty en T
+        Call Rut_TablaRam_Cargar(T, Lo_BD, Array(BD_ACont_Emi, BD_ACont_Vto, BD_ACont_Cob, BD_ImpRec, BD_ActivEco, _
+                                 BD_Anul, BD_Matricula, BD_Hinvalid, BD_FEmi, BD_FCob, BD_Incidencias), True)
 
-        If RegsEmitido > 0 Then
-            .DataBodyRange.Columns(BD_CriT_Emi).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Emitido"
-        End If
-            
+    '-Rec. Emitidos -------------------------------------------------------------------------------
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Emitido")
+        RegsEmitido = Fnc_Marcar(T, Cumple, BD_CriT_Emi, "Emitido")
+
     '-Rec. EjeAnt -------------------------------------------------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_EjeAnt")
-        RegsEjeAnt = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsEjeAnt > 0 Then
-            .DataBodyRange.Columns(BD_CriT_EjeAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "EjeAnt"
-        End If
-    
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_EjeAnt")
+        RegsEjeAnt = Fnc_Marcar(T, Cumple, BD_CriT_EjeAnt, "EjeAnt")
+
     '-Rec. Añejos -------------------------------------------------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aneja")
-        RegsAnejo = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsAnejo > 0 Then
-            .DataBodyRange.Columns(BD_CriT_Anejo).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Añejo"
-        End If
-    
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Aneja")
+        RegsAnejo = Fnc_Marcar(T, Cumple, BD_CriT_Anejo, "Añejo")
+
     '-Rec. Aplazado -------------------------------------------------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Aplazado")
-        RegsAplazado = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsAplazado > 0 Then
-            .DataBodyRange.Columns(BD_CriT_Aplazado).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "Aplazado"
-        End If
-    
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Aplazado")
+        RegsAplazado = Fnc_Marcar(T, Cumple, BD_CriT_Aplazado, "Aplazado")
+
     '-Rec. ADxAplz -------------------------------------------------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_ADxAplz")
-        RegsADxAplz = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsADxAplz > 0 Then
-            .DataBodyRange.Columns(BD_CriT_ADxAplz).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "ADxAplz"
-        End If
-              
-    '-----------------------------------------------------------------------------------------------------------------
-    '------------ A partir de ahora, las marcas pueden sobreescribir algún valor anterior ----------------------------
-    '-----------------------------------------------------------------------------------------------------------------
-    '-_Dev_EP_--------------------------------------------------------------------------------------------------------
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_ADxAplz")
+        RegsADxAplz = Fnc_Marcar(T, Cumple, BD_CriT_ADxAplz, "ADxAplz")
+
+    '-----------------------------------------------------------------------------------------------
+    '------------ A partir de ahora, las marcas pueden sobreescribir algún valor anterior ----------
+    '-----------------------------------------------------------------------------------------------
+    '-_Dev_EP_--------------------------------------------------------------------------------------
         '-Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AutoFilter Field:=BD_ImpRec, Criteria1:="<0"
-        RegsDevolucion = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsDevolucion > 0 Then
-            .DataBodyRange.Columns(BD_CriT_DevEP).SpecialCells(xlCellTypeVisible).Cells.Value = "_Dev_EP_"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Dev_EP_"
-        End If
-        
+        Cumple = Fnc_Filtro_Filas(T, BD_ImpRec, "<", 0)
+        RegsDevolucion = Fnc_Marcar(T, Cumple, BD_CriT_DevEP, "_Dev_EP_")
+
     '-Filtra Recibos Anulados, NO Matrícula o Invalidados -------------------------------------
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Anul")
-        RegsAnulado = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsAnulado > 0 Then
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Reg_Anul_"
-        End If
-    
-    '-_Contab_Ant_--------------------------------------------------------------------------------------------------------
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Reg_Anul")
+        RegsAnulado = Fnc_Marcar(T, Cumple, 0, "_Reg_Anul_")
+
+    '-_Contab_Ant_----------------------------------------------------------------------------------
         '-Filtra Cobradas en Años anteriores al de Emisión -------------------------------------
-        Call Rut_Lo_Filtros_Quitar(Lo_BD)
-        .Range.AutoFilter Field:=BD_ACont_Cob, Criteria1:="<" & APP_AnoCont
-        RegsContabAnt = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsContabAnt > 0 Then
-            .DataBodyRange.Columns(BD_CriT_ContabAnt).SpecialCells(xlCellTypeVisible).Cells.Value = "_Contab_Ant_"
-            .DataBodyRange.Columns(BD_Tipo_Rec).SpecialCells(xlCellTypeVisible).Cells.Value = "_Contab_Ant_"
-        End If
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=Emitido")
+        Cumple = Fnc_Filtro_Filas(T, BD_ACont_Cob, "<", APP_AnoCont)
+        RegsContabAnt = Fnc_Marcar(T, Cumple, BD_CriT_ContabAnt, "_Contab_Ant_")
+
+        rowfind = Fnc_Contar_Tipo(T, "Emitido")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. Emididos: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=EjeAnt")
+
+        rowfind = Fnc_Contar_Tipo(T, "EjeAnt")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. EjeAnt: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=Añejo")
+
+        rowfind = Fnc_Contar_Tipo(T, "Añejo")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. Añejos: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=Aplazado")
+
+        rowfind = Fnc_Contar_Tipo(T, "Aplazado")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. Aplazados: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=ADxAplz")
+
+        rowfind = Fnc_Contar_Tipo(T, "ADxAplz")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. ADxAplz: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=_Dev_EP_")
+
+        rowfind = Fnc_Contar_Tipo(T, "_Dev_EP_")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. de EP=AE4x4 _Devolución_EP_: ", 0, Format(rowfind, "#,##0") & " reg.")
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=_Reg_Anul_")
+
+        rowfind = Fnc_Contar_Tipo(T, "_Reg_Anul_")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. _Reg_Anul_: ", 0, Format(rowfind, "#,##0") & " reg.")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Registros: Anulados, NO Matrícula o Invalidados: ", 0)
-        
-        rowfind = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=_Contab_Ant_")
+
+        rowfind = Fnc_Contar_Tipo(T, "_Contab_Ant_")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. _Contab_Ant_: ", 0, Format(rowfind, "#,##0") & " reg.")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Registros, Cobrados anteriormente y por lo tanto, ya Contabilizados. ", 0)
-        
-        '---------------------------------------------------------------------------------------------------------
-        RegsClasifs = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "<>")
-        RegsNOCUADRA = Application.CountIfs(.DataBodyRange.Columns(BD_Tipo_Rec), "=")
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Sumatorio Recibos clasificados (de " & Format(Lo_BD.ListRows.Count, "#,##0") & " reg.)", 0, _
+
+        '-------------------------------------------------------------------------------------------
+        RegsNOCUADRA = Fnc_Contar_Tipo(T, "")
+        RegsClasifs = T.NumFilas - RegsNOCUADRA
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Sumatorio Recibos clasificados (de " & Format(T.NumFilas, "#,##0") & " reg.)", 0, _
                                         Format(RegsClasifs, "#,##0") & " reg.", "faltan = " & Format(RegsNOCUADRA, "#,##0") & " reg.", , , , 2, 2)
-        
-        '---------------------------------------------------------------------------------------------------------
-        '-Filtra Recibos ErrDate - Cobradas en Años anteriores al de Emisión -------------------------------------
-        .Range.AdvancedFilter xlFilterInPlace, Range("Tb_CriT_Reg_Err")
-        RegsErrDate = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
-        If RegsErrDate > 0 Then
-            .DataBodyRange.Columns(BD_Incidencias).SpecialCells(xlCellTypeVisible).Cells.Value = "_ERR_Date_"
-        End If
+
+        '-------------------------------------------------------------------------------------------
+        '-Filtra Recibos ErrDate - Cobradas en Años anteriores al de Emisión -----------------------
+        Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Reg_Err")
+        RegsErrDate = 0
+        For Fila = 1 To T.NumFilas
+            If Cumple(Fila) Then
+                T.Datos(Fila, BD_Incidencias) = "_ERR_Date_"
+                RegsErrDate = RegsErrDate + 1
+            End If
+        Next Fila
+        T.Modificada(BD_Incidencias) = True
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificados Reg. _ERR_Date_: ", 0, _
                                         Format(RegsErrDate, "#,##0") & " reg.")
-    
-        '--------------------------------------------------------------------------------------------------------
-        '-Filtra Recibos Sin Tipo ---------------------------------------------------------------------------------
-        '--------------------------------------------------------------------------------------------------------
-        .ShowAutoFilter = True          '- El AdvancedFilter con Rango de Criterio desactiva el "ShowFilterMarck"
+
+        '-------------------------------------------------------------------------------------------
+        '-Filtra Recibos Sin Tipo ------------------------------------------------------------------
+        '-------------------------------------------------------------------------------------------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Total Recibos BDatos: ", 0, _
-                                        Format(Lo_BD.ListRows.Count, "#,##0") & " reg.", , , , , 2)
-        '-Filtra Recibos Sin Tipo ---------------------------------------------------------------------------------
-        Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
-        .Range.AutoFilter Field:=BD_Tipo_Rec, Criteria1:="="
-        RegsSinTipo = Fnc_Lo_Contar_Visibles(Lo_BD, BD_Ref)    '- OJO, TIENE QUE ESTAR VISIBLE LA COLUMNA BD_Ref
+                                        Format(T.NumFilas, "#,##0") & " reg.", , , , , 2)
+        RegsSinTipo = RegsNOCUADRA
 Debug.Print "RegsSinTipo", RegsSinTipo
-        RegsCanTot = .ListRows.Count
+        RegsCanTot = T.NumFilas
 Debug.Print "RegsCanTot", , Format(RegsCanTot, "#,##0")
         RegsNOCUADRA = RegsCanTot - (RegsEmitido + RegsEjeAnt + RegsAnejo + RegsAplazado + RegsADxAplz + RegsSinTipo)
 Debug.Print "RegsNOCUADRA", RegsNOCUADRA
-        'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Left("Reg. Sin Clasificar: " & String(35, "_"), 35) & _
-                Right(String(15, "_") & Format(RegsNOCUADRA, "#,##0") & " reg.", 15), LastTimeLap)
 
-        .ShowAutoFilter = True          '- El AdvancedFilter con Rango de Criterio desactiva el "ShowFilterMarck"
+        '- En la hoja: las marcas y una ordenación con el resultado de las dos de antes: ACont_Emi, ACont_Vto y
+        '- ACont_Cob (al empezar), y Tipo_Rec (al terminar).
+        Call Rut_TablaRam_Volcar(T, Lo_BD)                              '- Tipo_Rec, Incidencias y BD_CriT_*
+        Erase T.Datos
+        Call Rut_TablaRam_Ordenar_Tandas(Lo_BD, Array(Array(BD_ACont_Emi, BD_ACont_Vto, BD_ACont_Cob), Array(BD_Tipo_Rec)))
 
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
-       
+
     End With        '- Lo_BD
-    
+
+Terminar:
     '- Visualizo el progreso -
     'Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clasificación de registros finalizada.", TimeLapSub)
 
@@ -219,5 +177,31 @@ Debug.Print "RegsNOCUADRA", RegsNOCUADRA
 Debug.Print "<<< RuT_Clasif_Recibos"
 
 End Sub
+'- -------------------------------------------------------------------------------------------------
 
+'- Marca Tipo_Rec (y la columna ColMarca, si no es 0) de las filas que cumplen; devuelve cuántas son ---
+Private Function Fnc_Marcar(T As T_TablaRam, Cumple() As Boolean, ByVal ColMarca As Long, ByVal Marca As String) As Long
+    Dim Fila    As Long
+    For Fila = 1 To T.NumFilas
+        If Cumple(Fila) Then
+            T.Datos(Fila, BD_Tipo_Rec) = Marca
+            If ColMarca > 0 Then T.Datos(Fila, ColMarca) = Marca
+            Fnc_Marcar = Fnc_Marcar + 1
+        End If
+    Next Fila
+    T.Modificada(BD_Tipo_Rec) = True
+    If ColMarca > 0 Then T.Modificada(ColMarca) = True
+End Function
 
+'- Cuántas filas tienen ese Tipo_Rec (sin distinguir mayúsculas, como CountIfs "=Emitido"); "" = vacío ---
+Private Function Fnc_Contar_Tipo(T As T_TablaRam, ByVal Tipo As String) As Long
+    Dim Fila    As Long
+    For Fila = 1 To T.NumFilas
+        If Tipo = "" Then
+            If IsEmpty(T.Datos(Fila, BD_Tipo_Rec)) Then Fnc_Contar_Tipo = Fnc_Contar_Tipo + 1
+        ElseIf Not IsEmpty(T.Datos(Fila, BD_Tipo_Rec)) Then
+            If StrComp(T.Datos(Fila, BD_Tipo_Rec), Tipo, vbTextCompare) = 0 Then Fnc_Contar_Tipo = Fnc_Contar_Tipo + 1
+        End If
+    Next Fila
+End Function
+'- -------------------------------------------------------------------------------------------------

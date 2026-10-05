@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_TablaRam"
-' Last Rev. 2026-10-02 20:15
+' Last Rev. 2026-10-05 23:11
 Option Explicit
 
 '===================================================================================================
@@ -22,17 +22,24 @@ Option Explicit
 '     posición de fila. Volcar comprueba al menos que el nº de filas no ha cambiado.
 '   - Volcar reescribe la columna ENTERA, también las filas que no se tocaron. Un texto que parezca
 '     número o fecha ("00123", "1/2") Excel lo convertiría al escribirlo: marcar como Modificada
-'     solo columnas de importes o de textos que no puedan confundirse con números o fechas.
+'     solo columnas de importes o de textos que no puedan confundirse con números o fechas. En BDatos,
+'     DNI, Form. Pago y CTA. CCC son textos con cifras: para vaciar celdas de esas columnas, usar
+'     Rut_TablaRam_Vaciar_Celdas.
 '   - .Value (por defecto) devuelve las fechas como Date y los importes con formato moneda como
 '     Currency (redondeado a 4 decimales), igual que leer .Cells(i, j): úsalo cuando se monten
 '     textos o comparaciones con esos valores. .Value2 (LeerValue2:=True) los deja como Double sin
 '     redondear: úsalo en las columnas que se vayan a Volcar, para que las filas que no se tocan
 '     queden idénticas.
-'   - Las columnas que no se cargan valen Empty en T.Datos.
+'   - Las columnas que no se cargan valen Empty en T.Datos. Se pueden rellenar y Volcar igualmente.
+'
+' Para filtrar la copia en RAM igual que los filtros de Excel: módulo Rut_Lo_CriT_Ram.
 '
 ' Subs públicas:
 '   Rut_TablaRam_Cargar(T, Lo, [Columnas], [LeerValue2])    - Lee de la hoja las columnas pedidas
 '   Rut_TablaRam_Volcar(T, Lo)                              - Escribe en la hoja las columnas Modificadas
+'                                                             (las seguidas, de una sola vez)
+'   Rut_TablaRam_Vaciar_Celdas(Lo, Filas, Columnas)         - Vacía en la hoja unas celdas sueltas
+'   Rut_TablaRam_Ordenar_Tandas(Lo, Tandas, [Primera])      - Una ordenación con el resultado de varias
 '===================================================================================================
 
 ' Copia en RAM de un ListObject. Pública porque viaja como parámetro entre módulos.
@@ -99,10 +106,13 @@ End Sub     ' Rut_TablaRam_Cargar
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
-'- Escribe en Lo las columnas de T marcadas como Modificadas, una escritura por columna ------------
+'- Escribe en Lo las columnas de T marcadas como Modificadas. Las que van seguidas, en una sola ----
+'- escritura (2026-10-05; antes, una por columna)
 Sub Rut_TablaRam_Volcar(T As T_TablaRam, Lo As ListObject)
-    Dim ColData()   As Variant
+    Dim Bloque()    As Variant
     Dim C           As Long
+    Dim C2          As Long
+    Dim K           As Long
     Dim Fila        As Long
 
     If T.NumFilas = 0 Then Exit Sub
@@ -111,17 +121,111 @@ Sub Rut_TablaRam_Volcar(T As T_TablaRam, Lo As ListObject)
                   "La tabla " & Lo.Name & " tiene " & Lo.ListRows.Count & " filas y su copia en RAM " & _
                   T.NumFilas & ": no se vuelca para no descuadrar los datos."
     End If
-    ReDim ColData(1 To T.NumFilas, 1 To 1)
-    For C = 1 To T.NumCols
+    C = 1
+    Do While C <= T.NumCols
         If T.Modificada(C) Then
-            For Fila = 1 To T.NumFilas
-                ColData(Fila, 1) = T.Datos(Fila, C)
-            Next Fila
-            Lo.ListColumns(C).DataBodyRange.Value = ColData
-            T.Modificada(C) = False
+            C2 = C                                  '- Hasta dónde llegan las Modificadas seguidas
+            Do While C2 < T.NumCols
+                If Not T.Modificada(C2 + 1) Then Exit Do
+                C2 = C2 + 1
+            Loop
+            ReDim Bloque(1 To T.NumFilas, 1 To C2 - C + 1)
+            For K = C To C2
+                For Fila = 1 To T.NumFilas
+                    Bloque(Fila, K - C + 1) = T.Datos(Fila, K)
+                Next Fila
+                T.Modificada(K) = False
+            Next K
+            Lo.ListColumns(C).DataBodyRange.Resize(, C2 - C + 1).Value = Bloque
+            C = C2 + 1
+        Else
+            C = C + 1
         End If
-    Next C
+    Loop
 End Sub     ' Rut_TablaRam_Volcar
+'---------------------------------------------------------------------------------------------------
+
+'===================================================================================================
+'- Vacía (ClearContents) en la hoja las celdas de las Columnas en las filas True de Filas ----------
+'-   Para columnas que Volcar no puede reescribir enteras (textos con cifras, como CTA. CCC). Las filas
+'-   seguidas van en un solo rango, y los rangos de cada columna se juntan hasta 250 caracteres de
+'-   dirección por llamada. Filas va por posición, como T.Datos: llamarla antes de ordenar o borrar filas.
+Sub Rut_TablaRam_Vaciar_Celdas(Lo As ListObject, Filas() As Boolean, Columnas As Variant)
+    Dim Ws          As Worksheet:   Set Ws = Lo.Parent
+    Dim Fila1       As Long:        Fila1 = Lo.DataBodyRange.Row
+    Dim Col         As Variant
+    Dim Letra       As String
+    Dim Direcc      As String
+    Dim Tramo       As String
+    Dim Fila        As Long
+    Dim Ini         As Long
+
+    For Each Col In Columnas
+        Letra = Split(Lo.ListColumns(Col).DataBodyRange.Cells(1, 1).Address(True, False), "$")(0)
+        Direcc = ""
+        Fila = 1
+        Do While Fila <= UBound(Filas)
+            If Filas(Fila) Then
+                Ini = Fila                          '- Hasta dónde llega el tramo de filas seguidas
+                Do While Fila < UBound(Filas)
+                    If Not Filas(Fila + 1) Then Exit Do
+                    Fila = Fila + 1
+                Loop
+                Tramo = Letra & (Fila1 + Ini - 1) & ":" & Letra & (Fila1 + Fila - 1)
+                If Len(Direcc) + Len(Tramo) + 1 > 250 Then
+                    Ws.Range(Direcc).ClearContents
+                    Direcc = ""
+                End If
+                If Direcc = "" Then Direcc = Tramo Else Direcc = Direcc & "," & Tramo
+            End If
+            Fila = Fila + 1
+        Loop
+        If Direcc <> "" Then Ws.Range(Direcc).ClearContents
+    Next Col
+End Sub     ' Rut_TablaRam_Vaciar_Celdas
+'---------------------------------------------------------------------------------------------------
+
+'===================================================================================================
+'- Ordena Lo UNA vez, con el resultado de las ordenaciones ascendentes de Tandas hechas una tras ---
+'- otra.
+'-   Tandas = Array(Array(cols de la 1ª), Array(cols de la 2ª), ...), en el orden en que se hacían.
+'-   Como la ordenación de Excel es estable, equivale a ordenar por las columnas de la última tanda,
+'-   luego por las de la penúltima, y así hasta la primera (una columna repetida solo cuenta la 1ª vez).
+'-   Primera (opcional): columna que va delante de todas (en M_111, la auxiliar de las filas a borrar,
+'-   que así quedan juntas al final sin cambiar el orden de las demás).
+'-   Quita antes los filtros: con filas ocultas, Excel solo ordenaría las visibles.
+'-   Sirve para que el paso a RAM deje las filas en el mismo orden que el código anterior: M_112 se
+'-   queda con el último duplicado de cada Ref y M_115 da el importe al primer recibo de cada matrícula.
+Sub Rut_TablaRam_Ordenar_Tandas(Lo As ListObject, Tandas As Variant, Optional ByVal Primera As Long = 0)
+    Dim Claves()    As Integer
+    Dim N           As Long
+    Dim I           As Long
+    Dim K           As Long
+    Dim Col         As Variant
+    Dim Vistas      As String:      Vistas = ","
+
+    If Lo.DataBodyRange Is Nothing Then Exit Sub
+    ReDim Claves(1 To 64)
+    If Primera > 0 Then
+        N = 1
+        Claves(1) = Primera
+        Vistas = Vistas & Primera & ","
+    End If
+    For I = UBound(Tandas) To LBound(Tandas) Step -1
+        For Each Col In Tandas(I)
+            If InStr(Vistas, "," & Col & ",") = 0 Then
+                N = N + 1
+                Claves(N) = Col
+                Vistas = Vistas & Col & ","
+            End If
+        Next Col
+    Next I
+    If N = 0 Then Exit Sub
+    Call Rut_Lo_Filtros_Quitar(Lo)
+    For K = 1 To N
+        Call Rut_Lo_Sort(Lo, Claves(K), xlAscending, (K = 1), Aplicar:=(K = N))
+    Next K
+End Sub     ' Rut_TablaRam_Ordenar_Tandas
 '---------------------------------------------------------------------------------------------------
 
 '- Devuelve SIEMPRE un array 2D (1 To filas, 1 To columnas): .Value de una sola celda no es array --
