@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-04 21:07
+' Last Rev. 2026-10-05 12:33
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -324,6 +324,11 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
     '       Puesto que voy a copiar los nuevos registros, tengo que eliminar los viejos.
     '       Dependiendo de si en Lo_Source hay 1 ó 2 Cursos Académicos, filtro por 1 o 2 Cursos.
     '- -------------------------------------------------------------------------------------------------------------------------------------
+    '- Antes de tocar Lo_INSS hay que darle un respiro a Excel (DoEvents). Tras procesar el ClsBk (en el LSace06 del Robot,
+    '- 343.000 filas, de las que se borran casi todas), borrar filas de Lo_INSS fallaba con -2147417848 (80010108) y dejaba Excel
+    '- inservible hasta cerrarlo (fallaba hasta leer .Hidden). No es ningún paso concreto: con una parada antes (punto de
+    '- interrupción) funcionaba, y con DoEvents también (2026-10-05, probado en el trabajo, con el mismo Office que en casa).
+    DoEvents
     Call Rut_Lo_WrkSht_Preparar(Wh_INSS)
     '- -------------------------------------------------------------------------------------------------------------------------------------
     If Not Lo_INSS.DataBodyRange Is Nothing Then
