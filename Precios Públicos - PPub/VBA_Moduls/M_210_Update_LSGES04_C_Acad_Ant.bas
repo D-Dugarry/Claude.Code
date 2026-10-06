@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-06 11:10
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 C_Acad_" & C_Acad_Ant & " ?" & 
     '- ----------------------------------------------------------------------------------------------------------------------------
     Dim Arch_New_Name         As String:    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant & "_BD" & "|LsGes04_C_Acad_" & C_Acad_Ant     '- El de siempre o el de Robot_PPub_Fusión
     Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
-    Call Rut_Lo_Import_LoData_LoDefCol(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
+    Call Rut_Lo_Import_LoData_LoDefCol(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name, Convertir_En_Ram:=True)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_IAdm_CAcadAnt.Name = "BD_ImpAdm_" & C_Acad_Ant
@@ -92,7 +92,7 @@ Rut_Lo_Format:
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateando el Excel. (+-30s)", LastTimeLap)
             TimeLap2 = LastTimeLap
-    Call Rut_Lo_Format_LoData_LoDefColData(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD)
+    Call Rut_Lo_Format_LoData_LoDefColData(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, Convertir:=False)   '- Las Col. N y F ya se convirtieron en RAM al importar
             LastTimeLap = TimeLap2
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateado el Excel, con  ", LastTimeLap, , Format(Lo_ImpAdmCAcadAnt.ListRows.Count, "#,##0") & " reg.", TxT_Progreso, , , , 2)

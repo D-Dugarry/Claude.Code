@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-04 21:06
+' Last Rev. 2026-10-06 11:10
 '2026-01-18
 Option Explicit
 
@@ -215,7 +215,12 @@ Sub Rut_Lo_Import_LoData_LoDefCol(Lo_Data As ListObject, _
                                   LoDefCol As ListObject, _
                                   Col_Header As Integer, _
                                   Arch_New_Name As String, _
-                                  Optional SheetNom As String = "")
+                                  Optional SheetNom As String = "", _
+                                  Optional ByVal Convertir_En_Ram As Boolean = False)
+'- Convertir_En_Ram (2026-10-06, fase 4 del paso a RAM): en vez de copiar y pegar valores (14,6 de los 28 seg. de importar y
+'- formatear el LSGES04 del Robot), lee el fichero en RAM, convierte allí las Col. N y F como el formateo
+'- (Rut_Ram_Textos_a_Numeros_y_Fechas) y escribe la tabla de una vez (Rut_Lo_Escribir_Importados). El llamador formatea
+'- después con Convertir:=False. Mismo resultado celda a celda, en valor y tipo. Sin Convertir_En_Ram, se copia y pega como siempre.
                              
 Debug.Print ">>> Rut_Lo_Import_LoData_LoDefCol"
 Rut_Off_Functions
@@ -227,6 +232,13 @@ Rut_Off_Functions
     Dim NomArch             As String
     Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim WrkSht              As Worksheet:       Set WrkSht = Lo_Data.Parent
+    Dim Datos               As Variant                                  '- Convertir_En_Ram: las filas del fichero
+    Dim Reescrita()         As Boolean                                  '- Convertir_En_Ram: Col. que ha cambiado la conversión
+    Dim T_Paso              As Single                                   '- Tiempos de cada paso, para el informe
+    Dim T_Abrir             As Single
+    Dim T_Leer              As Single
+    Dim T_Convertir         As Single
+    Dim T_Escribir          As Single
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
@@ -287,9 +299,11 @@ Rut_Off_Functions
     Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim Ws              As Worksheet
     Dim ClosedBook      As Workbook
+    T_Paso = Timer
     On Error Resume Next
     Set ClosedBook = Workbooks.Open(Arch_New_Name, ReadOnly:=True)
     On Error GoTo 0
+    T_Abrir = Timer - T_Paso
     If ClosedBook Is Nothing Then
         MsgBx_Title = "Proceso: Importar " & ArchRequest
         MsgBx_Msg = "¡No se ha podido abrir el fichero!" & vbLf & _
@@ -399,14 +413,29 @@ Rut_Off_Functions
         End If
 
         '- La Tabla Lo_Data SÍ tiene datos -Y- las Columnas coinciden. ---------------------
-        ClosedBook.Sheets(SheetIndx).ListObjects(1).DataBodyRange.Copy
-        Lo_Data.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues    'xlPasteAll    xlPasteValues
-        Application.CutCopyMode = False
+        If Convertir_En_Ram Then
+            T_Paso = Timer
+            Datos = Lo_ClsBk.DataBodyRange.Value2                       '- Ya sin la Col. ORIGEN
+            T_Leer = Timer - T_Paso
+        Else
+            ClosedBook.Sheets(SheetIndx).ListObjects(1).DataBodyRange.Copy
+            Lo_Data.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues    'xlPasteAll    xlPasteValues
+            Application.CutCopyMode = False
+        End If
         ClosedBook.Close SaveChanges:=False
                 Set ClosedBook = Nothing
                 Set Ws_ClsBk = Nothing
                 Set Lo_ClsBk = Nothing
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
+        If Convertir_En_Ram Then
+            T_Paso = Timer
+            Call Rut_Ram_Textos_a_Numeros_y_Fechas(Datos, LoDefCol, Reescrita)
+            T_Convertir = Timer - T_Paso
+            T_Paso = Timer
+            Call Rut_Lo_Escribir_Importados(Lo_Data, Datos, Reescrita)
+            T_Escribir = Timer - T_Paso
+            Datos = Empty                                               '- Libera la memoria
+        End If
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
                 Dim TimeLap2              As Single
                 TimeLap2 = LastTimeLap
@@ -414,6 +443,12 @@ Rut_Off_Functions
                 LastTimeLap = TimeLap2
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             If Quitada_Origen Then Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
+            If Convertir_En_Ram Then
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: abrir el fichero", 0, Format(T_Abrir, "0.00") & " seg.")
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: leer las filas en RAM", 0, Format(T_Leer, "0.00") & " seg.")
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: convertir en RAM las Col. N y F", 0, Format(T_Convertir, "0.00") & " seg.")
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: escribir en la tabla", 0, Format(T_Escribir, "0.00") & " seg.")
+            End If
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
@@ -421,6 +456,51 @@ Rut_Off_Functions
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol"
 End Sub
+'- ----------------------------------------------------------------------------------------------------------------------------
+
+'- ----------------------------------------------------------------------------------------------------------------------------
+'- Escribe en Lo_Data las filas leídas de un fichero (Datos, ya convertidas en RAM), con el mismo resultado que pegar valores y
+'- convertir después en la hoja (Rut_Lo_Format_LoData_LoDefColData):
+'-      - las Col. Reescritas (cambiadas por la conversión) se escriben con formato General, como las reescribía el formateo:
+'-        Excel interpreta los textos que queden en ellas
+'-      - las demás, con formato texto ("@") mientras se escriben: así Excel guarda los textos tal cual ("00123", "1/2", "=1+1"),
+'-        como el pegado, y los números siguen siendo números (comprobado el 2026-10-06). El formateo de después les quita el "@".
+'- Cada grupo de Col. seguidas con el mismo trato va en una sola escritura.
+'- ----------------------------------------------------------------------------------------------------------------------------
+Private Sub Rut_Lo_Escribir_Importados(Lo_Data As ListObject, Datos As Variant, Reescrita() As Boolean)
+    Dim WrkSht      As Worksheet:   Set WrkSht = Lo_Data.Parent
+    Dim NumFilas    As Long:        NumFilas = UBound(Datos, 1)
+    Dim NumCols     As Long:        NumCols = Application.Min(UBound(Datos, 2), Lo_Data.ListColumns.Count)
+    Dim Bloque()    As Variant
+    Dim Rng         As Range
+    Dim C           As Long
+    Dim C2          As Long
+    Dim K           As Long
+    Dim Fila        As Long
+
+    With Lo_Data.HeaderRowRange                             '- La tabla, con tantas filas como el fichero
+        Lo_Data.Resize WrkSht.Range(.Cells(1, 1), .Cells(1, .Columns.Count).Offset(NumFilas, 0))
+    End With
+    Lo_Data.DataBodyRange.Resize(, NumCols).NumberFormat = "General"
+    C = 1
+    Do While C <= NumCols
+        C2 = C                                              '- Hasta dónde llegan las Col. seguidas con el mismo trato
+        Do While C2 < NumCols
+            If Reescrita(C2 + 1) <> Reescrita(C) Then Exit Do
+            C2 = C2 + 1
+        Loop
+        ReDim Bloque(1 To NumFilas, 1 To C2 - C + 1)
+        For K = C To C2
+            For Fila = 1 To NumFilas
+                Bloque(Fila, K - C + 1) = Datos(Fila, K)
+            Next Fila
+        Next K
+        Set Rng = Lo_Data.DataBodyRange.Columns(C).Resize(, C2 - C + 1)
+        If Not Reescrita(C) Then Rng.NumberFormat = "@"
+        Rng.Value2 = Bloque
+        C = C2 + 1
+    Loop
+End Sub     ' Rut_Lo_Escribir_Importados
 '- ----------------------------------------------------------------------------------------------------------------------------
 
 '- ----------------------------------------------------------------------------------------------------------------------------

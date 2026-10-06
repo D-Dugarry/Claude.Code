@@ -1,12 +1,15 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-06 11:10
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Formatea una Tabla Listobject ----------------------------------------------------------------------------------------------
 '- ----------------------------------------------------------------------------------------------------------------------------
 Sub Rut_Lo_Format_LoData_LoDefColData(ByRef LoData As ListObject, _
-                                      ByRef LoDefCol As ListObject)
+                                      ByRef LoDefCol As ListObject, _
+                                      Optional ByVal Convertir As Boolean = True)
+'- Convertir = False (2026-10-06, fase 4 del paso a RAM): las Col. N y F ya vienen convertidas, porque la importación las
+'- convirtió en RAM (Rut_Lo_Import_LoData_LoDefCol con Convertir_En_Ram): aquí solo se les pone el formato.
 '-----------------------------------------------------------------------------------------------------------------------------------
 Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     '- Setting ListObjects ------------------------------------
@@ -77,7 +80,7 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             Case "F"
                With LoData.DataBodyRange
                     .Columns(Ccol).Select
-                    If WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
+                    If Convertir And WorksheetFunction.CountA(.Columns(Ccol)) > 0 Then
                         '- Convierto a fechas los textos de fecha, celda a celda en RAM: la Col. puede mezclar fechas y textos.
                         '- Sustituye a la Col. auxiliar "=RC[-1]*1" + pegar valores + Replace "0" (5,8 seg. las 3 Col.).
                         Call Rut_Col_Textos_a_Fechas(.Columns(Ccol))
@@ -88,7 +91,9 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
                With LoData.DataBodyRange
                     '- Las Col. N seguidas se convierten de una vez, con una lectura y una escritura para todo el bloque: la 1ª Col.
                     '- del bloque las convierte todas y las demás solo ponen su formato. (Col. a Col., las 11 Col. N tardaban 7,5 seg.)
-                    If Ccol > N_Hasta Then
+                    If Not Convertir Then
+                        '- Ya convertida en RAM al importar: solo el formato
+                    ElseIf Ccol > N_Hasta Then
                         N_Hasta = Ccol
                         Do While N_Hasta < UltCol
                             If Not LoDefCol.DataBodyRange.Cells(N_Hasta + 1, DefC_FormatCol) Then Exit Do
@@ -140,6 +145,30 @@ End Sub     ' Rut_Lo_Format_LoData_LoDefColData
 ' ==================================================================================================================================
 
 '- ----------------------------------------------------------------------------------------------------------------------------
+'- Convierte en RAM, con las mismas reglas que el formateo, las Col. N y F (FormatCol = VERDADERO en LoDefCol) de Datos: las
+'- filas de un fichero leídas con .Value2, antes de escribirlas en la tabla (Rut_Lo_Import_LoData_LoDefCol con Convertir_En_Ram).
+'- Reescrita(Col) = True si la Col. ha cambiado: el formateo la habría vuelto a escribir en la hoja, y al escribirla Excel
+'- interpreta los textos que queden en ella ("1/2" pasa a fecha); las Col. sin cambios no las tocaba. Escribiendo las Reescritas
+'- tal cual y las demás con formato texto, la tabla queda igual que pegando valores y convirtiendo en la hoja (comprobado el
+'- 2026-10-06 con el LSGES04 del Robot: 184.251 x 29 celdas iguales en valor y tipo).
+'- ----------------------------------------------------------------------------------------------------------------------------
+Sub Rut_Ram_Textos_a_Numeros_y_Fechas(Datos As Variant, LoDefCol As ListObject, Reescrita() As Boolean)
+    Dim Col             As Long
+    Dim ConTextos       As Boolean
+
+    ReDim Reescrita(1 To UBound(Datos, 2))
+    For Col = 1 To Application.Min(UBound(Datos, 2), LoDefCol.ListRows.Count)
+        If LoDefCol.DataBodyRange.Cells(Col, DefC_FormatCol) Then
+            Select Case LoDefCol.DataBodyRange.Cells(Col, DefC_TipVar)
+                Case "N":   Reescrita(Col) = (Fnc_Ram_Col_Textos_a_Numeros(Datos, Col, ConTextos) > 0)
+                Case "F":   Reescrita(Col) = (Fnc_Ram_Col_Textos_a_Fechas(Datos, Col) > 0)
+            End Select
+        End If
+    Next Col
+End Sub     ' Rut_Ram_Textos_a_Numeros_y_Fechas
+' ==================================================================================================================================
+
+'- ----------------------------------------------------------------------------------------------------------------------------
 '- Convierte en número los textos numéricos de un bloque de Col. seguidas, celda a celda en RAM, con una sola lectura y, casi
 '- siempre, una sola escritura para todo el bloque. Cada Col. puede mezclar números y textos: los números se dejan como están.
 '- Entiende los dos formatos de texto que llegan:
@@ -158,8 +187,6 @@ Private Sub Rut_Cols_Textos_a_Numeros(Rng As Range)
     Dim Fila            As Long
     Dim Col             As Long
     Dim NumCols         As Long
-    Dim ComaDecimal     As Boolean
-    Dim Num             As Double
     Dim Cambios()       As Long                             '- (1 To NumCols): celdas convertidas en cada Col.
     Dim ConTextos()     As Boolean                          '- (1 To NumCols): la Col. conserva textos que no son números
     Dim TotCambios      As Long
@@ -175,27 +202,7 @@ Private Sub Rut_Cols_Textos_a_Numeros(Rng As Range)
     ReDim Cambios(1 To NumCols)
     ReDim ConTextos(1 To NumCols)
     For Col = 1 To NumCols
-        ComaDecimal = False
-        For Fila = 1 To UBound(Datos, 1)                    '- 1ª pasada: ¿algún texto numérico lleva coma decimal?
-            If VarType(Datos(Fila, Col)) = vbString Then
-                If InStr(Datos(Fila, Col), ",") > 0 Then
-                    If Fnc_Texto_a_Numero(Datos(Fila, Col), True, Num) Then ComaDecimal = True: Exit For
-                End If
-            End If
-        Next Fila
-        For Fila = 1 To UBound(Datos, 1)                    '- 2ª pasada: conversión
-            If VarType(Datos(Fila, Col)) = vbString Then
-                If Datos(Fila, Col) = "" Then
-                    Datos(Fila, Col) = Empty
-                    Cambios(Col) = Cambios(Col) + 1
-                ElseIf Fnc_Texto_a_Numero(Datos(Fila, Col), ComaDecimal, Num) Then
-                    Datos(Fila, Col) = Num
-                    Cambios(Col) = Cambios(Col) + 1
-                Else
-                    ConTextos(Col) = True
-                End If
-            End If
-        Next Fila
+        Cambios(Col) = Fnc_Ram_Col_Textos_a_Numeros(Datos, Col, ConTextos(Col))
         TotCambios = TotCambios + Cambios(Col)
     Next Col
     If TotCambios = 0 Then Exit Sub
@@ -218,6 +225,38 @@ Private Sub Rut_Cols_Textos_a_Numeros(Rng As Range)
         Next Col
     End If
 End Sub     ' Rut_Cols_Textos_a_Numeros
+
+'- Convierte en número los textos numéricos de la Col. Col de Datos, en RAM, con las reglas de Rut_Cols_Textos_a_Numeros. ------
+'- Devuelve cuántas celdas ha cambiado, y en ConTextos si en la Col. quedan textos que no son números.
+Private Function Fnc_Ram_Col_Textos_a_Numeros(Datos As Variant, ByVal Col As Long, ByRef ConTextos As Boolean) As Long
+    Dim Fila            As Long
+    Dim ComaDecimal     As Boolean
+    Dim Num             As Double
+    Dim Cambios         As Long
+
+    ConTextos = False
+    For Fila = 1 To UBound(Datos, 1)                        '- 1ª pasada: ¿algún texto numérico lleva coma decimal?
+        If VarType(Datos(Fila, Col)) = vbString Then
+            If InStr(Datos(Fila, Col), ",") > 0 Then
+                If Fnc_Texto_a_Numero(Datos(Fila, Col), True, Num) Then ComaDecimal = True: Exit For
+            End If
+        End If
+    Next Fila
+    For Fila = 1 To UBound(Datos, 1)                        '- 2ª pasada: conversión
+        If VarType(Datos(Fila, Col)) = vbString Then
+            If Datos(Fila, Col) = "" Then
+                Datos(Fila, Col) = Empty
+                Cambios = Cambios + 1
+            ElseIf Fnc_Texto_a_Numero(Datos(Fila, Col), ComaDecimal, Num) Then
+                Datos(Fila, Col) = Num
+                Cambios = Cambios + 1
+            Else
+                ConTextos = True
+            End If
+        End If
+    Next Fila
+    Fnc_Ram_Col_Textos_a_Numeros = Cambios
+End Function    ' Fnc_Ram_Col_Textos_a_Numeros
 '- ----------------------------------------------------------------------------------------------------------------------------
 
 '- True (y el valor en Num) si Txt es un número escrito como texto. ComaDecimal: True = "1.234,56" / False = "1234.56" -------
@@ -266,11 +305,6 @@ End Function    ' Fnc_Texto_a_Numero
 '- -------------------------------------------------------------------------------------------------
 Private Sub Rut_Col_Textos_a_Fechas(Rng As Range)
     Dim Datos           As Variant
-    Dim Fila            As Long
-    Dim Txt             As String
-    Dim Serie           As Double
-    Dim Cambios         As Long
-    Dim DiccFechas      As Object:      Set DiccFechas = CreateObject("Scripting.Dictionary")     '- Texto -> fecha o Empty
 
     If Rng.Cells.CountLarge = 1 Then
         ReDim Datos(1 To 1, 1 To 1)
@@ -278,31 +312,43 @@ Private Sub Rut_Col_Textos_a_Fechas(Rng As Range)
     Else
         Datos = Rng.Value2
     End If
+    If Fnc_Ram_Col_Textos_a_Fechas(Datos, 1) > 0 Then Rng.Value2 = Datos
+End Sub     ' Rut_Col_Textos_a_Fechas
+
+'- Convierte en fecha los textos de fecha de la Col. Col de Datos, en RAM, con las reglas de Rut_Col_Textos_a_Fechas. ----------
+'- Devuelve cuántas celdas ha cambiado.
+Private Function Fnc_Ram_Col_Textos_a_Fechas(Datos As Variant, ByVal Col As Long) As Long
+    Dim Fila            As Long
+    Dim Txt             As String
+    Dim Serie           As Double
+    Dim Cambios         As Long
+    Dim DiccFechas      As Object:      Set DiccFechas = CreateObject("Scripting.Dictionary")     '- Texto -> fecha o Empty
+
     For Fila = 1 To UBound(Datos, 1)
-        Select Case VarType(Datos(Fila, 1))
+        Select Case VarType(Datos(Fila, Col))
             Case vbString
-                Txt = Datos(Fila, 1)
+                Txt = Datos(Fila, Col)
                 If Not DiccFechas.Exists(Txt) Then
                     If Fnc_Texto_a_Fecha(Txt, Serie) Then
                         If Serie = 0 Then DiccFechas.Add Txt, Empty Else DiccFechas.Add Txt, Serie
                     End If
                 End If
                 If DiccFechas.Exists(Txt) Then                  '- Si no está, no es una fecha: se queda como texto
-                    Datos(Fila, 1) = DiccFechas.Item(Txt)
+                    Datos(Fila, Col) = DiccFechas.Item(Txt)
                     Cambios = Cambios + 1
                 End If
             Case vbDouble
-                If Datos(Fila, 1) = 0 Then
-                    Datos(Fila, 1) = Empty
+                If Datos(Fila, Col) = 0 Then
+                    Datos(Fila, Col) = Empty
                     Cambios = Cambios + 1
-                ElseIf Datos(Fila, 1) <> Int(Datos(Fila, 1)) Then  '- Fecha con hora: le quito la hora
-                    Datos(Fila, 1) = Int(Datos(Fila, 1))
+                ElseIf Datos(Fila, Col) <> Int(Datos(Fila, Col)) Then  '- Fecha con hora: le quito la hora
+                    Datos(Fila, Col) = Int(Datos(Fila, Col))
                     Cambios = Cambios + 1
                 End If
         End Select
     Next Fila
-    If Cambios > 0 Then Rng.Value2 = Datos
-End Sub     ' Rut_Col_Textos_a_Fechas
+    Fnc_Ram_Col_Textos_a_Fechas = Cambios
+End Function    ' Fnc_Ram_Col_Textos_a_Fechas
 '- -------------------------------------------------------------------------------------------------
 
 '- True (y el nº de serie, sin hora, en Serie) si Txt es una fecha o un texto vacío (Serie = 0) ----

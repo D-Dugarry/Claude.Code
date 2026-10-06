@@ -12,8 +12,9 @@ Compara, celda a celda y dentro del rango de cada tabla:
 Y además el log del proceso (nombre APP_Task_Inf) y el informe de cada botón del Ribbon (columna
 Informe_Rut de Lo_RibbonUI, que guarda el log de la última ejecución de cada botón: así se comparan los
 de M_110, M_210 y M_310 aunque APP_Task_Inf solo tenga el último), quitando las horas y los tiempos.
-Las líneas de tiempos de cada paso del formateo ("Col. 14 F_Emi (F)....1,34 seg.") se quitan enteras,
-porque su texto cambia con el código (p. ej. "Col. 11 Ref (N, bloque 11-13)").
+Las líneas de tiempos de cada paso del formateo ("Col. 14 F_Emi (F)....1,34 seg.") y de la importación
+en RAM ("Importar: abrir el fichero....4,73 seg.") se quitan enteras, porque su texto cambia con el código
+(p. ej. "Col. 11 Ref (N, bloque 11-13)") y las de la importación solo salen con el código nuevo.
 
 Con --por, las diferencias de cada hoja se cuentan también por el valor de esa columna en la fila
 (p. ej. --por C_Acad: cuántas diferencias de cada columna caen en cada curso).
@@ -31,7 +32,7 @@ Uso:
 Las hojas se buscan por su CodeName (Sht__BD...), no por el nombre de la pestaña.
 Lee las hojas en streaming: con 177.000 filas tarda un par de minutos y no carga el libro en memoria.
 """
-# Last Rev. 2026-10-04 17:10
+# Last Rev. 2026-10-06 11:15
 
 import argparse
 import math
@@ -271,8 +272,10 @@ def comparar_hoja(A, B, codename, maximo, sin_hora=(), por=None):
     return total
 
 
-# Líneas de tiempos de cada paso del formateo (Rut_Lo_Format_LoData_LoDefColData): fuera enteras
-RE_TIEMPOS_FORMATEO = re.compile(r"^\s*(Quitar formatos y validaciones|Col\. \d+ .*\((T|F|N)(,[^)]*)?\) <t> seg\.|Anchos, alineaci)")
+# Líneas de tiempos de cada paso del formateo (Rut_Lo_Format_LoData_LoDefColData) y de la importación en RAM
+# (Rut_Lo_Import_LoData_LoDefCol con Convertir_En_Ram): fuera enteras
+RE_TIEMPOS_FORMATEO = re.compile(r"^\s*(Quitar formatos y validaciones|Col\. \d+ .*\((T|F|N)(,[^)]*)?\) <t> seg\.|Anchos, alineaci"
+                                 r"|Importar: .* <t> seg\.)")
 
 
 def limpiar_log(txt):

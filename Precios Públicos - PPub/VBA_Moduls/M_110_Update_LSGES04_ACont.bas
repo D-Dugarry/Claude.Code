@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-06 11:10
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -112,7 +112,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     '- Import LSGES04 por Año Contable --------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
     Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AnoCont & "|LsGes04_AñoCont_" & AnoCont     '- El de siempre o el de Robot_PPub_Fusión
-    Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name)
+    Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name, Convertir_En_Ram:=True)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD.Range("d2") = "Última Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
@@ -141,7 +141,7 @@ Rut_Lo_Format:
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateando el Excel.", LastTimeLap)
             TimeLap2 = LastTimeLap
-    Call Rut_Lo_Format_LoData_LoDefColData(Lo_BD, Lo_DefCol_BD)
+    Call Rut_Lo_Format_LoData_LoDefColData(Lo_BD, Lo_DefCol_BD, Convertir:=False)   '- Las Col. N y F ya se convirtieron en RAM al importar
             LastTimeLap = TimeLap2
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateado el Excel.", LastTimeLap, , , , , , , 2)
