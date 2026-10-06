@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_CriT_Ram"
-' Last Rev. 2026-10-05 23:11
+' Last Rev. 2026-10-06 11:50
 Option Explicit
 
 '===================================================================================================
@@ -15,6 +15,7 @@ Option Explicit
 '   Fnc_Filtro_Filas(T, Col, Op, Operando, [Vivas])  - las que deja .AutoFilter Field:=Col,
 '                                                      Criteria1:=Op & Operando
 '   Fnc_Filas_Contar(Filas)                          - cuántas valen True
+'   Fnc_Filas_Borrar(Vivas, Cumple, NVivas)          - borrado lógico: las que cumplen dejan de estar vivas
 '
 ' Las dos primeras devuelven un Boolean(1 To T.NumFilas) con True en las filas que cumplen (con la
 ' tabla vacía, un (0 To 0) con False). Con Vivas, un array igual, solo se miran las filas que valen
@@ -150,6 +151,20 @@ Public Function Fnc_Filas_Contar(Filas() As Boolean) As Long
     For Fila = 1 To UBound(Filas)
         If Filas(Fila) Then Fnc_Filas_Contar = Fnc_Filas_Contar + 1
     Next Fila
+End Function
+'---------------------------------------------------------------------------------------------------
+
+'- Borrado lógico: pone a False en Vivas las filas que cumplen y aún vivían; devuelve cuántas y ----
+'- las descuenta de NVivas. (Era Fnc_Borrar_Filas de M_111; desde el 2026-10-06 la usa también M_211)
+Public Function Fnc_Filas_Borrar(Vivas() As Boolean, Cumple() As Boolean, NVivas As Long) As Long
+    Dim Fila    As Long
+    For Fila = 1 To UBound(Vivas)
+        If Cumple(Fila) And Vivas(Fila) Then
+            Vivas(Fila) = False
+            Fnc_Filas_Borrar = Fnc_Filas_Borrar + 1
+        End If
+    Next Fila
+    NVivas = NVivas - Fnc_Filas_Borrar
 End Function
 '---------------------------------------------------------------------------------------------------
 

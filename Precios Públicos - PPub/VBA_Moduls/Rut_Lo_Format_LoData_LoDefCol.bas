@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-06 11:10
+' Last Rev. 2026-10-06 11:50
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -21,21 +21,13 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     Dim Ccol                As Integer
     Dim Ws_Data             As Worksheet:   Set Ws_Data = LoData.Parent
     Dim HiddenCol           As Boolean
-    Dim T_Ini               As Single:      T_Ini = Timer                   '- Tiempos del formateo, para el informe
-    Dim T_Paso              As Single
-    Dim T_Quitar            As Single                                       '- Quitar formatos y validaciones
-    Dim T_Cols              As Single                                       '- Suma de las Col. formateadas
-    Dim Tiempos             As Collection:  Set Tiempos = New Collection    '- Array(Texto, Segundos) de cada paso
-    Dim Paso                As Variant
     Dim UltCol              As Integer:     UltCol = Application.Min(LoData.Range.Columns.Count, LoDefCol.ListRows.Count)
     Dim N_Hasta             As Integer                                      '- Última Col. del bloque de Col. N ya convertido
-    Dim TxT_Bloque          As String                                       '- Para el informe de tiempos de las Col. N
 
     If LoData.DataBodyRange Is Nothing Then
         MsgBox "¡¡¡ Tabla SIN DATOS !!!", vbOKOnly, "Proceso: Formatear Tabla ListObjects"
         GoTo ExitSub
     End If
-    T_Paso = Timer
     '--- Quitar todo formato -----------------------------------
     LoData.DataBodyRange.Select
     With Selection
@@ -55,8 +47,6 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
         ' Opcional: restablecer formato numérico estándar
         .Cells.NumberFormat = "General"
     End With
-    T_Quitar = Timer - T_Paso
-    Tiempos.Add Array("   Quitar formatos y validaciones, alto de filas", T_Quitar)
     
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             TxT_Progreso = ActivForm.Controls("TBx_Informe")
@@ -68,8 +58,6 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             CantFormatCol = CantFormatCol + 1
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "___________________ Formateando Col. " & Ccol & " (" & CantFormatCol & "ª.), de " & TotCantFormatCol & " Col.", 0, , , TxT_Prog, , , 2)
-        T_Paso = Timer
-        TxT_Bloque = ""
         Select Case LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar)
             Case "T"
                     LoData.DataBodyRange.Columns(Ccol).Select
@@ -105,9 +93,8 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
                             '- Sustituye a TextToColumns, que con la config. española deja "443.73" como texto y lee "3867.9250" como 38.679.250.
                             Call Rut_Cols_Textos_a_Numeros(.Columns(Ccol).Resize(, N_Hasta - Ccol + 1))
                         End If
-                        If N_Hasta > Ccol Then TxT_Bloque = ", bloque " & Ccol & "-" & N_Hasta
                     Else
-                        TxT_Bloque = ", ya convertida en su bloque"
+                        '- Ya convertida con la 1ª Col. de su bloque
                     End If
 '                    Dim Rc As Range '--- Si es un número muy grande lo muestra como 99999E+12, con el For-Next lo quitamos ------
 '                    For Each Rc In .Columns(1)
@@ -122,9 +109,6 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
             Case Else
                 MsgBox "Error en Tipo de Variable, NO es T,F ó N ???", vbExclamation, "Procedimiento: Formatear Tabla."
         End Select
-        T_Paso = Timer - T_Paso
-        T_Cols = T_Cols + T_Paso
-        Tiempos.Add Array("   Col. " & Ccol & " " & LoData.ListColumns(Ccol).Name & " (" & LoDefCol.DataBodyRange.Cells(Ccol, DefC_TipVar) & TxT_Bloque & ")", T_Paso)
 NextCol:
 '        Ws_Data.Columns(LoData.ListColumns(Ccol).Range.Column).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
         LoData.Range.Columns(Ccol).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
@@ -133,11 +117,6 @@ NextCol:
         
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Formateadas: ", LastTimeLap, CantFormatCol & " de " & TotCantFormatCol & " col.", , TxT_Progreso)
-            '- Tiempo de cada paso del formateo (suman el total que da el llamador) -----------------------------------
-            Tiempos.Add Array("   Anchos, alineación y resto", (Timer - T_Ini) - T_Quitar - T_Cols)
-            For Each Paso In Tiempos
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", CStr(Paso(0)), 0, Format(Paso(1), "0.00") & " seg.")
-            Next Paso
         
 ExitSub:
 Debug.Print "<<< Rut_Lo_Format_LoData_LoDefColData"

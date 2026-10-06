@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_TablaRam"
-' Last Rev. 2026-10-05 23:11
+' Last Rev. 2026-10-06 11:50
 Option Explicit
 
 '===================================================================================================
@@ -40,6 +40,8 @@ Option Explicit
 '                                                             (las seguidas, de una sola vez)
 '   Rut_TablaRam_Vaciar_Celdas(Lo, Filas, Columnas)         - Vacía en la hoja unas celdas sueltas
 '   Rut_TablaRam_Ordenar_Tandas(Lo, Tandas, [Primera])      - Una ordenación con el resultado de varias
+'   Rut_TablaRam_Anotar_Orden(Tandas, Cols)                 - Anota una ordenación para Ordenar_Tandas
+'   Rut_TablaRam_Marcar(T, Filas, Col, Valor)               - Pone un valor en las filas marcadas
 '===================================================================================================
 
 ' Copia en RAM de un ListObject. Pública porque viaja como parámetro entre módulos.
@@ -226,6 +228,32 @@ Sub Rut_TablaRam_Ordenar_Tandas(Lo As ListObject, Tandas As Variant, Optional By
         Call Rut_Lo_Sort(Lo, Claves(K), xlAscending, (K = 1), Aplicar:=(K = N))
     Next K
 End Sub     ' Rut_TablaRam_Ordenar_Tandas
+'---------------------------------------------------------------------------------------------------
+
+'===================================================================================================
+'- Anota en Tandas una de las ordenaciones que hacía el código anterior, para Rut_TablaRam_Ordenar_Tandas.
+'-   Cols = Array(columnas de esa ordenación, en su orden). Tandas empieza sin dimensionar.
+'-   (Era Rut_Anotar_Orden de M_111; desde el 2026-10-06 la usa también M_211)
+Sub Rut_TablaRam_Anotar_Orden(Tandas() As Variant, ByVal Cols As Variant)
+    Dim N       As Long
+    On Error Resume Next
+    N = UBound(Tandas)                          '- Error si todavía está vacío: N se queda en 0
+    On Error GoTo 0
+    ReDim Preserve Tandas(1 To N + 1)
+    Tandas(N + 1) = Cols
+End Sub     ' Rut_TablaRam_Anotar_Orden
+'---------------------------------------------------------------------------------------------------
+
+'===================================================================================================
+'- Pone Valor en la columna Col de T, en las filas que valen True en Filas, y la marca como Modificada
+'-   (Era Rut_Marcar_Obs de M_111, solo para Obs_Conta; desde el 2026-10-06 la usa también M_211)
+Sub Rut_TablaRam_Marcar(T As T_TablaRam, Filas() As Boolean, ByVal Col As Long, ByVal Valor As Variant)
+    Dim Fila    As Long
+    For Fila = 1 To T.NumFilas
+        If Filas(Fila) Then T.Datos(Fila, Col) = Valor
+    Next Fila
+    T.Modificada(Col) = True
+End Sub     ' Rut_TablaRam_Marcar
 '---------------------------------------------------------------------------------------------------
 
 '- Devuelve SIEMPRE un array 2D (1 To filas, 1 To columnas): .Value de una sola celda no es array --

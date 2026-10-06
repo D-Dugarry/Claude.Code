@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-06 11:10
+' Last Rev. 2026-10-06 11:50
 '2026-01-18
 Option Explicit
 
@@ -234,11 +234,6 @@ Rut_Off_Functions
     Dim WrkSht              As Worksheet:       Set WrkSht = Lo_Data.Parent
     Dim Datos               As Variant                                  '- Convertir_En_Ram: las filas del fichero
     Dim Reescrita()         As Boolean                                  '- Convertir_En_Ram: Col. que ha cambiado la conversión
-    Dim T_Paso              As Single                                   '- Tiempos de cada paso, para el informe
-    Dim T_Abrir             As Single
-    Dim T_Leer              As Single
-    Dim T_Convertir         As Single
-    Dim T_Escribir          As Single
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
@@ -299,11 +294,9 @@ Rut_Off_Functions
     Prog__APP_Switch.Range("Sw_WB_Deactivate") = False     '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ---->>>
     Dim Ws              As Worksheet
     Dim ClosedBook      As Workbook
-    T_Paso = Timer
     On Error Resume Next
     Set ClosedBook = Workbooks.Open(Arch_New_Name, ReadOnly:=True)
     On Error GoTo 0
-    T_Abrir = Timer - T_Paso
     If ClosedBook Is Nothing Then
         MsgBx_Title = "Proceso: Importar " & ArchRequest
         MsgBx_Msg = "¡No se ha podido abrir el fichero!" & vbLf & _
@@ -414,9 +407,7 @@ Rut_Off_Functions
 
         '- La Tabla Lo_Data SÍ tiene datos -Y- las Columnas coinciden. ---------------------
         If Convertir_En_Ram Then
-            T_Paso = Timer
             Datos = Lo_ClsBk.DataBodyRange.Value2                       '- Ya sin la Col. ORIGEN
-            T_Leer = Timer - T_Paso
         Else
             ClosedBook.Sheets(SheetIndx).ListObjects(1).DataBodyRange.Copy
             Lo_Data.Range.Offset(1, 0).PasteSpecial Paste:=xlPasteValues    'xlPasteAll    xlPasteValues
@@ -428,12 +419,8 @@ Rut_Off_Functions
                 Set Lo_ClsBk = Nothing
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         If Convertir_En_Ram Then
-            T_Paso = Timer
             Call Rut_Ram_Textos_a_Numeros_y_Fechas(Datos, LoDefCol, Reescrita)
-            T_Convertir = Timer - T_Paso
-            T_Paso = Timer
             Call Rut_Lo_Escribir_Importados(Lo_Data, Datos, Reescrita)
-            T_Escribir = Timer - T_Paso
             Datos = Empty                                               '- Libera la memoria
         End If
             '- Visualizo el progreso  <<<<>>>>  ---------------------------------------------------------------------
@@ -443,12 +430,6 @@ Rut_Off_Functions
                 LastTimeLap = TimeLap2
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             If Quitada_Origen Then Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
-            If Convertir_En_Ram Then
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: abrir el fichero", 0, Format(T_Abrir, "0.00") & " seg.")
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: leer las filas en RAM", 0, Format(T_Leer, "0.00") & " seg.")
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: convertir en RAM las Col. N y F", 0, Format(T_Convertir, "0.00") & " seg.")
-                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "   Importar: escribir en la tabla", 0, Format(T_Escribir, "0.00") & " seg.")
-            End If
             
     Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 

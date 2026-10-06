@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-10-05 23:11
+' Last Rev. 2026-10-06 11:50
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -72,8 +72,8 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- Borrar Recibos AE4 Enseñanzas Propias -----------------------------------------------------------
     If Prog__APP_Switch.Range("Sw_DelRegAE4") Then
         Cumple = Fnc_Filtro_Filas(T, BD_ActivEco, "=", 4, Viva)
-        rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
-        Call Rut_Anotar_Orden(Tandas, Array(BD_ActivEco))
+        rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
+        Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_ActivEco))
         If rowfind > 0 Then
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. AE4 ", 0, _
@@ -92,8 +92,8 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- Borrar Recibos con Imp.Rec. < 0 -----------------------------------------------------------------
     If Prog__APP_Switch.Range("Sw_DelRegNeg") Then
         Cumple = Fnc_Filtro_Filas(T, BD_ImpRec, "<", 0, Viva)
-        rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
-        Call Rut_Anotar_Orden(Tandas, Array(BD_ImpRec))
+        rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
+        Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_ImpRec))
         If rowfind > 0 Then
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. Negativos. ", 0, _
@@ -113,17 +113,17 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '--------- El importe del recibo es Cero, el importe Académico NO es Cero, o el importe Administrativo NO es Cero. -----
 '--------- Es decir que la Matrícula del estudio es gratuita, aunque tiene coste. ------------------
 '- -------------------------------------------------------------------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_ImpRec, BD_ImpDto))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_ImpRec, BD_ImpDto))
     Cumple = Fnc_CriT_Filas(T, "Tb_CriT_ImpMatCero", Viva)
     rowfind = Fnc_Filas_Contar(Cumple)
     If rowfind > 0 Then
         If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
-            Call Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+            Call Fnc_Filas_Borrar(Viva, Cumple, NVivas)
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero A Coste Cero", 0, _
                  Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
         Else
-            Call Rut_Marcar_Obs(T, Cumple, "ImpMatCero")
+            Call Rut_TablaRam_Marcar(T, Cumple, BD_Obs_Conta, "ImpMatCero")
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Marcados Rec. de Matrícula_Cero A Coste Cero", 0, _
                  Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
@@ -136,17 +136,17 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Borrar Recibos - Subvencionado-, Imp_Rec =0 porque Imp_Dto >0 ----------------------------
 '- -------------------------------------------------------------------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_ImpRec))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_ImpRec))
     Cumple = Fnc_Filtro_Filas(T, BD_ImpRec, "=", 0, Viva)
     rowfind = Fnc_Filas_Contar(Cumple)
     If rowfind > 0 Then
         If Prog__APP_Switch.Range("Sw_DelRegMatriculaCero") Then
-            Call Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+            Call Fnc_Filas_Borrar(Viva, Cumple, NVivas)
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. de Matrícula_Cero Subvencionada", 0, _
                  Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
         Else
-            Call Rut_Marcar_Obs(T, Cumple, "ImpMatCero")
+            Call Rut_TablaRam_Marcar(T, Cumple, BD_Obs_Conta, "ImpMatCero")
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Marcados Rec. de Matrícula_Cero Subvencionada", 0, _
                  Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
@@ -158,9 +158,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos con DNI=1 ==>> "NO BORRAR NO BORRAR, FICTICIO PARA RECIBOS"  ---------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_DNI))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_DNI))
     Cumple = Fnc_Filtro_Filas(T, BD_DNI, "=", "1", Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. Ficticio, DNI=1", 0, _
@@ -173,9 +173,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos con AE=300 (M013 mal matriculado en Gestión Académica) ==>> "SEMINARI D'ORIENTACIÓ PER A PREPARACIÓ DE PROVES PER A MAJORS DE 25 ANYS"  --------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_ActivEco))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_ActivEco))
     Cumple = Fnc_Filtro_Filas(T, BD_ActivEco, "=", 300, Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. AE=300 que debería ser AE=4 y Plan=M013.", 0, _
@@ -190,9 +190,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos ANULADOS -------------------------------------------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_Anul))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_Anul))
     Cumple = Fnc_Filtro_Filas(T, BD_Anul, "=", "S", Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. Anulados ", 0, _
@@ -204,9 +204,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos NO Martrícula --------------------------------------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_Matricula))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_Matricula))
     Cumple = Fnc_Filtro_Filas(T, BD_Matricula, "=", "N", Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. NO Matrícula ", 0, _
@@ -219,9 +219,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos INVALIDADOS ----------------------------------------------------------------------
-    Call Rut_Anotar_Orden(Tandas, Array(BD_Hinvalid))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_Hinvalid))
     Cumple = Fnc_Filtro_Filas(T, BD_Hinvalid, "=", "S", Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. Invalidados ", 0, _
@@ -257,9 +257,9 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
 '- Borrar Recibos Emitidos en Años Posteriores a AnoCont -------------------------------------------
 '-Filtra Recibos con F_Emi > APP_FechCierreCont y los Borra  ---------------------------------------
 '-     (2026-10-05: antes, si había alguno, una línea de más borraba la tabla entera; ahora se borran solo esos)
-    Call Rut_Anotar_Orden(Tandas, Array(BD_FEmi))
+    Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_FEmi))
     Cumple = Fnc_Filtro_Filas(T, BD_FEmi, ">", Cierre, Viva)
-    rowfind = Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+    rowfind = Fnc_Filas_Borrar(Viva, Cumple, NVivas)
     If rowfind > 0 Then
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Borrados Rec. F_Emi > " & FechCierreCont, 0, _
@@ -277,10 +277,10 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
     Cumple = Fnc_CriT_Filas(T, "Tb_CriT_Reg_Err", Viva)
     rowfind = Fnc_Filas_Contar(Cumple)
     If rowfind > 0 Then
-        Call Rut_Marcar_Obs(T, Cumple, "Tb_CriT_Err_Date")
+        Call Rut_TablaRam_Marcar(T, Cumple, BD_Obs_Conta, "Tb_CriT_Err_Date")
         ErrDate = Cumple                                            '- Se copian a BD_ErrDate, se borren o no
         If Prog__APP_Switch.Range("Sw_DelRegErrDate") Then
-            Call Fnc_Borrar_Filas(Viva, Cumple, NVivas)
+            Call Fnc_Filas_Borrar(Viva, Cumple, NVivas)
             '- Visualizo el progreso --------
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Del Rec. con Fechas Incongruentes. ", 0, _
                  Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
@@ -332,36 +332,4 @@ Debug.Print "<<< RuT_Remove_Null_Reg"
     Call Rut_Lo_Filtros_Quitar(Lo_Data)
     Call Rut_WrkSheet_LstObj_LiberarEspacio(Sh_Data)
 End Sub     ' RuT_Remove_Reg_No_Valid
-'- -------------------------------------------------------------------------------------------------
-
-'- Borra en RAM (Viva = False) las filas que cumplen; devuelve cuántas y descuenta NVivas ----------
-Private Function Fnc_Borrar_Filas(Viva() As Boolean, Cumple() As Boolean, NVivas As Long) As Long
-    Dim Fila    As Long
-    For Fila = 1 To UBound(Viva)
-        If Cumple(Fila) And Viva(Fila) Then
-            Viva(Fila) = False
-            Fnc_Borrar_Filas = Fnc_Borrar_Filas + 1
-        End If
-    Next Fila
-    NVivas = NVivas - Fnc_Borrar_Filas
-End Function
-
-'- Pone la marca en Obs_Conta de las filas que cumplen ---------------------------------------------
-Private Sub Rut_Marcar_Obs(T As T_TablaRam, Cumple() As Boolean, ByVal Marca As String)
-    Dim Fila    As Long
-    For Fila = 1 To T.NumFilas
-        If Cumple(Fila) Then T.Datos(Fila, BD_Obs_Conta) = Marca
-    Next Fila
-    T.Modificada(BD_Obs_Conta) = True
-End Sub
-
-'- Anota una ordenación de las que hacía el código anterior (ver Rut_TablaRam_Ordenar_Tandas) ------
-Private Sub Rut_Anotar_Orden(Tandas() As Variant, ByVal Cols As Variant)
-    Dim N       As Long
-    On Error Resume Next
-    N = UBound(Tandas)                          '- Error si todavía está vacío: N se queda en 0
-    On Error GoTo 0
-    ReDim Preserve Tandas(1 To N + 1)
-    Tandas(N + 1) = Cols
-End Sub
 '- -------------------------------------------------------------------------------------------------
