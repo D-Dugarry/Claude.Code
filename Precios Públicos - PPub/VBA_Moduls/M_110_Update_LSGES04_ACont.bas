@@ -107,7 +107,7 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
         
 'GoTo SaltoAqui
 
-    If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 ?") Then GoTo SaltoAqui
+    If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04_AñoCont ?") Then GoTo SaltoAqui
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSGES04 por Año Contable --------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-07 13:48
 Option Explicit
 
 '###################################################################################################################################
@@ -42,7 +42,35 @@ Sub Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem As String, O
         NomFich = Right(Fich_SelectedItem, Len(Fich_SelectedItem) - InStrRev(Fich_SelectedItem, "\"))   '- ¡¡ Funciona con NEXE !!
         RutaFich = Left(Fich_SelectedItem, InStrRev(Fich_SelectedItem, "\"))                            ' Extrae solo la ruta del directorio
     End If
+    If InStr(Fich_SelectedItem, "/") > 0 Then NomFich = Fnc_URL_Decodificar(NomFich)             '- Los nombres de una URL vienen con %C3%B1 etc.
 End Sub             ' Fnc_Format_Referencia
+Function Fnc_URL_Decodificar(ByVal Txt As String) As String  ' Decodifica %C3%B1 (UTF-8 en porcentaje), como los nombres de una URL de NEXE
+' ==================================================================================================================================
+    Dim i As Long, B As Long, B2 As Long, B3 As Long
+    Dim Res As String
+    i = 1
+    Do While i <= Len(Txt)
+        If Mid$(Txt, i, 1) = "%" And i + 2 <= Len(Txt) Then
+            If Mid$(Txt, i + 1, 2) Like "[0-9A-Fa-f][0-9A-Fa-f]" Then
+                B = CLng("&H" & Mid$(Txt, i + 1, 2))
+                If B >= &HC2 And B <= &HDF And Mid$(Txt, i + 3, 1) = "%" And i + 5 <= Len(Txt) Then          '- 2 bytes (tildes, enye)
+                    B2 = CLng("&H" & Mid$(Txt, i + 4, 2))
+                    Res = Res & ChrW$(((B And &H1F) * 64) Or (B2 And &H3F)): i = i + 6
+                ElseIf B >= &HE0 And B <= &HEF And Mid$(Txt, i + 3, 1) = "%" And Mid$(Txt, i + 6, 1) = "%" And i + 8 <= Len(Txt) Then   '- 3 bytes
+                    B2 = CLng("&H" & Mid$(Txt, i + 4, 2)): B3 = CLng("&H" & Mid$(Txt, i + 7, 2))
+                    Res = Res & ChrW$(((B And &HF) * 4096) Or ((B2 And &H3F) * 64) Or (B3 And &H3F)): i = i + 9
+                Else
+                    Res = Res & Chr$(B): i = i + 3                          '- 1 byte (ASCII, p.ej. %20)
+                End If
+            Else
+                Res = Res & "%": i = i + 1
+            End If
+        Else
+            Res = Res & Mid$(Txt, i, 1): i = i + 1
+        End If
+    Loop
+    Fnc_URL_Decodificar = Res
+End Function        ' Fnc_URL_Decodificar
 '###################################################################################################################################
    'call Rut_File_Select ("Título...", NomFich, ["Excel"], ["*.xls?"])      '- NomFich = "Cancel"
 Sub Rut_File_Select(Titulo As String, _

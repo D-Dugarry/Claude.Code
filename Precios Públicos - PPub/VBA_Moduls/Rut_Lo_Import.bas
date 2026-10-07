@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-06 11:50
+' Last Rev. 2026-10-07 13:30
 '2026-01-18
 Option Explicit
 
@@ -242,7 +242,7 @@ Rut_Off_Functions
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Seleccionar el fichero y la ruta, para importar: " & ArchRequest, 0)
     '- Select File -------------------------------------------------------------------------------------
     Arch_New_Name = Fnc_Nombres_Prefijo_Comun(NombresValidos)                  '- El diálogo filtra por la parte común de los nombres
-    Call Rut_File_Select("Seleccionar el Nuevo Fichero Excel " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?")
+    Call Rut_File_Select_V2("Seleccionar el Nuevo Fichero Excel " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?")
         If Arch_New_Name = "Cancel" Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
@@ -255,7 +255,7 @@ Rut_Off_Functions
             Rut_On_Functions
             Exit Sub
         End If
-        NomArch = Dir(Arch_New_Name)
+        Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomArch)      '- Arch_New_Name es la ruta completa (no depende de CurDir)
         '- Comprueba que se ha seleccionado el nombre adecuado de Excel. --------------------------
         If Not Fnc_Nombre_Fichero_Valido(NomArch, NombresValidos) Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
