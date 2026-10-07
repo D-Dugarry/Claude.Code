@@ -9,7 +9,7 @@ los totales, commit `1f9cb9cc` del 2026-09-27; `Fnc_Lo_Contar_Visibles`, commit 
 
 **Etiquetas:** ✅ **Hecho** · 🧪 **Aplicado, falta probarlo en Excel** · ⏳ **Pendiente** · ⏸️ **Postergado**
 
-## Estado: ✅ FASES 1 A 5 HECHAS Y VERIFICADAS (commit del 2026-10-04 23:35); fase 6 postergada
+## Estado: ✅ FASES 1 A 5 HECHAS Y VERIFICADAS (2026-10-04); fase 6a (Lo_ListObjAPP) hecha y probada el 2026-10-07
 
 Pruebas 5 a 7 de «Cómo probarlo» no hechas: el usuario las dio por opcionales (cambios menores, ya
 cubiertos por la doble ejecución). `M_310` ya no vuelve a mostrar los totales de `Tb_INSS`.
@@ -257,7 +257,15 @@ configurada y 15 no.
   libro importado (`Rut_Lo_Import`), y los de `M_118` (su llamada está comentada) y `M_510`
   (hallazgo 8), que no se han tocado.
 
-### Fase 6: estudio, estado de la fila de totales configurable para las 39 tablas ⏸️
+### Fase 6: estudio, estado de la fila de totales configurable para las 39 tablas 🧪 (6a escrita el 2026-10-06, falta probarla)
+
+**Decisiones del usuario (2026-10-06):** la configuración vive en la hoja `ListObjAPP` (CodeName `Prog__APP_ListObj`), tabla
+`Lo_ListObjAPP` con columnas `CodeName_Sheet`, `Name_Sheet`, `Nom_ListObj`, `Sw_Col_Hide`, `Sw_TRow_Hide`, `Describción` (creada por el usuario, vacía).
+`Sw_TRow_Hide`: `False` = totales visibles, `True` = ocultos, vacío = libre. Se aplican Visible y Oculta (Libre no se toca).
+Alcance de este paso (6a): la tabla + la política que la lee. Se renombran antes las tablas con nombre por defecto (ningún módulo de
+`VBA_Moduls/` las nombra: comprobado con grep). `Sw_Col_Hide` queda sin usar de momento (hoy los switches están en `Lo_SwitchsAPP`).
+**6a en `Rut_Lo.bas`:** `Rut_Lo_Totales_Mostrar` recorre todas las tablas y aplica el estado de `Fnc_Lo_Totales_Estado`; sin fila en la
+tabla (o sin hoja) vale la regla de la fase 4; `Rut_Lo_ListObjAPP_Capturar` da de alta las tablas que falten sin tocar las existentes.
 
 Pedido por el usuario al decidir el punto 2. Tendrá su propio plan; aquí van los puntos que
 debería resolver.

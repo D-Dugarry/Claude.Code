@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-07 10:49
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
@@ -93,7 +93,7 @@ Debug.Print "Rut_Lo_Export_Bdatos"
     Sht__BD.Select
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Sht__BD.Unprotect
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD")
+    Call Rut_ColHide_Set("Sht__BD", Not Fnc_ColHide_Get("Sht__BD"))
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios

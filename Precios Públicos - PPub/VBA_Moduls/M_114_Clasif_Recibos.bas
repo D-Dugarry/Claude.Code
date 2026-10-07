@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-05 23:11
+' Last Rev. 2026-10-07 10:49
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -45,7 +45,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
 
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
+    Call Rut_ColHide_Set("Sht__BD", False)
     Sht__BD.Unprotect
 
         '- Visualizo el progreso

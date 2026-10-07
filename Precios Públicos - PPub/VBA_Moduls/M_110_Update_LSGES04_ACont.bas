@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-06 11:10
+' Last Rev. 2026-10-07 10:49
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -83,13 +83,13 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Prog_DefCol_BD.Visible = xlSheetVisible
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
+    Call Rut_ColHide_Set("Sht__BD", False)
     Sht__BD.Unprotect
     
     Dim Lo_BD_Ant           As ListObject:      Set Lo_BD_Ant = Sht__BD_Ant.ListObjects(1)
     Sht__BD_Ant.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_Ant)
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant") = Not Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant")
+    Call Rut_ColHide_Set("Sht__BD_Ant", Not Fnc_ColHide_Get("Sht__BD_Ant"))
     Sht__BD_Ant.Unprotect
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -161,7 +161,7 @@ RuT_Remove_Reg_No_Valid:
     Dim Lo_BD_ErrDate       As ListObject:      Set Lo_BD_ErrDate = Sht__BD_ErrDate.ListObjects(1)
             Sht__BD_ErrDate.Visible = xlSheetVisible
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_ErrDate)
-            Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_ErrDate") = False
+            Call Rut_ColHide_Set("Sht__BD_ErrDate", False)
             Sht__BD_ErrDate.Unprotect
             TimeLap2 = LastTimeLap
     Call RuT_Remove_Reg_No_Valid(Lo_BD, Lo_BD_ErrDate)
@@ -177,7 +177,7 @@ RuT_Duplicates_Search:
     Dim Lo_BD_Dpl           As ListObject:      Set Lo_BD_Dpl = Sht__BD_Dupl.ListObjects(1)
             Sht__BD_Dupl.Visible = xlSheetVisible
             Call Rut_Lo_WrkSht_Preparar(Sht__BD_Dupl)
-            Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Dupl") = False
+            Call Rut_ColHide_Set("Sht__BD_Dupl", False)
             Sht__BD_Dupl.Unprotect
     Call RuT_Duplicates_Search(Lo_BD, Lo_DefCol_BD, Lo_BD_Dpl, BD_Ref, BD_Incidencias, BD_H_Incidencias)
             Set Lo_BD_Dpl = Nothing

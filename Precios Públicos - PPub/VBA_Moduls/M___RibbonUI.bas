@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-04 21:08
+' Last Rev. 2026-10-07 10:49
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -610,8 +610,8 @@ End Sub
 '-----------------------------
 Sub GetLbl_ShowHide_Lo_Cols_Group(control As IRibbonControl, ByRef LabelVal)
     LabelVal = "Table: " & ActiveSheet.Name
-    If Not Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then GoTo FinRut
-    If Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Not Fnc_ColHide_Existe(ActiveSheet.CodeName) Then GoTo FinRut
+    If Fnc_ColHide_Get(ActiveSheet.CodeName) Then
         LabelVal = LabelVal & ", Cols Hidden"
     Else
         LabelVal = LabelVal & ", Cols Showed"
@@ -622,10 +622,10 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ShowHide_Lo_Cols(control As IRibbonControl, ByRef LabelVal)
     Application.ScreenUpdating = False
-    If Not Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Not Fnc_ColHide_Existe(ActiveSheet.CodeName) Then
         LabelVal = "¿?":            GoTo FinRut
     End If
-    If Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
+    If Fnc_ColHide_Get(ActiveSheet.CodeName) Then
         LabelVal = "Show Cols"
     Else
         LabelVal = "Hide Cols"
@@ -642,7 +642,7 @@ Debug.Print "GetLbl_ShowHide_Lo_Cols,  LabelVal=", LabelVal
 End Sub
 '-----------------------------
 Sub OnAct_ShowHide_Lo_Cols(control As IRibbonControl)
-    Dim SheetDefCol As String:     SheetDefCol = "_DefCol_" & ActiveSheet.Name
+    Dim SheetDefCol As String:     SheetDefCol = "DefCol_" & ActiveSheet.Name
     If Not Fnc_WrkSheet_Exist(SheetDefCol) Then GoTo FinRut
     Application.ScreenUpdating = False
     Call Rut_Lo_Columns_Show_Hide(Sheets(ActiveSheet.Name), Sheets(SheetDefCol), DefC_HiddenCol)
@@ -663,9 +663,9 @@ End Sub
 '-----------------------------
 Sub OnAct_ShowHide_Lo_Cols_Row1x(control As IRibbonControl)
     Application.ScreenUpdating = False
-    If Fnc_Range_Exist("Sw_Col_Hide_" & ActiveSheet.CodeName) Then
-        Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName) = Not Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName)
-        SW_ShowHide_Col = Prog__APP_Switch.Range("Sw_Col_Hide_" & ActiveSheet.CodeName)
+    If Fnc_ColHide_Existe(ActiveSheet.CodeName) Then
+        Call Rut_ColHide_Set(ActiveSheet.CodeName, Not Fnc_ColHide_Get(ActiveSheet.CodeName))
+        SW_ShowHide_Col = Fnc_ColHide_Get(ActiveSheet.CodeName)
     Else
         SW_ShowHide_Col = Not SW_ShowHide_Col
     End If

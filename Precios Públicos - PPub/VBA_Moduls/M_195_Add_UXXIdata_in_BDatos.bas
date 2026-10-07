@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_195_Add_UXXIdata_in_BDatos"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-07 10:49
 '- M_195_Import_a_BD_Ant -----------------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -23,11 +23,11 @@ Debug.Print "------------------------- >>> RuT_Add_UXXIdata_in_BDatos()"
     '- Setting Sheets ------------------------------------
     Sht__BD.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
+    Call Rut_ColHide_Set("Sht__BD", False)
     
     Sht__BD_Ant.Visible = xlSheetVisible
     Call Rut_Lo_WrkSht_Preparar(Sht__BD_Ant)
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD_Ant") = False
+    Call Rut_ColHide_Set("Sht__BD_Ant", False)
     
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios

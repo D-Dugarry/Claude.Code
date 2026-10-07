@@ -7,7 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-07 10:49
 Option Explicit
 
 Private myRibUI             As IRibbonUI
@@ -59,7 +59,7 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     Sht__BD.Visible = xlSheetVisible
     Sht__BD.Select
     Call Rut_Lo_Filtros_Quitar(Sht__BD.ListObjects(1))
-    Prog__APP_Switch.Range("Sw_Col_Hide_Sht__BD") = False
+    Call Rut_ColHide_Set("Sht__BD", False)
     
         Dim WrkSht      As Worksheet
     For Each WrkSht In Worksheets
