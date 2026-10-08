@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-07 14:57
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -55,7 +55,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
 
         Call Rut_Lo_Filtros_Quitar(Lo_BD)
         .DataBodyRange.Columns(BD_Tipo_Rec).ClearContents
-        .DataBodyRange.Columns(BD_CriT_Emi).Resize(, 56).ClearContents
+        .DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_DevEP - BD_CriT_Emi + 1).ClearContents
         '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 1).ClearContents
         '.DataBodyRange.Columns(BD_CriT_Emi).Resize(, BD_CriT_ErrDate - BD_CriT_Emi + 2).ClearContents
 

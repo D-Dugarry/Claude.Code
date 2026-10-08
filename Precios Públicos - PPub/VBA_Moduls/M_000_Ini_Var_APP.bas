@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-10-04 13:55
+' Last Rev. 2026-10-07 14:57
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -62,14 +62,20 @@ Public Const BD_H_Incidencias         As Integer = 52   ' col: bz
 Public Const BD_EP_Ctrl               As Integer = 53   ' col: ba
 Public Const BD_EP_GestReg            As Integer = 54   ' col: bb
 
-' - Columnas usadas como 'scratch' de marcado temporal por RuT_Clasif_Recibos (M_114) --------------
-Public Const BD_CriT_Emi               As Integer = 52   ' col: bz  (mismo indice fisico que BD_H_Incidencias, reusado como scratch)
-Public Const BD_CriT_EjeAnt            As Integer = 53   ' col: ba  (mismo indice fisico que BD_EP_Ctrl, reusado como scratch)
-Public Const BD_CriT_Anejo             As Integer = 54   ' col: bb  (mismo indice fisico que BD_EP_GestReg, reusado como scratch)
-Public Const BD_CriT_Aplazado          As Integer = 55   ' col: bc
-Public Const BD_CriT_ADxAplz           As Integer = 56   ' col: bd
-Public Const BD_CriT_ContabAnt         As Integer = 57   ' col: be
-Public Const BD_CriT_DevEP             As Integer = 58   ' col: bf
+Public Const BD_Ctrl_Emitido    As Integer = 55   ' col: bc
+Public Const BD_Ctrl_EjeAnt     As Integer = 56   ' col: bd
+Public Const BD_Ctrl_Anejo      As Integer = 57   ' col: be
+Public Const BD_Ctrl_Aplazado   As Integer = 58   ' col: bf
+Public Const BD_Ctrl_AdxAplz    As Integer = 59   ' col: bg
+
+' - Columnas de marcas de RuT_Clasif_Recibos (M_114): son columnas reales de BDatos (Emitido..Devol) -----
+Public Const BD_CriT_Emi               As Integer = 55   ' col: bc
+Public Const BD_CriT_EjeAnt            As Integer = 56   ' col: bd
+Public Const BD_CriT_Anejo             As Integer = 57   ' col: be
+Public Const BD_CriT_Aplazado          As Integer = 58   ' col: bf
+Public Const BD_CriT_ADxAplz           As Integer = 59   ' col: bg
+Public Const BD_CriT_ContabAnt         As Integer = 60   ' col: bh
+Public Const BD_CriT_DevEP             As Integer = 61   ' col: bi
 
 ' Lo_Prog_AE4.ListObjects(1) -----------------------------------
 Public Const AE4_TipRec               As Integer = 1    ' col: a
