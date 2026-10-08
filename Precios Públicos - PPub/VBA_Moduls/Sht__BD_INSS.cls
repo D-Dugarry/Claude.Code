@@ -20,8 +20,3 @@ Private Sub Worksheet_Deactivate()
 Debug.Print "Worksheet_DeActivate - " & ActiveSheet.Name
     Call Rut_ConfigExcel_RESTABLECER    '- Restaura Configuración Excel.
 End Sub
-
-
-
-
-
