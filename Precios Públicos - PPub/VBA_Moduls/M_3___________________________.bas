@@ -26,7 +26,7 @@ Attribute VB_Name = "M_3___________________________"
 '    -            Borrar de Lo_ClsBk Recibos de LSave06 con C_Acad <> C_Acad_Ant y C_Acad_Pos, para aligerar el peso de la Tabla.
 '    -            Borrar de Lo_ClsBk Recibos "<>INSS" en Nom_Concepto, para aligerar el peso de la Tabla.
 '    -            Borrar Recibos con Imp.Rec. < 0.
-'    -            M_314_Find_Rec_INSS, Identificar de un C_Acad, los 1º Rec. con Seguro obligatorio INSS, borrar los que no son.
+'    -            M_314_Find_Rec_INSS RETIRADO (2026-10-08): el LSace06 INSS del Robot ya viene filtrado.
 '    -  ?????          Borrar Recibos de C_Acad_Ant y Cobrados en Año_Cont_Ant.
 '    -            Borro los datos de las columnas NO necesarias.
 '    - --------------------------------------------------------------------------------------------------------------

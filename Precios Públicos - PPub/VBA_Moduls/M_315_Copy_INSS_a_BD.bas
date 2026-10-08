@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_315_Copy_INSS_a_BD"
-' Last Rev. 2026-10-04 21:07
+' Last Rev. 2026-10-08 13:52
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -29,6 +29,10 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
     Dim TxT_Progreso    As String
     Dim TxT_ProgIni     As String
     Dim rowfind         As Variant
+    Dim DFound          As Object:      Set DFound = CreateObject("Scripting.Dictionary")   '- Por Curso Acad: Recibos encontrados
+    Dim DNot            As Object:      Set DNot = CreateObject("Scripting.Dictionary")     '- Por Curso Acad: Recibos NO encontrados
+    Dim DImp            As Object:      Set DImp = CreateObject("Scripting.Dictionary")     '- Por Curso Acad: Importe INSS incorporado
+    Dim K_CAcad         As String
     
     Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
     Dim Lo_Bd_INSS      As ListObject:      Set Lo_Bd_INSS = Sht__BD_INSS.ListObjects(1)
@@ -48,7 +52,7 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
     
     '- Visualizo el progreso
     TxT_ProgIni = ActivForm.Controls("TBx_Informe")
-    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Procedimiento: Incorporar Imp. INSS, Cursos " & C_Acad_Ant & " y " & C_Acad_Pos, 0, , , , , , 4)
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", vbLf & "Procedimiento: Incorporar Imp. INSS, Cursos " & C_Acad_Ant & " y " & C_Acad_Pos, 0, , , , , , 4)
     TxT_Progreso = ActivForm.Controls("TBx_Informe")
 
     '- --------------------------------------------------------------------------------------------------------
@@ -66,19 +70,20 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
    '- -----------------------------------------------------------------------------------------------------------------------
    '- - Actualizo BDatos con Lo_Bd_INSS ------------------------------------------------------------------------------------------------
    '- -----------------------------------------------------------------------------------------------------------------------
-    Lo_BD.DataBodyRange.Columns(BD_Rec_Imp_INSS).ClearContents
+    '- (2026-10-08) Ya no se vacia la columna Rec_Imp_INSS entera: solo la de los recibos de C_Acad_Ant/Pos (arriba), para conservar la de otros cursos si BD_INSS se queda con uno solo.
 '    Lo_Bd_INSS.DataBodyRange.Columns(BD_Incidencias).ClearContents
     Call Rut_Lo_Sort(Lo_Bd_INSS, LS06_Ref, xlAscending, True)   '- Las dos tablas por Ref, para cruzarlas en un solo recorrido
     Call Rut_Lo_Sort(Lo_BD, BD_Ref, xlAscending, True)
     '- El cruce se hace en RAM (Rut_Lo_TablaRam), con el mismo recorrido de siempre: celda a celda en la hoja era lento.
-    '- BD se carga con .Value2 y la tabla INSS con .Value, que es lo que se copiaba antes con "Celda = Celda". Rec_Imp_INSS no
-    '- se carga: se acaba de vaciar, así que en RAM empieza vacía y se devuelve entera.
+    '- BD se carga con .Value2 y la tabla INSS con .Value, que es lo que se copiaba antes con "Celda = Celda". Rec_Imp_INSS SI se carga (ya no se vacia entera,
+    '- para conservar la de otros cursos) y se devuelve entera, con sus valores.
     Dim T_BD            As T_TablaRam
     Dim T_INSS          As T_TablaRam
-    Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref), True)
-    Call Rut_TablaRam_Cargar(T_INSS, Lo_Bd_INSS, Array(LS06_Ref, LS06_Concept_Imp, LS06_RecFound))
+    Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref, BD_Rec_Imp_INSS), True)
+    Call Rut_TablaRam_Cargar(T_INSS, Lo_Bd_INSS, Array(LS06_Ref, LS06_C_Acad, LS06_Concept_Imp, LS06_RecFound))
     F_BD = 1
     For F_BDINSS = 1 To TF_BbINSS
+        K_CAcad = CStr(T_INSS.Datos(F_BDINSS, LS06_C_Acad))
         Select Case T_BD.Datos(F_BD, BD_Ref)
             Case Is < T_INSS.Datos(F_BDINSS, LS06_Ref)     '- Ref_BD  NO-EXISTE-EN  Sht__BD_Adm
                 If F_BD < TF_BD Then
@@ -88,15 +93,19 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
                     '- BD agotada: este y todos los INSS restantes quedan sin encontrar --------
                     NotFound = NotFound + 1
                     T_INSS.Datos(F_BDINSS, LS06_RecFound) = "Not Found en BD. (BD agotada)"
+                    Call Rut_INSS_Acum(DNot, K_CAcad, 1)
                 End If
             Case Is = T_INSS.Datos(F_BDINSS, LS06_Ref)     '- Ref_BD  SÍ-EXISTE-EN  Sht__BD_Adm
                 T_BD.Datos(F_BD, BD_Rec_Imp_INSS) = T_INSS.Datos(F_BDINSS, LS06_Concept_Imp)
                 Found = Found + 1
                 T_INSS.Datos(F_BDINSS, LS06_RecFound) = "Found en BD."
+                Call Rut_INSS_Acum(DFound, K_CAcad, 1)
+                Call Rut_INSS_Acum(DImp, K_CAcad, Fnc_INSS_Importe(T_INSS.Datos(F_BDINSS, LS06_Concept_Imp)))
                 If F_BD < TF_BD Then F_BD = F_BD + 1
             Case Is > T_INSS.Datos(F_BDINSS, LS06_Ref)     '- Ref_BD_Adm  NO-EXISTE-EN  Sht__BD
                 NotFound = NotFound + 1
                 T_INSS.Datos(F_BDINSS, LS06_RecFound) = "Not Found en BD."
+                Call Rut_INSS_Acum(DNot, K_CAcad, 1)
         End Select
         If (F_BDINSS Mod 4000 = 0 And F_BDINSS <> 0) Or F_BD Mod 4000 = 0 Then
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos de: " & Format(Found, "#,##0") & _
@@ -119,13 +128,39 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
                 CantImpINSS = Application.Count(.Columns(BD_Rec_Imp_INSS))
         End With
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Procedimiento: Incorporar Imp.INSS. de los C_Acad " & C_Acad_Ant & " y " & C_Acad_Pos, 0, , , TxT_ProgIni, , , 2)
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Recibos NO encontrados: ", TimeLapSub, _
-                            Format(NotFound, "#,##0") & " reg.", " de " & Format(TF_BbINSS, "#,##0") & " reg.")
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "Incorporados datos de: ", 0, _
-                            Format(Found, "#,##0") & " reg.", " de " & Format(TF_BbINSS, "#,##0") & " reg.")
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "Total Importe Seguro Obl. INSS", 0, _
-                            Format(ImpTINSS, "#,##0.00€     "), " de " & Format(CantImpINSS, "#,##0") & " reg.")
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", vbLf & "Procedimiento: Incorporar Imp.INSS. de los C_Acad " & C_Acad_Ant & " y " & C_Acad_Pos, 0, , , TxT_ProgIni, , , 2)
+        '- El resultado, por Curso Académico (Ant y Pos primero; cualquier otro curso que hubiera en BD_INSS, después) ---------------
+        Dim DCursos     As Object:      Set DCursos = CreateObject("Scripting.Dictionary")
+        Dim KCurso      As Variant
+        Dim NFound      As Long
+        Dim NNot        As Long
+        Dim ImpCurso    As Currency
+        Dim Primero     As Boolean:     Primero = True
+        DCursos.Add C_Acad_Ant, 0
+        DCursos.Add C_Acad_Pos, 0
+        For Each KCurso In DFound.Keys
+            If Not DCursos.Exists(KCurso) Then DCursos.Add KCurso, 0
+        Next KCurso
+        For Each KCurso In DNot.Keys
+            If Not DCursos.Exists(KCurso) Then DCursos.Add KCurso, 0
+        Next KCurso
+        For Each KCurso In DCursos.Keys
+            NFound = 0:     If DFound.Exists(KCurso) Then NFound = DFound(KCurso)
+            NNot = 0:       If DNot.Exists(KCurso) Then NNot = DNot(KCurso)
+            ImpCurso = 0:   If DImp.Exists(KCurso) Then ImpCurso = DImp(KCurso)
+            If NFound + NNot = 0 Then
+                Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "C_Acad " & KCurso & ":  sin recibos INSS en BD_INSS.", 0)
+                Primero = False
+            Else
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "C_Acad " & KCurso & ":  Recibos NO encontrados: ", 0, _
+                                Format(NNot, "#,##0") & " reg.", " de " & Format(NFound + NNot, "#,##0") & " reg.")
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "Incorporados datos de: ", 0, _
+                                Format(NFound, "#,##0") & " reg.", " de " & Format(NFound + NNot, "#,##0") & " reg.")
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "Total Importe Seguro Obl. INSS", 0, _
+                                Format(ImpCurso, "#,##0.00€     "), " de " & Format(NFound, "#,##0") & " reg.")
+            Primero = False
+            End If
+        Next KCurso
 Lo_BD.ShowTotals = True
 Sht__BD_INSS.Range("a1").Select
 
@@ -133,4 +168,14 @@ Restablecer_Valores:
     Application.Speech.Speak "Proceso completado."
 End Sub     ' Rut_Copy_ImpINSS_en_BDatos     <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ==================================================================================================================================
+
+'- ----------------------------------------------------------------------------------------------------------------------------
+'- Acumuladores por Curso Académico del informe de Rut_Copy_ImpINSS_en_BDatos (Dictionary: curso -> total) ----------------------
+'- ----------------------------------------------------------------------------------------------------------------------------
+Private Sub Rut_INSS_Acum(ByVal Dic As Object, ByVal Clave As String, ByVal Valor As Currency)
+    If Dic.Exists(Clave) Then Dic(Clave) = Dic(Clave) + Valor Else Dic.Add Clave, Valor
+End Sub
+Private Function Fnc_INSS_Importe(ByVal Valor As Variant) As Currency
+    If IsNumeric(Valor) Then Fnc_INSS_Importe = CCur(Valor)       '- Vacío o texto = 0
+End Function
 

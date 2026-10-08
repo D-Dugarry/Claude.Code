@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-10-07 13:48
+' Last Rev. 2026-10-08 11:26
 Option Explicit
 
 '###################################################################################################################################
@@ -107,7 +107,11 @@ Sub Rut_File_Select_V2(Titulo As String, _
 Debug.Print ">>> Rut_File_Select_V2"
     With Application.FileDialog(msoFileDialogFilePicker)
             .Title = Titulo
-            .InitialFileName = Fnc_NEXE_RutaAPP & "\" & NameFile & "*"
+            If PathFile <> "" Then
+                .InitialFileName = PathFile & "\" & NameFile & "*"        '- Carpeta indicada por el llamador
+            Else
+                .InitialFileName = Fnc_NEXE_RutaAPP & "\" & NameFile & "*"
+            End If
             .InitialView = msoFileDialogViewDetails
             .ButtonName = "Seleccionar" ' o "Aceptar" o ...
             .Filters.Clear

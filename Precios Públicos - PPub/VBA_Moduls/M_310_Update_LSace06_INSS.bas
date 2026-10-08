@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-10-04 22:51
+' Last Rev. 2026-10-08 13:46
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -44,27 +44,83 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSace06 Del Curso_Acad " & C_Acad_Ant &
                            "¡¡¡ O sólo copiamos los datos de BD_INSS a BDatos.  !!!") Then GoTo Rut_Copy_ImpINSS_en_BDatos
         
         '- Visualizo el progreso --------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Importar LSace06 Del Curso_Acad " & C_Acad_Ant & " o " & C_Acad_Pos & vbLf & _
-                    "- Identificar Recibos con concepto Eco. Adm. del seguro obligatorio del INSS," & vbLf & _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: Importar LSace06 Del Curso_Acad " & C_Acad_Ant & " o " & C_Acad_Pos & vbLf & vbLf & _
+                    "- Importar Recibos con concepto Eco. Adm. del seguro obligatorio del INSS," & vbLf & _
                     "- Y añadir el dato a la tabla BDatos." & vbLf & _
                     Sht__BD_INSS.Range("c2") & vbLf & Sht__BD_INSS.Range("c3") & vbLf, 0)
 
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSace06 del Curso_Acad_Ant ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSACE06_" & C_Acad_Ant & "|LSace06_C_Acad_" & C_Acad_Ant     '- El de siempre o el de Robot_PPub_Fusión
+    '- ----------------------------------------------------------------------------------------------------------------------------
+    '- Constancia de la existencia de los DOS ficheros antes de tocar nada. Si falta alguno (y no se elige a mano), se pregunta:
+    '- abortar sin tocar BD_INSS, o vaciarla y quedarse con los datos de un solo curso.
+    '- ----------------------------------------------------------------------------------------------------------------------------
+    Dim Ruta_Ant        As String:      Ruta_Ant = Fnc_LSace06_Elegir_Fichero(C_Acad_Ant)
+    Dim Ruta_Pos        As String:      Ruta_Pos = Fnc_LSace06_Elegir_Fichero(C_Acad_Pos)
+    If Ruta_Ant = "Cancel" And Ruta_Pos = "Cancel" Then
+        MsgBox "No hay ningún fichero LSace06 INSS que importar (ni del " & C_Acad_Ant & " ni del " & C_Acad_Pos & ")." & vbLf & vbLf & _
+               "No se ha tocado BD_INSS.", vbExclamation, "Proceso: Importar LSace06"
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Abortado: no hay ningún LSace06 INSS que importar. No se ha tocado BD_INSS.", 0)
+        GoTo Terminar
+    ElseIf Ruta_Ant = "Cancel" Or Ruta_Pos = "Cancel" Then
+        Dim C_Acad_Falta As String:     C_Acad_Falta = IIf(Ruta_Ant = "Cancel", C_Acad_Ant, C_Acad_Pos)
+        Dim C_Acad_Queda As String:     C_Acad_Queda = IIf(Ruta_Ant = "Cancel", C_Acad_Pos, C_Acad_Ant)
+        If MsgBox("No hay LSace06 INSS del curso " & C_Acad_Falta & "." & vbLf & vbLf & _
+                  "Sí = vaciar BD_INSS y quedarnos SÓLO con los datos del curso " & C_Acad_Queda & vbLf & _
+                  "No = abortar, sin tocar BD_INSS", vbYesNo + vbExclamation + vbDefaultButton2, "Proceso: Importar LSace06") = vbNo Then
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Abortado: falta el LSace06 INSS del curso " & C_Acad_Falta & ". No se ha tocado BD_INSS.", 0)
+            GoTo Terminar
+        End If
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Sin LSace06 INSS del curso " & C_Acad_Falta & ": BD_INSS se queda sólo con el curso " & C_Acad_Queda & ".", 0)
+    End If
+    '- ----------------------------------------------------------------------------------------------------------------------------
+    '- Vaciar Lo_INSS ANTES de importar: se importan los dos cursos enteros, así que no queda nada que conservar. Se hace aquí, antes de abrir
+    '- ningún fichero grande (ver el DoEvents de M_311), y el informe dice cuántos recibos de cada curso había. ---------------------------------
+    Dim DiccCurso   As Object:      Set DiccCurso = CreateObject("Scripting.Dictionary")
+    Dim VCurso      As Variant
+    Dim KCurso      As Variant
+    Dim ICurso      As Long
+    Call Rut_Lo_Filtros_Quitar(Lo_INSS)
+    DiccCurso.Add C_Acad_Ant, 0
+    DiccCurso.Add C_Acad_Pos, 0
+    If Not Lo_INSS.DataBodyRange Is Nothing Then
+        VCurso = Lo_INSS.ListColumns(LS06_C_Acad).DataBodyRange.Value2
+        If IsArray(VCurso) Then
+            For ICurso = 1 To UBound(VCurso, 1)
+                KCurso = CStr(VCurso(ICurso, 1))
+                If DiccCurso.Exists(KCurso) Then DiccCurso(KCurso) = DiccCurso(KCurso) + 1 Else DiccCurso.Add KCurso, 1
+            Next ICurso
+        Else
+            KCurso = CStr(VCurso)
+            If DiccCurso.Exists(KCurso) Then DiccCurso(KCurso) = DiccCurso(KCurso) + 1 Else DiccCurso.Add KCurso, 1
+        End If
+        VCurso = Empty
+        Lo_INSS.DataBodyRange.Delete
+        Call Rut_WrkSheet_LstObj_LiberarEspacio(Sht__BD_INSS)
+    End If
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Vaciada la tabla BD_INSS, antes de importar. Recibos que tenía:", 0)
+    For Each KCurso In DiccCurso.Keys
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "del C_Acad " & KCurso & ": ", 0, Format(DiccCurso(KCurso), "#,##0") & " reg")
+    Next KCurso
+    Set DiccCurso = Nothing
     Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
-    Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, Arch_New_Name)
-        If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-        Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
+    If Ruta_Ant <> "Cancel" Then
+        Arch_New_Name = Ruta_Ant
+        Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, C_Acad_Ant, Arch_New_Name)
+            If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
+            Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
+    End If
 
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- Import LSace06 del Curso_Acad_Pos ------------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
-    Arch_New_Name = "LSACE06_" & C_Acad_Pos & "|LSace06_C_Acad_" & C_Acad_Pos     '- El de siempre o el de Robot_PPub_Fusión
-    Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, Arch_New_Name)
-        If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-        Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
+    If Ruta_Pos <> "Cancel" Then
+        Arch_New_Name = Ruta_Pos
+        Call Rut_Lo_Import_LoData_LoDefCol_LSace06(Lo_INSS, Lo_DefCol_LSace06, DefC_TitColGenInf, C_Acad_Pos, Arch_New_Name)
+            If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
+            Call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Arch_New_Name, NomFichLSace06, RutaFichLsace06)
+    End If
 
 Rut_Copy_ImpINSS_en_BDatos:
 If Not Func_MsgBox_vbYesNo("¿ Trasladar el ImpINSS del C_Acad_Ant y C_Acad_Pos a BDatos ?" & vbLf & vbLf & _

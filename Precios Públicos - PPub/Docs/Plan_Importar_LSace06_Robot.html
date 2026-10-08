@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan: importar el LSace06 INSS directamente desde la carpeta del Robot</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>Plan: importar el LSace06 INSS directamente desde la carpeta del Robot</h1>
+<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-08 · <strong>Afecta a:</strong> <code>M_310</code>, <code>M_311</code>, <code>M_314</code> (se retira), <code>M_315</code> (solo comprobar), <code>M_000_Ini_Var_APP</code>, <code>Rut_File_Folder_NEXE</code>, documentación.</p>
+<p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · 🧪 <strong>Aplicado, falta probarlo en Excel</strong> · ⏳ <strong>Pendiente</strong></p>
+<h2>Estado: 🧪 APLICADO Y COMPILA (2026-10-08); PROBADO UNA VEZ CON LOS DOS CURSOS, FALTAN LOS FALLOS Y EL CASO DE UN SOLO CURSO</h2>
+<p>Fase 0 hecha y decisiones del usuario recogidas (sección 6). Faltan las fases 2 a 5. Comprobado el 2026-10-08:</p>
+<ul>
+<li><code>M_000_Ini_Var_APP.bas</code> <strong>del repo</strong> ya trae las 16 constantes <code>LS06_*</code> nuevas (sin <code>LS06_ImpRec</code>, <code>LS06_RecINSS</code> ni <code>LS06_ACont_Cob</code>), pero está <strong>sin commitear</strong> y el libro <strong>guardado</strong> (08:47) aún tiene el antiguo de 29 columnas: hay que reimportarlo. <code>M_310</code>, <code>M_311</code>, <code>M_314</code> y <code>M_315</code> del libro son <strong>idénticos</strong> a los del repo (olevba), así que el «Úlitma/Última» de la captura eran solo datos viejos.</li>
+<li><code>Func_LstObj_ListColumns_DefCol_Check_OK</code> <strong>no da problema</strong>: sale como correcta en cuanto encuentra una fila de la <code>DefCol</code> con <code>TitColGenInf</code> vacío (<code>RecFound</code>), así que 15 columnas en el fichero frente a 16 en la <code>DefCol</code> valen.</li>
+<li><code>Rut_Lo_DataBodyRange_Filtered_Copy</code> <strong>no da problema</strong>: pega por posición y redimensiona <code>Lo_Target</code> con <strong>su</strong> ancho, así que <code>Rec found</code> queda dentro de la tabla y vacía.</li>
+</ul>
+<h2>Cambios posteriores a este plan (2026-10-08, tras la primera prueba)</h2>
+<ul>
+<li><code>Lo_INSS</code> se <strong>vacía entera antes de importar</strong> (en <code>M_310</code>, con el recuento por curso en el informe); <code>M_311</code> ya no borra por curso.</li>
+<li><code>M_310</code> <strong>localiza los dos ficheros antes de vaciar</strong>: si falta uno, pregunta si abortar o quedarse con un solo curso (<code>Fnc_LSace06_Elegir_Fichero</code>).</li>
+<li>El recuento de columnas «NO necesarias» usa <code>DefC_ProtectData</code> (contaba <code>DefC_HiddenCol</code>).</li>
+<li>Informe final de <code>M_315</code> <strong>por curso</strong>, y apariencia ajustada (líneas en blanco, sin «Lap» en la 1ª línea por curso).</li>
+<li><code>M_315</code> <strong>ya no vacía <code>Rec_Imp_INSS</code> entera</strong> (solo los recibos de Ant/Pos) y carga esa columna en RAM para devolverla con sus valores.</li>
+<li>Primera prueba (Ant 2025-26: 24.392 reg; Pos 2026-27: 23.970 reg): importa, y el cruce da 1.156 y 22.358 recibos encontrados.</li>
+</ul>
+<h2>1. Qué se pide</h2>
+<ol>
+<li>Los datos se leen <strong>directamente de una ruta configurada</strong>: el nombre definido <code>APP_Ruta_Robot_LSc06_Cacad</code></li>
+<ul>
+<li>el <strong>curso académico</strong> que toque + la <strong>carpeta de fecha más reciente</strong>.</li>
+</ul>
+<li>El fichero se llama <code>LSace06_C_Acad_2026-27_INSS_(2026-10-02).xlsx</code>: cambian el curso y la fecha según lo requerido.</li>
+<li>Si falla la ruta o el fichero: <strong>mensaje que diga cuál ha sido el fallo</strong> y proponer <strong>abortar</strong> o <strong>abrir el explorador</strong> para elegir el fichero a mano.</li>
+<li>El fichero <strong>ha cambiado de estructura y ya viene filtrado</strong>: no hace falta <code>M_314</code>. La tabla <code>Lo_INSS</code> tiene <strong>una columna más</strong> que el fichero (<code>Rec found</code>), que se usa en otro módulo (<code>M_315</code>).</li>
+</ol>
+<h2>2. Cómo está hoy (comprobado)</h2>
+<div class="tw"><table><thead><tr><th>Pieza</th><th>Hoy</th></tr></thead><tbody><tr><td><code>M_310</code> <code>RuT_Update_LSace06_CAcad_ImpAdm_INSS</code></td><td>Pregunta Sí/No, y llama <strong>dos veces</strong> a la importación (curso Ant y Pos) con `"LSACE06_&lt;curso&gt;\</td><td>LSace06_C_Acad_&lt;curso&gt;"<code>; después ofrece </code>M_315`.</td></tr><tr><td><code>M_311</code> <code>Rut_Lo_Import_LoData_LoDefCol_LSace06</code></td><td>Abre el diálogo de archivos (<code>Rut_File_Select_V2</code>, que siempre arranca en la carpeta del libro), abre el libro, comprueba cabecera, quita <code>ORIGEN</code>, formatea, <strong>borra</strong> por curso, por nombre <code>*INSS*</code> y por importe negativo, llama a <code>M_314</code>, vacía columnas no necesarias, borra de <code>Lo_INSS</code> el/los cursos y copia.</td></tr><tr><td><code>M_314</code> <code>RuT_Find_Rec_INSS_C_Acad</code></td><td>Ordena, se queda con el <strong>primer</strong> recibo de cada <code>Plan_DNI</code>, pregunta si exportar el <code>-INSS</code>, borra los cobrados en <code>AnoCont-1</code> del curso Ant.</td></tr><tr><td><code>M_315</code> <code>Rut_Copy_ImpINSS_en_BDatos</code></td><td>Cruza <code>BD</code> con <code>Lo_INSS</code> por <code>Ref</code> en RAM y escribe <code>Found / Not Found</code> en <strong><code>LS06_RecFound</code></strong>.</td></tr><tr><td>Nombres en <code>ConfigAPP</code></td><td><code>APP_Ruta_Robot_Ges04_Acont</code> (C11), <code>APP_Ruta_Robot_Ges04_CAcad</code> (C12) y <strong><code>APP_Ruta_Robot_LSc06_Cacad</code> (C13)</strong> ya existen en el libro, pero <strong>ningún módulo los usa todavía</strong>.</td></tr></tbody></table></div>
+<h3>El fichero nuevo (<code>LSace06_C_Acad_2026-27_INSS_(2026-10-02).xlsx</code>, leído con openpyxl)</h3>
+<ul>
+<li>Una sola hoja, <code>Data</code>, <strong>sin <code>ListObject</code></strong>, <strong>15 columnas</strong>: <code>REFERENCIA, CURSO_ACADEMICO, PLAN, EXPEDIENTE, NUM_RECIBO, COD_ACTIV, DESC_CONCEPTO, COD_CONCEPTO, DNI, APELLIDOS_Y_NOMBRE, IMP_UNITARIO, CANTIDAD, TOTAL_CONCEPTO, COD_DESCUENTO, DESC_DESCUENTO</code>. <strong>Sin <code>ORIGEN</code>.</strong></li>
+<li>Todo <strong>texto</strong> (<code>"1.12"</code>, <code>"2026248517338"</code>), como los demás ficheros del Robot.</li>
+<li><code>Prog_DefCol_LSace06</code> (captura) ya tiene <strong>16 filas</strong>: esas 15 (columna <code>TitColGenInf</code>) más <code>RecFound</code>, que no tiene <code>TitColGenInf</code> porque no viene en el fichero.</li>
+<li>Carpetas reales (en <code>Robot_PPub\LSace06_C_Acad\&lt;curso&gt;\&lt;AAAA-MM-DD&gt;\</code>): hay 4 ficheros por fecha (<code>…_(fecha).xlsx</code>, <code>…_Evol_…</code>, <code>…_INSS_…</code>, <code>…_Inf_…</code>); <strong>solo nos interesa el <code>_INSS_</code></strong>.</li>
+</ul>
+<h2>3. Hallazgo importante: el repo y el libro ya no coinciden en <code>LS06_*</code></h2>
+<p><code>M_000_Ini_Var_APP.bas</code> del repo todavía define <strong>29</strong> columnas <code>LS06_*</code> (<code>LS06_ACont_Cob</code>, <code>LS06_ImpRec</code>, <code>LS06_RecINSS</code>…; <code>LS06_RecFound = 29</code>). La captura de <code>Prog_DefCol_LSace06</code> ya genera <strong>16</strong> (<code>LS06_RecFound = 16</code>). Consecuencias:</p>
+<ul>
+<li><code>M_311</code> usa <code>LS06_ImpRec</code> y <code>M_314</code> usa <code>LS06_RecINSS</code> y <code>LS06_ACont_Cob</code>, que <strong>dejan de existir</strong>: mientras no se quiten, el libro <strong>no compila</strong> (<code>Variable no definida</code>).</li>
+<li><code>M_315</code> solo usa <code>LS06_Ref</code>, <code>LS06_Concept_Imp</code> y <code>LS06_RecFound</code>, que se conservan (con los índices nuevos).</li>
+<li>La captura de <code>BD_INSS</code> dice «<strong>Última</strong> Importación…» y el código escribe «<strong>Úlitma</strong> Importación…» (con otro formato de fecha): el libro parece llevar un <code>M_311</code> distinto del repo. <strong>Antes de editar nada hay que exportar del libro <code>M_000_Ini_Var_APP</code>, <code>M_310</code>, <code>M_311</code> y <code>M_314</code></strong> y comparar (olevba), para trabajar sobre lo que de verdad hay.</li>
+</ul>
+<h2>4. Diseño</h2>
+<h3>4.1 Función nueva: localizar el fichero</h3>
+<p><code>Fnc_LSace06_Robot_Localizar(CAcad As String, ByRef Ruta As String, ByRef Fallo As String) As Boolean</code> (en <code>M_311</code>, o en un módulo propio si crece). Pasos, cada uno con <strong>su</strong> mensaje de fallo:</p>
+<ol>
+<li><strong>Leer <code>Prog__APP.Range("APP_Ruta_Robot_LSc06_Cacad")</code></strong> (se comprueba primero dónde vive el nombre: <code>ConfigAPP</code>, hoja <code>Prog__APP</code>; por el 1004 de nombres de otra hoja). Fallo: «La ruta no está configurada».</li>
+<li><strong>Convertir la ruta</strong> con <code>Fnc_Format_Ruta</code> (si es <code>https://nexe.ua.es/…</code> pasa a letra de unidad). Con URLs <code>Dir$</code> da el error 52.</li>
+<li><strong>Carpeta del curso</strong>: <code>&lt;ruta&gt;\&lt;CAcad&gt;</code> (p. ej. <code>…\LSace06_C_Acad\2026-27</code>). Fallo: «No existe la carpeta del curso …».</li>
+<li><strong>Carpeta de fecha más reciente</strong>: recorrer las subcarpetas (<code>Dir$(…, vbDirectory)</code>), quedarse con las que empiezan por <code>AAAA-MM-DD</code> válido y elegir la <strong>fecha mayor</strong> (se compara la fecha, no el texto; se ignoran sufijos como <code>-r</code>). Fallo: «No hay carpetas de fecha en …».</li>
+<li><strong>Fichero</strong>: <code>LSace06_C_Acad_&lt;CAcad&gt;_INSS_(&lt;AAAA-MM-DD&gt;).xlsx</code> dentro de esa carpeta. Fallo: «No existe el fichero … en la carpeta más reciente (&lt;fecha&gt;)».</li>
+</ol>
+<p>Devuelve <code>True</code> y la ruta completa, o <code>False</code> y el texto del fallo.</p>
+<h3>4.2 Qué pasa si falla (punto 3 de la petición)</h3>
+<p>Aviso con el <strong>fallo concreto</strong> y hasta <strong>tres opciones</strong> (hace falta un cuadro de 3 botones: <code>Func_MsgBox_vbYesNo</code> solo tiene dos; <code>Form_MsgBox</code> admite hasta 3, se mira al implementar):</p>
+<ol>
+<li><strong>Usar la fecha anterior</strong>: solo si el fallo es «a la carpeta más reciente le falta el <code>_INSS_</code>» y existe una carpeta de fecha <strong>anterior</strong> que sí lo tiene. El aviso <strong>dice cuál es</strong> («Más reciente: 2026-10-08, sin <code>_INSS_</code>. Anterior con fichero: 2026-10-02») y, si se acepta, usa esa. Se busca hacia atrás hasta la primera que lo tenga.</li>
+<li><strong>Abrir el explorador</strong> para elegir a mano: <code>Rut_File_Select_V2</code> empezando en la carpeta que sí existe (hoy el diálogo arranca siempre en la del libro: se usa el parámetro <code>PathFile</code>, que existe y no se usaba).</li>
+<li><strong>Abortar</strong>: como una cancelación (<code>Arch_New_Name = "Cancel"</code>, mismo cierre de siempre).</li>
+</ol>
+<p>Con otros fallos (ruta sin configurar, sin carpeta de curso, sin carpetas de fecha) no hay fecha anterior que ofrecer: solo 2 y 3. Lo que se elija a mano <strong>debe llamarse</strong> <code>LSace06_C_Acad_&lt;curso&gt;_INSS_…</code> (el curso pedido <strong>y</strong> <code>_INSS_</code>): se valida con <code>Fnc_Nombre_Fichero_Valido</code> y, si no cuadra, se avisa y se vuelve a ofrecer. Con la fecha anterior no hace falta: ya cumple el nombre.</p>
+<h3>4.3 Cambios en <code>M_311</code> (<code>Rut_Lo_Import_LoData_LoDefCol_LSace06</code>)</h3>
+<div class="tw"><table><thead><tr><th>Paso actual</th><th>Qué se hace</th></tr></thead><tbody><tr><td>Diálogo <code>Rut_File_Select_V2</code> como primer paso</td><td>Primero <code>Fnc_LSace06_Robot_Localizar</code>; el diálogo solo como alternativa (4.2).</td></tr><tr><td>Parámetro <code>Arch_New_Name</code> con `"A\</td><td>B"`</td><td>Pasa a recibir el <strong>curso</strong> (o el nombre completo ya resuelto). Se retira la lista de prefijos `\</td><td>`.</td></tr><tr><td>Comprobar cabecera (<code>Func_LstObj_ListColumns_DefCol_Check_OK</code>)</td><td><strong>Se mantiene</strong>, pero la tabla del fichero tiene 15 columnas y la <code>DefCol</code> 16: hay que ver cómo compara (comprobado: para en la primera fila sin <code>TitColGenInf</code>; vale tal cual).</td></tr><tr><td>Quitar <code>ORIGEN</code></td><td>Se puede dejar (inofensivo) o quitar; el fichero nuevo no lo trae.</td></tr><tr><td>Formateo (<code>Rut_Lo_Format_LoData_LoDefColData</code>)</td><td><strong>Se mantiene</strong>: sigue siendo texto con punto decimal; la conversión en RAM ya lo resuelve.</td></tr><tr><td>Borrar por <code>C_Acad &lt;&gt; Ant y Pos</code></td><td><strong>Se sustituye por una comprobación</strong>: si el <code>CURSO_ACADEMICO</code> del fichero no es el pedido, avisar y abortar (el fichero ya es de un solo curso).</td></tr><tr><td>Borrar <code>&lt;&gt;*INSS*</code></td><td>Se retira (ya viene filtrado).</td></tr><tr><td>Borrar importes <code>&lt; 0</code></td><td><strong>Se mantiene, por seguridad</strong> (decisión del usuario), pero sobre <code>LS06_Concept_Imp</code> (<code>LS06_ImpRec</code> ya no existe). Con el mismo aviso en el log y sin quedarse sin recibos.</td></tr><tr><td><code>RuT_Find_Rec_INSS_C_Acad</code> (<code>M_314</code>)</td><td><strong>Se retira</strong> (petición 4).</td></tr><tr><td><code>CantCAcad</code> / <code>CursoArray</code> con 1 ó 2 cursos</td><td>Se simplifica: <strong>un fichero = un curso</strong>. Las fechas <code>APP_Last_LSace06_CAcad*</code> se anotan según el curso importado.</td></tr><tr><td>Vaciar columnas no necesarias (<code>DefC_ProtectData</code>)</td><td>Se mantiene si la <code>DefCol</code> lo sigue marcando; si no queda ninguna, se retira.</td></tr><tr><td>Borrar de <code>Lo_INSS</code> los recibos del curso y copiar</td><td><strong>Se mantiene</strong> (incluido el <code>DoEvents</code> antes de <code>Rut_Lo_WrkSht_Preparar</code>). La copia lleva 15 columnas a una tabla de 16: comprobado, copia por posición y deja <code>Rec found</code> vacía.</td></tr></tbody></table></div>
+<h3>4.4 Cambios en <code>M_310</code></h3>
+<p>Pasa a llamar a la importación con el <strong>curso</strong> (<code>C_Acad_Ant</code>, <code>C_Acad_Pos</code>) en vez de la lista de nombres. El resto del flujo (Sí/No, <code>M_315</code>, informe) no cambia. El texto del informe incluirá la <strong>ruta completa</strong> del fichero que se ha leído (también <code>\|</code> desaparece de los avisos).</p>
+<h3>4.5 Retirar <code>M_314</code></h3>
+<p>Es lo que pide el punto 4, pero conviene saber lo que se pierde (las tres cosas, también retiradas):</p>
+<ol>
+<li><strong>Quedarse con el primer recibo de cada <code>Plan_DNI</code></strong>: el fichero ya viene filtrado (decisión del usuario).</li>
+<li><strong>El <code>MsgBox</code> «¿Exportar los recibos INSS a un Excel para Felipe?»</strong>: se prescinde (decisión del usuario; el Robot ya deja el <code>_INSS_</code> en su carpeta).</li>
+<li><strong>Borrar los del curso Ant cobrados en <code>AnoCont-1</code></strong> (<code>LS06_ACont_Cob</code>): la columna ya no existe y el Robot <strong>no</strong> los excluye, pero el usuario dice que <strong>no es necesario</strong> → la regla se retira.</li>
+<li>De los importes negativos, en cambio, <strong>sí</strong> se conserva el borrado (4.3).</li>
+</ol>
+<p>Se borra <code>M_314_Find_Rec_INSS.bas</code> del repo y del libro, y se actualizan los comentarios que lo citan (<code>M_1___</code>, <code>M_3___</code>, cabecera de <code>M_311</code>).</p>
+<h3>4.6 <code>M_315</code> y <code>M_000_Ini_Var_APP</code></h3>
+<ul>
+<li><code>M_315</code>: no cambia, pero se <strong>comprueba</strong> con los índices nuevos (<code>LS06_RecFound = 16</code>) y que el cruce siga funcionando con <code>Ref</code> ordenada.</li>
+<li><code>M_000_Ini_Var_APP</code>: se <strong>reexporta del libro</strong> (las constantes las generan las hojas <code>_DefCol_*</code>) para que repo y libro coincidan.</li>
+</ul>
+<h2>5. Orden de trabajo</h2>
+<div class="tw"><table><thead><tr><th>Fase</th><th>Qué</th><th>Estado</th></tr></thead><tbody><tr><td>0</td><td>Comparar libro y repo (olevba), cabecera con la col. extra y copia por posición (ver «Estado»). Pendiente solo mirar el <strong>valor</strong> de <code>APP_Ruta_Robot_LSc06_Cacad</code> en <code>ConfigAPP!C13</code>.</td><td>✅ Hecho</td></tr><tr><td>1</td><td>Resolver las preguntas de la sección 6.</td><td>✅ Hecho</td></tr><tr><td>2</td><td><code>Fnc_LSace06_Robot_Localizar</code> + el aviso «fecha anterior / explorador / abortar» (4.1 y 4.2), con <code>vbYesNoCancel</code> nativo (no hizo falta <code>Form_MsgBox</code>). <code>Rut_File_Select_V2</code> usa ya <code>PathFile</code>.</td><td>🧪</td></tr><tr><td>3</td><td><code>M_311</code> simplificado (4.3), <code>M_310</code> (4.4) y <code>M_314</code> borrado del repo (4.5). Script cp1252/CRLF, sello <code>Last Rev.</code>, bytes verificados (0 <code>U+FFFD</code>, sin LF sueltos).</td><td>🧪</td></tr><tr><td>4</td><td>Dar la <strong>lista de componentes a reimportar</strong> (<code>M_000_Ini_Var_APP</code>, <code>M_310</code>, <code>M_311</code>, y borrar <code>M_314</code>); el método lo elige el usuario.</td><td>⏳</td></tr><tr><td>5</td><td>Probar (sección 7), actualizar <code>CLAUDE.md</code>, <code>Docs/</code> y los comentarios de <code>M_1___</code>/<code>M_3___</code>.</td><td>⏳</td></tr></tbody></table></div>
+<h2>6. Decisiones del usuario (2026-10-08)</h2>
+<div class="tw"><table><thead><tr><th>#</th><th>Pregunta</th><th>Respuesta</th></tr></thead><tbody><tr><td>1</td><td>¿Qué hacer si a la carpeta más reciente le falta el <code>_INSS_</code>?</td><td>Avisar y dar a elegir: <strong>abortar</strong>, o <strong>decir cuál es la fecha anterior</strong> y ofrecerla (4.2).</td></tr><tr><td>2</td><td>¿El Robot excluye importes negativos y cobrados en <code>AnoCont-1</code>?</td><td><strong>No excluye ninguno.</strong> Solo es necesario, por seguridad, el borrado de <strong>importes negativos</strong>; se conserva.</td></tr><tr><td>3</td><td>¿Se prescinde de exportar los recibos INSS «para Felipe»?</td><td><strong>Sí.</strong></td></tr><tr><td>4</td><td>¿Qué nombre debe tener un fichero elegido a mano?</td><td><strong>El esperado</strong>: con el curso y con <code>_INSS_</code>. Si no, se rechaza.</td></tr><tr><td>5</td><td><code>M_000_Ini_Var_APP</code> y la cabecera/copia con la columna de más</td><td>Constantes ya actualizadas en el repo; cabecera y copia comprobadas, sin problema.</td></tr></tbody></table></div>
+<h2>7. Cómo probarlo</h2>
+<ol>
+<li><strong>Camino feliz</strong>: <code>M_310</code> con Ant y Pos → localiza <code>…\2025-26\2026-10-02\…_INSS_(2026-10-02).xlsx</code> y el del <code>2026-27</code>; el log enseña la ruta; <code>BD_INSS</code> queda con los dos cursos y <code>Rec found</code> vacía; después, <code>M_315</code> rellena <code>Found/Not Found</code>.</li>
+<li><strong>Doble ejecución</strong> (como en los pasos a RAM): libro de antes, importando a mano el mismo fichero, contra el libro nuevo con la ruta automática; <code>Herramientas/Comparar_Libros_BD.py</code> sobre <code>Sht__BD</code> (columna <code>Rec_Imp_INSS</code>) y la hoja <code>BD_INSS</code> (con <code>--hojas</code>). Las diferencias esperables: filas que antes borraba <code>M_314</code> (cobrados en <code>AnoCont-1</code> del curso Ant) y ahora se quedan, ya que se retira esa regla. Son justo lo que hay que revisar.</li>
+<li><strong>Fallos</strong> (uno por uno): nombre <code>APP_Ruta_Robot_LSc06_Cacad</code> vacío; ruta que no existe; curso sin carpeta; curso sin carpetas de fecha; fecha sin <code>_INSS_</code> (con y sin fecha anterior disponible); en cada uno, probar las opciones que ofrezca el aviso. Y un fichero con importes negativos: se borran y queda anotado en el log.</li>
+<li><strong>Fichero elegido a mano</strong> con otro curso o sin <code>_INSS_</code> en el nombre → aviso y nueva oferta, sin tocar <code>BD_INSS</code>.</li>
+<li><strong>Ruta NEXE</strong> (<code>https://nexe.ua.es/…</code>) y ruta de unidad: las dos deben localizar el fichero.</li>
+<li><strong>Trabajo y casa</strong>: el nombre <code>APP_Ruta_Robot_LSc06_Cacad</code> vive en el libro (viaja con él), pero la <strong>unidad <code>Y:</code></strong> no tiene por qué existir igual en los dos ordenadores: se prueba en ambos.</li>
+</ol>
+<h2>8. Riesgos</h2>
+<ul>
+<li><strong>Libro sin compilar entre fases</strong>: las constantes <code>LS06_*</code> nuevas dejan sin definir las antiguas hasta que <code>M_311</code> y <code>M_314</code> se actualicen; por eso se reimportan <strong>a la vez</strong>.</li>
+<li><strong>Excel abierto con el fichero</strong>: la captura muestra el <code>_INSS_</code> abierto en Excel (existe <code>~$LSace06…</code>). Se abre con <code>ReadOnly:=True</code>, así que no estorba, pero el libro de datos y el de programación no pueden tener el <strong>mismo nombre</strong> (Excel no admite dos iguales): el nombre <code>LSace06_C_Acad_…</code> es distinto del de <code>PPub_BDatos_…</code>, así que no pasa, pero conviene recordar que <code>Workbooks.Open</code> devolvería <code>Nothing</code> en silencio con un homónimo.</li>
+<li><strong>Orden <code>Dir$</code> de carpetas</strong>: no se fía del orden alfabético; se calcula la fecha mayor.</li>
+</ul>
+</article></main>
+<footer>Generado desde <code>Plan_Importar_LSace06_Robot.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>

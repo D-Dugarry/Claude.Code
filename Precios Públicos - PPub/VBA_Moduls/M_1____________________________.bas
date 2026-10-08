@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_1____________________________"
-' Last Rev. 2026-09-30 19:16
+' Last Rev. 2026-10-08 11:26
 '    Importar Última Consulta de LSGES04_GE, Actualizar registros existentes y Añadir Nuevos.
 '
 '    - Rut_Lo_Import_LoData_LoDefCol, Import LSGES04 del Año_Contable en Sht_BD
@@ -40,7 +40,7 @@ Attribute VB_Name = "M_1____________________________"
 '    - Proceso:   1º Formateo
 '    -            2º Borrar de Lo_ClsBk Recibos de LSave06 con C_Acad <> C_Acad_Ant y C_Acad_Pos
 '    -            3º Borrar de Lo_ClsBk Recibos "<>INSS" en Nom_Concepto, para aligerar el peso de la Tabla.
-'    -            4º M_314_Find_Rec_INSS, Identificar de un C_Acad, los 1º Rec. con Seguro obligatorio INSS, borrar los que no son.
+'    -            4º M_314_Find_Rec_INSS RETIRADO (2026-10-08): el LSace06 INSS del Robot ya viene filtrado.
 '    -            5º Borro los datos de las columnas NO necesarias.
 '    -            6º Determinar si en el LSace06 Hay UNO o DOS Cursos Académicos, Crea Dictionary para valores únicos (eficiente para grandes datos)
 '    -            7º Borrar los Recibos de Lo_Data (Tabla DB_INSS) con el/los C_Acad del Nuevo LSace06
