@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-07 13:30
+' Last Rev. 2026-10-10 09:04
 '2026-01-18
 Option Explicit
 
@@ -462,7 +462,9 @@ Private Sub Rut_Lo_Escribir_Importados(Lo_Data As ListObject, Datos As Variant, 
     With Lo_Data.HeaderRowRange                             '- La tabla, con tantas filas como el fichero
         Lo_Data.Resize WrkSht.Range(.Cells(1, 1), .Cells(1, .Columns.Count).Offset(NumFilas, 0))
     End With
-    Lo_Data.DataBodyRange.Resize(, NumCols).NumberFormat = "General"
+    '- ClearFormats y no NumberFormat = "General": asignar un formato marca cada celda, tambien las vacias, y Excel las guarda una a una.
+    '- ClearFormats deja el formato en General igualmente (el formateo posterior lo repite). Medido el 2026-10-10.
+    Lo_Data.DataBodyRange.Resize(, NumCols).ClearFormats
     C = 1
     Do While C <= NumCols
         C2 = C                                              '- Hasta dónde llegan las Col. seguidas con el mismo trato

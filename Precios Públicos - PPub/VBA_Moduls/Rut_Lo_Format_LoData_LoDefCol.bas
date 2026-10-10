@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Format_LoData_LoDefCol"
-' Last Rev. 2026-10-06 11:50
+' Last Rev. 2026-10-10 09:04
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -23,6 +23,7 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
     Dim HiddenCol           As Boolean
     Dim UltCol              As Integer:     UltCol = Application.Min(LoData.Range.Columns.Count, LoDefCol.ListRows.Count)
     Dim N_Hasta             As Integer                                      '- Última Col. del bloque de Col. N ya convertido
+    Dim Al                  As Variant                                      '- Alineacion de la Col. segun LoDefCol
 
     If LoData.DataBodyRange Is Nothing Then
         MsgBox "¡¡¡ Tabla SIN DATOS !!!", vbOKOnly, "Proceso: Formatear Tabla ListObjects"
@@ -45,7 +46,8 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
         ' con las filas en alto automático, las Col. N tardaban 5 seg. más (Excel recalcula el alto al escribir en ellas).
         .RowHeight = Ws_Data.StandardHeight
         ' Opcional: restablecer formato numérico estándar
-        .Cells.NumberFormat = "General"
+        ' Sin NumberFormat = "General": ClearFormats ya deja el formato en General, y asignarlo marca cada celda (tambien las vacias)
+        ' como con formato: Excel las guarda una a una (~5 millones de celdas vacias en BDatos). Medido el 2026-10-10.
     End With
     
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
@@ -112,7 +114,11 @@ Debug.Print ">>> Rut_Lo_Format_LoData_LoDefColData"
 NextCol:
 '        Ws_Data.Columns(LoData.ListColumns(Ccol).Range.Column).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
         LoData.Range.Columns(Ccol).ColumnWidth = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Widht).Value
-        LoData.Range.Columns(Ccol).HorizontalAlignment = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Align).Value
+        Al = LoDefCol.DataBodyRange.Cells(Ccol, DefC_Align).Value
+        LoData.HeaderRowRange.Cells(1, Ccol).HorizontalAlignment = Al
+        If LoData.ShowTotals Then LoData.TotalsRowRange.Cells(1, Ccol).HorizontalAlignment = Al
+        '- Los datos solo si la alineacion no es General: ClearFormats ya la dejo en General, y asignarla marca cada celda vacia como con formato
+        If Al <> xlGeneral Then LoData.DataBodyRange.Columns(Ccol).HorizontalAlignment = Al
      Next
         
             '- Visualizo el progreso  <<<<>>>>  -----------------------------------------------------------------------
