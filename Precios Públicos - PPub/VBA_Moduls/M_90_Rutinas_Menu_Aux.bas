@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-11 17:19
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
@@ -58,7 +58,6 @@ End Sub
 Sub Rut_Activar_Programacion()
 Debug.Print "Rut_Activar_Programacion"
     Call RuT_Al_Abrir_WorkBook
-    Call Rut_Sheets_ShowAll
     Call Rut_ConfigExcel_RESTABLECER
     Prog__APP.Range("APP_Task_Inf") = "Estado de Programación Activado  -  " & Now
 End Sub

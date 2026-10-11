@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-11 14:38
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -398,8 +398,20 @@ End Sub
 '------------------------------------------------------------------------------------------
 Sub OnAct_Import_LSace06(control As IRibbonControl)
 Debug.Print "OnAct_Import_LSace06"
-    Call Rut_Progreso_Abrir("3º. Import LSace06  =  Imp. Rec. INSS")
-    Call RuT_Update_LSace06_CAcad_ImpAdm_INSS
+    '- El mismo boton importa los dos informes del Robot: INSS (M_310) o Imp. Adm. (M_120). Se pregunta ANTES de abrir el formulario de progreso.
+    Dim Resp    As VbMsgBoxResult
+    Resp = MsgBox("¿Qué LSace06 importamos?" & vbLf & vbLf & _
+                  "Sí = INSS  (Rec. con seguro obligatorio; BD_INSS)" & vbLf & _
+                  "No = Imp. Adm.  (Imp. INSS, Imp. Adm. y Dto. Adm.; BD_ImpAdm)" & vbLf & _
+                  "Cancelar = no importar", vbYesNoCancel + vbQuestion + vbDefaultButton3, "Proceso: Importar LSace06")
+    If Resp = vbCancel Then Exit Sub
+    If Resp = vbYes Then
+        Call Rut_Progreso_Abrir("3º. Import LSace06  =  Imp. Rec. INSS")
+        Call RuT_Update_LSace06_CAcad_ImpAdm_INSS
+    Else
+        Call Rut_Progreso_Abrir("3º. Import LSace06  =  Imp. Adm. (IAdm)")
+        Call RuT_Update_LSace06_CAcad_ImpAdm
+    End If
     Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 '    MyRibbon.InvalidateControl "BtnImport_LSace06"    '- Actualiza solo este Control_ID
 End Sub

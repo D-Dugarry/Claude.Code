@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-08 13:46
+' Last Rev. 2026-10-11 14:20
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -327,8 +327,8 @@ End Sub
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Nombre (sin fecha) de los ficheros INSS del Robot de un curso:  LSace06_C_Acad_2026-27_INSS_
 '- ----------------------------------------------------------------------------------------------------------------------------
-Function Fnc_LSace06_Prefijo(ByVal C_Acad As String) As String
-    Fnc_LSace06_Prefijo = "LSace06_C_Acad_" & C_Acad & "_INSS_"
+Function Fnc_LSace06_Prefijo(ByVal C_Acad As String, Optional ByVal Tipo As String = "INSS") As String
+    Fnc_LSace06_Prefijo = "LSace06_C_Acad_" & C_Acad & "_" & Tipo & "_"
 End Function
 
 '- ----------------------------------------------------------------------------------------------------------------------------
@@ -340,7 +340,8 @@ End Function
 '-      CarpetaOk = la ultima carpeta que existe de la ruta, para abrir el explorador ahi.
 '- ----------------------------------------------------------------------------------------------------------------------------
 Function Fnc_LSace06_Robot_Localizar(ByVal C_Acad As String, ByRef Ruta As String, ByRef Fallo As String, _
-                                     ByRef RutaAnt As String, ByRef CarpetaOk As String) As Boolean
+                                     ByRef RutaAnt As String, ByRef CarpetaOk As String, _
+                                     Optional ByVal Tipo As String = "INSS") As Boolean
     Dim Base        As String
     Dim CarpCurso   As String
     Dim Nom         As String
@@ -427,7 +428,7 @@ Function Fnc_LSace06_Robot_Localizar(ByVal C_Acad As String, ByRef Ruta As Strin
         Next i
         If iMax = 0 Then Exit Do
         Usado(iMax) = True
-        Fich = CarpCurso & "\" & Nombres(iMax) & "\" & Fnc_LSace06_Prefijo(C_Acad) & "(" & Left$(Nombres(iMax), 10) & ").xlsx"
+        Fich = CarpCurso & "\" & Nombres(iMax) & "\" & Fnc_LSace06_Prefijo(C_Acad, Tipo) & "(" & Left$(Nombres(iMax), 10) & ").xlsx"
         If Fnc_LSc06_Archivo_Existe(Fich) Then
             If Primera Then
                 Ruta = Fich
@@ -439,12 +440,12 @@ Function Fnc_LSace06_Robot_Localizar(ByVal C_Acad As String, ByRef Ruta As Strin
         End If
         If Primera Then
             Fallo = "En la carpeta más reciente (" & Nombres(iMax) & ") no está el fichero:" & vbLf & _
-                    Fnc_LSace06_Prefijo(C_Acad) & "(" & Left$(Nombres(iMax), 10) & ").xlsx"
+                    Fnc_LSace06_Prefijo(C_Acad, Tipo) & "(" & Left$(Nombres(iMax), 10) & ").xlsx"
             CarpetaOk = CarpCurso & "\" & Nombres(iMax)
             Primera = False
         End If
     Loop
-    If Not Fnc_LSace06_Robot_Localizar And Fallo = "" Then Fallo = "No se ha encontrado ningún fichero " & Fnc_LSace06_Prefijo(C_Acad) & "* en:" & vbLf & CarpCurso
+    If Not Fnc_LSace06_Robot_Localizar And Fallo = "" Then Fallo = "No se ha encontrado ningún fichero " & Fnc_LSace06_Prefijo(C_Acad, Tipo) & "* en:" & vbLf & CarpCurso
 End Function
 
 '- Dir$ da error 52 con rutas URL: aqui se devuelve False en vez de reventar. --------------------------------------------------
@@ -467,9 +468,9 @@ End Function
 '- si falla, avisa del fallo y ofrece la fecha anterior (si la hay), el explorador o abortar. Lo elegido a mano tiene que llamarse
 '- LSace06_C_Acad_<curso>_INSS_*. No abre el fichero ni toca nada: M_310 la usa para tener constancia de los dos antes de vaciar BD_INSS.
 '- ----------------------------------------------------------------------------------------------------------------------------
-Function Fnc_LSace06_Elegir_Fichero(ByVal C_Acad_Imp As String) As String
-    Dim NombresValidos  As String:      NombresValidos = Fnc_LSace06_Prefijo(C_Acad_Imp)     '- "LSace06_C_Acad_<curso>_INSS_"
-    Dim ArchRequest     As String:      ArchRequest = "LSace06 INSS del curso " & C_Acad_Imp
+Function Fnc_LSace06_Elegir_Fichero(ByVal C_Acad_Imp As String, Optional ByVal Tipo As String = "INSS") As String
+    Dim NombresValidos  As String:      NombresValidos = Fnc_LSace06_Prefijo(C_Acad_Imp, Tipo)     '- "LSace06_C_Acad_<curso>_INSS_"
+    Dim ArchRequest     As String:      ArchRequest = "LSace06 " & Tipo & " del curso " & C_Acad_Imp
     Dim RutaRobot       As String
     Dim RutaAnt         As String
     Dim Fallo           As String
@@ -481,7 +482,7 @@ Function Fnc_LSace06_Elegir_Fichero(ByVal C_Acad_Imp As String) As String
     Fnc_LSace06_Elegir_Fichero = "Cancel"
 
     Do
-        If Fnc_LSace06_Robot_Localizar(C_Acad_Imp, RutaRobot, Fallo, RutaAnt, CarpetaOk) Then
+        If Fnc_LSace06_Robot_Localizar(C_Acad_Imp, RutaRobot, Fallo, RutaAnt, CarpetaOk, Tipo) Then
             Fnc_LSace06_Elegir_Fichero = RutaRobot
             Exit Function
         End If

@@ -98,23 +98,43 @@ Public Const AE4_JI_Actual            As Integer = 17   ' col: q
 Public Const AE4_AD_Actual            As Integer = 18   ' col: r
 Public Const AE4_Descrip_JI           As Integer = 19   ' col: s
 
-' Lo_LSace06.ListObjects(1) INSS ------------------------------------
+' Lo_LSace06.ListObjects(1) Sht__BD_INSS -----------------------------
 Public Const LS06_Ref            As Integer = 1    ' col: a
-Public Const LS06_C_Acad         As Integer = 2    ' col: b
-Public Const LS06_Plan           As Integer = 3    ' col: c
-Public Const LS06_Expdte         As Integer = 4    ' col: d
-Public Const LS06_NumRec         As Integer = 5    ' col: e
-Public Const LS06_ActivEco       As Integer = 6    ' col: f
-Public Const LS06_Concept_Nom    As Integer = 7    ' col: g
-Public Const LS06_Concept_Cod    As Integer = 8    ' col: h
-Public Const LS06_DNI            As Integer = 9    ' col: i
-Public Const LS06_Nom            As Integer = 10   ' col: j
-Public Const LS06_Concept_Imp    As Integer = 11   ' col: k
-Public Const LS06_Concept_Cant   As Integer = 12   ' col: l
-Public Const LS06_Concept_TImp   As Integer = 13   ' col: m
-Public Const LS06_Dto_Cod        As Integer = 14   ' col: n
-Public Const LS06_Dto_Nom        As Integer = 15   ' col: o
-Public Const LS06_RecFound       As Integer = 16   ' col: p
+Public Const LS06_ACont_Emi      As Integer = 2    ' col: b
+Public Const LS06_ACont_Cob      As Integer = 3    ' col: c
+Public Const LS06_C_Acad         As Integer = 4    ' col: d
+Public Const LS06_Plan           As Integer = 5    ' col: e
+Public Const LS06_Expdte         As Integer = 6    ' col: f
+Public Const LS06_NumRec         As Integer = 7    ' col: g
+Public Const LS06_ActivEco       As Integer = 8    ' col: h
+Public Const LS06_Concept_Nom    As Integer = 9    ' col: i
+Public Const LS06_Concept_Cod    As Integer = 10   ' col: j
+Public Const LS06_DNI            As Integer = 11   ' col: k
+Public Const LS06_Nom            As Integer = 12   ' col: l
+Public Const LS06_Concept_Imp    As Integer = 13   ' col: m
+Public Const LS06_Concept_Cant   As Integer = 14   ' col: n
+Public Const LS06_Concept_TImp   As Integer = 15   ' col: o
+Public Const LS06_Dto_Nom        As Integer = 16   ' col: p
+Public Const LS06_RecFound       As Integer = 17   ' col: q
+
+' Lo_ImpAdm.ListObjects(1) LSace06 Sht__BD_ImpAdm --------------------
+Public Const IAdm_Ref            As Integer = 1    ' col: a
+Public Const IAdm_ACont_Emi      As Integer = 2    ' col: b
+Public Const IAdm_ACont_Cob      As Integer = 3    ' col: c
+Public Const IAdm_C_Acad         As Integer = 4    ' col: d
+Public Const IAdm_Plan           As Integer = 5    ' col: e
+Public Const IAdm_Expdte         As Integer = 6    ' col: f
+Public Const IAdm_NumRec         As Integer = 7    ' col: g
+Public Const IAdm_ActivEco       As Integer = 8    ' col: h
+Public Const IAdm_Concept_Nom    As Integer = 9    ' col: i
+Public Const IAdm_Concept_Cod    As Integer = 10   ' col: j
+Public Const IAdm_DNI            As Integer = 11   ' col: k
+Public Const IAdm_Nom            As Integer = 12   ' col: l
+Public Const IAdm_Concept_Imp    As Integer = 13   ' col: m
+Public Const IAdm_Concept_Cant   As Integer = 14   ' col: n
+Public Const IAdm_Concept_TImp   As Integer = 15   ' col: o
+Public Const IAdm_Dto_Nom        As Integer = 16   ' col: p
+Public Const IAdm_RecFound       As Integer = 17   ' col: q
 
 ' Tabla Prog_EPplazos.ListObjects(1) --------------------------------
 Public Const IRs_Cod_Plan         As Integer = 1       ' col: a
