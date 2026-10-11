@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-10 09:04
+' Last Rev. 2026-10-11 12:25
 '2026-01-18
 Option Explicit
 
@@ -216,7 +216,10 @@ Sub Rut_Lo_Import_LoData_LoDefCol(Lo_Data As ListObject, _
                                   Col_Header As Integer, _
                                   Arch_New_Name As String, _
                                   Optional SheetNom As String = "", _
-                                  Optional ByVal Convertir_En_Ram As Boolean = False)
+                                  Optional ByVal Convertir_En_Ram As Boolean = False, _
+                                  Optional ByVal NombreRutaRobot As String = "")
+'- NombreRutaRobot (2026-10-11): nombre de Excel con la carpeta base del Robot (p. ej. APP_Ruta_Robot_Ges04_Acont); el dialogo
+'- se abre en <base>\<AnoCont>\<carpeta de fecha mas reciente>. Vacio = como siempre (Fnc_NEXE_RutaAPP).
 '- Convertir_En_Ram (2026-10-06, fase 4 del paso a RAM): en vez de copiar y pegar valores (14,6 de los 28 seg. de importar y
 '- formatear el LSGES04 del Robot), lee el fichero en RAM, convierte allí las Col. N y F como el formateo
 '- (Rut_Ram_Textos_a_Numeros_y_Fechas) y escribe la tabla de una vez (Rut_Lo_Escribir_Importados). El llamador formatea
@@ -242,7 +245,9 @@ Rut_Off_Functions
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Seleccionar el fichero y la ruta, para importar: " & ArchRequest, 0)
     '- Select File -------------------------------------------------------------------------------------
     Arch_New_Name = Fnc_Nombres_Prefijo_Comun(NombresValidos)                  '- El diálogo filtra por la parte común de los nombres
-    Call Rut_File_Select_V2("Seleccionar el Nuevo Fichero Excel " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?")
+    Dim CarpIni             As String
+    If NombreRutaRobot <> "" Then CarpIni = Fnc_Ruta_Inicial_Robot(NombreRutaRobot, AnoCont)
+    Call Rut_File_Select_V2("Seleccionar el Nuevo Fichero Excel " & ArchRequest & ": ", Arch_New_Name, "Excel", "*.xls?", CarpIni)
         If Arch_New_Name = "Cancel" Then
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
@@ -502,8 +507,52 @@ Function Fnc_Nombre_Fichero_Valido(ByVal NomArch As String, ByVal NombresValidos
     Next Nombre
 End Function    ' Fnc_Nombre_Fichero_Valido
 
+'- ----------------------------------------------------------------------------------------------------------------------------
+'- Carpeta donde abrir el dialogo de importacion de un fichero del Robot:
+'-      <valor de NombreRango>\<Subcarpeta>\<carpeta de fecha AAAA-MM-DD mas reciente>
+'- Devuelve la ultima carpeta que existe de esa ruta, o "" si no hay ninguna (el dialogo abre entonces en Fnc_NEXE_RutaAPP).
+'- ----------------------------------------------------------------------------------------------------------------------------
+Function Fnc_Ruta_Inicial_Robot(ByVal NombreRango As String, ByVal Subcarpeta As String) As String
+    Dim Base        As String
+    Dim Carp        As String
+    Dim Nom         As String
+    Dim Mejor       As String
+    On Error Resume Next
+    Base = Trim$(CStr(Prog__APP.Range(NombreRango).Value))
+    If Base = "" Then Exit Function
+    Base = Fnc_Format_Ruta(Base)                                    '- Si es una URL de la Red Nexe, la pasa a letra de unidad
+    Do While Right$(Base, 1) = "\" Or Right$(Base, 1) = "/"
+        Base = Left$(Base, Len(Base) - 1)
+    Loop
+    If LCase$(Left$(Base, 4)) = "http" Then Exit Function
+    If Not Fnc_Carpeta_Existe_Robot(Base) Then Exit Function
+    Fnc_Ruta_Inicial_Robot = Base
+    Carp = Base & "\" & Subcarpeta
+    If Not Fnc_Carpeta_Existe_Robot(Carp) Then Exit Function
+    Fnc_Ruta_Inicial_Robot = Carp
+    Nom = Dir$(Carp & "\*", vbDirectory)
+    Do While Nom <> ""
+        If Nom Like "####-##-##*" Then
+            If Fnc_Carpeta_Existe_Robot(Carp & "\" & Nom) Then
+                If Nom > Mejor Then Mejor = Nom                     '- AAAA-MM-DD ordena como texto
+            End If
+        End If
+        Nom = Dir$
+    Loop
+    If Mejor <> "" Then Fnc_Ruta_Inicial_Robot = Carp & "\" & Mejor
+End Function    ' Fnc_Ruta_Inicial_Robot
+
+'- GetAttr da error si la ruta no existe o es una URL: aqui se devuelve False. ----------------------------------------------------
+Private Function Fnc_Carpeta_Existe_Robot(ByVal Ruta As String) As Boolean
+    Dim At As Long
+    On Error Resume Next
+    At = GetAttr(Ruta)
+    If Err.Number = 0 Then Fnc_Carpeta_Existe_Robot = ((At And vbDirectory) <> 0)
+End Function
+
 '- Parte inicial común de los nombres admitidos (sin distinguir mayúsculas), para el filtro del diálogo de selección: --------
 '- "LSGES04_GE_SinDtos_Año_2026|LsGes04_AñoCont_2026" -> "LSGES04_", que en el diálogo encuentra los dos.
+'- ----------------------------------------------------------------------------------------------------------------------------
 Function Fnc_Nombres_Prefijo_Comun(ByVal NombresValidos As String) As String
     Dim Nombres     As Variant
     Dim Prefijo     As String
