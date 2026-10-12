@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-12 22:59
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -8,11 +8,36 @@ Option Explicit
     '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
+    '- Las sumas de BDatos se hacen en memoria (Rut_Inf_Recibos_Sumas), sin ordenar BDatos (2026-10-12).
+
+'- Índices del tercer índice de Sumas(tipo de recibo, concepto, Sum_*), que rellena Rut_Inf_Recibos_Sumas ------------------------
+Private Const Sum_Tot_Emi       As Long = 1     '- Imp.Rec. de los emitidos
+Private Const Sum_Tot_Cob       As Long = 2     '- Imp.Cob. de los cobrados
+Private Const Sum_INSS_Emi      As Long = 3     '- Rec_Imp_INSS de los emitidos
+Private Const Sum_INSS_Cob      As Long = 4     '- Rec_Imp_INSS de los cobrados
+Private Const Sum_Adm_Emi       As Long = 5     '- Rec_Imp_Adm de los emitidos
+Private Const Sum_Adm_Cob       As Long = 6     '- Rec_Imp_Adm de los cobrados
+Private Const Sum_Emi_Ant       As Long = 7     '- Imp.Rec. de los emitidos, curso Ant (distinto del Pos)
+Private Const Sum_Emi_Pos       As Long = 8     '- Imp.Rec. de los emitidos, curso Pos
+Private Const Sum_Adm_Ant       As Long = 9     '- Rec_Imp_Adm de los emitidos, curso Ant
+Private Const Sum_Adm_Pos       As Long = 10    '- Rec_Imp_Adm de los emitidos, curso Pos
+Private Const Sum_Cob_Ant       As Long = 11    '- Imp.Cob. cobrado en el año contable, curso Ant
+Private Const Sum_Cob_Pos       As Long = 12    '- Imp.Cob. cobrado en el año contable, curso Pos
+Private Const Sum_CobAdm_Ant    As Long = 13    '- Rec_Imp_Adm cobrado en el año contable, curso Ant
+Private Const Sum_CobAdm_Pos    As Long = 14    '- Rec_Imp_Adm cobrado en el año contable, curso Pos
+Private Const Sum_N             As Long = 14
 
 ' ==================================================================================================================================
 Sub Rut_Recalcular_Tabla_Inf_Recibos()
 ' ==================================================================================================================================
 Debug.Print "Rut_Recalcular_Tabla_Inf_Recibos"
+
+    Dim Paso                    As String:      Paso = "leer la configuración y las tablas"   '- para el aviso si algo falla
+    Dim T_Ini                   As Double:      T_Ini = Timer       '- traza de tiempos en Inmediato: Rut_Inf_Recibos_Traza
+    Dim T_Paso                  As Double:      T_Paso = T_Ini
+    Dim Msg_Error               As String
+    Dim Off_Hecho               As Boolean
+    On Error GoTo Fin
 
     Dim ImpEmiCursAnt           As Currency
     Dim ImpEmiCursPos           As Currency
@@ -43,13 +68,16 @@ Dim APP_ACont       As String:          APP_ACont = Right(Prog__APP.Range("APP_A
 Dim APP_AcadAnt     As String:          APP_AcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
 Dim APP_AcadPos     As String:          APP_AcadPos = Prog__APP.Range("APP_C_Acad_Pos")
 
-Dim FechCierreCont  As String:          FechCierreCont = "<" & DateAdd("d", 1, Prog__APP.Range("APP_FechCierreCont"))
+'- Día siguiente al cierre, como número de serie: cuentan los recibos con fecha anterior. Hasta el 2026-10-12 iba como texto en el
+'  criterio de SUMIFS, que VBA pasa en formato americano: un cierre del 30/06 daba "<01/07/aaaa" = 7 de enero.
+Dim Lim_Cierre      As Long:            Lim_Cierre = CLng(Int(DateAdd("d", 1, Prog__APP.Range("APP_FechCierreCont"))))
+Dim Sumas()         As Double                                   '- (tipo de recibo, concepto, Sum_*): Rut_Inf_Recibos_Sumas
 Dim F_Concept       As Integer
 Dim F_Tp_Rec        As Integer
 
 Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
-Dim Lo_Concept      As ListObject:      Set Lo_Concept = Prog_Concept.ListObjects("Tb_Conceptos")
-Dim Lo_Tipo_Rec     As ListObject:      Set Lo_Tipo_Rec = Prog_TipoRec.ListObjects(1)   '- "Tb_TipoRec"
+Dim Lo_Concept      As ListObject:      Set Lo_Concept = Prog_Concept.ListObjects(1)       '- "Lo_Conceptos" (con "Tb_Conceptos", error 9 desde que se renombró la tabla)
+Dim Lo_Tipo_Rec     As ListObject:      Set Lo_Tipo_Rec = Prog_TipoRec.ListObjects(1)   '- "Lo_TipoRec"
 
 Dim Nom_Inf         As String:          Nom_Inf = "Inf_Recibos"
 Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
@@ -61,8 +89,8 @@ Dim RwJI            As ListRow
 Dim UltFila     As Integer:     UltFila = Lo_Inf.Range.Row + Lo_Inf.Range.Rows.Count + IIf(Lo_Inf.ShowTotals, 1, 2)
 Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.Count + 2
 
-    Application.ScreenUpdating = False
-    Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
+    Call Rut_Inf_Recibos_Traza(Paso, "preparar las hojas", T_Paso)
+    Call Rut_Off_Functions:     Off_Hecho = True    '- cálculo manual, pantalla y eventos; los restaura Rut_On_Functions en Fin
     Application.DisplayAlerts = False
 
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
@@ -76,17 +104,20 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     '- Borrado Tabla explicativa de Tipos de Recibos: Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. --------------------------
     Sht_Inf.Range(Cells(UltFila, 1), Cells(UltFila + TRows_LoTipoRec + 20, 1)).EntireRow.Delete
     
-    '------------ Preparo Sht__BD y Ordeno por Tipo_Tasa y Concepto_Económico -----------------------------------
+    '------------ Preparo las hojas y ordeno Lo_Conceptos -----------------------------------------------------------
 '    Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Call Rut_Lo_WrkSht_Preparar(Sht_Inf)
     Call Rut_Lo_WrkSht_Preparar(Sht__BD)
     Call Rut_Lo_Sort(Lo_Concept, 1, xlAscending, True)          '- Ordeno por el número de Aplicación-Concepto 1303, 1310, 1311...
-    Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, True)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
-    Call Rut_Lo_Sort(Lo_BD, BD_Concepto, xlAscending, False)   '- 1303.00 1310.00 1311.00 Etc.
+    '- BDatos ya no se ordena por Tipo_Rec y Concepto (2026-10-12; unos 7 s): las sumas no dependen del orden, y los módulos que
+    '  necesitan un orden lo ponen ellos (limpiando antes los criterios). El orden del informe lo da la ordenación de Lo_Inf.
+    Call Rut_Inf_Recibos_Traza(Paso, "sumar los importes de BDatos", T_Paso)
+    Call Rut_Inf_Recibos_Sumas(Lo_BD, Lo_Tipo_Rec, Lo_Concept, Lim_Cierre, APP_AcadPos, APP_AnoCont, Sumas)
     
     Sht_Inf.Select
     
     '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
+    Call Rut_Inf_Recibos_Traza(Paso, "vaciar el informe y escribir las cabeceras", T_Paso)
     If Not Lo_Inf.DataBodyRange Is Nothing Then Lo_Inf.DataBodyRange.Delete
 
     '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto ------------------------------------
@@ -114,6 +145,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     End With
     
     '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
+    Call Rut_Inf_Recibos_Traza(Paso, "rellenar la tabla", T_Paso)
     For F_Tp_Rec = 1 To Lo_Tipo_Rec.ListRows.Count
         
         Tp_Rec = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 1)
@@ -124,6 +156,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             
             If Lo_Concept.DataBodyRange.Cells(F_Concept, 14) = 4 Then GoTo Sigiente_Concepto
             Concept = Lo_Concept.DataBodyRange.Cells(F_Concept, 1)
+            Paso = "rellenar la tabla (" & Tp_Rec & ", " & Concept & ")"
             If TipRec_Cncpt <> (Tp_Rec & Concept) Then
                 Set RwJI = Lo_Inf.ListRows.Add
                 TipRec_Cncpt = Tp_Rec & Concept
@@ -137,7 +170,6 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             DescripcionB = Lo_Concept.DataBodyRange.Cells(F_Concept, 2)
             RwJI.Range(InfRec_ConcptNom) = DescripcionB
             
-            With Sht__BD.ListObjects(1).DataBodyRange
             '-----------------------------------------------------------------------------------------------------------------------
             '----- Primeras 12 columnas de la Tabla; Imp_Rec, Imp_INSS, Imp_Adm e Imp_Acad -----------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
@@ -148,17 +180,9 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-------------------------------- Importes Recibos Emitidos: Acad. + Adm. ----------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
             '- Importe Recibos Emitidos --------------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Tot_Emi) = Application.SumIfs(.Columns(BD_ImpRec), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Tot_Emi) = Sumas(F_Tp_Rec, F_Concept, Sum_Tot_Emi)
             '- Importe Recibos Emitidos Cobrado ------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Tot_Cob) = Application.SumIfs(.Columns(BD_ImpCob), _
-                                                    .Columns(BD_ImpCob), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FCob), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Tot_Cob) = Sumas(F_Tp_Rec, F_Concept, Sum_Tot_Cob)
             '- Saldo Recibos Emitidos Pendiente ----------------------------------------------------------------------------------
             RwJI.Range(InfRec_Tot_Pdte) = RwJI.Range(InfRec_Tot_Emi) - RwJI.Range(InfRec_Tot_Cob)
 
@@ -166,17 +190,9 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-------------------------------- Importes Adm.: Seg.Obl. INSS ---------------------------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
             '- Importe INSS ---------------------------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Adm_INSS_Emi) = Application.SumIfs(.Columns(BD_Rec_Imp_INSS), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Adm_INSS_Emi) = Sumas(F_Tp_Rec, F_Concept, Sum_INSS_Emi)
             '- Importe INSS. Cobrado ------------------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Adm_INSS_Cob) = Application.SumIfs(.Columns(BD_Rec_Imp_INSS), _
-                                                    .Columns(BD_ImpCob), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FCob), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Adm_INSS_Cob) = Sumas(F_Tp_Rec, F_Concept, Sum_INSS_Cob)
             '- Saldo INSS. Pendiente ----------------------------------------------------------------------------------------------
             RwJI.Range(InfRec_Adm_INSS_Pdte) = RwJI.Range(InfRec_Adm_INSS_Emi) - RwJI.Range(InfRec_Adm_INSS_Cob)
 
@@ -184,18 +200,10 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-------------------------------- Importes Adm. SIN Imp.INSS -----------------------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
             '- Importe Adm. SIN INSS -----------------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Adm_Emi) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Adm_Emi) = Sumas(F_Tp_Rec, F_Concept, Sum_Adm_Emi)
             RwJI.Range(InfRec_Adm_Emi) = RwJI.Range(InfRec_Adm_Emi) - RwJI.Range(InfRec_Adm_INSS_Emi)
             '- Importe Adm. Cobrado ------------------------------------------------------------------------------------------------
-            RwJI.Range(InfRec_Adm_Cob) = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ImpCob), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_FCob), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            RwJI.Range(InfRec_Adm_Cob) = Sumas(F_Tp_Rec, F_Concept, Sum_Adm_Cob)
             RwJI.Range(InfRec_Adm_Cob) = RwJI.Range(InfRec_Adm_Cob) - RwJI.Range(InfRec_Adm_INSS_Cob)
             '- Saldo Imp. Adm. SIN INSS --------------------------------------------------------------------------------------------
             RwJI.Range(InfRec_Adm_Pdte) = RwJI.Range(InfRec_Adm_Emi) - RwJI.Range(InfRec_Adm_Cob)
@@ -226,60 +234,20 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             '-------------------------------- Importes Académicos por Curso_Acad ---------------------------------------------------
             '-----------------------------------------------------------------------------------------------------------------------
             '- Importe Recibos Emitidos x Curso_Acad Ant / Pos ----------------------------------------------------------------------
-            ImpEmiCursAnt = Application.SumIfs(.Columns(BD_ImpRec), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
-            ImpEmiCursPos = Application.SumIfs(.Columns(BD_ImpRec), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "=" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            ImpEmiCursAnt = Sumas(F_Tp_Rec, F_Concept, Sum_Emi_Ant)
+            ImpEmiCursPos = Sumas(F_Tp_Rec, F_Concept, Sum_Emi_Pos)
             '- Importe Adm. x Curso_Acad Ant / Pos -------------------------------------------------------------------------
-            ImpAdmCursAnt = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
-            ImpAdmCursPos = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ImpRec), ">0", _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "=" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            ImpAdmCursAnt = Sumas(F_Tp_Rec, F_Concept, Sum_Adm_Ant)
+            ImpAdmCursPos = Sumas(F_Tp_Rec, F_Concept, Sum_Adm_Pos)
             ImpAcadCursAnt = ImpEmiCursAnt - ImpAdmCursAnt
             ImpAcadCursPos = ImpEmiCursPos - ImpAdmCursPos
             
             '- Importe Recibos Cobrados x Curso_Acad Ant / Pos ----------------------------------------------------------------------
-            ImpCobCursAnt = Application.SumIfs(.Columns(BD_ImpCob), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
-            ImpCobCursPos = Application.SumIfs(.Columns(BD_ImpCob), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "=" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            ImpCobCursAnt = Sumas(F_Tp_Rec, F_Concept, Sum_Cob_Ant)
+            ImpCobCursPos = Sumas(F_Tp_Rec, F_Concept, Sum_Cob_Pos)
             '- Importe Adm. Cobrados  x Curso_Acad Ant / Pos -------------------------------------------------------------------------
-            ImpCobCursAdmAnt = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "<>" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
-            ImpCobCursAdmPos = Application.SumIfs(.Columns(BD_Rec_Imp_Adm), _
-                                                    .Columns(BD_ACont_Cob), "=" & APP_AnoCont, _
-                                                    .Columns(BD_Tipo_Rec), "*" & Tp_Rec & "*", _
-                                                    .Columns(BD_C_Acad), "=" & APP_AcadPos, _
-                                                    .Columns(BD_FEmi), FechCierreCont, _
-                                                    .Columns(BD_Concepto), Concept)
+            ImpCobCursAdmAnt = Sumas(F_Tp_Rec, F_Concept, Sum_CobAdm_Ant)
+            ImpCobCursAdmPos = Sumas(F_Tp_Rec, F_Concept, Sum_CobAdm_Pos)
             ImpCobCursAcadAnt = ImpCobCursAnt - ImpCobCursAdmAnt
             ImpCobCursAcadPos = ImpCobCursPos - ImpCobCursAdmPos
             '-----------------------------------------------------------------------------------------------------------------------
@@ -341,9 +309,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             End If
                     
 
-            End With
             
-Sigiente_Concepto:
 
             Select Case RwJI.Range(InfRec_TipRec)
             Case "EjeAnt"
@@ -362,7 +328,7 @@ Sigiente_Concepto:
                                              & Concept2 & "__" & DescripcionB & ".  "
             End Select
             
-            If RwJI.Range(JIs_TipRec) = "EjeAnt" Then
+            If RwJI.Range(InfRec_TipRec) = "EjeAnt" Then
                 RwJI.Range(InfRec_Descrip_JI) = "Añadir línea de Cobro en JI-" & APP_AnoCont - 1 & _
                                              " del Importe Cobrado y de Concepto Eco. " & Concept2 & _
                                              "__" & RwJI.Range(InfRec_Ensenanza) & " - " & DescripcionB & ".  "
@@ -381,9 +347,11 @@ Sigiente_Concepto:
             RwJI.Range.EntireRow.AutoFit
             RwJI.Range.VerticalAlignment = xlCenter
             
+Sigiente_Concepto:      '- AE 4: sin fila (2026-10-12; antes saltaba a las descripciones y repintaba la fila anterior)
         Next F_Concept
     Next F_Tp_Rec
     
+    Call Rut_Inf_Recibos_Traza(Paso, "redondear los importes", T_Paso)
     '- Redondear todos los valores a 2 decimales ----------------------
     Dim Lin         As Integer, Col     As Integer
     Dim RngCol      As Range, Celda     As Range
@@ -399,6 +367,7 @@ Sigiente_Concepto:
 SiguienteColumna:
     Next Col
     
+    Call Rut_Inf_Recibos_Traza(Paso, "dar formato al informe y quitar las filas sin importe", T_Paso)
     '- Indento la columna de Descripción de JIs -------------
     Lo_Inf.ListColumns(InfRec_Descrip_JI).DataBodyRange.Select
     Selection.InsertIndent 1
@@ -429,6 +398,7 @@ SiguienteColumna:
     
     '- ------------------------------------------------------
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
+    Call Rut_Inf_Recibos_Traza(Paso, "copiar la leyenda de los tipos de recibo", T_Paso)
     Dim ColIni      As Integer:     ColIni = InfRec_Descrip_JI
     Dim ColFin      As Integer:     ColFin = ColIni + 1
     UltFila = Lo_Inf.TotalsRowRange.Row + 3
@@ -498,6 +468,7 @@ SiguienteColumna:
     End With
     
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
+    Call Rut_Inf_Recibos_Traza(Paso, "separar las filas de EURLE", T_Paso)
     Dim RowsFind    As Variant
     Dim Rng         As Range
     With Lo_Inf
@@ -514,6 +485,7 @@ SiguienteColumna:
     End With
     
 Finalizar:
+    Call Rut_Inf_Recibos_Traza(Paso, "anotar la fecha del cálculo", T_Paso)
     Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Sht_Inf.Calculate
     Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierro contable: " & Prog__APP.Range("APP_FechCierreCont")
@@ -525,12 +497,176 @@ Finalizar:
 ''        vbCrLf & Format(Now, "hh:mm:ss") & "  Realizado el: " & Date & "  " & "-   Tiempo transcurrido: " & Round(Timer - H_Inicio, 2) & " seg."
 ''    MsgBox MenuAux_Msg
     Lo_BD.ShowTotals = True
-    
-    Application.ScreenUpdating = True
-    Application.Calculation = Sw_Calculation
+
+Fin:
+    If Err.Number <> 0 Then
+        Msg_Error = "Error " & Err.Number & " al " & Paso & ":" & vbLf & Err.Description
+        Debug.Print ">>> Rut_Recalcular_Tabla_Inf_Recibos -> ERROR " & Err.Number & " al " & Paso & ": " & Err.Description
+    End If
+    On Error GoTo -1                                '- sale del manejador de errores, para que el Resume Next de abajo valga
+    On Error Resume Next
+    If Msg_Error <> "" Then                         '- salida por error: el informe sin filtros y las filas de totales visibles
+        Application.CutCopyMode = False
+        Call Rut_Lo_Filtros_Quitar(Lo_Inf)
+        Call Rut_Lo_Totales_Mostrar                 '- las celdas de encima de BDatos leen su fila de totales
+    End If
     Application.DisplayAlerts = True
-    Application.Speech.Speak "Proceso completado", True
+    On Error GoTo 0
+    Call Rut_Inf_Recibos_Traza(Paso, "restaurar el estado de Excel (Rut_On_Functions)", T_Paso)
+    If Off_Hecho Then Call Rut_On_Functions         '- antes, Application.Calculation = Sw_Calculation (Boolean): se ignoraba y quedaba en Manual
+    Call Rut_Inf_Recibos_Traza(Paso, "", T_Paso)
+    Debug.Print "   M_130: TOTAL " & Format(Timer - T_Ini, "0.00") & " s"
+    If Msg_Error <> "" Then                         '- el aviso, ya con la pantalla activa
+        MsgBox Msg_Error & vbLf & vbLf & "El informe puede haber quedado incompleto: vuelve a calcularlo.", _
+               vbExclamation, "Calcular " & Nom_Inf
+    Else
+        Application.Speech.Speak "Proceso completado", True
+    End If
 End Sub     '- Rut_Recalcular_Tabla_Inf_Recibos
+' ==================================================================================================================================
+'- Sumas de BDatos para el informe, en una sola pasada en memoria (2026-10-12). Antes eran 14 SUMIFS por fila del informe (420 en
+'  total, unos 20 s); dan los mismos importes (comprobado con los 420). Sumas(tipo de recibo, concepto, Sum_*), con los criterios
+'  de aquellos SUMIFS:
+'   - Tipo_Rec: texto que CONTIENE el tipo de Lo_TipoRec (el "*Emitido*" de antes), sin distinguir mayúsculas.
+'   - Concepto: igual al de Lo_Conceptos. Si este es un número escrito con punto ("1310.01"), igual a ese número: así leía el
+'     criterio SUMIFS llamado desde VBA.
+'   - Emitidos: Imp.Rec. > 0 y F_Emi anterior a Lim. Cobrados: Imp.Cob. > 0 y F_Cob anterior a Lim. Lim = día siguiente al cierre.
+'   - Por curso: C_Acad igual al curso Pos, o distinto (vacías incluidas) para el Ant. Cobrado en el año contable: ACont_Cob igual
+'     al año y F_Emi anterior a Lim (sin mirar F_Cob ni que Imp.Cob. sea > 0, como antes).
+'   - Solo suman los números; textos, vacías y errores no cuentan, como en SUMIFS.
+' ==================================================================================================================================
+Private Sub Rut_Inf_Recibos_Sumas(Lo_BD As ListObject, Lo_Tipo_Rec As ListObject, Lo_Concept As ListObject, _
+                                  ByVal Lim As Double, ByVal C_Acad_Pos As String, ByVal AnoCont As String, _
+                                  Sumas() As Double)
+' ----------------------------------------------------------------------------------------------------------------------------------
+    Dim T           As T_TablaRam
+    Dim N_Tp        As Long:        N_Tp = Lo_Tipo_Rec.ListRows.Count
+    Dim N_Cp        As Long:        N_Cp = Lo_Concept.ListRows.Count
+    Dim Tipos()     As String
+    Dim Alias_Cp()  As Long                         '- un concepto repetido en Lo_Conceptos suma lo mismo que el primero
+    Dim Dic_Num     As Object:      Set Dic_Num = CreateObject("Scripting.Dictionary")
+    Dim Dic_Txt     As Object:      Set Dic_Txt = CreateObject("Scripting.Dictionary")
+    Dim Pos_Min     As String:      Pos_Min = LCase$(C_Acad_Pos)
+    Dim ACont_Num   As Double:      ACont_Num = Val(AnoCont)
+    Dim Fila        As Long, Tp As Long, Cp As Long, K As Long
+    Dim V           As Variant, Tip As Variant
+    Dim FEmi_OK     As Boolean, Emi_OK As Boolean, Cob_OK As Boolean, ACont_OK As Boolean
+    Dim Es_Pos      As Boolean, Es_Ant As Boolean
+    Dim Imp_Rec     As Double, Imp_Cob As Double, Imp_INSS As Double, Imp_Adm As Double
+
+    If N_Tp = 0 Or N_Cp = 0 Then Exit Sub
+    ReDim Sumas(1 To N_Tp, 1 To N_Cp, 1 To Sum_N)
+    ReDim Tipos(1 To N_Tp)
+    ReDim Alias_Cp(1 To N_Cp)
+    For Tp = 1 To N_Tp
+        Tipos(Tp) = CStr(Lo_Tipo_Rec.DataBodyRange.Cells(Tp, 1).Value2)
+    Next Tp
+    For Cp = 1 To N_Cp                              '- concepto -> nº de fila en Lo_Conceptos
+        Alias_Cp(Cp) = Cp
+        V = Lo_Concept.DataBodyRange.Cells(Cp, 1).Value2
+        If VarType(V) = vbString Then
+            If Fnc_Es_Numero_Punto(CStr(V)) Then V = Val(CStr(V))
+        End If
+        If VarType(V) = vbDouble Then
+            If Dic_Num.Exists(V) Then Alias_Cp(Cp) = Dic_Num(V) Else Dic_Num.Add V, Cp
+        Else
+            V = LCase$(CStr(V))
+            If Dic_Txt.Exists(V) Then Alias_Cp(Cp) = Dic_Txt(V) Else Dic_Txt.Add V, Cp
+        End If
+    Next Cp
+
+    Call Rut_TablaRam_Cargar(T, Lo_BD, Array(BD_ACont_Cob, BD_C_Acad, BD_FEmi, BD_FCob, BD_ImpRec, BD_ImpCob, _
+                                             BD_Rec_Imp_Adm, BD_Rec_Imp_INSS, BD_Concepto, BD_Tipo_Rec), True)
+    For Fila = 1 To T.NumFilas
+        Cp = 0
+        V = T.Datos(Fila, BD_Concepto)
+        If VarType(V) = vbDouble Then
+            If Dic_Num.Exists(V) Then Cp = Dic_Num(V)
+        ElseIf VarType(V) = vbString Then
+            V = LCase$(V)
+            If Dic_Txt.Exists(V) Then Cp = Dic_Txt(V)
+        End If
+        Tip = T.Datos(Fila, BD_Tipo_Rec)
+        If Cp > 0 And VarType(Tip) = vbString Then
+            V = T.Datos(Fila, BD_ImpRec):           Imp_Rec = 0:    If VarType(V) = vbDouble Then Imp_Rec = V
+            V = T.Datos(Fila, BD_ImpCob):           Imp_Cob = 0:    If VarType(V) = vbDouble Then Imp_Cob = V
+            V = T.Datos(Fila, BD_Rec_Imp_INSS):     Imp_INSS = 0:   If VarType(V) = vbDouble Then Imp_INSS = V
+            V = T.Datos(Fila, BD_Rec_Imp_Adm):      Imp_Adm = 0:    If VarType(V) = vbDouble Then Imp_Adm = V
+            V = T.Datos(Fila, BD_FEmi):             FEmi_OK = False: If VarType(V) = vbDouble Then FEmi_OK = (V < Lim)
+            Emi_OK = FEmi_OK And (Imp_Rec > 0)
+            V = T.Datos(Fila, BD_FCob):             Cob_OK = False: If VarType(V) = vbDouble Then Cob_OK = (V < Lim)
+            Cob_OK = Cob_OK And (Imp_Cob > 0)
+            V = T.Datos(Fila, BD_ACont_Cob)
+            Select Case VarType(V)
+                Case vbDouble:  ACont_OK = (V = ACont_Num)
+                Case vbString:  ACont_OK = (Trim$(V) = AnoCont)
+                Case Else:      ACont_OK = False
+            End Select
+            V = T.Datos(Fila, BD_C_Acad)
+            Select Case VarType(V)
+                Case vbString:  Es_Pos = (LCase$(V) = Pos_Min):     Es_Ant = Not Es_Pos
+                Case vbError:   Es_Pos = False:                     Es_Ant = False
+                Case Else:      Es_Pos = False:                     Es_Ant = True       '- vacías y números: distintos del Pos
+            End Select
+            For Tp = 1 To N_Tp
+                If InStr(1, Tip, Tipos(Tp), vbTextCompare) > 0 Then
+                    If Emi_OK Then
+                        Sumas(Tp, Cp, Sum_Tot_Emi) = Sumas(Tp, Cp, Sum_Tot_Emi) + Imp_Rec
+                        Sumas(Tp, Cp, Sum_INSS_Emi) = Sumas(Tp, Cp, Sum_INSS_Emi) + Imp_INSS
+                        Sumas(Tp, Cp, Sum_Adm_Emi) = Sumas(Tp, Cp, Sum_Adm_Emi) + Imp_Adm
+                        If Es_Pos Then
+                            Sumas(Tp, Cp, Sum_Emi_Pos) = Sumas(Tp, Cp, Sum_Emi_Pos) + Imp_Rec
+                            Sumas(Tp, Cp, Sum_Adm_Pos) = Sumas(Tp, Cp, Sum_Adm_Pos) + Imp_Adm
+                        ElseIf Es_Ant Then
+                            Sumas(Tp, Cp, Sum_Emi_Ant) = Sumas(Tp, Cp, Sum_Emi_Ant) + Imp_Rec
+                            Sumas(Tp, Cp, Sum_Adm_Ant) = Sumas(Tp, Cp, Sum_Adm_Ant) + Imp_Adm
+                        End If
+                    End If
+                    If Cob_OK Then
+                        Sumas(Tp, Cp, Sum_Tot_Cob) = Sumas(Tp, Cp, Sum_Tot_Cob) + Imp_Cob
+                        Sumas(Tp, Cp, Sum_INSS_Cob) = Sumas(Tp, Cp, Sum_INSS_Cob) + Imp_INSS
+                        Sumas(Tp, Cp, Sum_Adm_Cob) = Sumas(Tp, Cp, Sum_Adm_Cob) + Imp_Adm
+                    End If
+                    If ACont_OK And FEmi_OK Then
+                        If Es_Pos Then
+                            Sumas(Tp, Cp, Sum_Cob_Pos) = Sumas(Tp, Cp, Sum_Cob_Pos) + Imp_Cob
+                            Sumas(Tp, Cp, Sum_CobAdm_Pos) = Sumas(Tp, Cp, Sum_CobAdm_Pos) + Imp_Adm
+                        ElseIf Es_Ant Then
+                            Sumas(Tp, Cp, Sum_Cob_Ant) = Sumas(Tp, Cp, Sum_Cob_Ant) + Imp_Cob
+                            Sumas(Tp, Cp, Sum_CobAdm_Ant) = Sumas(Tp, Cp, Sum_CobAdm_Ant) + Imp_Adm
+                        End If
+                    End If
+                End If
+            Next Tp
+        End If
+    Next Fila
+
+    For Cp = 1 To N_Cp                              '- conceptos repetidos: las sumas del primero
+        If Alias_Cp(Cp) <> Cp Then
+            For Tp = 1 To N_Tp
+                For K = 1 To Sum_N
+                    Sumas(Tp, Cp, K) = Sumas(Tp, Alias_Cp(Cp), K)
+                Next K
+            Next Tp
+        End If
+    Next Cp
+End Sub     '- Rut_Inf_Recibos_Sumas
+' ----------------------------------------------------------------------------------------------------------------------------------
+'- "1310.01" o "1303": solo cifras y como mucho un punto (un número como lo lee SUMIFS llamado desde VBA)
+Private Function Fnc_Es_Numero_Punto(ByVal Txt As String) As Boolean
+    Txt = Trim$(Txt)
+    If Txt = "" Or Txt = "." Then Exit Function
+    If Txt Like "*[!0-9.]*" Then Exit Function
+    If Len(Txt) - Len(Replace(Txt, ".", "")) > 1 Then Exit Function
+    Fnc_Es_Numero_Punto = True
+End Function
+' ----------------------------------------------------------------------------------------------------------------------------------
+'- Traza de tiempos en Inmediato (2026-10-12): al empezar cada paso, escribe lo que ha tardado el anterior.
+Private Sub Rut_Inf_Recibos_Traza(ByRef Paso As String, ByVal Nuevo As String, ByRef T_Paso As Double)
+    Debug.Print "   M_130: " & Format(Timer - T_Paso, "0.00") & " s  " & Paso
+    Paso = Nuevo
+    T_Paso = Timer
+End Sub
 ' ==================================================================================================================================
 'Sub Ejemplo_Selcción_Múltiple()
 '    Union(Cells(44 + 4, 4), Range(Cells(44 + 5, 3), Cells(44 + 3 + 5, 11))).Select

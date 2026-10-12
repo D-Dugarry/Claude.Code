@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-12 20:28
+' Last Rev. 2026-10-12 22:59
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -523,8 +523,12 @@ Debug.Print "GetLbl_ReCalculate_ListObj_Sht_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ReCalculate_ListObj_Sht(control As IRibbonControl, ByRef LabelVal)
-    If Fnc_Range_Exist("APP_Last_Calc_" & ActiveSheet.Name) Then
-        LabelVal = Format(Prog__APP.Range("APP_Last_Calc_" & ActiveSheet.Name), "dd-mmm-yy hh:mm")
+    '- Fecha del ultimo calculo: APP_Last_Calc_<hoja>, salvo en Inf_Recibos_TIO, cuya rutina (M_130) la guarda en
+    '  APP_Last_Calc_Inf_Recibos (2026-10-12; antes el boton de esa hoja mostraba siempre "Calc_JIs").
+    Dim Nom_Calc    As String:      Nom_Calc = "APP_Last_Calc_" & ActiveSheet.Name
+    If ActiveSheet.CodeName = Sht__Inf_Recibos_TIO.CodeName Then Nom_Calc = "APP_Last_Calc_Inf_Recibos"
+    If Fnc_Range_Exist(Nom_Calc) Then
+        LabelVal = Format(Prog__APP.Range(Nom_Calc), "dd-mmm-yy hh:mm")
     Else
         LabelVal = "Calc_JIs"
     End If
