@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-10-08 13:46
+' Last Rev. 2026-10-12 20:44
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSace06 Del Curso_Acad " & C_Acad_Ant &
 
 Rut_Copy_ImpINSS_en_BDatos:
 If Not Func_MsgBox_vbYesNo("¿ Trasladar el ImpINSS del C_Acad_Ant y C_Acad_Pos a BDatos ?" & vbLf & vbLf & _
-                           "¡¡¡ Tienen que estar todos los Recibos que deben de estar, como los AE4.  !!!") Then GoTo Terminar
+                           "¡¡¡ Tienen que estar todos los Recibos que deben de estar.  !!!") Then GoTo Terminar
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_315_Copy_INSS_a_BD, Trasladar el ImpAdm, ImpAcad y ImpDto del C_Acad_Ant a BDatos --------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------

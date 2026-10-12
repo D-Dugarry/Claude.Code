@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-10-11 17:32
+' Last Rev. 2026-10-12 20:44
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -82,27 +82,6 @@ Public Const BD_IAdm_ImpINSS          As Integer = 64   ' col: bl
 Public Const BD_IAdm_ImpAdm           As Integer = 65   ' col: bm
 Public Const BD_IAdm_DtoAdm           As Integer = 66   ' col: bn
 Public Const BD_IAdm_TotDto           As Integer = 67   ' col: bo
-
-' Lo_Prog_AE4.ListObjects(1) -----------------------------------
-Public Const AE4_TipRec               As Integer = 1    ' col: a
-Public Const AE4_Plan                 As Integer = 2    ' col: b
-Public Const AE4_PlanNom              As Integer = 3    ' col: c
-Public Const AE4_C_Acad               As Integer = 4    ' col: d
-Public Const AE4_ConcptEco            As Integer = 5    ' col: e
-Public Const AE4_Tot_Emi              As Integer = 6    ' col: f
-Public Const AE4_Tot_Cob              As Integer = 7    ' col: g
-Public Const AE4_Tot_Pdte             As Integer = 8    ' col: h
-Public Const AE4_Adm_Emi              As Integer = 9    ' col: i
-Public Const AE4_Adm_Cob              As Integer = 10   ' col: j
-Public Const AE4_Adm_Pdte             As Integer = 11   ' col: k
-Public Const AE4_Acad_Emi             As Integer = 12   ' col: l
-Public Const AE4_Acad_Cob             As Integer = 13   ' col: m
-Public Const AE4_Acad_Pdte            As Integer = 14   ' col: n
-Public Const AE4_JI_Ant               As Integer = 15   ' col: o
-Public Const AE4_AD_Ant               As Integer = 16   ' col: p
-Public Const AE4_JI_Actual            As Integer = 17   ' col: q
-Public Const AE4_AD_Actual            As Integer = 18   ' col: r
-Public Const AE4_Descrip_JI           As Integer = 19   ' col: s
 
 ' Lo_LSace06.ListObjects(1) Sht__BD_INSS -----------------------------
 Public Const LS06_Ref            As Integer = 1    ' col: a

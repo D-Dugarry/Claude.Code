@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-11 20:18
+' Last Rev. 2026-10-12 20:28
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -185,13 +185,6 @@ RuT_Duplicates_Search:
     Call RuT_Duplicates_Search(Lo_BD, Lo_DefCol_BD, Lo_BD_Dpl, BD_Ref, BD_Incidencias, BD_H_Incidencias)
             Set Lo_BD_Dpl = Nothing
         
-'''Rut_Copy_AE4x4_en_BDatos:
-'''    If Not Func_MsgBox_vbYesNo("¿ Trasladar los recibos de AE4x4 a BDatos ?") Then GoTo RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio
-'''    '- ----------------------------------------------------------------------------------------------------------------------------
-'''    '- M_315_Copy_INSS_a_BD, Trasladar el importe INSS a los recibos de BDatos ----------------------------------------------------
-'''    '- ----------------------------------------------------------------------------------------------------------------------------
-'''    Call Rut_Copy_AE4x4_en_BDatos   '¡¡¡ Quizás preguntar si no hay que actualizar antes con el módúlo Update_LSGES04_C_Acad_Ant !!!
-
 RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio:
     '- ----------------------------------------------------------------------------------------------------------------------------
     '- M_113, Asignar Código Concepto-Eco del Rec Y Rellenar Col Cta_Ingreso con el nº de Cta. correspondiente y Año de Vencimiento en ACont_Vto-----

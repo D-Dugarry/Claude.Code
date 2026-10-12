@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 00:16
+' Last Rev. 2026-10-12 20:44
 '2026-01-23
 Option Explicit
 
@@ -105,7 +105,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
                 F_BDAdm = F_BDAdm - 1
             Case Is = T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD  SÍ-EXISTE-EN  Sht__BD_Adm
                 If T_Adm.Datos(F_BDAdm, BD_ActivEco) = 4 Then
-                    '- AE4 excluido (M_214 ya los borra): sus importes vienen de AE4x4
+                    '- AE4 excluido (M_214 ya los borra): este proyecto no procesa los AE4
                     T_Adm.Datos(F_BDAdm, BD_Incidencias) = "AE4 excluido."
                 Else
                     If T_Adm.Datos(F_BDAdm, BD_ActivEco) > 6 Then

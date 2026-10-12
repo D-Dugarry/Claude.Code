@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-10-12 08:33
+' Last Rev. 2026-10-12 20:44
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -71,7 +71,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
                                                   BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
     For Fila = 1 To TF_LoBDatos   '--- Bucle para recorrer todas la filas de LoBDatos
         If T_BD.Datos(Fila, BD_C_Acad) <> C_Acad_Pos Then GoTo Sig_Reg         '- NO tenemos en cuenta loas Recibos de Otros C_Acad, porque NO tenemos toda la información
-        If T_BD.Datos(Fila, BD_ActivEco) = 4 Then GoTo Sig_Reg             '- NO tenemos en cuenta los Recibos de AE4,  ya vienen con sus ImpAdm de AE4x4
+        If T_BD.Datos(Fila, BD_ActivEco) = 4 Then GoTo Sig_Reg             '- NO tenemos en cuenta los Recibos de AE4: este proyecto no los procesa
         If T_BD.Datos(Fila, BD_ActivEco) > 6 Then Exit For                 '- NO tenemos en cuenta los Recibos de Movimiento (ordenada por AE, ya no quedan más)
         PlanDNI_New = T_BD.Datos(Fila, BD_Plan) & "_" & T_BD.Datos(Fila, BD_DNI)
         If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)

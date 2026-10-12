@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-10-06 11:50
+' Last Rev. 2026-10-12 20:44
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -182,7 +182,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
                                                         Format(rowfind, " #,##0") & " reg. ", _
                                                         " de " & Format(NVivas, "#,##0") & " reg.")
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " - Son Rec. EFP, Plan=M013 'Seminario orientación pruebas > 65', mal matriculado x Secretaría de Acceso", 0)
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " - Mal matrículados con Rec.Mov. con AE=300, los borro porque vendrán en el AE4x4 ¡¡rectificados a mano!!", 0)
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", " - Mal matrículados con Rec.Mov. con AE=300, los borro porque son AE4 y este proyecto no los procesa", 0)
     Else
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "No hay Rec. Ficticio, DNI=1", 0)

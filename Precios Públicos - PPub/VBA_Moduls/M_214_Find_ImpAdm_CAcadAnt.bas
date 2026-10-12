@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 08:29
+' Last Rev. 2026-10-12 20:44
 '2026-01-25
 Option Explicit
 
@@ -56,7 +56,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Call Rut_TablaRam_Cargar(T_AE, Lo_Data, Array(BD_ActivEco, BD_Plan, BD_DNI, BD_Anul, BD_Obs_Conta), True)
     For Fila = 1 To TF_Bdata
         '- Mismos criterios que M_115 (C_Acad_Pos):
-        If T_AE.Datos(Fila, BD_ActivEco) = 4 Then NAE4 = NAE4 + 1: GoTo Sig_Reg   '- AE4 excluido (sin marca, se borra): sus importes vienen de AE4x4
+        If T_AE.Datos(Fila, BD_ActivEco) = 4 Then NAE4 = NAE4 + 1: GoTo Sig_Reg   '- AE4 excluido (sin marca, se borra): este proyecto no procesa los AE4
         If T_AE.Datos(Fila, BD_ActivEco) > 6 Then T_AE.Datos(Fila, BD_Obs_Conta) = "RecCab": GoTo Sig_Reg   '- AE=80 y Rec.Mov.: todos, M_215 les pasa Imp.Rec. a Rec_Imp_Adm
         PlanDNI_New = T_AE.Datos(Fila, BD_Plan) & "_" & T_AE.Datos(Fila, BD_DNI)
         If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)
@@ -78,7 +78,7 @@ Sig_Reg:
     Call Rut_TablaRam_Volcar(T_AE, Lo_Data)                            '- Devuelvo a la hoja la Col. Obs_Conta
     Erase T_AE.Datos                                                    '- Libero la RAM
     
-    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excluidos Rec. AE=4 (sus importes vienen de AE4x4): ", 0, Format(NAE4, "#,##0") & " reg.")
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excluidos Rec. AE=4 (este proyecto no los procesa): ", 0, Format(NAE4, "#,##0") & " reg.")
     With Lo_Data
         Call Rut_Lo_Filtros_Quitar(Lo_Data)
         '- Visualizo el progreso ----------------------------------------------------------------------------------------

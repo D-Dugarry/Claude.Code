@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-11 14:38
+' Last Rev. 2026-10-12 20:28
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -418,28 +418,6 @@ End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
 '
-'   Import File los 4 de Wb_AE4 -----------------------------------------------------------
-'------------------------------------------------------------------------------------------
-'  <group id="ImportAE4x4_Group"     tag="ImportAE4x4_Group"   label="Import BD_AE4x4">
-'__________________________________________________________________________________________
-'
-'   Importar Importar los 4 WB: EFP y CFC de AñoCon_Ant/Pos ------------
-'------------------------------------------------------------------------------------------
-Sub GetLbl_Import_AE4(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_Import_AE4"), "dd-mmm hh:mm") & vbLf & " AE4x4"
-Debug.Print "GetLbl_Import_AE4", LabelVal
-End Sub
-'------------------------------------------------------------------------------------------
-Sub OnAct_Import_AE4(control As IRibbonControl)
-Debug.Print "OnAct_Import_AE4"
-    Call Rut_Progreso_Abrir("2º. Import AE-4x4  =  añadir Rec. AE4 a BDatos")
-    Call RuT_Update_AE4x4
-    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
-'    MyRibbon.InvalidateControl "BtnImport_AE4"    '- Actualiza solo este Control_ID
-End Sub
-'------------------------------------------------------------------------------------------
-'__________________________________________________________________________________________
-'
 '   Dynamic Menu-Sheets_Sht to Goto -------------------------------------------------------
 '------------------------------------------------------------------------------------------
 '  <group id="Dynamic_SheetList_GoTo_Group" getLabel="GetLbl_Dynamic_SheetList_GoTo_Group">
@@ -560,7 +538,6 @@ Debug.Print "OnAct_ReCalculate_ListObj_Sht"
     Select Case ActiveSheet.CodeName
         Case Sht__Inf_Recibos_TIO.CodeName:     Call Rut_Recalcular_Tabla_Inf_Recibos
         Case Sht__Inf_Inf_Rsm.CodeName:         Call Rut_Recalcular_Tabla_Inf_RSm
-        Case Sht__BD_JIs_AE4.CodeName:          Call Rut_Recalcular_Tabla_JIs_AE4
     End Select
     Call RefreshRibbon                          '- rotulo con la fecha del ultimo calculo
 End Sub
