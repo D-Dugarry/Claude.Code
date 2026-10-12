@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-11 12:25
+' Last Rev. 2026-10-11 20:18
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -33,7 +33,10 @@ Option Explicit
 Function Func_MsgBox_vbYesNo(Optional Msg As String = "¿ Seguimos ?") As Boolean
     Dim Respuesta    As VbMsgBoxResult
     Func_MsgBox_vbYesNo = True
-    Respuesta = MsgBox(Msg, vbYesNo + vbQuestion, "procedimiento")
+    '- (2026-10-11) vbMsgBoxSetForeground + vbSystemModal: la pregunta SIEMPRE por delante. Form_Running_Rut tapa toda la ventana
+    '- de Excel; si Excel no es la aplicacion activa, el MsgBox se abre DETRAS del formulario y Excel parece colgado (no responde
+    '- al raton ni a Ctrl+Pausa porque espera una respuesta que no se ve).
+    Respuesta = MsgBox(Msg, vbYesNo + vbQuestion + vbMsgBoxSetForeground + vbSystemModal, "procedimiento")
     If Respuesta = vbNo Then Func_MsgBox_vbYesNo = False
 End Function
 '==================================================================================================================================

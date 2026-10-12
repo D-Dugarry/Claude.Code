@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-10-08 11:26
+' Last Rev. 2026-10-12 00:16
 Option Explicit
 
 '###################################################################################################################################
@@ -185,10 +185,11 @@ Sub Rut_TimeLap_Inf(ActivForm As Object, _
     Else
         With ActivForm.Controls(Kontrol)
             .Value = TxTAnt
+            .SetFocus
             .SelStart = Len(.Text)      '- Mueve el cursor a la posición X, en este caso el final del Text.
             .SelLength = 0
-            .SetFocus
         End With
+        Call Rut_TextBox_Ver_Final(ActivForm, ActivForm.Controls(Kontrol))   '- y la vista con el cursor (ver la rutina)
         ActivForm.Repaint
     End If
     
@@ -204,6 +205,41 @@ Sub Rut_TimeLap_Inf(ActivForm As Object, _
 '    End With
 '                ActivForm.Repaint
                 LastTimeLap = Timer
+End Sub
+' -------------------------------------------------------------------------------------------------------------------------------
+'- Lleva la vista del TextBox del informe hasta el cursor, que el llamador ya ha dejado al final.
+'- Un TextBox de MSForms solo desplaza la vista hasta el cursor cuando el CONTROL gana el foco: mover el cursor (SelStart,
+'- CurLine) con el control ya enfocado, o reactivar la ventana del formulario, NO desplaza nada (comprobado el 2026-10-11 con
+'- una prueba con tres variantes y repetida: solo funciono pasar el foco a otro control y devolverlo). Por eso el foco va un
+'- instante a otro control y vuelve. En Form_Running_Rut, mientras dura la tarea, no hay ningun otro control visible que pueda
+'- tener el foco (solo etiquetas y los botones ocultos): se usa un CommandButton oculto, mostrado solo durante el rebote.
+Sub Rut_TextBox_Ver_Final(Frm As Object, Tb As Object)
+    Dim c       As Object
+    Dim Otro    As Object
+    Dim Oculto  As Boolean
+    On Error Resume Next                    '- el informe no debe romper la tarea por esto
+    For Each c In Frm.Controls              '- 1. otro control visible que pueda tener el foco
+        If c.Name <> Tb.Name Then
+            Select Case TypeName(c)
+                Case "CommandButton", "TextBox", "ComboBox", "ListBox", "CheckBox", "OptionButton", "ToggleButton"
+                    If c.Visible And c.Enabled Then Set Otro = c: Exit For
+            End Select
+        End If
+    Next c
+    If Otro Is Nothing Then                 '- 2. si no, un CommandButton oculto, mostrado solo durante el rebote
+        For Each c In Frm.Controls
+            If TypeName(c) = "CommandButton" And c.Enabled Then Set Otro = c: Oculto = True: Exit For
+        Next c
+    End If
+    If Not Otro Is Nothing Then
+        If Oculto Then Otro.Visible = True
+        Otro.SetFocus
+        Tb.SetFocus
+        Tb.SelStart = Len(Tb.Text)
+        Tb.SelLength = 0
+        If Oculto Then Otro.Visible = False
+    End If
+    On Error GoTo 0
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 ''-----------------------------------------------------------------------------------------------------------------------------------
