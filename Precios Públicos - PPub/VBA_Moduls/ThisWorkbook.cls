@@ -7,7 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-12 13:05
 Option Explicit
 
 Private myRibUI             As IRibbonUI
@@ -62,9 +62,8 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     Call Rut_ColHide_Set("Sht__BD", False)
     
         Dim WrkSht      As Worksheet
-    For Each WrkSht In Worksheets
-        WrkSht.Visible = xlSheetVisible
-        'If WrkSht.CodeName <> ActiveSheet.CodeName Then Sheets(WrkSht.Name).Visible = xlSheetVeryHidden
+    For Each WrkSht In Worksheets                       '- solo BDatos visible; las demas se abren con el menu de hojas del Ribbon
+        If WrkSht.CodeName <> Sht__BD.CodeName Then WrkSht.Visible = xlSheetVeryHidden   '- antes se mostraban todas, y el Modo Programacion las ensenaba al mostrar las pestanas
     Next
     
     Call Rut_Lo_FreezePanes_InmovilizaFxCx(2)

@@ -1,4 +1,5 @@
 Attribute VB_Name = "Rut_Hipervinculos"
+' Last Rev. 2026-10-12 13:05
 Option Explicit
 
 ' ==================================================================================================================================
@@ -10,6 +11,7 @@ Sub Rut_ListarHipervinculos()
 
     ' Crear una nueva hoja para mostrar los resultados
     If Fnc_WrkSheet_Exist("Hipervínculos") Then
+        Sheets("Hipervínculos").Visible = xlSheetVisible  '- Rut_WrkSheet_Vaciar acaba seleccionandola: oculta daria error 1004
         Call Rut_WrkSheet_Vaciar(Sheets("Hipervínculos"))
         Set hojaResultado = ThisWorkbook.Sheets("Hipervínculos")
     Else
