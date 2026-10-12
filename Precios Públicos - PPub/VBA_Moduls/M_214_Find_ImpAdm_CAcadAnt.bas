@@ -1,12 +1,12 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 00:16
+' Last Rev. 2026-10-12 07:44
 '2026-01-25
 Option Explicit
 
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Identificar de un C_Acad, los 1º Rec. de c/matrícula para obt. Imp_Acad, Imp_Adm, Imp_Dto ---------------------------------------------
 '- ----------------------------------------------------------------------------------------------------------------------------
-Sub RuT_Find_Imp_AdmAcad_C_Acad(Lo_AE4x1 As ListObject)
+Sub RuT_Find_Imp_AdmAcad_C_Acad(Lo_Data As ListObject)
                                   
 Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim ImpTAcad        As Currency
@@ -15,7 +15,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim ImpTDto         As Currency
     Dim TimeLapSub      As Single:      TimeLapSub = LastTimeLap
     Dim Fila            As Long
-    Dim TF_Bdata        As Long:        TF_Bdata = Lo_AE4x1.ListRows.Count
+    Dim TF_Bdata        As Long:        TF_Bdata = Lo_Data.ListRows.Count
     Dim RowsDel         As Long
     Dim NAE4            As Long
     Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
@@ -27,7 +27,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim TxT_Progreso    As String
     Dim RowData         As ListRow
     Dim rowfind         As Variant
-    Dim Sh_Data         As Worksheet:   Set Sh_Data = Lo_AE4x1.Parent
+    Dim Sh_Data         As Worksheet:   Set Sh_Data = Lo_Data.Parent
 
     '- Visualizo el progreso ----------------------------------------------------------------------------------------
     TxT_ProgIni = ActivForm.Controls("TBx_Informe")
@@ -35,24 +35,24 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
                          C_Acad_Ant & ", en " & Format(TF_Bdata, "#,##0") & " reg.", 0, , , , , , 2)
     TxT_Progreso = ActivForm.Controls("TBx_Informe")
     
-    Call Rut_Lo_Filtros_Quitar(Lo_AE4x1)
-    Lo_AE4x1.DataBodyRange.Columns(BD_Rec_Imp_Adm).ClearContents
-    Lo_AE4x1.DataBodyRange.Columns(BD_Rec_Imp_Acad).ClearContents
-    Lo_AE4x1.DataBodyRange.Columns(BD_Rec_Imp_Dto).ClearContents
-    Lo_AE4x1.DataBodyRange.Columns(BD_Obs_Conta).ClearContents
+    Call Rut_Lo_Filtros_Quitar(Lo_Data)
+    Lo_Data.DataBodyRange.Columns(BD_Rec_Imp_Adm).ClearContents
+    Lo_Data.DataBodyRange.Columns(BD_Rec_Imp_Acad).ClearContents
+    Lo_Data.DataBodyRange.Columns(BD_Rec_Imp_Dto).ClearContents
+    Lo_Data.DataBodyRange.Columns(BD_Obs_Conta).ClearContents
     
     ' Ordenar por columnas  ------------------------------
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
-        Call Rut_Lo_Sort(Lo_AE4x1, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
-    '- Recorro toda la tabla Lo_AE4x1, en RAM (Rut_Lo_TablaRam): celda a celda con ListRows(Fila) se quedaba colgado con ~100.000 filas.
+    '- Recorro toda la tabla Lo_Data, en RAM (Rut_Lo_TablaRam): celda a celda con ListRows(Fila) se quedaba colgado con ~100.000 filas.
     '- Se carga con .Value2; solo se devuelve la Col. Obs_Conta (la que acaba de vaciarse arriba, el resto no se toca).
     Dim T_AE            As T_TablaRam
-    Call Rut_TablaRam_Cargar(T_AE, Lo_AE4x1, Array(BD_ActivEco, BD_Plan, BD_DNI, BD_Anul, BD_Obs_Conta), True)
+    Call Rut_TablaRam_Cargar(T_AE, Lo_Data, Array(BD_ActivEco, BD_Plan, BD_DNI, BD_Anul, BD_Obs_Conta), True)
     For Fila = 1 To TF_Bdata
         '- Mismos criterios que M_115 (C_Acad_Pos):
         If T_AE.Datos(Fila, BD_ActivEco) = 4 Then NAE4 = NAE4 + 1: GoTo Sig_Reg   '- AE4 excluido (sin marca, se borra): sus importes vienen de AE4x4
@@ -74,18 +74,18 @@ Sig_Reg:
         End If
     Next
     T_AE.Modificada(BD_Obs_Conta) = True
-    Call Rut_TablaRam_Volcar(T_AE, Lo_AE4x1)                            '- Devuelvo a la hoja la Col. Obs_Conta
+    Call Rut_TablaRam_Volcar(T_AE, Lo_Data)                            '- Devuelvo a la hoja la Col. Obs_Conta
     Erase T_AE.Datos                                                    '- Libero la RAM
     
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excluidos Rec. AE=4 (sus importes vienen de AE4x4): ", 0, Format(NAE4, "#,##0") & " reg.")
-    With Lo_AE4x1
-        Call Rut_Lo_Filtros_Quitar(Lo_AE4x1)
+    With Lo_Data
+        Call Rut_Lo_Filtros_Quitar(Lo_Data)
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Resultado de Identificar Importes Adm. de todo el Curso " & C_Acad_Ant, 0, , _
                                                         "en " & Format(TF_Bdata, "#,##0") & "reg.", TxT_ProgIni, , , 2)
         '- Borrar Recibos Sin ImpAdm -----------------------------------
         rowfind = .ListRows.Count
-        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_AE4x1, BD_Obs_Conta, "=")
+        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, BD_Obs_Conta, "=")
         RowsDel = rowfind - .ListRows.Count
         If RowsDel > 0 Then
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Borrados Rec. SIN Imp.Adm. ", 0, _
@@ -116,7 +116,7 @@ Sig_Reg:
     
         '- Borrar Recibos Cobrados en Año_Cont_Ant -----------------------------------
         rowfind = .ListRows.Count
-        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_AE4x1, BD_ACont_Cob, "=" & AnoCont - 1)
+        Call Rut_Lo_DataBodyRange_Filter_y_DEL(Lo_Data, BD_ACont_Cob, "=" & AnoCont - 1)
         TF_Bdata = .ListRows.Count
         RowsDel = rowfind - TF_Bdata
         If RowsDel > 0 Then
@@ -150,7 +150,7 @@ Sig_Reg:
     End With
 
 Restablecer_Valores:
-Call Rut_Lo_Filtros_Quitar(Lo_AE4x1)
+Call Rut_Lo_Filtros_Quitar(Lo_Data)
 Call Rut_WrkSheet_LstObj_LiberarEspacio(Sh_Data)
 Debug.Print "<<< RuT_Find_Imp_AdmAcad_C_Acad" & C_Acad
 End Sub     ' -------------------------------------------------------------------------------------------------------------------------<<<
