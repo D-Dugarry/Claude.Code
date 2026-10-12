@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-04 17:08
+' Last Rev. 2026-10-12 00:16
 '2026-01-25
 Option Explicit
 
@@ -17,6 +17,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim Fila            As Long
     Dim TF_Bdata        As Long:        TF_Bdata = Lo_AE4x1.ListRows.Count
     Dim RowsDel         As Long
+    Dim NAE4            As Long
     Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_C_Acad_Pos")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
@@ -48,18 +49,22 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
         Call Rut_Lo_Sort(Lo_AE4x1, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_AE4x1, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
     
-    '- Recorro toda la tabla Lo_AE4x1 -----------------------------------------------------------------
-    For Fila = 1 To TF_Bdata   '--- Bucle para recorrer todas la filas de la Consulta Prog_TitPH
-        Set RowData = Lo_AE4x1.ListRows(Fila)
-        If RowData.Range(BD_ActivEco) = 80 Then RowData.Range(BD_Obs_Conta) = "RecCab": GoTo Sig_Reg
-        PlanDNI_New = RowData.Range(BD_Plan) & "_" & RowData.Range(BD_DNI)
+    '- Recorro toda la tabla Lo_AE4x1, en RAM (Rut_Lo_TablaRam): celda a celda con ListRows(Fila) se quedaba colgado con ~100.000 filas.
+    '- Se carga con .Value2; solo se devuelve la Col. Obs_Conta (la que acaba de vaciarse arriba, el resto no se toca).
+    Dim T_AE            As T_TablaRam
+    Call Rut_TablaRam_Cargar(T_AE, Lo_AE4x1, Array(BD_ActivEco, BD_Plan, BD_DNI, BD_Anul, BD_Obs_Conta), True)
+    For Fila = 1 To TF_Bdata
+        '- Mismos criterios que M_115 (C_Acad_Pos):
+        If T_AE.Datos(Fila, BD_ActivEco) = 4 Then NAE4 = NAE4 + 1: GoTo Sig_Reg   '- AE4 excluido (sin marca, se borra): sus importes vienen de AE4x4
+        If T_AE.Datos(Fila, BD_ActivEco) > 6 Then T_AE.Datos(Fila, BD_Obs_Conta) = "RecCab": GoTo Sig_Reg   '- AE=80 y Rec.Mov.: todos, M_215 les pasa Imp.Rec. a Rec_Imp_Adm
+        PlanDNI_New = T_AE.Datos(Fila, BD_Plan) & "_" & T_AE.Datos(Fila, BD_DNI)
         If PlanDNI_New <> PlanDNI_Ant Then   '--- Solo la primera Tasa Adm (es decir solo una tasa, porque las demás las repite)
-                    If RowData.Range(BD_Anul) = "S" Then
-                                            RowData.Range(BD_Obs_Conta) = "RecNegCab"    '- para quitar marca de borrar Rec.
-                                    Else
-                                            RowData.Range(BD_Obs_Conta) = "RecCab"    '- para quitar marca de borrar Rec.
-                    End If
-                                            PlanDNI_Ant = PlanDNI_New
+            If T_AE.Datos(Fila, BD_Anul) = "S" Then
+                T_AE.Datos(Fila, BD_Obs_Conta) = "RecNegCab"    '- para quitar marca de borrar Rec.
+            Else
+                T_AE.Datos(Fila, BD_Obs_Conta) = "RecCab"    '- para quitar marca de borrar Rec.
+            End If
+            PlanDNI_Ant = PlanDNI_New
         End If
 Sig_Reg:
         If Fila Mod 10000 = 0 Then
@@ -68,7 +73,11 @@ Sig_Reg:
                                 Format(Fila, "#,##0") & "reg.", 0, , , TxT_Progreso, True, , 2)
         End If
     Next
+    T_AE.Modificada(BD_Obs_Conta) = True
+    Call Rut_TablaRam_Volcar(T_AE, Lo_AE4x1)                            '- Devuelvo a la hoja la Col. Obs_Conta
+    Erase T_AE.Datos                                                    '- Libero la RAM
     
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Excluidos Rec. AE=4 (sus importes vienen de AE4x4): ", 0, Format(NAE4, "#,##0") & " reg.")
     With Lo_AE4x1
         Call Rut_Lo_Filtros_Quitar(Lo_AE4x1)
         '- Visualizo el progreso ----------------------------------------------------------------------------------------
@@ -146,6 +155,3 @@ Call Rut_WrkSheet_LstObj_LiberarEspacio(Sh_Data)
 Debug.Print "<<< RuT_Find_Imp_AdmAcad_C_Acad" & C_Acad
 End Sub     ' -------------------------------------------------------------------------------------------------------------------------<<<
 ' ========================================================================================================================================
-
-
-

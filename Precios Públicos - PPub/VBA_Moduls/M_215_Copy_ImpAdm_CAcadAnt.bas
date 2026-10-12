@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-12 00:16
 '2026-01-23
 Option Explicit
 
@@ -96,7 +96,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     Dim T_BD            As T_TablaRam
     Dim T_Adm           As T_TablaRam
     Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref, BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
-    Call Rut_TablaRam_Cargar(T_Adm, Lo_BD_CAcad_Ant, Array(BD_Ref, BD_ImpAcad, BD_ImpAdm, BD_ImpDto, BD_Incidencias))
+    Call Rut_TablaRam_Cargar(T_Adm, Lo_BD_CAcad_Ant, Array(BD_Ref, BD_ActivEco, BD_ImpRec, BD_ImpAcad, BD_ImpAdm, BD_ImpDto, BD_Incidencias))
     F_BD = 1
     For F_BDAdm = 1 To TF_BDAdm
         Select Case T_BD.Datos(F_BD, BD_Ref)
@@ -104,11 +104,21 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
                 If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
                 F_BDAdm = F_BDAdm - 1
             Case Is = T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD  SÍ-EXISTE-EN  Sht__BD_Adm
-                T_BD.Datos(F_BD, BD_Rec_Imp_Acad) = T_Adm.Datos(F_BDAdm, BD_ImpAcad)
-                T_BD.Datos(F_BD, BD_Rec_Imp_Adm) = T_Adm.Datos(F_BDAdm, BD_ImpAdm)
-                T_BD.Datos(F_BD, BD_Rec_Imp_Dto) = T_Adm.Datos(F_BDAdm, BD_ImpDto)
-                Found = Found + 1
-                T_Adm.Datos(F_BDAdm, BD_Incidencias) = "Found en BD."
+                If T_Adm.Datos(F_BDAdm, BD_ActivEco) = 4 Then
+                    '- AE4 excluido (M_214 ya los borra): sus importes vienen de AE4x4
+                    T_Adm.Datos(F_BDAdm, BD_Incidencias) = "AE4 excluido."
+                Else
+                    If T_Adm.Datos(F_BDAdm, BD_ActivEco) > 6 Then
+                        '- AE=80 y Rec.Mov.: Imp.Rec. ==a==>> Rec_Imp_Adm (porque puede tener Dto's), como M_115
+                        T_BD.Datos(F_BD, BD_Rec_Imp_Adm) = T_Adm.Datos(F_BDAdm, BD_ImpRec)
+                    Else
+                        T_BD.Datos(F_BD, BD_Rec_Imp_Acad) = T_Adm.Datos(F_BDAdm, BD_ImpAcad)
+                        T_BD.Datos(F_BD, BD_Rec_Imp_Adm) = T_Adm.Datos(F_BDAdm, BD_ImpAdm)
+                        T_BD.Datos(F_BD, BD_Rec_Imp_Dto) = T_Adm.Datos(F_BDAdm, BD_ImpDto)
+                    End If
+                    Found = Found + 1
+                    T_Adm.Datos(F_BDAdm, BD_Incidencias) = "Found en BD."
+                End If
                 If F_BD < TF_BD Then F_BD = F_BD + 1 Else Exit For
             Case Is > T_Adm.Datos(F_BDAdm, BD_Ref)     '- Ref_BD_Adm  NO-EXISTE-EN  Sht__BD
                 NotFound = NotFound + 1
