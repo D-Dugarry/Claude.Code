@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-10-07 14:57
+' Last Rev. 2026-10-11 17:32
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -77,6 +77,12 @@ Public Const BD_CriT_ADxAplz           As Integer = 59   ' col: bg
 Public Const BD_CriT_ContabAnt         As Integer = 60   ' col: bh
 Public Const BD_CriT_DevEP             As Integer = 61   ' col: bi
 
+' - Columnas _IAdm_ de BDatos (M_122): importes del LSace06 IAdm (BD_ImpAdm) por recibo -----
+Public Const BD_IAdm_ImpINSS          As Integer = 64   ' col: bl
+Public Const BD_IAdm_ImpAdm           As Integer = 65   ' col: bm
+Public Const BD_IAdm_DtoAdm           As Integer = 66   ' col: bn
+Public Const BD_IAdm_TotDto           As Integer = 67   ' col: bo
+
 ' Lo_Prog_AE4.ListObjects(1) -----------------------------------
 Public Const AE4_TipRec               As Integer = 1    ' col: a
 Public Const AE4_Plan                 As Integer = 2    ' col: b
@@ -130,10 +136,10 @@ Public Const IAdm_Concept_Nom    As Integer = 9    ' col: i
 Public Const IAdm_Concept_Cod    As Integer = 10   ' col: j
 Public Const IAdm_DNI            As Integer = 11   ' col: k
 Public Const IAdm_Nom            As Integer = 12   ' col: l
-Public Const IAdm_Concept_Imp    As Integer = 13   ' col: m
-Public Const IAdm_Concept_Cant   As Integer = 14   ' col: n
-Public Const IAdm_Concept_TImp   As Integer = 15   ' col: o
-Public Const IAdm_Dto_Nom        As Integer = 16   ' col: p
+Public Const IAdm_Imp_INSS     As Integer = 13   ' col: m
+Public Const IAdm_Imp_Adm      As Integer = 14   ' col: n
+Public Const IAdm_Dto_Adm      As Integer = 15   ' col: o
+Public Const IAdm_Tot_Dto      As Integer = 16   ' col: p
 Public Const IAdm_RecFound       As Integer = 17   ' col: q
 
 ' Tabla Prog_EPplazos.ListObjects(1) --------------------------------

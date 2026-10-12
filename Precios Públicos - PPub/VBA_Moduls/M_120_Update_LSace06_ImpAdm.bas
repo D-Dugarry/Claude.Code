@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_120_Update_LSace06_ImpAdm"
-' Last Rev. 2026-10-11 14:58
+' Last Rev. 2026-10-11 17:45
 '- M_120_Update_LSace06_ImpAdm ---------------------------------------------------------------------------------------------------------
 
 Option Explicit
@@ -116,6 +116,14 @@ Debug.Print "------------------------- >>> RuT_Update_LSace06_CAcad_ImpAdm()"
         Call Rut_Lo_Import_LSace06_ImpAdm(Lo_ImpAdm, Lo_DefCol_ImpAdm, DefC_TitColGenInf, C_Acad_Pos, Arch_New_Name)
             If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
     End If
+
+Rut_Copy_IAdm_a_BDatos:
+If Not Func_MsgBox_vbYesNo("¿ Trasladar Imp. INSS, Imp. Adm. y Dto. Adm. del C_Acad_Ant y C_Acad_Pos a BDatos ?" & vbLf & vbLf & _
+                           "¡¡¡ Tienen que estar todos los Recibos que deben de estar, como los AE4.  !!!") Then GoTo Terminar
+    '- ----------------------------------------------------------------------------------------------------------------------------
+    '- M_122_Copy_IAdm_a_BD, Trasladar Imp. INSS, Imp. Adm., Dto. Adm. y Tot. Dto. a BDatos (como M_310 con M_315)
+    '- ----------------------------------------------------------------------------------------------------------------------------
+    Call Rut_Copy_IAdm_a_BDatos
 
 Terminar:
     '- Visualizo el progreso --------
