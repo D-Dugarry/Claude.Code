@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-13 00:20
 Option Explicit
 
 '- Hojas (por CodeName) cuyas tablas quedan con la fila de totales visible cuando NO tienen fila en Lo_ListObjAPP, ademas de todas
@@ -727,4 +727,34 @@ Public Sub Rut_Names_Borrar_REF_Hoja(ByVal Ws As Worksheet)
         End If
     Next i
     Debug.Print "Rut_Names_Borrar_REF_Hoja: " & N & " nombres borrados de " & Ws.Name
+End Sub
+' --------------------------------------------------------------------------------------------------
+'###################################################################################################
+' Borra los nombres ROTOS de todo el libro: los que apuntan a #REF! y los que apuntan a OTRO libro.
+' Son restos de copiar hojas (p. ej. APP_C_Acad_Ant de ambito ConfigMail, que apunta a
+' [EP_202x-2x_BaseDatos-LIQ _V3.xlsm]_ConfigAPP): el de ambito hoja hace sombra al nombre bueno de
+' ambito libro cuando se lee desde esa hoja. No toca los internos de Excel (_FilterDatabase,
+' Print_Area...) ni las referencias a tablas (Lo_Organicas[]). Por defecto SOLO LISTA. Desde Inmediato:
+'   Call Rut_Names_Borrar_Rotos              '- lista en Inmediato lo que borraria
+'   Call Rut_Names_Borrar_Rotos(False)       '- los borra (despues, guardar el libro)
+Public Sub Rut_Names_Borrar_Rotos(Optional ByVal Solo_Listar As Boolean = True)
+' --------------------------------------------------------------------------------------------------
+    Dim i       As Long
+    Dim N       As Long
+    Dim Nom     As String
+    Dim Ref     As String
+    Dim Corto   As String
+    For i = ThisWorkbook.Names.Count To 1 Step -1
+        Nom = ThisWorkbook.Names(i).Name                        '- los de ambito hoja salen como "Hoja!Nombre"
+        Ref = ThisWorkbook.Names(i).RefersTo
+        Corto = Mid$(Nom, InStrRev(Nom, "!") + 1)
+        If Left$(Corto, 1) <> "_" And Not Corto Like "Print_*" Then    '- los internos de Excel no se tocan
+            If InStr(Ref, "#REF!") > 0 Or (InStr(Ref, ".xl") > 0 And InStr(Ref, "]") > 0) Then
+                Debug.Print IIf(Solo_Listar, "Se borraria: ", "Borrado: ") & Nom & "   ->   " & Ref
+                If Not Solo_Listar Then ThisWorkbook.Names(i).Delete
+                N = N + 1
+            End If
+        End If
+    Next i
+    Debug.Print "Rut_Names_Borrar_Rotos: " & N & IIf(Solo_Listar, " nombres rotos, sin borrar", " nombres borrados")
 End Sub

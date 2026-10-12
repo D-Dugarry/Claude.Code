@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_132_Anadir_Num_JIs_al_Inf"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-13 00:20
 '2026-02-14
 Option Explicit
 
@@ -25,7 +25,7 @@ Dim RngJIs          As Range
 Dim Celda           As Range
 
     Application.ScreenUpdating = False
-    Dim Sw_Calculation      As Boolean:     Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
+    Dim Sw_Calculation      As XlCalculation: Sw_Calculation = Application.Calculation:   Application.Calculation = xlCalculationManual
     Application.DisplayAlerts = False
 
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
