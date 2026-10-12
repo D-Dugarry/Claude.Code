@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 07:44
+' Last Rev. 2026-10-12 08:29
 '2026-01-25
 Option Explicit
 
@@ -45,6 +45,7 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
         Call Rut_Lo_Sort(Lo_Data, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_Data, BD_Expdte, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_Data, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----

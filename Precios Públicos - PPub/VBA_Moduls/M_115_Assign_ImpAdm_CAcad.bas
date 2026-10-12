@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-10-04 21:07
+' Last Rev. 2026-10-12 08:33
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -58,6 +58,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
         Call Rut_Lo_Sort(LoBDatos, BD_C_Acad, xlAscending, True, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_ActivEco, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_Plan, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(LoBDatos, BD_Expdte, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_DNI, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_NumRec, xlAscending, False, Aplicar:=False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(LoBDatos, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----

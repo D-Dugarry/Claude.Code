@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_413_Assign_ImpAdm_AE4x1"
-' Last Rev. 2026-10-04 21:07
+' Last Rev. 2026-10-12 08:34
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -45,6 +45,7 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_C_Acad, xlAscending, True)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_ActivEco, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_Plan, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
+        Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_Expdte, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_DNI, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_NumRec, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
         Call Rut_Lo_Sort(Lo_ClsBk_AE4x1, BD_Ref, xlAscending, False)    '- Ordenar primero accelera un montón el borrado -----
