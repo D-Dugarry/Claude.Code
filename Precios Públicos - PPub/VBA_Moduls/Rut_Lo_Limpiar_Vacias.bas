@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Limpiar_Vacias"
-' Last Rev. 2026-10-10 23:19
+' Last Rev. 2026-10-12 09:46
 Option Explicit
 ' Dependencias: Rut_Wb_State_Manager (Rut_Off_Functions / Rut_On_Functions), Rut_Ws_Protect_Status (Rut_Prot_Save / Rut_Prot_Restore,
 ' tipo T_Prot_Estado) y la constante DefC_FormatCol (M_000_Ini_Var_APP).
@@ -79,88 +79,104 @@ End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 
 ' ==================================================================================================================================
-Sub Rut_Ws_Quitar_Estilo_Columna(Ws As Worksheet, Lo As ListObject)   '--- Quita el estilo (fuente) de las COLUMNAS de la hoja ---
+Sub Rut_Ws_Quitar_Estilo_Columna(Ws As Worksheet)   '--- Devuelve el estilo Normal a las COLUMNAS de la hoja, sin cambiar sus celdas ---
 ' ==================================================================================================================================
-' Las columnas de la hoja pueden llevar una fuente propia (en BDatos, Courier New): como las celdas vacias SIN formato propio son
-' distintas de la columna, Excel las guarda una a una (4,2 millones de celdas en BDatos). Con la fuente por defecto del libro en las
-' columnas, esas celdas ya no se guardan. Prueba del 2026-10-10 sobre una copia: 56.000 KB -> 41.300 KB, mismos valores y formatos.
-' Pone la fuente por defecto (la del estilo Normal) en TODA la hoja y despues devuelve su nombre y tamano a las celdas que NO estan
-' en el cuerpo de la tabla (cabeceras, filas de encima, fila de totales...), que si tienen fuentes propias. Conserva negrita, cursiva
-' y color. Si esas celdas son mas de 50.000, no hace nada. Se ejecuta UNA vez: el estilo de columna queda guardado en el libro.
+' Una celda vacia se guarda en el fichero si su formato es distinto del de su COLUMNA. Las columnas de BDatos llevaban un estilo
+' propio (Courier New hasta el 2026-10-10; despues, la fuente del tema, que a la vista es igual que Normal pero para Excel es otro
+' estilo), y ClearFormats (lo hacen la importacion y el formateo en cada proceso) deja las celdas en Normal: al ser distintas de su
+' columna, Excel guardaba una a una ~5 millones de celdas vacias. Por eso la version anterior de esta rutina (poner la fuente del
+' tema en toda la hoja) bajo el libro a 41 MB y los procesos de despues lo volvieron a subir (66 MB el 2026-10-12).
+' Ahora: copia el formato de las celdas en uso a una hoja temporal (por tramos de filas), quita el formato de TODA la hoja (asi las
+' columnas quedan en Normal) y devuelve a las celdas su formato. Probado el 2026-10-12 sobre una copia del libro: 66,5 -> 52,8 MB,
+' y las 160.543 x 69 celdas de BDatos con el mismo valor y el mismo formato (numero, fuente, relleno, bordes, alineacion y
+' proteccion), los mismos anchos y altos y el mismo formato condicional. Se ejecuta UNA vez por hoja: el estilo de columna queda
+' guardado en el libro. Si falla a medias, NO borra la hoja temporal (tiene el formato de las celdas): cerrar el libro SIN guardar.
 ' ==================================================================================================================================
-    Const MAX_CELDAS As Long = 50000
+    Const FILAS_TRAMO As Long = 20000
     Dim Prot_Estado As T_Prot_Estado
-    Dim Normal As Style:            Set Normal = Ws.Parent.Styles("Normal")
-    Dim Ur As Range, Body As Range, Bloque As Variant, Cel As Range
-    Dim R1 As Long, R2 As Long, C1 As Long, C2 As Long, B1 As Long, B2 As Long, BC1 As Long, BC2 As Long
-    Dim Bloques As New Collection, Guardadas As New Collection
-    Dim Vistas As Long, Aplicado As Boolean, V As Variant
+    Dim Wb As Workbook:             Set Wb = Ws.Parent
+    Dim Hoja_Activa As Object:      Set Hoja_Activa = Wb.ActiveSheet
+    Dim Alertas As Boolean:         Alertas = Application.DisplayAlerts
+    Dim Tmp As Worksheet, Ur As Range
+    Dim NFil As Long, NCol As Long, R As Long, R2 As Long
+    Dim Sel As String, Scr_Fila As Long, Scr_Col As Long, Vista As Boolean
+    Dim Paso As String, Aplicado As Boolean
 
-    If Lo.DataBodyRange Is Nothing Then Exit Sub
     Call Rut_Off_Functions
     Call Rut_Prot_Save(Ws, Prot_Estado)             '- anota sus permisos y la desprotege
     On Error GoTo Fin
 
-    '--- 1) Celdas fuera del cuerpo de la tabla: encima, debajo, a la izquierda y a la derecha ---
-    Set Ur = Ws.UsedRange:          Set Body = Lo.DataBodyRange
-    R1 = Ur.Row:                    R2 = Ur.Row + Ur.Rows.Count - 1
-    C1 = Ur.Column:                 C2 = Ur.Column + Ur.Columns.Count - 1
-    B1 = Body.Row:                  B2 = Body.Row + Body.Rows.Count - 1
-    BC1 = Body.Column:              BC2 = Body.Column + Body.Columns.Count - 1
-    If B1 > R1 Then Bloques.Add Ws.Range(Ws.Cells(R1, C1), Ws.Cells(B1 - 1, C2))
-    If R2 > B2 Then Bloques.Add Ws.Range(Ws.Cells(B2 + 1, C1), Ws.Cells(R2, C2))
-    If BC1 > C1 Then Bloques.Add Ws.Range(Ws.Cells(B1, C1), Ws.Cells(B2, BC1 - 1))
-    If C2 > BC2 Then Bloques.Add Ws.Range(Ws.Cells(B1, BC2 + 1), Ws.Cells(B2, C2))
-    For Each Bloque In Bloques
-        Vistas = Vistas + Bloque.Cells.Count
-    Next Bloque
-    If Vistas > MAX_CELDAS Then
-        Debug.Print ">>> Rut_Ws_Quitar_Estilo_Columna, " & Ws.Name & ": " & Format(Vistas, "#,##0") & " celdas fuera de la tabla (maximo " & MAX_CELDAS & "), no se hace nada"
-        GoTo Fin
+    Paso = "medir la hoja"
+    Set Ur = Ws.UsedRange                           '- se trabaja desde A1 hasta la ultima celda en uso
+    NFil = Ur.Row + Ur.Rows.Count - 1
+    NCol = Ur.Column + Ur.Columns.Count - 1
+    If Ws.Visible = xlSheetVisible Then             '- PasteSpecial cambia la seleccion de la hoja: se anota para dejarla igual
+        Ws.Activate
+        If TypeName(Selection) = "Range" Then Sel = Selection.Address
+        Scr_Fila = ActiveWindow.ScrollRow:  Scr_Col = ActiveWindow.ScrollColumn
+        Vista = True
     End If
 
-    '--- 2) Anota la fuente de las que no usan la de por defecto ---
-    For Each Bloque In Bloques
-        For Each Cel In Bloque.Cells
-            If Cel.Font.Name <> Normal.Font.Name Or Cel.Font.Size <> Normal.Font.Size Then
-                Guardadas.Add Array(Cel.Address(False, False), Cel.Font.Name, Cel.Font.Size)
-            End If
-        Next Cel
-    Next Bloque
+    Paso = "copiar el formato a la hoja temporal"
+    Set Tmp = Wb.Worksheets.Add(After:=Wb.Sheets(Wb.Sheets.Count))
+    For R = 1 To NFil Step FILAS_TRAMO
+        R2 = Application.Min(R + FILAS_TRAMO - 1, NFil)
+        Ws.Range(Ws.Cells(R, 1), Ws.Cells(R2, NCol)).Copy
+        Tmp.Cells(R, 1).PasteSpecial xlPasteFormats
+    Next R
+    Application.CutCopyMode = False
 
-    '--- 3) Fuente por defecto en toda la hoja (cambia el estilo de columna) y se devuelve la suya a las celdas anotadas ---
+    Paso = "quitar el formato de la hoja"
     Aplicado = True
-    Ws.Cells.Font.ThemeFont = xlThemeFontMinor          ' la fuente del tema (Calibri), igual que la del estilo Normal
-    Ws.Cells.Font.Size = Normal.Font.Size
-    For Each V In Guardadas
-        Ws.Range(V(0)).Font.Name = V(1)
-        Ws.Range(V(0)).Font.Size = V(2)
-    Next V
-    Debug.Print ">>> Rut_Ws_Quitar_Estilo_Columna, " & Ws.Name & ": fuente por defecto en la hoja; devuelta su fuente a " & Guardadas.Count & _
-                " celdas de " & Format(Vistas, "#,##0") & " fuera de la tabla (guardar el libro para que baje el tamano)"
+    Ws.Cells.ClearFormats                           '- columnas y filas en Normal, celdas sin formato
+
+    Paso = "devolver el formato a las celdas"
+    For R = 1 To NFil Step FILAS_TRAMO
+        R2 = Application.Min(R + FILAS_TRAMO - 1, NFil)
+        Tmp.Range(Tmp.Cells(R, 1), Tmp.Cells(R2, NCol)).Copy
+        Ws.Cells(R, 1).PasteSpecial xlPasteFormats
+    Next R
+    Application.CutCopyMode = False
+
+    Paso = "borrar la hoja temporal"
+    Application.DisplayAlerts = False
+    Tmp.Delete
+    Application.DisplayAlerts = Alertas
+    Aplicado = False
+    Debug.Print ">>> Rut_Ws_Quitar_Estilo_Columna, " & Ws.Name & ": estilo Normal en las columnas; formato devuelto a " & _
+                Format(NFil, "#,##0") & " filas x " & NCol & " col. (guardar el libro para que baje el tamano)"
 
 Fin:
     If Err.Number <> 0 Then
-        Debug.Print ">>> Rut_Ws_Quitar_Estilo_Columna, " & Ws.Name & " -> ERROR " & Err.Number & ": " & Err.Description
-        If Aplicado Then                                '- fallo a medias: se intenta devolver su fuente a las celdas anotadas
-            Err.Clear
-            On Error Resume Next
-            For Each V In Guardadas
-                Ws.Range(V(0)).Font.Name = V(1)
-                Ws.Range(V(0)).Font.Size = V(2)
-            Next V
+        Debug.Print ">>> Rut_Ws_Quitar_Estilo_Columna, " & Ws.Name & " -> ERROR " & Err.Number & " al " & Paso & ": " & Err.Description
+        Application.CutCopyMode = False
+        Application.DisplayAlerts = Alertas
+        If Aplicado Then
+            MsgBox "Error al " & Paso & ": " & Err.Description & vbLf & vbLf & _
+                   "La hoja " & Ws.Name & " puede haberse quedado sin formato: cierra el libro SIN GUARDAR." & vbLf & _
+                   "(El formato de sus celdas esta en la hoja " & Tmp.Name & ".)", vbCritical, "Quitar el estilo de columna"
+        Else
+            MsgBox "Error al " & Paso & ": " & Err.Description & vbLf & vbLf & _
+                   "La hoja " & Ws.Name & " no se ha cambiado.", vbExclamation, "Quitar el estilo de columna"
         End If
     End If
+    On Error GoTo -1                                '- sale del manejador de errores, para que el Resume Next de abajo valga
     On Error Resume Next
-    Call Rut_Prot_Restore(Ws, Prot_Estado, True)        '- la reprotege con los mismos permisos; True = UserInterfaceOnly
+    If Vista And Not Aplicado Then                  '- la seleccion y el desplazamiento de antes
+        Ws.Activate
+        If Sel <> "" Then Ws.Range(Sel).Select
+        ActiveWindow.ScrollRow = Scr_Fila:  ActiveWindow.ScrollColumn = Scr_Col
+    End If
+    If Not Hoja_Activa Is Nothing Then Hoja_Activa.Activate
+    Call Rut_Prot_Restore(Ws, Prot_Estado, True)    '- la reprotege con los mismos permisos; True = UserInterfaceOnly
     On Error GoTo 0
     Call Rut_On_Functions
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<
 
 ' ==================================================================================================================================
-Sub Rut_BDatos_Quitar_Estilo_Columna()      '--- BDatos: quita el estilo (fuente) de las columnas, para que no se guarden las celdas vacias ---
+Sub Rut_BDatos_Quitar_Estilo_Columna()      '--- BDatos: estilo Normal en las columnas, para que no se guarden las celdas vacias ---
 ' ==================================================================================================================================
-    Call Rut_Ws_Quitar_Estilo_Columna(Sht__BD, Sht__BD.ListObjects(1))
+    Call Rut_Ws_Quitar_Estilo_Columna(Sht__BD)
 End Sub
 ' -------------------------------------------------------------------------------------------------------------------------------<<<

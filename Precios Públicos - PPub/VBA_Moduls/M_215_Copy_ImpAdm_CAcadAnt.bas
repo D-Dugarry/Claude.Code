@@ -27,6 +27,8 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     Dim F_BDAdm         As Long
     Dim Found           As Long:        Found = 0
     Dim NotFound        As Long:        NotFound = 0
+    Dim NRecMov         As Long:        NRecMov = 0
+    Dim ImpRecMov       As Currency:    ImpRecMov = 0
     Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
     Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
     Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
@@ -95,7 +97,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     '- tabla del C_Acad_Ant con .Value, que es lo que se copiaba antes con "Celda = Celda".
     Dim T_BD            As T_TablaRam
     Dim T_Adm           As T_TablaRam
-    Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref, BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
+    Call Rut_TablaRam_Cargar(T_BD, Lo_BD, Array(BD_Ref, BD_C_Acad, BD_ActivEco, BD_ImpRec, BD_Rec_Imp_Acad, BD_Rec_Imp_Adm, BD_Rec_Imp_Dto), True)
     Call Rut_TablaRam_Cargar(T_Adm, Lo_BD_CAcad_Ant, Array(BD_Ref, BD_ActivEco, BD_ImpRec, BD_ImpAcad, BD_ImpAdm, BD_ImpDto, BD_Incidencias))
     F_BD = 1
     For F_BDAdm = 1 To TF_BDAdm
@@ -131,6 +133,18 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
                         Format(F_BD, "#,##0") & "/" & Format(TF_BD, "#,##0") & "reg.", 0, , , TxT_Progreso, True, , 2)
         End If
     Next F_BDAdm
+    '- AE=80 y Rec.Mov. (AE > 6) del C_Acad_Ant: Imp.Rec. ==a==>> Rec_Imp_Adm, desde la propia BDatos, como M_115 (2026-10-12).
+    '- El LSGES04 C_Acad del Robot no trae estos recibos (solo AE <= 6 y sin movimiento), así que el cruce de arriba no los
+    '- encuentra, y el ClearContents del principio les había borrado el Rec_Imp_Adm que les dio M_115: se quedaban vacíos.
+    For F_BD = 1 To TF_BD
+        If T_BD.Datos(F_BD, BD_C_Acad) = C_Acad_Ant Then
+            If T_BD.Datos(F_BD, BD_ActivEco) > 6 Then
+                T_BD.Datos(F_BD, BD_Rec_Imp_Adm) = T_BD.Datos(F_BD, BD_ImpRec)
+                NRecMov = NRecMov + 1
+                ImpRecMov = ImpRecMov + T_BD.Datos(F_BD, BD_ImpRec)
+            End If
+        End If
+    Next F_BD
     T_BD.Modificada(BD_Rec_Imp_Acad) = True
     T_BD.Modificada(BD_Rec_Imp_Adm) = True
     T_BD.Modificada(BD_Rec_Imp_Dto) = True
@@ -144,6 +158,8 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
                                                    ", Cobrado en " & AnoCont & " a BDatos.", 0, , , TxT_ProgIni, , , 2)
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Incorporados datos a: " & _
                         Format(Found, "#,##0") & " reg. de BDatos, de un total de " & Format(TF_BDAdm, "#,##0") & "reg. de " & Sht__BD_IAdm_CAcadAnt.Name, 0)
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Asignado Imp.Rec. ==a==>> Rec_Imp_Adm, a los Rec. AE=80 y Rec.Mov. ", 0, _
+                        Format(NRecMov, "#,##0") & " reg.", Format(ImpRecMov, "#,##0.00€"))
     
     Call Rut_Lo_Filtros_Quitar(Lo_BD)
     With Lo_BD
@@ -163,7 +179,7 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
                                         Format(ImpTAcad, "#,##0.00€"), "en " & Format(CantImpAcad, "#,##0 reg."))
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Descuentos  de Matrícula por un importe de:    ", 0, _
                                         Format(ImpTDto, "#,##0.00€"), "en " & Format(CantImpDto, "#,##0 reg."))
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Tasas Acad. de Matrícula por un importe de:    ", 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "     Tasas Adm.  de Matrícula por un importe de:    ", 0, _
                                         Format(ImpTAdm, "#,##0.00€"), "en " & Format(CantImpAdm, "#,##0 reg."))
 
 Restablecer_Valores:
