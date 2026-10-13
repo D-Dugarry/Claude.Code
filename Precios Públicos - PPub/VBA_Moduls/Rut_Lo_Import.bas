@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo_Import"
-' Last Rev. 2026-10-11 12:40
+' Last Rev. 2026-10-13 12:44
 '2026-01-18
 Option Explicit
 
@@ -17,7 +17,7 @@ Rut_Off_Functions
     Dim ArchRequest         As String:          ArchRequest = Arch_New_Name
     Dim TxT_Progreso        As String
     Dim NomArch             As String
-    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("App_AnoCont")
     Dim Lo_Data             As ListObject:      Set Lo_Data = WrkSht.ListObjects(1)
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -31,7 +31,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -45,7 +45,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado, el fichero debe ser un " & ArchRequest & " * !" & vbLf & vbLf & "  y se ha seleccionado:  " & NomArch
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -87,7 +87,7 @@ Rut_Off_Functions
                     "Puede que ya está abierto un libro con el mismo nombre en esta sesión de Excel," & vbLf & _
                     "o que la ruta no sea accesible: " & vbLf & Arch_New_Name
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-        Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+        Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
@@ -107,7 +107,7 @@ Rut_Off_Functions
                 MsgBx_Title = "Proceso: Importar " & ArchRequest
                 MsgBx_Msg = "¡ La Sheet NO existe !    "
                 MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-                Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+                Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '                With ActivForm.Controls("TBx_Informe")
 '                    .Value = MsgBx_Msg & vbLf & Now()
 '                    ActivForm.Repaint
@@ -145,7 +145,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ La tabla no contiene datos !    "
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -163,7 +163,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ La cabedera de la tabla no coincide !    " & vbLf & "Puede haber un cambio en la estructura de la Tabla"
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -195,7 +195,7 @@ Rut_Off_Functions
                 LastTimeLap = TimeLap2
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
     Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
 Rut_On_Functions
@@ -219,7 +219,7 @@ Sub Rut_Lo_Import_LoData_LoDefCol(Lo_Data As ListObject, _
                                   Optional ByVal Convertir_En_Ram As Boolean = False, _
                                   Optional ByVal NombreRutaRobot As String = "", _
                                   Optional ByVal SubcarpetaRobot As String = "")
-'- NombreRutaRobot (2026-10-11): nombre de Excel con la carpeta base del Robot (p. ej. APP_Ruta_Robot_Ges04_Acont); el dialogo
+'- NombreRutaRobot (2026-10-11): nombre de Excel con la carpeta base del Robot (p. ej. App_Ruta_Robot_Ges04_Acont); el dialogo
 '- se abre en <base>\<SubcarpetaRobot>\<carpeta de fecha mas reciente> (SubcarpetaRobot vacia = AnoCont).
 '- Vacio NombreRutaRobot = como siempre (Fnc_NEXE_RutaAPP).
 '- Convertir_En_Ram (2026-10-06, fase 4 del paso a RAM): en vez de copiar y pegar valores (14,6 de los 28 seg. de importar y
@@ -235,7 +235,7 @@ Rut_Off_Functions
     Dim ArchRequest         As String:          ArchRequest = Replace(Arch_New_Name, "|", " o ")    '- Para mostrarlos en los avisos
     Dim TxT_Progreso        As String
     Dim NomArch             As String
-    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim AnoCont             As String:          AnoCont = Prog__APP.Range("App_AnoCont")
     Dim WrkSht              As Worksheet:       Set WrkSht = Lo_Data.Parent
     Dim Datos               As Variant                                  '- Convertir_En_Ram: las filas del fichero
     Dim Reescrita()         As Boolean                                  '- Convertir_En_Ram: Col. que ha cambiado la conversión
@@ -254,7 +254,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -268,7 +268,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ Cancelado, el fichero debe ser un " & ArchRequest & " * !" & vbLf & vbLf & "  y se ha seleccionado:  " & NomArch
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -310,7 +310,7 @@ Rut_Off_Functions
                     "Puede que ya está abierto un libro con el mismo nombre en esta sesión de Excel," & vbLf & _
                     "o que la ruta no sea accesible: " & vbLf & Arch_New_Name
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-        Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+        Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         Arch_New_Name = "Cancel"
         Prog__APP_Switch.Range("Sw_WB_Deactivate") = True      '- Esto parece que evita un ERROR al abrir el ClsBk que cierra el programa ----<<<
         Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
@@ -330,7 +330,7 @@ Rut_Off_Functions
                 MsgBx_Title = "Proceso: Importar " & ArchRequest
                 MsgBx_Msg = "¡ La Sheet NO existe !    "
                 MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-                Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+                Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '                With ActivForm.Controls("TBx_Informe")
 '                    .Value = MsgBx_Msg & vbLf & Now()
 '                    ActivForm.Repaint
@@ -365,7 +365,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ La tabla no contiene datos !    "
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -383,7 +383,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ La cabedera de la tabla no coincide !    " & vbLf & "Puede haber un cambio en la estructura de la Tabla"
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
 '            With ActivForm.Controls("TBx_Informe")
 '                .Value = MsgBx_Msg & vbLf & Now()
 '                ActivForm.Repaint
@@ -438,7 +438,7 @@ Rut_Off_Functions
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importados nuevos datos: ", LastTimeLap, " ", Format(Lo_Data.ListRows.Count, "#,##0") & " reg.")
             If Quitada_Origen Then Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Quitada la Col. ORIGEN que añade Robot_PPub_Fusión.", 0)
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
     Call Rut_Lo_Totales_Restaurar(Lo_Data, Totales_Visibles)
 Rut_On_Functions
@@ -543,6 +543,29 @@ Function Fnc_Ruta_Inicial_Robot(ByVal NombreRango As String, ByVal Subcarpeta As
     Loop
     If Mejor <> "" Then Fnc_Ruta_Inicial_Robot = Carp & "\" & Mejor
 End Function    ' Fnc_Ruta_Inicial_Robot
+
+'- Fecha de la carpeta de descarga del Robot de la que viene un fichero (2026-10-13) ---------------
+'-   <base>\<año o curso>\<AAAA-MM-DD>\LsGes04_AñoCont_2026_(2026-10-02).xlsx -> la fecha de la carpeta
+'- Empty si la carpeta que contiene el fichero no empieza por AAAA-MM-DD (no viene del Robot). Misma
+'- regla que Fnc_Ruta_Inicial_Robot para reconocer las carpetas de fecha; vale con rutas con "/".
+'- -------------------------------------------------------------------------------------------------
+Function Fnc_Fecha_Carpeta_Robot(ByVal Ruta As String) As Variant
+    Dim Partes      As Variant
+    Dim Carpeta     As String
+    Dim A           As Integer
+    Dim M           As Integer
+    Dim D           As Integer
+
+    Fnc_Fecha_Carpeta_Robot = Empty
+    Partes = Split(Replace(Ruta, "/", "\"), "\")
+    If UBound(Partes) < 1 Then Exit Function
+    Carpeta = Partes(UBound(Partes) - 1)
+    If Not (Carpeta Like "####-##-##*") Then Exit Function
+    A = CInt(Left$(Carpeta, 4)):    M = CInt(Mid$(Carpeta, 6, 2)):  D = CInt(Mid$(Carpeta, 9, 2))
+    If M < 1 Or M > 12 Or D < 1 Or D > 31 Then Exit Function
+    If Day(DateSerial(A, M, D)) <> D Then Exit Function         '- p. ej. 2026-02-30 no es una fecha
+    Fnc_Fecha_Carpeta_Robot = DateSerial(A, M, D)
+End Function    ' Fnc_Fecha_Carpeta_Robot
 
 '- GetAttr da error si la ruta no existe o es una URL: aqui se devuelve False. ----------------------------------------------------
 Private Function Fnc_Carpeta_Existe_Robot(ByVal Ruta As String) As Boolean

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-12 22:59
+' Last Rev. 2026-10-13 13:18
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -48,7 +48,7 @@ Debug.Print "--------------------------------------------------- >>> OnLoad_MyRi
     SW_TabExcelVisible = False
     
     '--- Activo los valores de los Cursos Académicos ------------------------------------>>>>
-    If Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Ant") Then
+    If Prog__APP.Range("App_CursAcad") = Prog__APP.Range("App_C_Acad_Ant") Then
             SW_C_Acad_Ant = True
             SW_C_Acad_Pos = False
         MyTag = "checkBoxAcad1"
@@ -58,9 +58,9 @@ Debug.Print "--------------------------------------------------- >>> OnLoad_MyRi
         MyTag = "checkBoxAcad2"
     End If   '---------------------------------------------------------------------------<<<<
     If ActiveSheet.Comments.Count = 0 Then
-        Prog__APP.Range("APP_Help_State") = "'Desactivados'"
+        Prog__APP.Range("App_Help_State") = "'Desactivados'"
     Else
-        Prog__APP.Range("APP_Help_State") = "'Activados'"
+        Prog__APP.Range("App_Help_State") = "'Activados'"
     End If
     
     BtnGrabarSiVisible = False
@@ -201,12 +201,12 @@ End Function
 '    Change User --------------------------------------------------------------------------
 '__________________________________________________________________________________________
 Sub GetLbl_User(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Prog__APP.Range("APP_User_Name")
+    LabelVal = Prog__APP.Range("App_User_Name")
 Debug.Print "GetLbl_User", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_CCtxtUser(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = "Cambiar el Usuario (" & Prog__APP.Range("APP_User_Name") & ")"
+    LabelVal = "Cambiar el Usuario (" & Prog__APP.Range("App_User_Name") & ")"
 Debug.Print "GetLbl_CCtxtUser", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -262,7 +262,7 @@ End Sub
 '   OnOff Help (sólo en alguna hoja) ------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_Help_Group(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Prog__APP.Range("APP_Help_State")
+    LabelVal = Prog__APP.Range("App_Help_State")
 Debug.Print "GetLbl_HelpGroup", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ End Sub
 '- Export BDatos --------------------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ExportBDatos(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_BD_Export"), "dd-mmm-yy hh:mm") & " Export"
+    LabelVal = Format(Prog__APP.Range("App_Last_BD_Export"), "dd-mmm-yy hh:mm") & " Export"
 Debug.Print "GetLbl_ExportBDatos", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -315,7 +315,7 @@ End Sub
 '- Import BDatos --------------------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ImportBDatos(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_BD_Import"), "dd-mmm-yy hh:mm") & " Import"
+    LabelVal = Format(Prog__APP.Range("App_Last_BD_Import"), "dd-mmm-yy hh:mm") & " Import"
 Debug.Print "GetLbl_ImportBDatos", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -331,7 +331,7 @@ End Sub
 '- Restituir BDatos -----------------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_RestoreBDatos(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_BD_Restore"), "dd-mmm-yy hh:mm") & " Restore"
+    LabelVal = Format(Prog__APP.Range("App_Last_BD_Restore"), "dd-mmm-yy hh:mm") & " Restore"
 Debug.Print "GetLbl_RestoreBDatos", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -353,7 +353,7 @@ End Sub
 '   Importar LsGes04 x AnoCont a BDatos ---------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_Import_G04_ACont(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_Import"), "dd-mmm hh:mm") & " A.Cont " & Prog__APP.Range("APP_AnoCont")
+    LabelVal = Format(Prog__APP.Range("App_Last_Import"), "dd-mmm hh:mm") & " A.Cont " & Prog__APP.Range("App_AnoCont")
 Debug.Print "GetLbl_Import_G04_ACont", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -369,7 +369,7 @@ End Sub
 '   Importar LSGES04 x CursoAcad, para identificar Recibos de Imp.Adm ---------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_Import_G04_CAcadAnt(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Format(Prog__APP.Range("APP_Last_Import_CAcad"), "dd-mmm hh:mm") & " I.Adm." & vbLf & " C.Acad_Ant " & Prog__APP.Range("APP_C_Acad_Ant")
+    LabelVal = Format(Prog__APP.Range("App_Last_Import_CAcad"), "dd-mmm hh:mm") & " I.Adm." & vbLf & " C.Acad_Ant " & Prog__APP.Range("App_C_Acad_Ant")
 Debug.Print "GetLbl_Import_G04_CAcadAnt", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -391,8 +391,8 @@ End Sub
 '   Importar Informe de LSace06 para las cuotas del INSS ----------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_Import_LSace06(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Prog__APP.Range("APP_C_Acad_Ant") & " " & Format(Prog__APP.Range("APP_Last_LSace06_CAcadAnt"), "dd-mmm hh:mm") & vbLf & _
-               Prog__APP.Range("APP_C_Acad_Pos") & " " & Format(Prog__APP.Range("APP_Last_LSace06_CAcadPos"), "dd-mmm hh:mm")
+    LabelVal = Prog__APP.Range("App_C_Acad_Ant") & " " & Format(Prog__APP.Range("App_Last_LSace06_CAcadAnt"), "dd-mmm hh:mm") & vbLf & _
+               Prog__APP.Range("App_C_Acad_Pos") & " " & Format(Prog__APP.Range("App_Last_LSace06_CAcadPos"), "dd-mmm hh:mm")
 Debug.Print "GetLbl_Import_LSace06", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
@@ -523,10 +523,10 @@ Debug.Print "GetLbl_ReCalculate_ListObj_Sht_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ReCalculate_ListObj_Sht(control As IRibbonControl, ByRef LabelVal)
-    '- Fecha del ultimo calculo: APP_Last_Calc_<hoja>, salvo en Inf_Recibos_TIO, cuya rutina (M_130) la guarda en
-    '  APP_Last_Calc_Inf_Recibos (2026-10-12; antes el boton de esa hoja mostraba siempre "Calc_JIs").
-    Dim Nom_Calc    As String:      Nom_Calc = "APP_Last_Calc_" & ActiveSheet.Name
-    If ActiveSheet.CodeName = Sht__Inf_Recibos_TIO.CodeName Then Nom_Calc = "APP_Last_Calc_Inf_Recibos"
+    '- Fecha del ultimo calculo: App_Last_Calc_<hoja>, salvo en Inf_Recibos_TIO, cuya rutina (M_130) la guarda en
+    '  App_Last_Calc_Inf_Recibos (2026-10-12; antes el boton de esa hoja mostraba siempre "Calc_JIs").
+    Dim Nom_Calc    As String:      Nom_Calc = "App_Last_Calc_" & ActiveSheet.Name
+    If ActiveSheet.CodeName = Sht__Inf_Recibos_TIO.CodeName Then Nom_Calc = "App_Last_Calc_Inf_Recibos"
     If Fnc_Range_Exist(Nom_Calc) Then
         LabelVal = Format(Prog__APP.Range(Nom_Calc), "dd-mmm-yy hh:mm")
     Else
@@ -546,6 +546,15 @@ Debug.Print "OnAct_ReCalculate_ListObj_Sht"
     Call RefreshRibbon                          '- rotulo con la fecha del ultimo calculo
 End Sub
 '------------------------------------------------------------------------------------------
+'- Enviar el Informe de Recibos por correo (grupo Inf_Recibos_Group; Docs/Plan_Mail_Inf_Recibos.md)
+Sub OnAct_Mail_Inf_Recibos(control As IRibbonControl)
+Debug.Print "================== >>> OnAct_Mail_Inf_Recibos"
+    Call Rut_Progreso_Abrir("Enviar el Informe de Recibos por correo")
+    Call Rut_Mail_Inf_Recibos
+    Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
+Debug.Print "================== <<< OnAct_Mail_Inf_Recibos"
+End Sub
+'------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________
 '
 '   Exportar la WorkSheet  ----------------------------------------------------------------
@@ -556,8 +565,8 @@ End Sub
 '- Export Active_WorkSheet ----------------------------------------------------------------
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ExportWorkSheet_Group(control As IRibbonControl, ByRef LabelVal)
-'    LabelVal = Format(Prog__APP.Range("APP_Last_Exp_JIsPPub"), "dd-mmm-yy hh:mm") & " Exp."
-    If Fnc_Range_Exist("APP_Last_Exp_" & ActiveSheet.Name) Then
+'    LabelVal = Format(Prog__APP.Range("App_Last_Exp_JIsPPub"), "dd-mmm-yy hh:mm") & " Exp."
+    If Fnc_Range_Exist("App_Last_Exp_" & ActiveSheet.Name) Then
         LabelVal = "Export " & ActiveSheet.Name
     Else
         LabelVal = "Export WS" & " Exp."
@@ -565,9 +574,9 @@ Sub GetLbl_ExportWorkSheet_Group(control As IRibbonControl, ByRef LabelVal)
 Debug.Print "GetLbl_ExportWorkSheetGroup", LabelVal
 End Sub
 Sub GetLbl_ExportWorkSheet(control As IRibbonControl, ByRef LabelVal)
-'    LabelVal = Format(Prog__APP.Range("APP_Last_Exp_JIsPPub"), "dd-mmm-yy hh:mm") & " Exp."
-    If Fnc_Range_Exist("APP_Last_Exp_" & ActiveSheet.Name) Then
-        LabelVal = Format(Prog__APP.Range("APP_Last_Exp_" & ActiveSheet.Name), "dd-mmm-yy hh:mm") & " Exp."
+'    LabelVal = Format(Prog__APP.Range("App_Last_Exp_JIsPPub"), "dd-mmm-yy hh:mm") & " Exp."
+    If Fnc_Range_Exist("App_Last_Exp_" & ActiveSheet.Name) Then
+        LabelVal = Format(Prog__APP.Range("App_Last_Exp_" & ActiveSheet.Name), "dd-mmm-yy hh:mm") & " Exp."
     Else
         LabelVal = "Export WS" & " Exp."
     End If
@@ -784,12 +793,12 @@ End Sub
 ' ==================================================================================================================================
 
 Sub GetVsbl_ProgButtons(control As IRibbonControl, ByRef Visible)
-    If Prog__APP.Range("APP_User_ID") = "Boss" Then Visible = True Else Visible = False
+    If Prog__APP.Range("App_User_ID") = "Boss" Then Visible = True Else Visible = False
     Debug.Print "GetVsbl_ProgButtons", control.ID, Visible
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetVsbl_TabProgMenu(control As IRibbonControl, ByRef Visible)
-    If Prog__APP.Range("APP_User_ID") = "Boss" Then Visible = True Else Visible = False
+    If Prog__APP.Range("App_User_ID") = "Boss" Then Visible = True Else Visible = False
 Debug.Print "GetVsbl_TabProgMenu", control.ID
 End Sub
 '------------------------------------------------------------------------------------------
@@ -1225,20 +1234,20 @@ End Sub
 '    Año-Cont
 '------------------------------------------------------------------------------------------
 Sub GetText_EditBoxACont(control As IRibbonControl, ByRef returnedVal)
-    returnedVal = Prog__APP.Range("APP_AnoCont")
+    returnedVal = Prog__APP.Range("App_AnoCont")
 Debug.Print "GetText_EditBoxACont", returnedVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub OnChange_EditBoxACont(control As IRibbonControl, ACont As String)
     If Val(ACont) >= 2022 Then
         '--- Activo los valores de los Cursos Académicos ------------------------------------>>>>
-        Prog__APP.Range("APP_C_Acad_Ant") = ACont - 1 & "-" & Right(ACont, 2)
-        Prog__APP.Range("APP_C_Acad_Pos") = ACont & "-" & Right(ACont, 2) + 1
-        Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Ant")
+        Prog__APP.Range("App_C_Acad_Ant") = ACont - 1 & "-" & Right(ACont, 2)
+        Prog__APP.Range("App_C_Acad_Pos") = ACont & "-" & Right(ACont, 2) + 1
+        Prog__APP.Range("App_CursAcad") = Prog__APP.Range("App_C_Acad_Ant")
         SW_C_Acad_Ant = True
         SW_C_Acad_Pos = False
         MyTag = "checkBoxAcad1"
-        Prog__APP.Range("APP_AnoCont") = ACont
+        Prog__APP.Range("App_AnoCont") = ACont
         '------------------------------------------------------------------------------------<<<<
     Else
         MsgBx_Msg = "¡¡¡ Año incorrecto, debe ser mayor que 2021 !!!"
@@ -1254,13 +1263,13 @@ Sub OnAct_checkBoxAcad(control As IRibbonControl, pressed As Boolean)
     If MyTag = "checkBoxAcadAnt" Then
         SW_C_Acad_Ant = True
         SW_C_Acad_Pos = False
-        Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Ant")
+        Prog__APP.Range("App_CursAcad") = Prog__APP.Range("App_C_Acad_Ant")
     Else
         SW_C_Acad_Ant = False
         SW_C_Acad_Pos = True
-        Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Pos")
+        Prog__APP.Range("App_CursAcad") = Prog__APP.Range("App_C_Acad_Pos")
     End If
-'    Wk_TitP_Liquid.Range("Liquid_Tipo_Plan") = Prog__APP.Range("APP_TitP_o_Curs") & " - " & Prog__APP.Range("APP_CursAcad")
+'    Wk_TitP_Liquid.Range("Liquid_Tipo_Plan") = Prog__APP.Range("App_TitP_o_Curs") & " - " & Prog__APP.Range("App_CursAcad")
     Call RefreshRibbon
 Debug.Print "sub OnAct_checkBoxAcad", control.Tag, pressed
 End Sub
@@ -1276,12 +1285,12 @@ Debug.Print "sub GetPressed_checkBoxAcad", control.Tag, ActiveBox
 End Sub
 '---------------- BoxAcadAnt ------------------------------------------------------------------
 Sub GetLbl_checkBoxAcadAnt(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Prog__APP.Range("APP_C_Acad_Ant")
+    LabelVal = Prog__APP.Range("App_C_Acad_Ant")
 Debug.Print "sub GetLbl_checkBoxAcadAnt", LabelVal
 End Sub
 '---------------- BoxAcadPos -------------------------------------------------------------------
 Sub GetLbl_checkBoxAcadPos(control As IRibbonControl, ByRef LabelVal)
-    LabelVal = Prog__APP.Range("APP_C_Acad_Pos")
+    LabelVal = Prog__APP.Range("App_C_Acad_Pos")
 Debug.Print "sub GetLbl_checkBoxAcadPos", LabelVal
 End Sub
 ''''__________________________________________________________________________________________
@@ -1291,15 +1300,15 @@ End Sub
 '''Sub OnAct_checkBoxTipoEP(control As IRibbonControl, pressed As Boolean)
 '''    If MyTag <> control.Tag Then MyTag = control.Tag
 '''    If MyTag = "checkBoxEPTP" Then
-'''        Prog__APP.Range("APP_TitP_o_Curs") = "Tít. Propios"
+'''        Prog__APP.Range("App_TitP_o_Curs") = "Tít. Propios"
 '''        Wk_TitP_Liquid.Name = "Liquid_Tit_Propios"
 '''    Else
-'''        Prog__APP.Range("APP_TitP_o_Curs") = "Cursos<200h"
+'''        Prog__APP.Range("App_TitP_o_Curs") = "Cursos<200h"
 '''        Wk_TitP_Liquid.Name = "Liquid_Cursos200h"
 '''    End If
-''''    Wk_TitP_Liquid.Range("Liquid_Tipo_Plan") = Prog__APP.Range("APP_TitP_o_Curs") & " - " & Prog__APP.Range("APP_CursAcad")
+''''    Wk_TitP_Liquid.Range("Liquid_Tipo_Plan") = Prog__APP.Range("App_TitP_o_Curs") & " - " & Prog__APP.Range("App_CursAcad")
 '''    Call RefreshRibbon
-'''Debug.Print "sub OnAct_checkBoxTipoEP", control.Tag, pressed, control.Tag, Prog__APP.Range("APP_TitP_o_Curs")
+'''Debug.Print "sub OnAct_checkBoxTipoEP", control.Tag, pressed, control.Tag, Prog__APP.Range("App_TitP_o_Curs")
 '''End Sub
 ''''------------- SHOW - Select Tipo de Enseñanza Propia --------------------------------------------
 '''Sub GetPressed_checkBoxTipoEP(control As IRibbonControl, ByRef ActiveBox)
@@ -1401,7 +1410,7 @@ End Sub
         With Prog__Menu_Aux.ListObjects(1).DataBodyRange
             For Cont_Row = 1 To .Rows.Count
                 '- Usuario por elemento completo (2026-10-04; antes InStr, "Rafa" casaba con "RafaG")
-                If Fnc_Lista_Contiene(CStr(.Cells(Cont_Row, Task_Usuario)), CStr(Prog__APP.Range("APP_User_ID").Value)) _
+                If Fnc_Lista_Contiene(CStr(.Cells(Cont_Row, Task_Usuario)), CStr(Prog__APP.Range("App_User_ID").Value)) _
                    And Left(.Cells(Cont_Row, Task_Tarea), 3) = "9_ " Then
                     If Num_Tarea > 1 Then xml = xml & "<menuSeparator  id='Separ" & Num_Tarea & "' />"
                     xml = xml & "<button id='button" & Num_Tarea & "' tag='Task-Row_" & Format(Cont_Row, "00") & _
@@ -1421,8 +1430,8 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
     Dim Pos_Delimitador     As Integer
     Dim Rutinas_Name        As String
     Dim Rut_Name        As String
-    Prog__APP.Range("APP_Task_Index") = Val(Right(control.Tag, 2))
-    Rutinas_Name = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 3)
+    Prog__APP.Range("App_Task_Index") = Val(Right(control.Tag, 2))
+    Rutinas_Name = Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("App_Task_Index"), 3)
     Do       ' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
         Pos_Delimitador = InStr(Rutinas_Name, " + ")
         If Pos_Delimitador < 1 Then ' ------------------ Última o Única Rutina ---------------------
@@ -1433,7 +1442,7 @@ Debug.Print "------------------- >>> OnAction_Dynamic_Task"
         Application.Run Rut_Name
         If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
         Call Rut_Lo_Totales_Mostrar         '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
-        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), 5) = Prog__APP.Range("APP_Task_Inf").Value
+        Prog__Menu_Aux.ListObjects(1).DataBodyRange.Cells(Prog__APP.Range("App_Task_Index"), 5) = Prog__APP.Range("App_Task_Inf").Value
     Loop While Len(Rutinas_Name) > 0
     Application.ScreenUpdating = True
     DoEvents
@@ -1442,5 +1451,3 @@ End Sub
 '<<<<<##########################################################################################<<<<<
 '########## Dynamic-Menú #######################################################################<<<<<
 '<<<<<##########################################################################################<<<<<
-
-

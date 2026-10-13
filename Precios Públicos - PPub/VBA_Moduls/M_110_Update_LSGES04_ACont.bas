@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_110_Update_LSGES04_ACont"
-' Last Rev. 2026-10-12 20:28
+' Last Rev. 2026-10-13 12:44
 'Rev.: 2026-01-22
 '- M_110_Load_LSGES04_ACont -----------------------------------------------------------------------------------------------------------
 Option Explicit
@@ -72,9 +72,9 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     Dim TimeLap2        As Single
     Dim TxT_Progreso    As String
     Dim Arch_New_Name   As String
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
     Application.ScreenUpdating = False
@@ -103,10 +103,10 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
         '- Visualizo el progreso --------
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", _
                                         "Proceso: Importar LSGES04 para extraer Recibos Académicos de TIO y EP. Imp.Adm del Curso " & _
-                                        Prog__APP.Range("APP_C_Acad_Pos") & ".", 0)
+                                        Prog__APP.Range("App_C_Acad_Pos") & ".", 0)
 
         '- Ajuste de la Fecha del Cierro Contable --------------
-'''        Call Rut_AskDate_CierreContable(Range("APP_FechCierreCont"))
+'''        Call Rut_AskDate_CierreContable(Range("App_FechCierreCont"))
         
 'GoTo SaltoAqui
 
@@ -115,12 +115,18 @@ Debug.Print "------------------------- >>> RuT_Update_LSGES04_ACont()"
     '- Import LSGES04 por Año Contable --------------------------------------------------------------------------------
     '- ----------------------------------------------------------------------------------------------------------------------------
     Arch_New_Name = "LSGES04_GE_SinDtos_Año_" & AnoCont & "|LsGes04_AñoCont_" & AnoCont     '- El de siempre o el de Robot_PPub_Fusión
-    Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name, Convertir_En_Ram:=True, NombreRutaRobot:="APP_Ruta_Robot_Ges04_Acont")
+    Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name, Convertir_En_Ram:=True, NombreRutaRobot:="App_Ruta_Robot_Ges04_Acont")
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-    Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
+    '- Fecha de la carpeta de descarga del Robot de la que viene el fichero (2026-10-13): da nombre al adjunto del Informe de
+    '- Recibos (M_135). Vacía si el fichero no está en una carpeta de fecha del Robot, para no dejar la de otra importación.
+    Dim Fecha_Robot     As Variant:         Fecha_Robot = Fnc_Fecha_Carpeta_Robot(Arch_New_Name)
+    Prog__APP.Range("App_Last_Import_Robot_PPub").Value = Fecha_Robot
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Fecha de la carpeta del Robot: " & IIf(IsEmpty(Fecha_Robot), _
+                             "ninguna (el fichero no está en una carpeta de fecha)", Format$(Fecha_Robot, "dd/mm/yyyy")), 0)
     Sht__BD.Range("d2") = "Última Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
-    Sht__BD.Range("b3") = " Tabla Recibos Académicos de TIO y EP. y de Imp.Adm del Año_Contable " & Prog__APP.Range("APP_AnoCont") & _
-                            ", y Cursos: " & Prog__APP.Range("APP_C_Acad_Ant") & " y " & Prog__APP.Range("APP_C_Acad_Pos") & "."
+    Sht__BD.Range("b3") = " Tabla Recibos Académicos de TIO y EP. y de Imp.Adm del Año_Contable " & Prog__APP.Range("App_AnoCont") & _
+                            ", y Cursos: " & Prog__APP.Range("App_C_Acad_Ant") & " y " & Prog__APP.Range("App_C_Acad_Pos") & "."
     
 Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
     'If Not Func_MsgBox_vbYesNo("¿ Borrar Datos por protección de Datos ?") Then GoTo Rut_Lo_Format
@@ -243,7 +249,7 @@ Terminar:
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
     
 Final:
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Sht__BD.Select
     Lo_BD.ShowTotals = True
     Call Rut_WrkSheet_LstObj_LiberarEspacio(Sht__BD)
@@ -261,4 +267,3 @@ Rut_On_Functions
 Debug.Print "------------------------- <<< Sub RuT_Update_LSGES04_ACont()"
 End Sub ' RuT_Importar_LSGES04_GE   --------------------------------------------------------------------------------------------
 '===================================================================================================================================
-

@@ -7,12 +7,12 @@ Además, lo de la sección 7: `M_130`, `M_132`, `M_133` y `Rut_Lo` (`Rut_Names_B
 
 **Etiquetas:** ✅ **Hecho** · 🧪 **Aplicado, falta probarlo en Excel** · ⏳ **Pendiente**
 
-## Estado: ⏳ PLAN CERRADO, SIN EMPEZAR
+## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; pendiente: etiquetas «Prueba: NO/SÍ» del Ribbon y fase 4 (2026-10-13)
 
-- ✅ Configuración de correo (hoja `ConfigMail`) hecha por el usuario y exportada (`Prog__APP_Mail.cls`, sin commitear).
-- 🧪 Sección 7 arreglada el 2026-10-13 en `M_130`, `M_132` y `M_133`, y nueva `Rut_Names_Borrar_Rotos` en `Rut_Lo`
-  (sin commitear). **Falta importarlos en el libro**: comprobado con `olevba` en el guardado de las 00:33, el libro
-  sigue con las versiones anteriores.
+- ✅ Configuración de correo (hoja `ConfigMail`) hecha por el usuario y exportada (`Prog__APP_Mail.cls`).
+- ✅ Sección 7 arreglada el 2026-10-13 en `M_130`, `M_132` y `M_133`, y nueva `Rut_Names_Borrar_Rotos` en `Rut_Lo`.
+  **Importados en el libro**: comprobado con `olevba` en el guardado de las 00:38.
+- ✅ Fase 1: `Rut_Mail_Send.bas` importado en el libro y probado con envío real (ver la fase 1 de la sección 4).
 - ✅ Los 18 nombres rotos, borrados a mano por el usuario (2.2). Comprobado en el guardado de las 00:33: 0 nombres con
   `#REF!` o vínculo externo, y sin vínculos externos.
 
@@ -268,15 +268,132 @@ tienes abierto, al guardar machacaría el cambio (o al revés).
    - ✅ Los cambios de la otra sesión (`M_130`, separadores, `M___RibbonUI`) ya están commiteados (`cd97ee759`,
      `b3c2fb75c`).
    - ✅ Los 18 nombres rotos, borrados.
-   - ⏳ Importar `M_130_Gen_Inf_Recibos`, `M_132_Anadir_Num_JIs_al_Inf`, `M_133_Anadir_Num_JIs_a_BDatos` y `Rut_Lo`
-     (sección 7).
-   - ⏳ `Sw_Test` a VERDADERO para las pruebas.
-1. ⏳ **`Rut_Mail_Send.bas`.** Prueba aislada desde Inmediato, sin adjunto y en modo prueba:
-   `? Fnc_Email_Send("x@ua.es", "Prueba PPub", , "<b>Hola</b>", Msg), Msg`.
-2. ⏳ **`Fnc_Inf_Recibos_A_Xlsx`** (en `M_135`). Generar el `.xlsx` sin enviar y revisarlo: abrirlo en Excel y leerlo con
-   Python (tabla, totales, combinadas, altos, título, leyenda, EURLE, sin formas, sin vínculos y modo de cálculo, ver
-   riesgo 3).
-3. ⏳ **`Rut_Mail_Inf_Recibos`** y los tres callbacks.
+   - ✅ Importados `M_130_Gen_Inf_Recibos`, `M_132_Anadir_Num_JIs_al_Inf`, `M_133_Anadir_Num_JIs_a_BDatos` y `Rut_Lo`
+     (sección 7; `olevba`, guardado de las 00:38).
+   - ⏳ `Sw_Test` a VERDADERO para las pruebas (`Workbook_Open` lo deja en FALSO al abrir el libro).
+1. 🧪 **`Rut_Mail_Send.bas`** (2026-10-13). Lo escrito, respecto a 3.2:
+   - `Fnc_Email_Send(Dest, Asunto, [Adjunto], [CuerpoHTML], [ErrMsg], [DestReal])`: `DestReal` devuelve a quién va el
+     correo de verdad (con `Sw_Test`, `APP_User_Mail`), para el informe. La lista de destinatarios se valida también
+     en modo prueba. Si el adjunto no existe, **no envía** (Certificados avisaba y lo mandaba sin adjunto).
+     `CuerpoHTML` es un fragmento: el motor pone `<html><body>`, la rúbrica (`APP_User_Name`) y la firma.
+   - `Fnc_Valid_Email_Lista` acepta `;` y `,`, quita espacios (también el de no separación), separadores sobrantes y
+     direcciones repetidas.
+   - `Fnc_HTML_Texto` escapa además `&`, `<` y `>`.
+   - Errores: los de JyC/Certificados, y además `0x80040211` con `0x80040217` en la descripción (no inicia sesión:
+     credenciales). Se sabrá en la prueba 5 qué código da Gmail con una contraseña mala.
+   - **Prueba:** la línea de Inmediato que proponía este plan (`? Fnc_Email_Send(..., Msg), Msg`) no compila
+     ("El tipo de argumento ByRef no coincide": en Inmediato `Msg` es `Variant`). En su lugar, `Call Rut_Mail_Probar`
+     (con adjunto, `Call Rut_Mail_Probar(True)`): primero `Fnc_Mail_Probar_Sin_Enviar` (8 listas de direcciones,
+     `Fnc_HTML_Texto` y 2 envíos que no deben salir: sin destinatarios y con un adjunto que no existe) y después un correo al usuario activo con tildes,
+     eñe y euro en el asunto y en el cuerpo.
+   - **Probado por COM** (copia del guardado de las 00:38, instancia de Excel aparte): compila;
+     `Fnc_Mail_Probar_Sin_Enviar` sin fallos; con `SMTP_SERVIDOR` apuntando a `127.0.0.1` en la copia, el envío
+     recorre CDO entero (mensaje, configuración, adjunto) y falla al conectar con el texto de «Sin conexión», con
+     `DestReal` = `a@ua.es;b@ua.es` (lista limpia) y, con `Sw_Test`, `dugarry@ua.es`.
+   - **Primer envío real** (2026-10-13, `Rut_Mail_Probar(True)` en el libro): llegó a `dugarry@ua.es` con el cuerpo,
+     la rúbrica y la firma bien, y la eñe y las tildes del asunto bien, pero **el € del asunto llegó como `?`**.
+     Causa, vista en el MIME que genera CDO (`GetStream`, sin enviar): CDO usa por defecto `iso-8859-1`, que no tiene
+     el euro, y el HTML iba sin juego de caracteres declarado (Gmail lo adivinó). Con `.BodyPart.Charset = "utf-8"`
+     antes del asunto y `.HTMLBodyPart.Charset = "utf-8"` tras el cuerpo, asunto, texto y HTML salen en `utf-8` y se
+     decodifican bien. Aplicado (11:26) y probado por COM. JyC y Certificados tienen lo mismo (sin tocar).
+   - ✅ **Segundo envío real** (reimportado, `Rut_Mail_Probar(True)`): asunto con su €, cuerpo, rúbrica, firma y el
+     adjunto `PPub_Prueba_Correo.txt`, todo bien. **Fase 1 cerrada.**
+2. 🧪 **`Fnc_Inf_Recibos_A_Xlsx([ErrMsg])`** (en `M_135_Mail_Inf_Recibos`, nuevo, 2026-10-13), y la prueba
+   `Rut_Inf_Recibos_Probar_Xlsx` (genera el `.xlsx` sin enviarlo y lo señala en el Explorador). Respecto a 3.1:
+   - El filtro de la tabla se quita desde la tabla (`LoN.AutoFilter.ShowAllData`, como `Rut_Lo_Filtros_Quitar`): con
+     `WsN.ShowAllData` daba **error 1004** en la copia de una hoja filtrada.
+   - **Altos de fila:** casi todas las filas tienen alto automático (`M_130` hace `AutoFit`) y en el libro nuevo Excel
+     los recalcula a su manera (filas de 15,5 a 30). Se copian los de la hoja (los que se ven en PPub); las filas
+     ocultas por un filtro dan alto 0 y se quedan con el suyo.
+   - **Nombres:** Excel copiaba con la hoja `RibbonPtr` (constante de PPub). Se borra todo nombre que no apunte a un
+     rango de la propia copia (también los `#REF!` y los de otros libros).
+   - Si la hoja está oculta, se muestra un momento para copiarla y se vuelve a ocultar. Se vuelve a la hoja activa.
+     `Sw_WB_Deactivate` recupera su valor anterior (no se fuerza a VERDADERO).
+   - **Probado por COM** (copia del guardado de las 00:38): (A) la hoja tal cual y (B) muy oculta, con E:R ocultas y
+     la tabla filtrada. Los dos `.xlsx`: una hoja, tabla `B4:Z20` con 25 columnas, totales y botones de filtro sin
+     filtro, **0 celdas distintas** de la hoja en B:Z (valor y fórmula), combinadas iguales (sin `AA2:AJ2`), anchos
+     iguales, fila 1 sin `x`, sin formas, sin vínculos, sin nombres, sin macros, `calcPr` **sin** `calcMode` (=
+     Automático). La hoja origen, igual que antes (oculta, columnas ocultas, filtro, hoja activa), contador de
+     `Rut_Off_Functions` a 0. Riesgo 3: pasar PPub a Automático un momento cuesta 0,01 s (un `CalculateFull`, 0,04 s).
+   - **Decisiones del usuario (2026-10-13):** la fila 1, que queda vacía, con **alto normal** (`StandardHeight`; en la
+     hoja mide 59 puntos), y el adjunto al **100 % de zoom** (la hoja está al 55 %). Aplicado y probado por COM.
+   - `D2` dirá «cierre» cuando se vuelva a calcular el informe con el `M_130` nuevo (en el guardado de las 00:38 aún
+     decía «cierro»).
+   - **Nombre del adjunto (decisión del usuario, 2026-10-13):** `Inf_Recibos_TIO (datos del AAAA-MM-DD).xlsx`, con la
+     **fecha de la carpeta de descarga del Robot**, que se guarda en `App_Last_Import_Robot_PPub` (`ConfigAPP!B23`,
+     creado por el usuario). La anota `M_110` al importar el LSGES04 del año contable: `Fnc_Fecha_Carpeta_Robot`
+     (`Rut_Lo_Import`, junto a `Fnc_Ruta_Inicial_Robot` y con su misma regla) saca la fecha de la carpeta que contiene
+     el fichero elegido (`…\2026\2026-10-02\LsGes04_AñoCont_2026_(2026-10-02).xlsx`); si no es una carpeta de fecha,
+     deja la celda vacía y el adjunto se llama `Inf_Recibos_TIO.xlsx`. `M_210`, `M_310` y `M_120` no la tocan.
+     Probado por COM: el proyecto compila; rutas del Robot, de la Red Nexe (`/`), «2026-10-02 bis», sin carpeta de
+     fecha y «2026-02-30»; y el nombre con la celda con fecha, número de serie, texto, vacía y sin el nombre.
+   - **Falta:** importar `M_135_Mail_Inf_Recibos`, `M_110_Update_LSGES04_ACont` y `Rut_Lo_Import`, y que el usuario
+     genere y revise el `.xlsx` en su Excel.
+3. 🧪 **`Rut_Mail_Inf_Recibos`** (en `M_135`) y el callback **`OnAct_Mail_Inf_Recibos`** (`M___RibbonUI`, tras el del
+   ábaco) (2026-10-13):
+   - El callback: `Rut_Progreso_Abrir` → `Rut_Mail_Inf_Recibos` → `Rut_Progreso_Cerrar(control.Tag, True)`.
+   - La rutina: valida `App_Mail_Inf_Recibos` (`Fnc_Valid_Email_Lista`); pregunta con `Func_MsgBox_vbYesNo`
+     (último cálculo, cierre, descarga de los recibos, destinatarios y, con `Sw_Test`, «MODO PRUEBA: irá solo a
+     `App_User_Mail`»); genera el adjunto; asunto `PPub - Informe de Recibos, año contable 2026, cierre dd/mm/aaaa`;
+     cuerpo HTML al estilo de JyC `M_720` («Hola», qué lleva el informe, EURLE aparte, fechas de descarga, cierre y
+     último cálculo; sin totales); envía; borra el temporal salvo con `Sw_Test`; todo al informe del formulario. Los
+     fallos, al informe y en un `MsgBox` por delante del formulario (`Rut_Mail_Inf_Recibos_Aviso`).
+   - **Los callbacks de JI's ya no son de este plan:** según `Docs/Plan_Botones_JIs_Ribbon.md` (otra sesión, mismo
+     día), «Añadir JI's de BD al Inf.» lo hace `M_130` al calcular y queda un solo botón, «JI's del Inf. a BD», con su
+     callback en ese plan. El grupo «Informe de Recibos» (fase 4) llevará el botón de correo y ese.
+   - **`D2` del informe (petición del usuario):** `M_130` añade una tercera línea, `"Descarga de los Recibos del " &
+     Prog__APP.Range("App_Last_Import_Robot_PPub")`. La fila 2 ya mide 63,75 (la amplió el usuario): caben las tres.
+   - **Probado por COM** (copia del guardado de las 12:44, con los 6 módulos del repo: `Rut_Lo_Import`, `M_110`,
+     `M_130`, `M___RibbonUI`, `Rut_Mail_Send` y `M_135`): el proyecto compila; `D2` sale con sus tres líneas; y
+     `Rut_Mail_Inf_Recibos` de principio a fin con y sin `Sw_Test` (en la copia: pregunta respondida «Sí», sin
+     formulario, `MsgBox` a Inmediato y servidor `127.0.0.1`): pregunta, informe, adjunto `Inf_Recibos_TIO (datos del
+     2026-10-02).xlsx` (con `D2` de tres líneas), fallo «Sin conexión» y, con `Sw_Test`, el adjunto conservado.
+     **Falta:** el envío real desde el botón (fase 4) o desde Inmediato.
+   - ⚠️ **Envío real por error (2026-10-13, en la primera prueba del usuario desde Inmediato):** el informe llegó a
+     `felipe.martinez@…` (asunto sin «[PRUEBA]») porque `Sw_Test` estaba en FALSO. El usuario lo creía activo: en el
+     Ribbon se veía el botón **«Prueba ON»**, que es el que se ve con la prueba **apagada** y significa «pulsa para
+     activarla» (`BtnSW_PruebaON`, `getVisible` = `Not Sw_Test`; con la prueba encendida se ve «Prueba OFF»). El motor
+     hizo lo correcto; la pregunta no avisaba de que el envío era real. Arreglos (decisión del usuario):
+     - ✅ **La pregunta** (en el repo, probada por COM, falta importarla): con un envío real empieza por
+       «¡ ENVÍO REAL !   Va a:  …», con icono de aviso y **«No» por defecto** (`vbDefaultButton2`: un Intro sin mirar no
+       envía nada); con `Sw_Test`, «MODO PRUEBA (Sw_Test): irá solo a dugarry@ua.es (no a …)». Ya no usa
+       `Func_MsgBox_vbYesNo` (que no tiene botón por defecto). El informe del formulario anota «Envío real a …» o «Modo
+       prueba…». (El ⚠ no cabe: el `MsgBox` de VBA solo muestra caracteres de Windows-1252.)
+     - ⏳ **Las etiquetas del Ribbon**, que digan el estado: `BtnSW_PruebaON` → **«Prueba: NO»** y `BtnSW_PruebaOFF` →
+       **«Prueba: SÍ»** (solo el `label`; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya
+       describen bien estado y acción). Pendiente: el usuario guarda y cierra Excel y confirma que no tiene el
+       `customUI14.xml` abierto en el Custom UI Editor; entonces copia del libro en `CopiaSeguridad\`, cambio de las dos
+       etiquetas en el zip, verificación de que el resto queda idéntico y aviso al usuario.
+   - 🧪 **Copia en la carpeta de red** (petición del usuario, 2026-10-13, escrita desde la sesión de
+     `Docs/Plan_Botones_JIs_Ribbon.md`):
+     - **Dónde:** `App_Ruta_Inf_Recibos`, en `ConfigAPP!C10`; `App_RutaRed_Inf_Recibos` apunta a la misma celda. La
+       celda guarda la ruta **sin unidad** (`\Espai_ServConta\_Unidad_Tesorería\Tesoreria_Felipe\Aa_TESORERIA_FELIPE\DOCUMENTOS DUGARRY`),
+       como `App_RutaRed_Robot_PPub`.
+     - **Ruta completa:** `Fnc_Inf_Recibos_Carpeta_Red` le pone delante la unidad de red del usuario
+       (`App_User_Unid_Red`, que `Form_Usuario` cambia con el teletrabajo; en el trabajo, `Y:`, que es Nexe por
+       WebDAV). Una ruta completa (`Y:\…`, `\\servidor\…`) se usa tal cual, y una de la Red Nexe (`https://…`) pasa por
+       `Fnc_Format_Ruta` y `Fnc_URL_Decodificar`.
+     - **Pregunta:** una propia, después de la del envío: «¿ Copiar también el informe en la carpeta de red ?», con la
+       carpeta y el nombre del fichero.
+       - Si ya hay uno con ese nombre, la pregunta lo dice («se sustituirá»).
+       - Con `Sw_Test`, avisa de que la carpeta es la de verdad, y «No» es el botón por defecto.
+       - Si la carpeta no se encuentra o falta la ruta o la unidad, pregunta si se envía el correo de todos modos.
+     - **La copia:** `FileCopy` del `.xlsx` de `%TEMP%`, antes del envío. Si falla, avisa por delante del formulario
+       (con el error 70, «¿ lo tiene alguien abierto ?») y el correo se envía igual.
+     - **Nombre:** el mismo que el adjunto, `Inf_Recibos_TIO (datos del AAAA-MM-DD).xlsx`, ahora en
+       `Fnc_Inf_Recibos_Nombre`, que usa también `Fnc_Inf_Recibos_A_Xlsx`. Nunca lleva la hora detrás, aunque la lleve
+       el temporal.
+     - **Probado por COM** (copia del guardado de las 13:23, preguntas contestadas por código, envío simulado: no
+       salió ningún correo). Salieron como se esperaba los 9 casos:
+       - copia en una carpeta de prueba;
+       - repetida (se sustituye);
+       - destino de solo lectura (error 75, aviso, el correo sale igual);
+       - «No» a copiar;
+       - «No» al envío;
+       - carpeta inexistente, con «No» y con «Sí» a enviar de todos modos;
+       - `C10` vacía;
+       - la ruta real de `C10`: `Y:\Espai_ServConta\…\DOCUMENTOS DUGARRY` existe y se pregunta bien. Se contestó «No»:
+         no se escribió nada en Nexe.
 4. ⏳ **Ribbon:** aviso → XML → aviso; filas en `Lo_RibbonUI`; volcado y validación; borrar las dos formas.
 5. ⏳ **Pruebas** (sección 5), en los dos ordenadores.
 6. ⏳ **Documentación:** `CLAUDE.md` del proyecto (motor de correo, `ConfigMail`, `M_135`, botones de JIs) y una línea
@@ -301,6 +418,9 @@ Con `Sw_Test` = VERDADERO (el correo va a `APP_User_Mail` con «[PRUEBA]»):
 | 8 | Después de cada caso | La hoja origen igual que antes, el libro sin vínculos nuevos, contador de `Rut_Off_Functions` a 0 (`? Fnc_Get_NestLevel()`) |
 | 9 | Con `Sw_Test` = FALSO | Llega a los destinatarios reales y el temporal ya no está en `%TEMP%` |
 | 10 | Botones de JIs | Hacen lo mismo que las formas (también la pregunta de EP de `M_132`), solo se ven en `Inf_Recibos_TIO` |
+| 11 | «Sí» a copiar en la carpeta de red | El `.xlsx` queda en `App_Ruta_Inf_Recibos` (unidad del usuario + `C10`) con el nombre del adjunto, y el informe del formulario lo dice |
+| 12 | Repetir el envío | La pregunta avisa de que el fichero de la red se sustituirá |
+| 13 | El fichero de la red abierto por otro (o la unidad desconectada) | Aviso por delante del formulario; el correo se envía igual (desconectada: pregunta si enviarlo de todos modos) |
 
 ## 6. Decisiones del usuario (2026-10-12)
 
