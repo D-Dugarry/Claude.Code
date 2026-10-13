@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-10-13 12:01
+' Last Rev. 2026-10-13 13:18
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -505,7 +505,8 @@ Finalizar:
     Call Rut_Inf_Recibos_Traza(Paso, "anotar la fecha del cálculo", T_Paso)
     Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Sht_Inf.Calculate
-    Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierre contable: " & Prog__APP.Range("APP_FechCierreCont")
+    Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierre contable: " & Prog__APP.Range("APP_FechCierreCont") & _
+                          vbLf & "Descarga de los Recibos del " & Prog__APP.Range("App_Last_Import_Robot_PPub")   '- fecha de la carpeta del Robot (M_110), 2026-10-13
     Sht_Inf.Range("b2") = "Informe Recibos " & APP_AnoCont       '- titulo de B2:C2 (combinadas: se escribe en la ancla, B2)
     Sht_Inf.Range("d2").Select
     Prog__APP.Range("APP_Last_Calc_" & Nom_Inf) = Format(Now(), "dd-mmm-yy hh:mm")
