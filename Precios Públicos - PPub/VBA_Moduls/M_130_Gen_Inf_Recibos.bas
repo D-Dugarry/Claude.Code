@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-10-13 00:20
+' Last Rev. 2026-10-13 12:01
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -9,6 +9,8 @@ Option Explicit
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
     '- Las sumas de BDatos se hacen en memoria (Rut_Inf_Recibos_Sumas), sin ordenar BDatos (2026-10-12).
+    '- Los JI's de BDatos van al informe en esa misma pasada (2026-10-13; antes los ponía M_132, con la forma
+    '  «Añadir JI's de BD al Inf.»). BDatos queda protegida como estaba (Rut_Prot_Save/Rut_Prot_Restore).
 
 '- Índices del tercer índice de Sumas(tipo de recibo, concepto, Sum_*), que rellena Rut_Inf_Recibos_Sumas ------------------------
 Private Const Sum_Tot_Emi       As Long = 1     '- Imp.Rec. de los emitidos
@@ -27,6 +29,11 @@ Private Const Sum_CobAdm_Ant    As Long = 13    '- Rec_Imp_Adm cobrado en el año
 Private Const Sum_CobAdm_Pos    As Long = 14    '- Rec_Imp_Adm cobrado en el año contable, curso Pos
 Private Const Sum_N             As Long = 14
 
+'- JI's y AD's (2026-10-13): las 6 columnas van seguidas y en el mismo orden en BDatos (BD_JI_Emi_Adm..BD_JI_443_Acad) y en
+'  el informe (InfRec_JI_Emi_Adm..InfRec_JI_443_Acad). JI_Sin_Num: hay recibos de ese tipo y concepto, pero ninguno tiene JI.
+Public Const JI_N_Col          As Long = 6
+Public Const JI_Sin_Num        As String = "·-·"
+
 ' ==================================================================================================================================
 Sub Rut_Recalcular_Tabla_Inf_Recibos()
 ' ==================================================================================================================================
@@ -37,6 +44,8 @@ Debug.Print "Rut_Recalcular_Tabla_Inf_Recibos"
     Dim T_Paso                  As Double:      T_Paso = T_Ini
     Dim Msg_Error               As String
     Dim Off_Hecho               As Boolean
+    Dim Prot_BD                 As T_Prot_Estado    '- protección de BDatos: Rut_Prot_Save al empezar, Rut_Prot_Restore en Fin
+    Dim Prot_Hecho              As Boolean
     On Error GoTo Fin
 
     Dim ImpEmiCursAnt           As Currency
@@ -72,6 +81,8 @@ Dim APP_AcadPos     As String:          APP_AcadPos = Prog__APP.Range("APP_C_Aca
 '  criterio de SUMIFS, que VBA pasa en formato americano: un cierre del 30/06 daba "<01/07/aaaa" = 7 de enero.
 Dim Lim_Cierre      As Long:            Lim_Cierre = CLng(Int(DateAdd("d", 1, Prog__APP.Range("APP_FechCierreCont"))))
 Dim Sumas()         As Double                                   '- (tipo de recibo, concepto, Sum_*): Rut_Inf_Recibos_Sumas
+Dim JIs()           As String                                   '- (tipo de recibo, concepto, 1 To JI_N_Col): Rut_Inf_Recibos_Sumas
+Dim K_JI            As Long
 Dim F_Concept       As Integer
 Dim F_Tp_Rec        As Integer
 
@@ -96,7 +107,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     H_Inicio = Timer                ' Para Saber el tiempo de proceso
     
     Sht__BD.Visible = xlSheetVisible
-    Sht__BD.Unprotect
+    Call Rut_Prot_Save(Sht__BD, Prot_BD):     Prot_Hecho = True     '- la desprotege; en Fin, protegida como estaba (antes se quedaba sin proteger)
     Prog_Concept.Visible = xlSheetHidden
     Prog_TipoRec.Visible = xlSheetHidden
     Sht_Inf.Visible = xlSheetVisible
@@ -111,8 +122,8 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     Call Rut_Lo_Sort(Lo_Concept, 1, xlAscending, True)          '- Ordeno por el número de Aplicación-Concepto 1303, 1310, 1311...
     '- BDatos ya no se ordena por Tipo_Rec y Concepto (2026-10-12; unos 7 s): las sumas no dependen del orden, y los módulos que
     '  necesitan un orden lo ponen ellos (limpiando antes los criterios). El orden del informe lo da la ordenación de Lo_Inf.
-    Call Rut_Inf_Recibos_Traza(Paso, "sumar los importes de BDatos", T_Paso)
-    Call Rut_Inf_Recibos_Sumas(Lo_BD, Lo_Tipo_Rec, Lo_Concept, Lim_Cierre, APP_AcadPos, APP_AnoCont, Sumas)
+    Call Rut_Inf_Recibos_Traza(Paso, "sumar los importes y juntar los JI's de BDatos", T_Paso)
+    Call Rut_Inf_Recibos_Sumas(Lo_BD, Lo_Tipo_Rec, Lo_Concept, Lim_Cierre, APP_AcadPos, APP_AnoCont, Sumas, JIs)
     
     Sht_Inf.Select
     
@@ -338,6 +349,12 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             End If
             
             
+            '- JI's y AD's de los recibos de BDatos (2026-10-13; antes los ponía M_132): los distintos, separados por ", ";
+            '  JI_Sin_Num si hay recibos y ninguno tiene; vacía si no hay recibos de ese tipo y concepto.
+            For K_JI = 1 To JI_N_Col
+                If Len(JIs(F_Tp_Rec, F_Concept, K_JI)) > 0 Then RwJI.Range(InfRec_JI_Emi_Adm + K_JI - 1) = JIs(F_Tp_Rec, F_Concept, K_JI)
+            Next K_JI
+            
             If WorksheetFunction.IsEven(F_Tp_Rec) Then             '- IsEven = Es Par
                 RwJI.Range.Interior.ColorIndex = 19
             Else
@@ -511,6 +528,7 @@ Fin:
         Call Rut_Lo_Filtros_Quitar(Lo_Inf)
         Call Rut_Lo_Totales_Mostrar                 '- las celdas de encima de BDatos leen su fila de totales
     End If
+    If Prot_Hecho Then Call Rut_Prot_Restore(Sht__BD, Prot_BD, True)    '- después de Rut_Lo_Totales_Mostrar, que necesita BDatos sin proteger
     Application.DisplayAlerts = True
     On Error GoTo 0
     Call Rut_Inf_Recibos_Traza(Paso, "restaurar el estado de Excel (Rut_On_Functions)", T_Paso)
@@ -535,10 +553,16 @@ End Sub     '- Rut_Recalcular_Tabla_Inf_Recibos
 '   - Por curso: C_Acad igual al curso Pos, o distinto (vacías incluidas) para el Ant. Cobrado en el año contable: ACont_Cob igual
 '     al año y F_Emi anterior a Lim (sin mirar F_Cob ni que Imp.Cob. sea > 0, como antes).
 '   - Solo suman los números; textos, vacías y errores no cuentan, como en SUMIFS.
+'  En la misma pasada, JIs(tipo de recibo, concepto, 1 To JI_N_Col) junta los JI's de BDatos (2026-10-13; antes M_132 filtraba
+'  BDatos una vez por fila del informe, con «=» en Tipo_Rec y en Concepto), con sus mismas reglas:
+'   - Tipo_Rec IGUAL al tipo (sin distinguir mayúsculas), no que lo contenga; sin mirar fechas ni importes.
+'   - Los valores distintos de cada columna (.Value, como Celda.Value), en el orden de BDatos, separados por ", ".
+'   - JI_Sin_Num si hay recibos y ninguno tiene dato; vacío si no hay recibos. No cuentan como dato los vacíos, los
+'     blancos, los errores ni JI_Sin_Num (Fnc_JI_Con_Dato).
 ' ==================================================================================================================================
 Private Sub Rut_Inf_Recibos_Sumas(Lo_BD As ListObject, Lo_Tipo_Rec As ListObject, Lo_Concept As ListObject, _
                                   ByVal Lim As Double, ByVal C_Acad_Pos As String, ByVal AnoCont As String, _
-                                  Sumas() As Double)
+                                  Sumas() As Double, JIs() As String)
 ' ----------------------------------------------------------------------------------------------------------------------------------
     Dim T           As T_TablaRam
     Dim N_Tp        As Long:        N_Tp = Lo_Tipo_Rec.ListRows.Count
@@ -554,9 +578,17 @@ Private Sub Rut_Inf_Recibos_Sumas(Lo_BD As ListObject, Lo_Tipo_Rec As ListObject
     Dim FEmi_OK     As Boolean, Emi_OK As Boolean, Cob_OK As Boolean, ACont_OK As Boolean
     Dim Es_Pos      As Boolean, Es_Ant As Boolean
     Dim Imp_Rec     As Double, Imp_Cob As Double, Imp_INSS As Double, Imp_Adm As Double
+    Dim Datos_JI    As Variant                      '- (fila, 1 To JI_N_Col): las columnas de JI's de BDatos
+    Dim Dic_JI()    As Object                       '- (tipo, concepto, columna): JI's distintos
+    Dim N_Rec()     As Long                         '- (tipo, concepto): recibos con ese tipo IGUAL y ese concepto
+    Dim V_JI        As Variant
+    Dim Dic         As Object
 
     If N_Tp = 0 Or N_Cp = 0 Then Exit Sub
     ReDim Sumas(1 To N_Tp, 1 To N_Cp, 1 To Sum_N)
+    ReDim JIs(1 To N_Tp, 1 To N_Cp, 1 To JI_N_Col)
+    ReDim Dic_JI(1 To N_Tp, 1 To N_Cp, 1 To JI_N_Col)
+    ReDim N_Rec(1 To N_Tp, 1 To N_Cp)
     ReDim Tipos(1 To N_Tp)
     ReDim Alias_Cp(1 To N_Cp)
     For Tp = 1 To N_Tp
@@ -578,6 +610,7 @@ Private Sub Rut_Inf_Recibos_Sumas(Lo_BD As ListObject, Lo_Tipo_Rec As ListObject
 
     Call Rut_TablaRam_Cargar(T, Lo_BD, Array(BD_ACont_Cob, BD_C_Acad, BD_FEmi, BD_FCob, BD_ImpRec, BD_ImpCob, _
                                              BD_Rec_Imp_Adm, BD_Rec_Imp_INSS, BD_Concepto, BD_Tipo_Rec), True)
+    If T.NumFilas > 0 Then Datos_JI = Lo_BD.ListColumns(BD_JI_Emi_Adm).DataBodyRange.Resize(, JI_N_Col).Value
     For Fila = 1 To T.NumFilas
         Cp = 0
         V = T.Datos(Fila, BD_Concepto)
@@ -638,20 +671,56 @@ Private Sub Rut_Inf_Recibos_Sumas(Lo_BD As ListObject, Lo_Tipo_Rec As ListObject
                         End If
                     End If
                 End If
+                If StrComp(Tip, Tipos(Tp), vbTextCompare) = 0 Then      '- JI's: tipo IGUAL, sin mirar fechas ni importes
+                    N_Rec(Tp, Cp) = N_Rec(Tp, Cp) + 1
+                    For K = 1 To JI_N_Col
+                        V_JI = Datos_JI(Fila, K)
+                        If Fnc_JI_Con_Dato(V_JI) Then
+                            If Dic_JI(Tp, Cp, K) Is Nothing Then Set Dic_JI(Tp, Cp, K) = CreateObject("Scripting.Dictionary")
+                            Set Dic = Dic_JI(Tp, Cp, K)
+                            Dic(V_JI) = True                         '- valores distintos, en el orden de BDatos
+                        End If
+                    Next K
+                End If
             Next Tp
         End If
     Next Fila
 
-    For Cp = 1 To N_Cp                              '- conceptos repetidos: las sumas del primero
+    For Tp = 1 To N_Tp                              '- JI's: los distintos, separados por ", "; JI_Sin_Num si hay recibos sin ninguno
+        For Cp = 1 To N_Cp
+            For K = 1 To JI_N_Col
+                If Not Dic_JI(Tp, Cp, K) Is Nothing Then
+                    JIs(Tp, Cp, K) = Join(Dic_JI(Tp, Cp, K).Keys, ", ")
+                ElseIf N_Rec(Tp, Cp) > 0 Then
+                    JIs(Tp, Cp, K) = JI_Sin_Num
+                End If
+            Next K
+        Next Cp
+    Next Tp
+
+    For Cp = 1 To N_Cp                              '- conceptos repetidos: las sumas y los JI's del primero
         If Alias_Cp(Cp) <> Cp Then
             For Tp = 1 To N_Tp
                 For K = 1 To Sum_N
                     Sumas(Tp, Cp, K) = Sumas(Tp, Alias_Cp(Cp), K)
                 Next K
+                For K = 1 To JI_N_Col
+                    JIs(Tp, Cp, K) = JIs(Tp, Alias_Cp(Cp), K)
+                Next K
             Next Tp
         End If
     Next Cp
 End Sub     '- Rut_Inf_Recibos_Sumas
+' ----------------------------------------------------------------------------------------------------------------------------------
+'- Un valor de una columna de JI's cuenta como dato si no está vacío ni en blanco, no es un error y no es JI_Sin_Num
+'  (2026-10-13; lo usan Rut_Inf_Recibos_Sumas y M_133).
+Public Function Fnc_JI_Con_Dato(ByVal V As Variant) As Boolean
+    If IsEmpty(V) Or IsError(V) Then Exit Function
+    If VarType(V) = vbString Then
+        If Trim$(V) = "" Or V = JI_Sin_Num Then Exit Function
+    End If
+    Fnc_JI_Con_Dato = True
+End Function
 ' ----------------------------------------------------------------------------------------------------------------------------------
 '- "1310.01" o "1303": solo cifras y como mucho un punto (un número como lo lee SUMIFS llamado desde VBA)
 Private Function Fnc_Es_Numero_Punto(ByVal Txt As String) As Boolean
