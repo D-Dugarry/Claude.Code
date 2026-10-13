@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-04 21:08
+' Last Rev. 2026-10-13 12:28
 
 Option Explicit
 
@@ -86,22 +86,22 @@ End Sub     ' <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_Activate()
 Debug.Print "Sub UserForm_Activate() - Form_menu"
-    Me.Tbx_AnoContable = Prog__APP.Range("APP_AnoCont")
-    Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_C_Acad_Ant")
-    Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_C_Acad_Pos")
+    Me.Tbx_AnoContable = Prog__APP.Range("App_AnoCont")
+    Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("App_C_Acad_Ant")
+    Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("App_C_Acad_Pos")
     
     Me.Lb_SW_Test.Visible = Prog__APP_Switch.Range("Sw_Test")
     Me.Lb_SW_Boss.Visible = Prog__APP_Switch.Range("Sw_Boss")
     Me.Lb_SW_WB_Deactivate.Visible = Prog__APP_Switch.Range("Sw_WB_Deactivate")
     Me.Lb_SW_DelRegNeg.Visible = Prog__APP_Switch.Range("Sw_DelRegNeg")
     
-    If Prog__APP.Range("APP_CursAcad") = Prog__APP.Range("APP_C_Acad_Ant") Then
+    If Prog__APP.Range("App_CursAcad") = Prog__APP.Range("App_C_Acad_Ant") Then
         Me.FrOpBt_CAcadAnt.Value = True
     Else
         Me.FrOpBt_CAcadPos.Value = True
     End If
 
-'    If Prog__APP.Range("APP_TitP_o_Curs") = "Tít. Propios" Then
+'    If Prog__APP.Range("App_TitP_o_Curs") = "Tít. Propios" Then
 '        Me.FrOpBt_TitP.Value = True
 '    Else
 '        Me.FrOpBt_Curs.Value = True
@@ -121,9 +121,9 @@ Debug.Print "Sub UserForm_Activate() - Form_menu"
         Me.Frame_Select_Tipo_EP.Visible = False
     End If
     
-    Me.Tbx_UserName = Prog__APP.Range("APP_User_Name")
-    Me.Tbx_UserExt = Prog__APP.Range("APP_User_Ext")
-    Me.Tbx_Unidad_NEXE = Prog__APP.Range("APP_User_Unid_Red") & ":"
+    Me.Tbx_UserName = Prog__APP.Range("App_User_Name")
+    Me.Tbx_UserExt = Prog__APP.Range("App_User_Ext")
+    Me.Tbx_Unidad_NEXE = Prog__APP.Range("App_User_Unid_Red") & ":"
     
     Me.Lb_Fondo_Inf.BackColor = RGB(255, 222, 255)          '- Rosa Pink   RGB(255, 224, 192)
     Me.Lb_Fondo_Tit_Inf.BackColor = RGB(255, 224, 192)     '- Rosa Pink
@@ -135,16 +135,16 @@ End Sub     ' UserForm_Activate    <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ' ------------------------------------------------------------------------------------------------------
 Sub Tbx_AnoContable_AfterUpdate()
     If Me.Tbx_AnoContable >= 2022 Then
-        Prog__APP.Range("APP_AnoCont") = Me.Tbx_AnoContable
+        Prog__APP.Range("App_AnoCont") = Me.Tbx_AnoContable
         Me.FrOpBt_CAcadAnt.Value = True
-        Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("APP_AnoCont") - 1 & "-" & Right(Prog__APP.Range("APP_AnoCont"), 2)
-        Prog__APP.Range("APP_CursAcad") = Me.FrOpBt_CAcadAnt.Caption
-        Prog__APP.Range("APP_C_Acad_Ant") = Me.FrOpBt_CAcadAnt.Caption
-        Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("APP_AnoCont") & "-" & Right(Prog__APP.Range("APP_AnoCont"), 2) + 1
-        Prog__APP.Range("APP_C_Acad_Pos") = Me.FrOpBt_CAcadPos.Caption
+        Me.FrOpBt_CAcadAnt.Caption = Prog__APP.Range("App_AnoCont") - 1 & "-" & Right(Prog__APP.Range("App_AnoCont"), 2)
+        Prog__APP.Range("App_CursAcad") = Me.FrOpBt_CAcadAnt.Caption
+        Prog__APP.Range("App_C_Acad_Ant") = Me.FrOpBt_CAcadAnt.Caption
+        Me.FrOpBt_CAcadPos.Caption = Prog__APP.Range("App_AnoCont") & "-" & Right(Prog__APP.Range("App_AnoCont"), 2) + 1
+        Prog__APP.Range("App_C_Acad_Pos") = Me.FrOpBt_CAcadPos.Caption
     Else
         MsgBox "¡¡¡ Año incorrecto, debe ser mayor que 2021 !!!", vbOKOnly, "Proceso: Procedimiento de Liquidación"
-        Me.Tbx_AnoContable = Prog__APP.Range("APP_AnoCont")
+        Me.Tbx_AnoContable = Prog__APP.Range("App_AnoCont")
         Me.Tbx_AnoContable.SetFocus
     End If
 End Sub
@@ -158,7 +158,7 @@ Dim Nombre_Rut          As String
 Dim Task_NotInterno     As Boolean
 Dim Users_Allowed       As Boolean
 Dim SheetBtn_OK         As Boolean
-Dim Usuario_ID          As String:      Usuario_ID = UCase(Prog__APP.Range("APP_User_ID"))
+Dim Usuario_ID          As String:      Usuario_ID = UCase(Prog__APP.Range("App_User_ID"))
 Dim Rng_SW_Boss          As Range:      Set Rng_SW_Boss = Prog__APP_Switch.Range("Sw_Boss")
 
 
@@ -203,7 +203,7 @@ Sub Btn_Ejec_Tarea_Click()
     Dim ImagenName          As String
         ImagenName = Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Imagen)
         
-    Prog__APP.Range("APP_Task_Index") = TaskIndice
+    Prog__APP.Range("App_Task_Index") = TaskIndice
     Me.Lb_Fondo_Inf.BackColor = RGB(255, 222, 255)          '- Rosa Pink   RGB(255, 224, 192)
     Me.Lb_Fondo_Tit_Inf.BackColor = RGB(255, 224, 192)     '- Rosa Pink
     Me.Lb_Tit_Informe.Caption = "Tarea en Proceso: " & Lo_Tareas.DataBodyRange.Cells(TaskIndice, Task_Tarea)
@@ -215,8 +215,8 @@ Sub Btn_Ejec_Tarea_Click()
             Pos_Delimitador = Len(Rutinas_Name) + 1
         End If
         Rut_Name = Left(Rutinas_Name, Pos_Delimitador - 1)
-'        Prog__APP.Range("APP_Task_Index") = Index_RutAux
-        Prog__APP.Range("APP_Task_Rut") = Rut_Name
+'        Prog__APP.Range("App_Task_Index") = Index_RutAux
+        Prog__APP.Range("App_Task_Rut") = Rut_Name
         Rutinas_Name = Mid(Rutinas_Name, Pos_Delimitador + 3)
         If ImagenName <> "" Then
             Me.Controls(ImagenName).Visible = True
@@ -227,12 +227,12 @@ Sub Btn_Ejec_Tarea_Click()
         End If
         If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la tarea se salto algun Rut_On_Functions
         Call Rut_Lo_Totales_Mostrar         '- BDatos, Inf_Recibos_TIO y las DefCol, con la fila de totales (Docs/Plan_ShowTotals.md, fase 4)
-        Me.Lb_Tit_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Tarea)
+        Me.Lb_Tit_Informe.Caption = "Informe Tarea: " & Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("App_Task_Index"), Task_Tarea)
         
-        If Prog__APP.Range("APP_Task_Inf") <> "" Then Me.TBx_Informe = Prog__APP.Range("APP_Task_Inf")
+        If Prog__APP.Range("App_Task_Inf") <> "" Then Me.TBx_Informe = Prog__APP.Range("App_Task_Inf")
         
-        Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("APP_Task_Index"), Task_Rut_Informe) = Me.TBx_Informe.Text
-        Prog__APP.Range("APP_Task_Inf") = Me.TBx_Informe.Text
+        Lo_Tareas.DataBodyRange.Cells(Prog__APP.Range("App_Task_Index"), Task_Rut_Informe) = Me.TBx_Informe.Text
+        Prog__APP.Range("App_Task_Inf") = Me.TBx_Informe.Text
         Me.Lb_Fondo_Inf.BackColor = RGB(192, 255, 192)
         Me.Lb_Fondo_Tit_Inf.BackColor = RGB(192, 255, 192)
         
@@ -297,19 +297,19 @@ Private Sub TBx_Rutina_Name_AfterUpdate()
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub FrOpBt_CAcadAnt_Click()
-    Range("APP_CursAcad") = Me.FrOpBt_CAcadAnt.Caption
+    Range("App_CursAcad") = Me.FrOpBt_CAcadAnt.Caption
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub FrOpBt_CAcadPos_Click()
-    Range("APP_CursAcad") = Me.FrOpBt_CAcadPos.Caption
+    Range("App_CursAcad") = Me.FrOpBt_CAcadPos.Caption
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub FrOpBt_TitP_Click()
-'    Range("APP_TitP_o_Curs") = Me.FrOpBt_TitP.Caption
+'    Range("App_TitP_o_Curs") = Me.FrOpBt_TitP.Caption
 '    Wk_TitP_Liquid.Name = "Liquid_Tit_Propios"
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub FrOpBt_Curs_Click()
-'    Range("APP_TitP_o_Curs") = Me.FrOpBt_Curs.Caption
+'    Range("App_TitP_o_Curs") = Me.FrOpBt_Curs.Caption
 '    Wk_TitP_Liquid.Name = "Liquid_Cursos200h"
 End Sub

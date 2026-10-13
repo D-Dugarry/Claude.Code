@@ -9,9 +9,11 @@ Compara, celda a celda y dentro del rango de cada tabla:
     último decimal),
   - el color de relleno (lo que pinta M_112 en los duplicados),
   - el formato de número.
-Y además el log del proceso (nombre APP_Task_Inf) y el informe de cada botón del Ribbon (columna
+Y además el log del proceso (nombre App_Task_Inf) y el informe de cada botón del Ribbon (columna
 Informe_Rut de Lo_RibbonUI, que guarda el log de la última ejecución de cada botón: así se comparan los
-de M_110, M_210 y M_310 aunque APP_Task_Inf solo tenga el último), quitando las horas y los tiempos.
+de M_110, M_210 y M_310 aunque App_Task_Inf solo tenga el último), quitando las horas y los tiempos.
+Los nombres se buscan sin distinguir mayúsculas, como Excel: vale también con copias anteriores al
+2026-10-13, cuando el prefijo era APP_.
 Las líneas de tiempos de cada paso del formateo ("Col. 14 F_Emi (F)....1,34 seg.") y de la importación
 en RAM ("Importar: abrir el fichero....4,73 seg.") se quitan enteras, porque su texto cambia con el código
 (p. ej. "Col. 11 Ref (N, bloque 11-13)") y las de la importación solo salen con el código nuevo.
@@ -32,7 +34,7 @@ Uso:
 Las hojas se buscan por su CodeName (Sht__BD...), no por el nombre de la pestaña.
 Lee las hojas en streaming: con 177.000 filas tarda un par de minutos y no carga el libro en memoria.
 """
-# Last Rev. 2026-10-06 11:15
+# Last Rev. 2026-10-13 12:30
 
 import argparse
 import math
@@ -47,7 +49,7 @@ NS = {"m": M, "r": R}
 T_ROW, T_C, T_V, T_IS, T_T = ("{%s}%s" % (M, x) for x in ("row", "c", "v", "is", "t"))
 
 HOJAS_DEFECTO = ["Sht__BD", "Sht__BD_Dupl", "Sht__BD_ErrDate"]
-NOMBRE_LOG = "APP_Task_Inf"
+NOMBRE_LOG = "App_Task_Inf"
 
 
 def col2num(c):
@@ -85,12 +87,12 @@ class Libro:
         for s in wb.find("m:sheets", NS):
             destino = rels[s.get("{%s}id" % R)]
             self.hojas[s.get("name")] = "xl/" + destino.replace("/xl/", "").lstrip("/")
-        self.nombres = {}
+        self.nombres = {}                                   # en minúsculas: Excel no distingue (APP_ / App_)
         dn = wb.find("m:definedNames", NS)
         if dn is not None:
             for d in dn:
                 if d.get("localSheetId") is None:
-                    self.nombres[d.get("name")] = d.text
+                    self.nombres[d.get("name").lower()] = d.text
         self.codename = {}                                  # CodeName -> nombre pestaña
         for nombre, f in self.hojas.items():
             cab = self.z.open(f).read(4000).decode("utf-8", "ignore")
@@ -171,7 +173,7 @@ class Libro:
             el.clear()
 
     def valor_nombre(self, nombre):
-        ref = self.nombres.get(nombre)
+        ref = self.nombres.get(nombre.lower())
         if not ref:
             return None
         m = re.match(r"'?(.+?)'?!(\$?[A-Z]+\$?\d+)", ref)

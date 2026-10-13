@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_195_Add_UXXIdata_in_BDatos"
-' Last Rev. 2026-10-07 10:49
+' Last Rev. 2026-10-13 12:28
 '- M_195_Import_a_BD_Ant -----------------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -10,9 +10,9 @@ Debug.Print "------------------------- >>> RuT_Add_UXXIdata_in_BDatos()"
     Dim TimeLapSub      As Single:      TimeLapSub = LastTimeLap
     Dim TxT_Progreso    As String
     Dim TxT_ProgIni     As String
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("App_CursAcad")
     
     '- Setting ListObjects ------------------------------------
     Dim Lo_BD               As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
@@ -49,7 +49,7 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos el Fichero ?") Then GoTo Rut_Copy_Datos
     Dim Arch_New_Name         As String ':    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD_Ant, Lo_DefCol_BD_Ant, DefC_TitColLstObj, Arch_New_Name)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-    Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_Ant.Range("d2") = "Úlitma Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Importado BD_Ant: " & Arch_New_Name, TimeLapSub, , , TxT_ProgIni, True)
@@ -124,8 +124,8 @@ If Not Func_MsgBox_vbYesNo("¿ Trasladar Datos Contables UXXI de BD_Ant a BDatos 
     Lo_BD_Ant.ShowTotals = True
 
 Terminar:
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
-    Prog__APP.Range("APP_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Last_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_Ant.Range("d1") = "Traspasados Datos UXXI a BDatos: " & Format(Now(), "dd-mmm-yy hh:mm")
     Lo_BD_Ant.ShowTotals = True
     Sht__BD.Calculate

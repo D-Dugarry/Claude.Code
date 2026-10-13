@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_310_Update_LSace06_INSS"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 '- M_310_Update_LSace06_INSS -----------------------------------------------------------------------------------------------------------
 
@@ -17,9 +17,9 @@ Debug.Print "------------------------- >>> RuT_Update_LSace06_CAcad_ImpAdm_INSS(
     Dim RutaFichLsace06 As String
     Dim TxT_Progreso    As String
     Dim Arch_New_Name   As String
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
     
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
     Application.ScreenUpdating = False
@@ -134,7 +134,7 @@ Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     '- Sin 'Lo_INSS.ShowTotals = True' (2026-10-04, decisión del usuario): sus totales no se requieren, y volver a mostrarlos obligaba a ocultarlos en la siguiente ejecución, que es lo que falla tras M_110/M_210 (ver CLAUDE.md).
     Sht__BD_INSS.Calculate
 

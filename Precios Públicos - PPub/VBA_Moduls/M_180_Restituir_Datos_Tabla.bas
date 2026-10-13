@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_180_Restituir_Datos_Tabla"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-13 12:28
 '- M_180_Restituir_Datos_Tabla -----------------------------------------------------------------------------------------------------
 
 Option Explicit
@@ -24,7 +24,7 @@ Rut_Off_Functions
             MsgBx_Msg = "Ha pulsado el botón <Cancelar>."
             MsgBx_Title = "Proceso: Restituir Tabla Tasas EP."
             Load Form_MsgBox: Call Form_MsgBox.SetParameter(16, True, "OK", 1, "Ask"): Form_MsgBox.Show     '- ([Font-Size]=16, [Red-Border]=False, [Buttons]="Ok", [Default-Button]=1, [Image]="Msg")
-            Prog__APP.Range("APP_Task_Inf") = "Proceso Cancelado: " & Now()
+            Prog__APP.Range("App_Task_Inf") = "Proceso Cancelado: " & Now()
             GoTo Restablecer_Valores
         Else
             Arch__Tit_Prop_New = .SelectedItems(1)
@@ -53,11 +53,11 @@ Rut_Off_Functions
 Sht__BD.Protect , allowFiltering:=True, allowSorting:=True, DrawingObjects:=True, UserInterfaceOnly:=True       '=== IMPORTANTE, Mantiene protegida la hoja pero permite modificar con VBA  ================
 'Sht__BD.Visible = xlSheetVeryHidden
 
-Prog__APP.Range("APP_Task_Inf") = "¡¡¡ Proceso concluido con éxito !!! día: " & Now() & " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & _
+Prog__APP.Range("App_Task_Inf") = "¡¡¡ Proceso concluido con éxito !!! día: " & Now() & " - Tiempo: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & _
         "Restituido el Fichero Excel de trabajo de las Tasas de Títulos Propios y Cursos < 200h.  " & vbCrLf & _
         "Se han importado: " & Format(Sht__BD.ListObjects(1).ListRows.Count, "#,##0") & " reg." & vbCrLf & _
         "Del Archivo: " & Arch__Tit_Prop_New
-Prog__APP.Range("APP_Last_BD_Restore") = Format(Now(), "dd-mmm-yy hh:mm")
+Prog__APP.Range("App_Last_BD_Restore") = Format(Now(), "dd-mmm-yy hh:mm")
 
 Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

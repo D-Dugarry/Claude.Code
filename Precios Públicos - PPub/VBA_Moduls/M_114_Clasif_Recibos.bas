@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_114_Clasif_Recibos"
-' Last Rev. 2026-10-07 14:57
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -35,7 +35,7 @@ Debug.Print ">>> RuT_Clasif_Recibos"
     Dim RegsNOCUADRA        As Long
 
     Dim rowfind             As Long
-    Dim APP_AnoCont         As String:      APP_AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim APP_AnoCont         As String:      APP_AnoCont = Prog__APP.Range("App_AnoCont")
     Dim TimeLapSub          As Single:      TimeLapSub = LastTimeLap
     Dim T                   As T_TablaRam
     Dim Cumple()            As Boolean

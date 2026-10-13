@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_210_Update_LSGES04_C_Acad_Ant"
-' Last Rev. 2026-10-12 00:16
+' Last Rev. 2026-10-13 12:28
 '2026-01-23
 '- M_210_Update_LSGES04_C_Acad -----------------------------------------------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ Sub RuT_Update_LSGES04_IAdm_CAcadAnt()  '- Importar LSGES04_GE por Curso-Acad., 
 Debug.Print "------------------------- >>> RuT_Update_LSGES04_IAdm_CAcadAnt()"
     Dim TimeLap2        As Single
     Dim TxT_Progreso    As String
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("App_CursAcad")
     
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
     Application.ScreenUpdating = False
@@ -67,9 +67,9 @@ If Not Func_MsgBox_vbYesNo("¿ Importamos LSGES04 C_Acad_" & C_Acad_Ant & " ?" & 
     Dim Arch_New_Name         As String:    Arch_New_Name = "LSGES04_GE_SinDtos_Curso_" & C_Acad_Ant & "_BD" & "|LsGes04_C_Acad_" & C_Acad_Ant     '- El de siempre o el de Robot_PPub_Fusión
     Rut_Off_Functions   '- Antes lo hacía (sin cerrarlo) la rutina de importación; el On está en Restablecer_Valores
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_ImpAdmCAcadAnt, Lo_DefCol_BD, DefC_TitColGenInf, Arch_New_Name, Convertir_En_Ram:=True, _
-                NombreRutaRobot:="APP_Ruta_Robot_Ges04_CAcad", SubcarpetaRobot:=C_Acad_Ant)
+                NombreRutaRobot:="App_Ruta_Robot_Ges04_CAcad", SubcarpetaRobot:=C_Acad_Ant)
         If Arch_New_Name = "Cancel" Then GoTo Restablecer_Valores
-    Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_IAdm_CAcadAnt.Name = "BD_ImpAdm_" & C_Acad_Ant
 
 Rut_Lo_ListColumns_ClearContents_DefC_ProtectData:
@@ -139,10 +139,10 @@ Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
-    Prog__APP.Range("APP_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Last_Import_CAcad") = Format(Now(), "dd-mmm-yy hh:mm")
     Sht__BD_IAdm_CAcadAnt.Range("d2") = "Úlitma Importación: " & Format(Now(), "dd-mmm-yy hh:mm")
-    Sht__BD.Range("b3") = " Tabla Rec. Acad. TIO y EP  +  Imp.Adm Curso " & Prog__APP.Range("APP_C_Acad_Pos") & _
+    Sht__BD.Range("b3") = " Tabla Rec. Acad. TIO y EP  +  Imp.Adm Curso " & Prog__APP.Range("App_C_Acad_Pos") & _
                           " y Curso " & C_Acad & "."
     Call Rut_Lo_Filtros_Quitar(Lo_ImpAdmCAcadAnt)
     Lo_ImpAdmCAcadAnt.ShowTotals = True

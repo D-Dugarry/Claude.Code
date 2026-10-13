@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-01 08:38
+' Last Rev. 2026-10-13 12:28
 'Form_Usuario
 Option Explicit
 
@@ -38,7 +38,7 @@ Debug.Print "Btn_Eixir_Click"
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
-    If Prog__APP.Range("APP_User_ID") = "" Then
+    If Prog__APP.Range("App_User_ID") = "" Then
         MsgBx_Msg = "¿Cerramos la aplicación?" & vbCrLf & "¿¿¿ Seguro que desea continuar SIN Grabar los Datos ???"
         MsgBx_Title = "Procedimiento: Identificación de Usuario."
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
@@ -53,7 +53,7 @@ Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
         Cancel = 1
         Exit Sub
     End If
-    Debug.Print "Nuevo Usuario: " & Prog__APP.Range("APP_User_Name") & vbLf & vbLf & "- Email: " & Prog__APP.Range("APP_User_Mail") & vbLf & "- Ext. " & Prog__APP.Range("APP_User_Ext")
+    Debug.Print "Nuevo Usuario: " & Prog__APP.Range("App_User_Name") & vbLf & vbLf & "- Email: " & Prog__APP.Range("App_User_Mail") & vbLf & "- Ext. " & Prog__APP.Range("App_User_Ext")
 Debug.Print "UserForm_QueryClose ------------------<<< Form Usuario "
 End Sub
 ' ------------------------------------------------------------------------------------------------------
@@ -74,10 +74,10 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub UserForm_Activate()
 Debug.Print "UserForm_Activate - Form_Usuario"
-    Prog__APP.Range("APP_User_ID") = ""
-    Prog__APP.Range("APP_User_Unid_Red") = ""
-    Prog__APP.Range("APP_User_Mail") = ""
-    Prog__APP.Range("APP_User_RutaAPP") = ""
+    Prog__APP.Range("App_User_ID") = ""
+    Prog__APP.Range("App_User_Unid_Red") = ""
+    Prog__APP.Range("App_User_Mail") = ""
+    Prog__APP.Range("App_User_RutaAPP") = ""
     Prog__APP_Switch.Range("Sw_Boss") = False
     Prog__APP_Switch.Range("Sw_Test") = False
     App_RutaAPP = ""
@@ -87,7 +87,7 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Sub Btn_Validar_Click()
 Debug.Print "Btn_Validar_Click - Form_Usuario"
-    Prog__APP.Range("APP_User_ID") = ""
+    Prog__APP.Range("App_User_ID") = ""
     If Trim(TBx_Usuario_ID.Value) = "" Then      '- Sin Rellenar ----------------------
         Lbl_Obl_ID.Visible = True
         MsgBx_Msg = "¡¡¡ Ups, Sorry !!!" & vbCrLf & vbCrLf & "Sin Usuario especificado"
@@ -110,22 +110,22 @@ Debug.Print "Btn_Validar_Click - Form_Usuario"
             GoTo Volver_a_Preguntar  '- NO hay coincidencia Mays/Mins -----
         End If
         '- La coincidencia es TOTAL distingue mayúsculas de minúsculas -----------------------------------------------
-        Prog__APP.Range("APP_User_ID") = .Cells(Index_Usuario, 1)
-        Prog__APP.Range("APP_User_Name") = .Cells(Index_Usuario, 2)
-        Prog__APP.Range("APP_User_Mail") = .Cells(Index_Usuario, 6)
-        Prog__APP.Range("APP_User_Ext") = .Cells(Index_Usuario, 7)
-        Tbx_UserName = Prog__APP.Range("APP_User_Name")
-        Tbx_UserExt = Prog__APP.Range("APP_User_Ext")
+        Prog__APP.Range("App_User_ID") = .Cells(Index_Usuario, 1)
+        Prog__APP.Range("App_User_Name") = .Cells(Index_Usuario, 2)
+        Prog__APP.Range("App_User_Mail") = .Cells(Index_Usuario, 6)
+        Prog__APP.Range("App_User_Ext") = .Cells(Index_Usuario, 7)
+        Tbx_UserName = Prog__APP.Range("App_User_Name")
+        Tbx_UserExt = Prog__APP.Range("App_User_Ext")
         Tbx_UserMail = .Cells(Index_Usuario, 6)
         If CheckBox_Teletrabajo.Value = True Then
-            Prog__APP.Range("APP_User_Unid_Red") = .Cells(Index_Usuario, 5)
+            Prog__APP.Range("App_User_Unid_Red") = .Cells(Index_Usuario, 5)
         Else
-            Prog__APP.Range("APP_User_Unid_Red") = .Cells(Index_Usuario, 4)
+            Prog__APP.Range("App_User_Unid_Red") = .Cells(Index_Usuario, 4)
         End If
-        Debug.Print "Nuevo Usuario: " & Prog__APP.Range("APP_User_Name") & vbLf & "Email: " & Prog__APP.Range("APP_User_Mail") & vbLf & "Etx.: " & Prog__APP.Range("APP_User_Ext")
-        Prog__APP.Range("APP_User_RutaAPP") = Fnc_NEXE_RutaAPP
-        Tbx_Unidad_NEXE = Prog__APP.Range("APP_User_Unid_Red")
-        If Prog__APP.Range("APP_User_ID") = "Boss" Then Prog__APP_Switch.Range("Sw_Boss") = True Else Prog__APP_Switch.Range("Sw_Boss") = False
+        Debug.Print "Nuevo Usuario: " & Prog__APP.Range("App_User_Name") & vbLf & "Email: " & Prog__APP.Range("App_User_Mail") & vbLf & "Etx.: " & Prog__APP.Range("App_User_Ext")
+        Prog__APP.Range("App_User_RutaAPP") = Fnc_NEXE_RutaAPP
+        Tbx_Unidad_NEXE = Prog__APP.Range("App_User_Unid_Red")
+        If Prog__APP.Range("App_User_ID") = "Boss" Then Prog__APP_Switch.Range("Sw_Boss") = True Else Prog__APP_Switch.Range("Sw_Boss") = False
         Btn_Eixir.Visible = True
         Exit Sub
     End With    ' Prog__Usuarios.ListObjects(1).DataBodyRange
@@ -133,7 +133,7 @@ Volver_a_Preguntar:
     '- Usuario Erróneo ---------------
     Btn_Eixir.Visible = False
     Lbl_Obl_ID.Visible = False
-    Prog__APP.Range("APP_User_ID") = ""
+    Prog__APP.Range("App_User_ID") = ""
     Me.TBx_Usuario_ID = ""
     Me.TBx_Usuario_ID.SetFocus
     Application.SendKeys "{TAB}"       ' Getting setfocus back to the serial textbox
@@ -142,50 +142,50 @@ End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Tbx_UserName_AfterUpdate()
     Prog__Usuarios.ListObjects(1).DataBodyRange.Cells(Index_Usuario, 2) = Me.Tbx_UserName
-    Prog__APP.Range("APP_User_Name") = Me.Tbx_UserName
-Debug.Print "Tbx_UserName_AfterUpdate: " & Prog__APP.Range("APP_User_Name")
+    Prog__APP.Range("App_User_Name") = Me.Tbx_UserName
+Debug.Print "Tbx_UserName_AfterUpdate: " & Prog__APP.Range("App_User_Name")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Tbx_UserExt_AfterUpdate()
     Prog__Usuarios.ListObjects(1).DataBodyRange.Cells(Index_Usuario, 2) = Me.Tbx_UserExt
-    Prog__APP.Range("APP_User_Ext") = Me.Tbx_UserExt
-Debug.Print "Tbx_UserName_AfterUpdate: " & Prog__APP.Range("APP_User_Ext")
+    Prog__APP.Range("App_User_Ext") = Me.Tbx_UserExt
+Debug.Print "Tbx_UserName_AfterUpdate: " & Prog__APP.Range("App_User_Ext")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Tbx_UserMail_AfterUpdate()
     With Prog__Usuarios.ListObjects(1).DataBodyRange
-        Prog__APP.Range("APP_User_Mail") = Me.Tbx_UserMail
-        .Cells(Index_Usuario, 6) = Prog__APP.Range("APP_User_Mail")
-        Prog__APP.Range("APP_User_RutaAPP") = Fnc_NEXE_RutaAPP
+        Prog__APP.Range("App_User_Mail") = Me.Tbx_UserMail
+        .Cells(Index_Usuario, 6) = Prog__APP.Range("App_User_Mail")
+        Prog__APP.Range("App_User_RutaAPP") = Fnc_NEXE_RutaAPP
     End With    ' Prog__Usuarios.ListObjects(1).DataBodyRange
-Debug.Print "Tbx_UserMail_AfterUpdate: " & Prog__APP.Range("APP_User_Mail"), Prog__APP.Range("APP_User_RutaAPP")
+Debug.Print "Tbx_UserMail_AfterUpdate: " & Prog__APP.Range("App_User_Mail"), Prog__APP.Range("App_User_RutaAPP")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub Tbx_Unidad_NEXE_AfterUpdate()
     With Prog__Usuarios.ListObjects(1).DataBodyRange
-        Prog__APP.Range("APP_User_Unid_Red") = Me.Tbx_Unidad_NEXE
+        Prog__APP.Range("App_User_Unid_Red") = Me.Tbx_Unidad_NEXE
         If CheckBox_Teletrabajo.Value = True Then
-            .Cells(Index_Usuario, 5) = Prog__APP.Range("APP_User_Unid_Red")
+            .Cells(Index_Usuario, 5) = Prog__APP.Range("App_User_Unid_Red")
         Else
-            .Cells(Index_Usuario, 4) = Prog__APP.Range("APP_User_Unid_Red")
+            .Cells(Index_Usuario, 4) = Prog__APP.Range("App_User_Unid_Red")
         End If
-        Prog__APP.Range("APP_User_RutaAPP") = Fnc_NEXE_RutaAPP
+        Prog__APP.Range("App_User_RutaAPP") = Fnc_NEXE_RutaAPP
     End With    ' Prog__Usuarios.ListObjects(1).DataBodyRange
-Debug.Print "CheckBox_Teletrabajo_AfterUpdate: " & Prog__APP.Range("APP_User_RutaAPP")
+Debug.Print "CheckBox_Teletrabajo_AfterUpdate: " & Prog__APP.Range("App_User_RutaAPP")
 End Sub
 ' ------------------------------------------------------------------------------------------------------
 Private Sub CheckBox_Teletrabajo_AfterUpdate()
     With Prog__Usuarios.ListObjects(1).DataBodyRange
         If CheckBox_Teletrabajo.Value = True Then
-            Prog__APP.Range("APP_User_Unid_Red") = .Cells(Index_Usuario, 5)
+            Prog__APP.Range("App_User_Unid_Red") = .Cells(Index_Usuario, 5)
         Else
-            Prog__APP.Range("APP_User_Unid_Red") = .Cells(Index_Usuario, 4)
+            Prog__APP.Range("App_User_Unid_Red") = .Cells(Index_Usuario, 4)
         End If
-            Prog__APP.Range("APP_User_RutaAPP") = ActiveWorkbook.Path
-        Prog__APP.Range("APP_User_RutaAPP") = Fnc_NEXE_RutaAPP
+            Prog__APP.Range("App_User_RutaAPP") = ActiveWorkbook.Path
+        Prog__APP.Range("App_User_RutaAPP") = Fnc_NEXE_RutaAPP
     
     End With    ' Prog__Usuarios.ListObjects(1).DataBodyRange
-    Me.Tbx_Unidad_NEXE = Prog__APP.Range("APP_User_Unid_Red")
-Debug.Print "Tbx_Unidad_NEXE_AfterUpdate: " & Prog__APP.Range("APP_User_RutaAPP")
+    Me.Tbx_Unidad_NEXE = Prog__APP.Range("App_User_Unid_Red")
+Debug.Print "Tbx_Unidad_NEXE_AfterUpdate: " & Prog__APP.Range("App_User_RutaAPP")
 End Sub
 

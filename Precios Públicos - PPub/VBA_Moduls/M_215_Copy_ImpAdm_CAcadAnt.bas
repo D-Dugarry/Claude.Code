@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_215_Copy_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 '2026-01-23
 Option Explicit
 
@@ -29,9 +29,9 @@ Debug.Print ">>> Rut_Copy_ImpAdm_CAcadAnt_a_BDatos"
     Dim NotFound        As Long:        NotFound = 0
     Dim NRecMov         As Long:        NRecMov = 0
     Dim ImpRecMov       As Currency:    ImpRecMov = 0
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_CursAcad")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("App_CursAcad")
     Dim TimeLapSub      As Single:      TimeLapSub = Time
     Dim TxT_Progreso    As String
     Dim TxT_ProgIni     As String

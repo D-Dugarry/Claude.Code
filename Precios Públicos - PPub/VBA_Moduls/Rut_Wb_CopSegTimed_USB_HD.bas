@@ -1,13 +1,13 @@
 Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
-' Last Rev. 2026-10-04 20:27
+' Last Rev. 2026-10-13 12:28
 '='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='='=
 ' Rut_Wb_CopSegTimed_USB_HD  -  Copias de seguridad del libro con marca de tiempo
 '
 ' Genera copias de seguridad en dos modalidades: USB con ruta configurable (con diálogo
 ' y actualización automática de path) o directorio local CopiaSeguridad/ sin diálogo.
-' La copia HD se lanza desde Workbook_Open cuando han pasado APP_CopSeg_HD_Frecuency días
+' La copia HD se lanza desde Workbook_Open cuando han pasado App_CopSeg_HD_Frecuency días
 ' (o más) desde la última (Fnc_CopSeg_HD_Toca); al hacerse, purga las copias del libro
-' con más de APP_CopSeg_HD_FrecPurga meses (los backups manuales se conservan).
+' con más de App_CopSeg_HD_FrecPurga meses (los backups manuales se conservan).
 ' La carpeta CopiaSeguridad/ se crea sola si no existe (no viaja con el libro al copiarlo).
 ' Toda la configuración vive en rangos con nombre de ámbito Libro en la hoja ConfigCopSeg;
 ' Rut_CopSeg_Asegurar_Config crea hoja y rangos si faltan, así que el módulo es autoinstalable
@@ -24,17 +24,17 @@ Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
 ' identidad en la ruta; feedback descartado en silencio).
 '
 ' Configuración (hoja ConfigCopSeg, autocreada):
-'   APP_CopSeg_Usb_Path, APP_CopSeg_Usb_Date, APP_CopSeg_HD_Date,
-'   APP_CopSeg_HD_Frecuency, APP_CopSeg_HD_FrecPurga
+'   App_CopSeg_Usb_Path, App_CopSeg_Usb_Date, App_CopSeg_HD_Date,
+'   App_CopSeg_HD_Frecuency, App_CopSeg_HD_FrecPurga
 '
 ' Índice de Subs/Functions:
 '   Rut_WrkBook_CopSegTimed_USB               - Guarda copia del libro con marca de tiempo; ruta USB con diálogo
 '   Rut_WrkBook_CopSegTimed_WB_HD             - Guarda copia del libro en CopiaSeguridad/ sin diálogo y purga las antiguas
-'   Fnc_CopSeg_HD_Toca                        - True si toca copia HD según APP_CopSeg_HD_Frecuency (llamar desde Workbook_Open)
+'   Fnc_CopSeg_HD_Toca                        - True si toca copia HD según App_CopSeg_HD_Frecuency (llamar desde Workbook_Open)
 '   Fnc_CopSeg_Rng                            - Range de un nombre de ámbito Libro, viva donde viva su celda
 '   Fnc_CopSeg_Range_Exist (Private)          - Comprueba si existe un nombre definido a nivel de libro
 '   Fnc_CopSeg_Cfg_Long (Private)             - Lee un parámetro numérico de la config, con valor por defecto
-'   Fnc_CopSeg_HD_Purgar (Private)            - Elimina de CopiaSeguridad/ las copias con más de APP_CopSeg_HD_FrecPurga meses
+'   Fnc_CopSeg_HD_Purgar (Private)            - Elimina de CopiaSeguridad/ las copias con más de App_CopSeg_HD_FrecPurga meses
 '   Fnc_CopSeg_Crear_Carpeta (Private)        - Crea CopiaSeguridad/ si no existe; True si la ha creado
 '   Rut_CopSeg_Asegurar_Config                - Setup idempotente: hoja ConfigCopSeg y sus rangos de configuración
 '   Fnc_CopSeg_Ruta (Private)                 - Hook opcional: adapta la ruta vía Fnc_Format_Ruta del anfitrión si existe
@@ -45,9 +45,9 @@ Attribute VB_Name = "Rut_Wb_CopSegTimed_USB_HD"
 Option Explicit
 
 Private Const C_CopSeg_HojaCfg          As String = "ConfigCopSeg"                       ' Hoja de configuración del módulo
-Private Const C_CopSeg_Usb_Path_Def     As String = "F:\__CopSeg Versiones Programas\"   ' Ruta USB por defecto (APP_CopSeg_Usb_Path)
-Private Const C_CopSeg_HD_Frec_Def      As Long = 1                                      ' Días entre copias HD por defecto (APP_CopSeg_HD_Frecuency)
-Private Const C_CopSeg_HD_FrecPurga_Def As Long = 3                                      ' Meses de retención por defecto (APP_CopSeg_HD_FrecPurga)
+Private Const C_CopSeg_Usb_Path_Def     As String = "F:\__CopSeg Versiones Programas\"   ' Ruta USB por defecto (App_CopSeg_Usb_Path)
+Private Const C_CopSeg_HD_Frec_Def      As Long = 1                                      ' Días entre copias HD por defecto (App_CopSeg_HD_Frecuency)
+Private Const C_CopSeg_HD_FrecPurga_Def As Long = 3                                      ' Meses de retención por defecto (App_CopSeg_HD_FrecPurga)
 
 '===============================================================================
 Sub Rut_WrkBook_CopSegTimed_USB(Optional Tipo As String = "")  '- Guarda Copia de Este Excel con marca de tiempo en el nombre del archivo. (Tipo="Data"/"VBA", etc.) ----------
@@ -58,7 +58,7 @@ Sub Rut_WrkBook_CopSegTimed_USB(Optional Tipo As String = "")  '- Guarda Copia d
     Dim FichExt         As String
         FichExt = Right(ThisWorkbook.Name, Len(ThisWorkbook.Name) - InStrRev(ThisWorkbook.Name, ".") + 1)
     Dim fichPath        As String
-        fichPath = Fnc_CopSeg_Rng("APP_CopSeg_Usb_Path").Value & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
+        fichPath = Fnc_CopSeg_Rng("App_CopSeg_Usb_Path").Value & FichNom & " " & Format(Now, "(yymmdd_hhmm)") & Tipo & FichExt
     Dim FichSelect      As Variant
         FichSelect = Application.GetSaveAsFilename(fichPath, "Excel Files (*" & FichExt & "), *" & FichExt)
         If VarType(FichSelect) = vbBoolean Then Exit Sub    ' El usuario cancela el diálogo: ni copia, ni sello de fecha, ni cambio de ruta
@@ -67,17 +67,17 @@ Sub Rut_WrkBook_CopSegTimed_USB(Optional Tipo As String = "")  '- Guarda Copia d
         ThisWorkbook.SaveCopyAs Filename:=FichSelect
         Application.DisplayAlerts = True
         On Error GoTo 0
-    If Fnc_CopSeg_Rng("APP_CopSeg_Usb_Path").Value <> Left(FichSelect, InStrRev(FichSelect, "\")) Then
+    If Fnc_CopSeg_Rng("App_CopSeg_Usb_Path").Value <> Left(FichSelect, InStrRev(FichSelect, "\")) Then
         ' Pedir confirmación de cambio de ruta
         Dim Mensage     As String
-        Mensage = "¿ Cambiamos esta ruta: " & Fnc_CopSeg_Rng("APP_CopSeg_Usb_Path").Value & vbLf & _
+        Mensage = "¿ Cambiamos esta ruta: " & Fnc_CopSeg_Rng("App_CopSeg_Usb_Path").Value & vbLf & _
                   " por esta ? " & Left(FichSelect, InStrRev(FichSelect, "\")) & vbCrLf & vbCrLf
         Answer = MsgBox(Mensage, vbExclamation + vbYesNo + vbDefaultButton2, "Proceso: Cambio de Ruta para las Copias de Seguridad.")
         If Answer = vbYes Then
-            Fnc_CopSeg_Rng("APP_CopSeg_Usb_Path").Value = Left(FichSelect, InStrRev(FichSelect, "\"))
+            Fnc_CopSeg_Rng("App_CopSeg_Usb_Path").Value = Left(FichSelect, InStrRev(FichSelect, "\"))
         End If
     End If
-    Fnc_CopSeg_Rng("APP_CopSeg_Usb_Date").Value = Now
+    Fnc_CopSeg_Rng("App_CopSeg_Usb_Date").Value = Now
     Call Fnc_CopSeg_Log("Copia USB realizada: " & FichSelect & "  -  " & Now())
 Finalizar:
     Application.DisplayAlerts = True     ' Por si SaveCopyAs falla con los avisos desactivados
@@ -85,7 +85,7 @@ End Sub
 ' ------------------------------------------------------------------------------
 
 ' ==============================================================================
-Sub Rut_WrkBook_CopSegTimed_WB_HD()   '- Guarda copia del libro en CopiaSeguridad/ sin diálogo; purga las copias con más de APP_CopSeg_HD_FrecPurga meses
+Sub Rut_WrkBook_CopSegTimed_WB_HD()   '- Guarda copia del libro en CopiaSeguridad/ sin diálogo; purga las copias con más de App_CopSeg_HD_FrecPurga meses
 ' ==============================================================================
     '- Guardar estado de Excel (por si es manual o eventos desactivados) ----------
     Dim PrevScreen  As Boolean:    PrevScreen = Application.ScreenUpdating
@@ -121,8 +121,8 @@ Sub Rut_WrkBook_CopSegTimed_WB_HD()   '- Guarda copia del libro en CopiaSegurida
             ThisWorkbook.SaveCopyAs Filename:=IntialName
             Application.DisplayAlerts = True
             On Error GoTo 0
-    Fnc_CopSeg_Rng("APP_CopSeg_HD_Date").Value = Now
-    '- Purgar las copias con más de APP_CopSeg_HD_FrecPurga meses ---------------
+    Fnc_CopSeg_Rng("App_CopSeg_HD_Date").Value = Now
+    '- Purgar las copias con más de App_CopSeg_HD_FrecPurga meses ---------------
     Dim Purgadas    As Long
     Purgadas = Fnc_CopSeg_HD_Purgar(FPath, FichNom, FichExt)
 
@@ -146,16 +146,16 @@ End Sub     ' Rut_WrkBook_CopSegTimed_WB_HD
 ' ------------------------------------------------------------------------------
 
 ' ==============================================================================
-Function Fnc_CopSeg_HD_Toca() As Boolean   '- True si toca copia HD: han pasado APP_CopSeg_HD_Frecuency días (o más) desde la última
+Function Fnc_CopSeg_HD_Toca() As Boolean   '- True si toca copia HD: han pasado App_CopSeg_HD_Frecuency días (o más) desde la última
 ' ==============================================================================
 ' Con Frecuency = 1 replica el comportamiento clásico: copia diaria si la última no es de hoy.
 ' Si el sello está vacío o no es fecha (1ª instalación), devuelve True.
     Call Rut_CopSeg_Asegurar_Config
     Dim UltimaCopia     As Date
     On Error Resume Next
-    UltimaCopia = CDate(Fnc_CopSeg_Rng("APP_CopSeg_HD_Date").Value)
+    UltimaCopia = CDate(Fnc_CopSeg_Rng("App_CopSeg_HD_Date").Value)
     On Error GoTo 0
-    Fnc_CopSeg_HD_Toca = (Int(CDbl(UltimaCopia)) + Fnc_CopSeg_Cfg_Long("APP_CopSeg_HD_Frecuency", C_CopSeg_HD_Frec_Def) <= Date)
+    Fnc_CopSeg_HD_Toca = (Int(CDbl(UltimaCopia)) + Fnc_CopSeg_Cfg_Long("App_CopSeg_HD_Frecuency", C_CopSeg_HD_Frec_Def) <= Date)
 End Function     ' Fnc_CopSeg_HD_Toca
 ' ------------------------------------------------------------------------------
 
@@ -183,14 +183,14 @@ End Function     ' Fnc_CopSeg_Cfg_Long
 ' ------------------------------------------------------------------------------
 
 ' ==============================================================================
-Private Function Fnc_CopSeg_HD_Purgar(FPath As String, FichNom As String, FichExt As String) As Long   '- Elimina las copias del libro con más de APP_CopSeg_HD_FrecPurga meses; devuelve cuántas borró
+Private Function Fnc_CopSeg_HD_Purgar(FPath As String, FichNom As String, FichExt As String) As Long   '- Elimina las copias del libro con más de App_CopSeg_HD_FrecPurga meses; devuelve cuántas borró
 ' ==============================================================================
 ' Solo toca ficheros con el patrón exacto de Rut_WrkBook_CopSegTimed_WB_HD:
 '   "<FichNom> - (yymmdd_hhmm)<FichExt>"
 ' Cualquier otro fichero de la carpeta (backups manuales, otros libros...) se conserva.
     Dim FSO             As Object:      Set FSO = CreateObject("Scripting.FileSystemObject")
     Dim Fichero         As Object
-    Dim FechaLimite     As Date:        FechaLimite = DateAdd("m", -Fnc_CopSeg_Cfg_Long("APP_CopSeg_HD_FrecPurga", C_CopSeg_HD_FrecPurga_Def), Date)
+    Dim FechaLimite     As Date:        FechaLimite = DateAdd("m", -Fnc_CopSeg_Cfg_Long("App_CopSeg_HD_FrecPurga", C_CopSeg_HD_FrecPurga_Def), Date)
     Dim Prefijo         As String:      Prefijo = FichNom & " - ("
     Dim ABorrar         As Collection:  Set ABorrar = New Collection
     Dim RutaFich        As Variant
@@ -239,7 +239,7 @@ End Function     ' Fnc_CopSeg_Crear_Carpeta
 ' ==============================================================================
 Sub Rut_CopSeg_Asegurar_Config()   '- Setup idempotente: hoja ConfigCopSeg y sus rangos de configuración
 ' ==============================================================================
-' Se puede llamar siempre: crea la hoja y los rangos que falten y elimina nombres APP_CopSeg_*
+' Se puede llamar siempre: crea la hoja y los rangos que falten y elimina nombres App_CopSeg_*
 ' rotos (#REF!, p.ej. tras mover la config desde otra hoja). Lo que ya existe queda intacto.
 ' El setup de la hoja del gestor de copias es aparte: Rut_CopSeg_Gestor_Asegurar_Config
     '- 1) Hoja de configuración (crearla si falta) ------------------------------
@@ -263,22 +263,22 @@ Sub Rut_CopSeg_Asegurar_Config()   '- Setup idempotente: hoja ConfigCopSeg y sus
         Ws.Range("$C$1").Value = "Descripción"
         Ws.Range("$A$1:$C$1").Font.Bold = True
     End If
-    '- 2) Nombres APP_CopSeg_* rotos (#REF!): eliminarlos para poder recrearlos --
+    '- 2) Nombres App_CopSeg_* rotos (#REF!): eliminarlos para poder recrearlos --
     Dim Nm              As Name
     Dim ABorrar         As Collection:  Set ABorrar = New Collection
     Dim NomRoto         As Variant
     For Each Nm In ThisWorkbook.Names
-        If Left(Nm.Name, Len("APP_CopSeg_")) = "APP_CopSeg_" And InStr(1, Nm.RefersTo, "#REF!") > 0 Then ABorrar.Add Nm.Name
+        If Left(Nm.Name, Len("App_CopSeg_")) = "App_CopSeg_" And InStr(1, Nm.RefersTo, "#REF!") > 0 Then ABorrar.Add Nm.Name
     Next Nm
     For Each NomRoto In ABorrar
         ThisWorkbook.Names(NomRoto).Delete
     Next NomRoto
     '- 3) Rangos de configuración (uno por fila; solo se crean si el nombre no existe) --
-    Call Rut_CopSeg_Cfg_Rango(Ws, 2, "APP_CopSeg_Usb_Path", C_CopSeg_Usb_Path_Def, "Ruta para la CopSeg USB")
-    Call Rut_CopSeg_Cfg_Rango(Ws, 3, "APP_CopSeg_Usb_Date", Empty, "Fecha de la última CopSeg USB")
-    Call Rut_CopSeg_Cfg_Rango(Ws, 4, "APP_CopSeg_HD_Date", Empty, "Fecha de la última CopSeg HD")
-    Call Rut_CopSeg_Cfg_Rango(Ws, 5, "APP_CopSeg_HD_Frecuency", C_CopSeg_HD_Frec_Def, "Frecuencia de días para las copias")
-    Call Rut_CopSeg_Cfg_Rango(Ws, 6, "APP_CopSeg_HD_FrecPurga", C_CopSeg_HD_FrecPurga_Def, "Frecuencia de meses para las purgas")
+    Call Rut_CopSeg_Cfg_Rango(Ws, 2, "App_CopSeg_Usb_Path", C_CopSeg_Usb_Path_Def, "Ruta para la CopSeg USB")
+    Call Rut_CopSeg_Cfg_Rango(Ws, 3, "App_CopSeg_Usb_Date", Empty, "Fecha de la última CopSeg USB")
+    Call Rut_CopSeg_Cfg_Rango(Ws, 4, "App_CopSeg_HD_Date", Empty, "Fecha de la última CopSeg HD")
+    Call Rut_CopSeg_Cfg_Rango(Ws, 5, "App_CopSeg_HD_Frecuency", C_CopSeg_HD_Frec_Def, "Frecuencia de días para las copias")
+    Call Rut_CopSeg_Cfg_Rango(Ws, 6, "App_CopSeg_HD_FrecPurga", C_CopSeg_HD_FrecPurga_Def, "Frecuencia de meses para las purgas")
     If HojaNueva Then Ws.Columns("A:C").AutoFit
 End Sub     ' Rut_CopSeg_Asegurar_Config
 ' ------------------------------------------------------------------------------

@@ -72,14 +72,14 @@ Dim TipRec_Cncpt    As String:          TipRec_Cncpt = ""
 Dim DescripcionA    As String
 Dim DescripcionB    As String
 Dim MenuAux_Msg     As String
-Dim APP_AnoCont     As String:          APP_AnoCont = Prog__APP.Range("APP_AnoCont")
-Dim APP_ACont       As String:          APP_ACont = Right(Prog__APP.Range("APP_AnoCont"), 2)
-Dim APP_AcadAnt     As String:          APP_AcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
-Dim APP_AcadPos     As String:          APP_AcadPos = Prog__APP.Range("APP_C_Acad_Pos")
+Dim APP_AnoCont     As String:          APP_AnoCont = Prog__APP.Range("App_AnoCont")
+Dim APP_ACont       As String:          APP_ACont = Right(Prog__APP.Range("App_AnoCont"), 2)
+Dim APP_AcadAnt     As String:          APP_AcadAnt = Prog__APP.Range("App_C_Acad_Ant")
+Dim APP_AcadPos     As String:          APP_AcadPos = Prog__APP.Range("App_C_Acad_Pos")
 
 '- Día siguiente al cierre, como número de serie: cuentan los recibos con fecha anterior. Hasta el 2026-10-12 iba como texto en el
 '  criterio de SUMIFS, que VBA pasa en formato americano: un cierre del 30/06 daba "<01/07/aaaa" = 7 de enero.
-Dim Lim_Cierre      As Long:            Lim_Cierre = CLng(Int(DateAdd("d", 1, Prog__APP.Range("APP_FechCierreCont"))))
+Dim Lim_Cierre      As Long:            Lim_Cierre = CLng(Int(DateAdd("d", 1, Prog__APP.Range("App_FechCierreCont"))))
 Dim Sumas()         As Double                                   '- (tipo de recibo, concepto, Sum_*): Rut_Inf_Recibos_Sumas
 Dim JIs()           As String                                   '- (tipo de recibo, concepto, 1 To JI_N_Col): Rut_Inf_Recibos_Sumas
 Dim K_JI            As Long
@@ -505,11 +505,11 @@ Finalizar:
     Call Rut_Inf_Recibos_Traza(Paso, "anotar la fecha del cálculo", T_Paso)
     Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Sht_Inf.Calculate
-    Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierre contable: " & Prog__APP.Range("APP_FechCierreCont") & _
+    Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierre contable: " & Prog__APP.Range("App_FechCierreCont") & _
                           vbLf & "Descarga de los Recibos del " & Prog__APP.Range("App_Last_Import_Robot_PPub")   '- fecha de la carpeta del Robot (M_110), 2026-10-13
     Sht_Inf.Range("b2") = "Informe Recibos " & APP_AnoCont       '- titulo de B2:C2 (combinadas: se escribe en la ancla, B2)
     Sht_Inf.Range("d2").Select
-    Prog__APP.Range("APP_Last_Calc_" & Nom_Inf) = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Last_Calc_" & Nom_Inf) = Format(Now(), "dd-mmm-yy hh:mm")
     
 ''    '- Visualizo el progreso ---------------------------------------------------------------------------------------
 ''    MenuAux_Msg = Format(Now, "hh:mm:ss") & "  Tabla generada." & vbCrLf & _
@@ -742,6 +742,3 @@ End Sub
 'Sub Ejemplo_Selcción_Múltiple()
 '    Union(Cells(44 + 4, 4), Range(Cells(44 + 5, 3), Cells(44 + 3 + 5, 11))).Select
 'End Sub
-
-
-

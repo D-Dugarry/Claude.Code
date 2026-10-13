@@ -12,7 +12,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-13 12:28
 
 Option Explicit
 
@@ -29,9 +29,9 @@ Private Const GWL_Style = (-16)
 ' USO (2026-10-04, patron de Jornadas y Congresos): el boton lo abre, llama a su rutina y lo cierra:
 '      Call Rut_Progreso_Abrir("Titulo")          '- M_90_Rutinas_Menu_Aux: Load + titulo + Show vbModeless
 '      Call RuT_Update_LSGES04_ACont             '- escribe su progreso en ActivForm.Controls("TBx_Informe")
-'      Call Rut_Progreso_Cerrar(control.Tag)     '- informe a APP_Task_Inf y Lo_RibbonUI + Rut_Finalizada
+'      Call Rut_Progreso_Cerrar(control.Tag)     '- informe a App_Task_Inf y Lo_RibbonUI + Rut_Finalizada
 '
-' Antes el boton dejaba el nombre de la rutina en APP_Task_Rut y abria este formulario en modal; su
+' Antes el boton dejaba el nombre de la rutina en App_Task_Rut y abria este formulario en modal; su
 ' UserForm_Activate la buscaba en Tb_Tareas (_Menu_Aux), ponia de titulo el nombre de la tarea y la
 ' lanzaba con Application.Run. Ese camino se ha retirado: el formulario ya no busca ni lanza nada.
 '==================================================================================================

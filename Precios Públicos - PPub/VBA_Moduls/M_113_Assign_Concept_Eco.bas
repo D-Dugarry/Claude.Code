@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_113_Assign_Concept_Eco"
-' Last Rev. 2026-10-05 23:11
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 '                           ¡¡¡  OJO HE MIDIFICADO CONCEPTO ECO. por 1303.00 Y NO 1303 = 1030,00   !!!
 Option Explicit
@@ -26,7 +26,7 @@ Sub RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio(Lo_Data As ListObject)
 '- Antes se filtraba y escribía en la hoja en cada paso, con un bucle celda a celda para ACont_Vto (14 s).
 Debug.Print ">>> RuT_Assign_AnoVto_CtaCCC_ConcepEco_y_TipoEstudio"
     Dim TimeLapSub          As Single:      TimeLapSub = LastTimeLap
-    Dim AnoCont             As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim AnoCont             As Integer:     AnoCont = Prog__APP.Range("App_AnoCont")
     Dim Cont_Fail           As Long
     Dim ContErrFVto         As Long
     Dim rowfind             As Long

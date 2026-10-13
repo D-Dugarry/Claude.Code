@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_111_Del_Null_Reg_G04_ACont"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -13,8 +13,8 @@ Option Explicit
 '        - Borrar Recibos ANULADOS
 '        - Borrar Recibos NO Martrícula
 '        - Borrar Recibos INVALIDADOS
-'        - Filtra Recibos con F_Cob > APP_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
-'        - Borrar Recibos con F_Emi > APP_FechCierreCont "FUERA DEL PERÍODO CONTABLE"
+'        - Filtra Recibos con F_Cob > App_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob
+'        - Borrar Recibos con F_Emi > App_FechCierreCont "FUERA DEL PERÍODO CONTABLE"
 '        - Borrar Incongruencias de Fechas, Recibos Cobrados en Años Anteriores o Posteriores a AnoCont
 
             Sub RuT_Remove_Null_Reg_ByHand()
@@ -41,7 +41,7 @@ Sub RuT_Remove_Reg_No_Valid(Lo_Data As ListObject, _
 '- que el orden importa) que deja juntas al final las filas a borrar, la copia a BD_ErrDate y un solo borrado.
 '- Antes se filtraba, contaba y borraba en la hoja en cada paso (13 s con 172.000 reg.).
 Debug.Print ">>> RuT_Remove_Reg_No_Valid"
-    Dim FechCierreCont  As String:      FechCierreCont = Prog__APP.Range("APP_FechCierreCont")
+    Dim FechCierreCont  As String:      FechCierreCont = Prog__APP.Range("App_FechCierreCont")
     Dim Cierre          As Double:      Cierre = CDbl(CDate(FechCierreCont))
     Dim Sh_Data         As Worksheet:   Set Sh_Data = Lo_Data.Parent
     Dim T               As T_TablaRam
@@ -232,7 +232,7 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
     End If
 
 '- -------------------------------------------------------------------------------------------------
-'-Filtra Recibos con F_Cob > APP_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob -------
+'-Filtra Recibos con F_Cob > App_FechCierreCont y Limpia-Clear las Columnas BD_FCob, BD_ImpCob, BD_FormPag, BD_CtaPag y BD_HTipCob -------
 '-     (en la hoja se vacían al final, celda a celda agrupadas: CTA. CCC y Form. Pago son textos con cifras y Volcar los convertiría)
     Cumple = Fnc_Filtro_Filas(T, BD_FCob, ">", Cierre, Viva)
     rowfind = Fnc_Filas_Contar(Cumple)
@@ -244,18 +244,18 @@ Debug.Print ">>> RuT_Remove_Reg_No_Valid"
             End If
         Next Fila
         '- Visualizo el progreso --------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clear Data Rec. F_Cob > " & Prog__APP.Range("APP_FechCierreCont"), 0, _
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Clear Data Rec. F_Cob > " & Prog__APP.Range("App_FechCierreCont"), 0, _
              Format(rowfind, " #,##0") & " reg. ", " de " & Format(NVivas, "#,##0") & " reg.")
     Else
         '- Visualizo el progreso --------
-        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "No hay Rec. F_Cob > " & Prog__APP.Range("APP_FechCierreCont"), 0)
+        Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "No hay Rec. F_Cob > " & Prog__APP.Range("App_FechCierreCont"), 0)
     End If
 
 '- -------------------------------------------------------------------------------------------------
 '- ----------- Borrar Recibos con fechas FUERA DEL PERÍODO CONTABLE --------------------------------
 '- -------------------------------------------------------------------------------------------------
 '- Borrar Recibos Emitidos en Años Posteriores a AnoCont -------------------------------------------
-'-Filtra Recibos con F_Emi > APP_FechCierreCont y los Borra  ---------------------------------------
+'-Filtra Recibos con F_Emi > App_FechCierreCont y los Borra  ---------------------------------------
 '-     (2026-10-05: antes, si había alguno, una línea de más borraba la tabla entera; ahora se borran solo esos)
     Call Rut_TablaRam_Anotar_Orden(Tandas, Array(BD_FEmi))
     Cumple = Fnc_Filtro_Filas(T, BD_FEmi, ">", Cierre, Viva)

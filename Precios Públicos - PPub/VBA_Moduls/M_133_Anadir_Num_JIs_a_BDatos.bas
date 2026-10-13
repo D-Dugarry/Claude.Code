@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_133_Anadir_Num_JIs_a_BDatos"
-' Last Rev. 2026-10-13 12:02
+' Last Rev. 2026-10-13 12:28
 '2026-02-14
 Option Explicit
 
@@ -7,7 +7,7 @@ Option Explicit
 '- 2026-10-13: con control de errores (Paso, Rut_Off_Functions/Rut_On_Functions) y BDatos protegida al acabar como estaba
 '  (Rut_Prot_Save/Rut_Prot_Restore). Se miran las 6 columnas de JI's (antes solo las 4 primeras: una fila con solo JI 4430 se
 '  saltaba), y JI_Sin_Num ("·-·", recibos sin JI) cuenta como vacío: ya no se copia a BDatos como si fuera un JI. El resultado
-'  queda en APP_Task_Inf. Los JI's de BDatos al informe los pone ya M_130 al calcularlo (antes, M_132).
+'  queda en App_Task_Inf. Los JI's de BDatos al informe los pone ya M_130 al calcularlo (antes, M_132).
 
 ' ==================================================================================================================================
 Sub Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos()
@@ -106,9 +106,9 @@ Fin:
     If Prot_Hecho Then Call Rut_Prot_Restore(Sht__BD, Prot_BD, True)    '- después de Rut_Lo_Totales_Mostrar, que necesita BDatos sin proteger
     Application.DisplayAlerts = True
     If Msg_Error <> "" Then
-        Prog__APP.Range("APP_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & Replace(Msg_Error, vbLf, " ")
+        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & Replace(Msg_Error, vbLf, " ")
     Else
-        Prog__APP.Range("APP_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & N_Filas & _
+        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & N_Filas & _
                                           " filas del informe, " & Format(N_Recibos, "#,##0") & " recibos (" & Format(Timer - T_Ini, "0.0") & " s)"
     End If
     On Error GoTo 0

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_600_Informe_EP_RSm"
-' Last Rev. 2026-09-30 21:12
+' Last Rev. 2026-10-13 12:28
 Option Explicit
 
 ' ==================================================================================================================================
@@ -63,7 +63,7 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
     Plan = "":   CAcad = "":   AnoEmi = 0: Cont_Tot_Reg = 0:
     Range("TP_Cod_Plan") = ""
     Range("TP_Cod_Plan").Select
-'    ActiveCell.Offset(0, 1) = Prog__APP.Range("APP_CursAcad")
+'    ActiveCell.Offset(0, 1) = Prog__APP.Range("App_CursAcad")
 '    ActiveCell.Offset(0, 1).Select
 '    ActiveCell.Offset(0, 1) = " Última actualización: " & Now()
     ActiveCell.Offset(0, 1).Select
@@ -221,18 +221,18 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
                 
                 Case "Añejo"
                         RwInf.Range(IRs_Incidencia) = "Añejo_" & RwEPs.Range(BD_C_Acad)
-                        Anexo = "_Cont" & Right(Prog__APP.Range("APP_AnoCont"), 2) & " Añejo"
+                        Anexo = "_Cont" & Right(Prog__APP.Range("App_AnoCont"), 2) & " Añejo"
                 Case "EjeAnt"
-                        RwInf.Range(IRs_Incidencia) = "Pdte.Cob." & Prog__APP.Range("APP_AnoCont") - 1
+                        RwInf.Range(IRs_Incidencia) = "Pdte.Cob." & Prog__APP.Range("App_AnoCont") - 1
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " Em_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "Emitido"
                         RwInf.Range(IRs_Incidencia) = "Emi Curso_" & RwEPs.Range(BD_C_Acad)
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " Em_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "ADxAplz"
-                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AnoCont")
+                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("App_AnoCont")
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) & " AD_" & Right(RwEPs.Range(BD_C_Acad), 5)
                 Case "Aplazado"
-                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("APP_AnoCont") - 1
+                        RwInf.Range(IRs_Incidencia) = "ADxAplz_" & Prog__APP.Range("App_AnoCont") - 1
                         Anexo = "_Cont" & Right(RwEPs.Range(BD_ACont_Emi), 2) + 1 & " Rm_" & Right(RwEPs.Range(BD_C_Acad), 5)
             End Select
             
@@ -247,13 +247,13 @@ Sub Rut_Recalcular_Tabla_Inf_RSm()    ' ========================================
             If RwEPs.Range(BD_Tipo_Rec) = "Aplazado" Then
                 RwInf.Range(IRs_Descripc) = "LIQ-EP_Plan_" & RwEPs.Range(BD_Plan) & _
                                             "-N Curso_" & RwEPs.Range(BD_C_Acad) & _
-                                            "_AñoCont_" & Prog__APP.Range("APP_AnoCont") & _
+                                            "_AñoCont_" & Prog__APP.Range("App_AnoCont") & _
                                             " TipoRec_Rms443" & _
                                             " - " & RwEPs.Range(BD_NomPlan)
             Else
                 RwInf.Range(IRs_Descripc) = "LIQ-EP_Plan_" & RwEPs.Range(BD_Plan) & _
                                             "-N Curso_" & RwEPs.Range(BD_C_Acad) & _
-                                            "_AñoCont_" & Prog__APP.Range("APP_AnoCont") & _
+                                            "_AñoCont_" & Prog__APP.Range("App_AnoCont") & _
                                             " TipoRec_" & RwEPs.Range(BD_Tipo_Rec) & _
                                             " - " & RwEPs.Range(BD_NomPlan)
             End If
@@ -305,7 +305,7 @@ Rut_Events_Status_Choose ("ON")
 
 MsgBox "Tiempo: " & Round(Timer - H_Inicio, 2) & " seg." & "    Registros: " & Cont_Tot_Reg & "    Planes: " & F_Plan
 
-'Prog__APP.Range("APP_Task_Inf") = "¡¡¡ Proceso concluido con éxito !!!   He tardado: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & _
+'Prog__APP.Range("App_Task_Inf") = "¡¡¡ Proceso concluido con éxito !!!   He tardado: " & Round(Timer - H_Inicio, 2) & " seg." & vbCrLf & _
         "En la Nueva Consulta hay:  " & "  -  Tot.Reg. " & Cont_Tot_Reg & "    Planes: " & F_Plan & vbCrLf & Now()
         
 Rut_On_Functions

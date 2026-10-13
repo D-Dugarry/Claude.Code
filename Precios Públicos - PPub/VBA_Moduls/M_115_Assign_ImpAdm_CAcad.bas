@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_115_Assign_ImpAdm_CAcad"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-26
 Option Explicit
 
@@ -21,11 +21,11 @@ Debug.Print ">>> Rut_Assign_Imp_AdmAcad_C_Acad_Pos"
     Dim Fila            As Long
     Dim TF_LoBDatos     As Long:        TF_LoBDatos = LoBDatos.ListRows.Count
     Dim RowsDel         As Long
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    '- (2026-10-04) Curso Pos, como dice el nombre de la rutina. Antes leía el selector APP_CursAcad: con el selector en el
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    '- (2026-10-04) Curso Pos, como dice el nombre de la rutina. Antes leía el selector App_CursAcad: con el selector en el
     '- curso Ant calculaba el curso que M_215 borra justo después, y el curso Pos se quedaba sin Rec_Imp_*.
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
     Dim PlanDNI_New     As String:
     Dim TxT_ProgIni     As String

@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_211_Del_Null_Reg_CAcadAnt"
-' Last Rev. 2026-10-06 11:50
+' Last Rev. 2026-10-13 12:28
 '2026-01-23
 '- M_211_Remove_Null_Reg_CAcad
 Option Explicit
@@ -37,7 +37,7 @@ Sub RuT_Remove_Null_Reg_CAcad(Lo_G04 As ListObject)
 '- se queda con el último duplicado de cada Ref, así que el orden importa) que deja juntas al final las filas a borrar, y un
 '- solo borrado. Antes se filtraba, contaba y borraba en la hoja en cada paso.
 Debug.Print ">>> RuT_Remove_Null_Reg_CAcad"
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     Dim T               As T_TablaRam
     Dim Viva()          As Boolean          '- La fila sigue en la tabla (las demás ya están borradas en RAM)
     Dim Cumple()        As Boolean
@@ -263,7 +263,7 @@ Aplicar_en_la_Hoja:
         MsgBx_Msg = "¡ A la tabla Lo_G04 no le quedan Recibos procesables !"
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), 0)
-        Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe") & vbLf & vbLf & MsgBx_Msg & Now()
+        Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe") & vbLf & vbLf & MsgBx_Msg & Now()
         Exit Sub
     End If
 

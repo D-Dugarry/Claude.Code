@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_602_Cierre_Contable_PLANES"
-' Last Rev. 2026-10-04 22:17
+' Last Rev. 2026-10-13 12:28
 '2026-01-27
 '- M31_Cierre_Contable_PLANES
 Option Explicit
@@ -22,8 +22,8 @@ End Sub
 '==================================================================================================================================
 Sub RuT_Cierre_Contable_Planes_CAcad_Ant_y_Pos()
 '==================================================================================================================================
-    Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim CursoAcad       As String:      CursoAcad = Prog__APP.Range("App_C_Acad_Pos")
+    Dim CursoAcadAnt    As String:      CursoAcadAnt = Prog__APP.Range("App_C_Acad_Ant")
 
     Dim RngVisible  As Range
     Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
@@ -224,7 +224,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Ant(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String)
 '==================================================================================================================================
-    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("App_AnoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
     Dim Txt_Cabecera    As String
@@ -559,7 +559,7 @@ Sub RuT_Cierre_Contable_Planes_CAcad_Pos(Lo_BD As ListObject, _
                                          CursoAcad As String, _
                                          TipoCurso As String)
 '==================================================================================================================================
-    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("APP_AnoCont")
+    Dim AnoCont         As Integer:     AnoCont = Prog__APP.Range("App_AnoCont")
     Dim Cont            As Long
     Dim ContIni         As Long:        ContIni = 1
     Dim Txt_Cabecera    As String

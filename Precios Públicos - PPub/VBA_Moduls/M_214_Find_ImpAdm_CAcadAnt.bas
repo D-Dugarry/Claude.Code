@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_214_Find_ImpAdm_CAcadAnt"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 '2026-01-25
 Option Explicit
 
@@ -8,7 +8,7 @@ Option Explicit
 '- ----------------------------------------------------------------------------------------------------------------------------
 Sub RuT_Find_Imp_AdmAcad_C_Acad(Lo_Data As ListObject)
                                   
-Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
+Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("App_CursAcad")
     Dim ImpTAcad        As Currency
     Dim ImpTAdm         As Currency
     Dim ImpNegTAdm      As Currency
@@ -18,9 +18,9 @@ Debug.Print ">>> RuT_Find_Imp_AdmAcad_C_Acad" & Prog__APP.Range("APP_CursAcad")
     Dim TF_Bdata        As Long:        TF_Bdata = Lo_Data.ListRows.Count
     Dim RowsDel         As Long
     Dim NAE4            As Long
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad          As String:      C_Acad = Prog__APP.Range("App_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     Dim PlanDNI_Ant     As String:      PlanDNI_Ant = ""
     Dim PlanDNI_New     As String:
     Dim TxT_ProgIni     As String

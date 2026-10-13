@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_120_Update_LSace06_ImpAdm"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-13 12:28
 '- M_120_Update_LSace06_ImpAdm ---------------------------------------------------------------------------------------------------------
 
 Option Explicit
@@ -7,14 +7,14 @@ Option Explicit
 '   Importar el LSace06 "IAdm" del Robot (LSace06_C_Acad_<curso>_IAdm_(<fecha>).xlsx) de los cursos C_Acad_Ant y C_Acad_Pos en la
 '   hoja BD_ImpAdm (Sht__BD_ImpAdm, tabla Lo_ImpAdm). Modelo: M_310 (INSS) + M_311, con los mismos criterios:
 '
-'    - El fichero se localiza solo en la carpeta del Robot (APP_Ruta_Robot_LSc06_Cacad + curso + carpeta de fecha mas reciente);
+'    - El fichero se localiza solo en la carpeta del Robot (App_Ruta_Robot_LSc06_Cacad + curso + carpeta de fecha mas reciente);
 '      si falla, se avisa y se ofrece la fecha anterior, el explorador o no importar ese curso (Fnc_LSace06_Elegir_Fichero, M_311,
 '      con Tipo = "IAdm").
 '    - Se localizan los DOS ficheros antes de tocar nada. Si falta uno, se pregunta: abortar o vaciar BD_ImpAdm y quedarse con un curso.
 '    - Se vacia Lo_ImpAdm entera (informando de los recibos de cada curso) y se importan los dos cursos a continuacion.
 '    - Cada fichero trae UN solo curso: solo se comprueba que sea el pedido. A diferencia del INSS NO se borran los importes
 '      negativos: en IAdm el descuento (DTO_ADM) puede ser negativo y es un dato valido.
-'    - Solo se copian los recibos emitidos o cobrados en el Año Contable (APP_AnoCont).
+'    - Solo se copian los recibos emitidos o cobrados en el Año Contable (App_AnoCont).
 '    - NO se copian los datos a BDatos (otra fase). La col. "Rec found" queda vacia hasta entonces.
 
 '==================================================================================================================================
@@ -22,8 +22,8 @@ Sub RuT_Update_LSace06_CAcad_ImpAdm()  '- Importar LSace06 IAdm (Imp. INSS, Imp.
 '==================================================================================================================================
 Debug.Print "------------------------- >>> RuT_Update_LSace06_CAcad_ImpAdm()"
     Dim Arch_New_Name   As String
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
 
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir, M_90)
 
@@ -129,7 +129,7 @@ Terminar:
     '- Visualizo el progreso --------
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
     Sht__BD_ImpAdm.Calculate
 
 Restablecer_Valores:    '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -161,9 +161,9 @@ Rut_Off_Functions
     Dim Ccol            As Integer
     Dim rowfind         As Variant
     Dim TxT_Progreso    As String
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     Dim Wh_ImpAdm       As Worksheet:   Set Wh_ImpAdm = Lo_ImpAdm.Parent
 
     H_Inicio = Timer                '- Para saber el tiempo de proceso
@@ -286,7 +286,7 @@ Rut_Off_Functions
     Else
         Wh_ImpAdm.Range("c2") = "Última Importación LSace06 IAdm C_Acad_Ant - " & C_Acad_Ant & " - el " & Format(Now(), "dd-mmm-yy hh:mm")
     End If
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LSace06_ImpAdm"
@@ -295,7 +295,7 @@ Exit Sub
 '- Salida de aborto: cierra el ClsBk (si estaba abierto), devuelve "Cancel" y deja el informe cerrado. ------------------------------------
 Abortar_con_Aviso:
     MsgBox MsgBx_Msg, vbExclamation, "Proceso: Importar " & ArchRequest
-    Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
+    Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
     Arch_New_Name = "Cancel"
     If Not ClosedBook Is Nothing Then ClosedBook.Close SaveChanges:=False

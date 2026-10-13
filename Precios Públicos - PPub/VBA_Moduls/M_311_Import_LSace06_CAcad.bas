@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_311_Import_LSace06_CAcad"
-' Last Rev. 2026-10-11 14:20
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -63,9 +63,9 @@ Rut_Off_Functions
     Dim RutaFichLsace06 As String
     Dim Ccol            As Integer
     Dim FichNameINSS    As String
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
     Dim Wh_INSS         As Worksheet:   Set Wh_INSS = Lo_INSS.Parent
     Dim RutaRobot       As String
     Dim RutaAnt         As String
@@ -112,7 +112,7 @@ Rut_Off_Functions
             MsgBx_Title = "Proceso: Importar " & ArchRequest
             MsgBx_Msg = "¡ La Sheet NO existe !    "
             MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-            Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+            Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
             '- Visualizo el progreso
                 Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
             Arch_New_Name = "Cancel"
@@ -139,7 +139,7 @@ Rut_Off_Functions
         MsgBx_Title = "Proceso: Importar " & ArchRequest
         MsgBx_Msg = "¡ La tabla no contiene datos !    "
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-        Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+        Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         '- Visualizo el progreso
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
         Arch_New_Name = "Cancel"
@@ -154,7 +154,7 @@ Rut_Off_Functions
         MsgBx_Title = "Proceso: Importar " & ArchRequest
         MsgBx_Msg = "¡ La cabedera de la tabla no coincide !    " & vbLf & "Puede haber un cambio en la estructura de la Tabla"
         MsgBox MsgBx_Msg, vbExclamation, MsgBx_Title
-        Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+        Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
         '- Visualizo el progreso
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
         Arch_New_Name = "Cancel"
@@ -210,9 +210,9 @@ Rut_Off_Functions
         GoTo Abortar_con_Aviso
     End If
     If C_Acad_Imp = C_Acad_Pos Then
-        Prog__APP.Range("APP_Last_LSace06_CAcadPos") = Format(Now(), "dd-mmm-yy hh:mm")
+        Prog__APP.Range("App_Last_LSace06_CAcadPos") = Format(Now(), "dd-mmm-yy hh:mm")
     Else
-        Prog__APP.Range("APP_Last_LSace06_CAcadAnt") = Format(Now(), "dd-mmm-yy hh:mm")
+        Prog__APP.Range("App_Last_LSace06_CAcadAnt") = Format(Now(), "dd-mmm-yy hh:mm")
     End If
         '- Visualizo el progreso
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(11, " ") & "El LSace06 trae Rec. INSS de " & Text & ": ", 0, _
@@ -293,9 +293,9 @@ Rut_Off_Functions
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(26, " ") & "en BD_INSS Rec. de " & Text, 0, _
                             Format(rowfind, "#,##0") & " reg", "Total: " & Format(Lo_INSS.ListRows.Count, "#,##0") & " reg")
             
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
-    Sht__BD_INSS.Range("c2") = "Úlitma Importación LSace06 C_Acad_Ant - " & C_Acad_Ant & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadAnt")
-    Sht__BD_INSS.Range("c3") = "Úlitma Importación LSace06 C_Acad_Pos - " & C_Acad_Pos & " - el " & Prog__APP.Range("APP_Last_LSace06_CAcadPos")
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Sht__BD_INSS.Range("c2") = "Úlitma Importación LSace06 C_Acad_Ant - " & C_Acad_Ant & " - el " & Prog__APP.Range("App_Last_LSace06_CAcadAnt")
+    Sht__BD_INSS.Range("c3") = "Úlitma Importación LSace06 C_Acad_Pos - " & C_Acad_Pos & " - el " & Prog__APP.Range("App_Last_LSace06_CAcadPos")
 
 Rut_On_Functions
 Debug.Print "<<< Rut_Lo_Import_LoData_LoDefCol_LSace06"
@@ -306,12 +306,12 @@ Proceso_Finalizado_por_quedarse_sin_Registros:
     MsgBx_Msg = "¡ A la tabla Lo_ClsBk_LSace06 no le quedan Recibos procesables !"
 Abortar_con_Aviso:
     MsgBox MsgBx_Msg, vbExclamation, "Proceso: Importar " & ArchRequest
-    Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
+    Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & vbLf & Now()
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
     GoTo Abortar_Cierre
 Cancelado_Usuario:
     MsgBx_Msg = "¡ Cancelado a petición del Usuario !    "
-    Prog__APP.Range("APP_Task_Inf") = Prog__APP.Range("APP_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
+    Prog__APP.Range("App_Task_Inf") = Prog__APP.Range("App_Task_Inf") & vbLf & vbLf & MsgBx_Msg & Now()
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", MsgBx_Msg & vbLf & "Proceso Finalizado. " & Format(Now(), "dd-mmm-yy hh:mm"), LastTimeLap)
 Abortar_Cierre:
     Arch_New_Name = "Cancel"
@@ -333,7 +333,7 @@ End Function
 
 '- ----------------------------------------------------------------------------------------------------------------------------
 '- Localiza el LSace06 INSS de un curso en la carpeta del Robot:
-'-      <APP_Ruta_Robot_LSc06_Cacad>\<curso>\<carpeta de fecha mas reciente>\LSace06_C_Acad_<curso>_INSS_(<fecha>).xlsx
+'-      <App_Ruta_Robot_LSc06_Cacad>\<curso>\<carpeta de fecha mas reciente>\LSace06_C_Acad_<curso>_INSS_(<fecha>).xlsx
 '- Devuelve True y Ruta (completa) si lo encuentra. Si no: False y
 '-      Fallo     = que ha fallado (para el aviso),
 '-      RutaAnt   = fichero de la fecha anterior mas cercana que SI lo tiene (o "" si no hay),
@@ -358,10 +358,10 @@ Function Fnc_LSace06_Robot_Localizar(ByVal C_Acad As String, ByRef Ruta As Strin
 
     '- 1) Ruta configurada ------------------------------------------------------------------------
     On Error Resume Next
-    Base = Trim$(CStr(Prog__APP.Range("APP_Ruta_Robot_LSc06_Cacad").Value))
+    Base = Trim$(CStr(Prog__APP.Range("App_Ruta_Robot_LSc06_Cacad").Value))
     On Error GoTo 0
     If Base = "" Then
-        Fallo = "No está configurada la ruta del Robot LSace06 (nombre APP_Ruta_Robot_LSc06_Cacad, hoja ConfigAPP)."
+        Fallo = "No está configurada la ruta del Robot LSace06 (nombre App_Ruta_Robot_LSc06_Cacad, hoja ConfigAPP)."
         Exit Function
     End If
     Base = Fnc_Format_Ruta(Base)                                    '- Si es una URL de la Red Nexe, la pasa a letra de unidad

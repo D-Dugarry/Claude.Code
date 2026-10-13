@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_315_Copy_INSS_a_BD"
-' Last Rev. 2026-10-08 13:52
+' Last Rev. 2026-10-13 12:28
 'Rev.: 2026-01-22
 Option Explicit
 
@@ -22,9 +22,9 @@ Debug.Print ">>> Rut_Copy_ImpINSS_en_BDatos"
     Dim F_BDINSS        As Long
     Dim Found           As Long:        Found = 0
     Dim NotFound        As Long:        NotFound = 0
-    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("APP_AnoCont")
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
+    Dim AnoCont         As String:      AnoCont = Prog__APP.Range("App_AnoCont")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
     Dim TimeLapSub      As Single:      TimeLapSub = LastTimeLap
     Dim TxT_Progreso    As String
     Dim TxT_ProgIni     As String

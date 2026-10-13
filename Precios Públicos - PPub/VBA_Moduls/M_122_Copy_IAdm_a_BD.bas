@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_122_Copy_IAdm_a_BD"
-' Last Rev. 2026-10-11 17:54
+' Last Rev. 2026-10-13 12:28
 '- M_122_Copy_IAdm_a_BD ---------------------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -18,8 +18,8 @@ Sub Rut_Copy_IAdm_a_BDatos()  '- Copiar Imp. INSS, Imp. Adm., Dto. Adm. y Tot. D
 '==================================================================================================================================
 Debug.Print ">>> Rut_Copy_IAdm_a_BDatos"
 
-    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("APP_C_Acad_Ant")
-    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("APP_C_Acad_Pos")
+    Dim C_Acad_Ant      As String:      C_Acad_Ant = Prog__APP.Range("App_C_Acad_Ant")
+    Dim C_Acad_Pos      As String:      C_Acad_Pos = Prog__APP.Range("App_C_Acad_Pos")
     Dim F_BD            As Long
     Dim F_IAdm          As Long
     Dim Found           As Long
@@ -174,7 +174,7 @@ Debug.Print ">>> Rut_Copy_IAdm_a_BDatos"
         End If
     Next KCurso
 
-    Prog__APP.Range("APP_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
+    Prog__APP.Range("App_Task_Inf") = ActivForm.Controls("TBx_Informe").Text
 
 Restablecer_Valores:
     Call Rut_Lo_Totales_Restaurar(Lo_BD, TotalesVisibles)

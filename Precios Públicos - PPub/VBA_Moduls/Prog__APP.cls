@@ -20,7 +20,3 @@ Private Sub Worksheet_Deactivate()
 Debug.Print "Worksheet_Deactivate - " & ActiveSheet.Name
     Call Rut_Context_Buttons_Restore    '- Restaura las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
 End Sub
-
-
-
-

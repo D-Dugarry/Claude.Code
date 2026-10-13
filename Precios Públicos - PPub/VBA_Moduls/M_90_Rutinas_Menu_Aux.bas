@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_90_Rutinas_Menu_Aux"
-' Last Rev. 2026-10-11 17:19
+' Last Rev. 2026-10-13 12:28
 Option Explicit
 
 '- Estado de protección de las hojas desprotegidas con el botón Protect/UnProtect
@@ -16,10 +16,10 @@ Private Progreso_Hoja           As String     '- hoja activa al abrir el progres
 '
 '      Call Rut_Progreso_Abrir("Titulo de la tarea")
 '      Call RuT_Update_LSGES04_ACont               '- escribe su progreso en ActivForm (= Form_Running_Rut)
-'      Call Rut_Progreso_Cerrar(control.Tag)       '- informe a APP_Task_Inf y a Lo_RibbonUI, fondo verde
+'      Call Rut_Progreso_Cerrar(control.Tag)       '- informe a App_Task_Inf y a Lo_RibbonUI, fondo verde
 '
 '  Sustituye a RuT_Ejecutar_Rut, RuT_Load_Task_Data y RuT_Save_Task_Data, y al camino viejo: el
-'  boton dejaba el nombre de la rutina en APP_Task_Rut y Form_Running_Rut la buscaba en Tb_Tareas
+'  boton dejaba el nombre de la rutina en App_Task_Rut y Form_Running_Rut la buscaba en Tb_Tareas
 '  (_Menu_Aux) y la lanzaba con Application.Run. Como el cierre lo hace el boton, cualquier salida
 '  de la rutina (cancelar un dialogo incluido) deja visible el boton de salida del formulario.
 Public Sub Rut_Progreso_Abrir(ByVal Titulo As String)
@@ -36,7 +36,7 @@ End Sub
 '==================================================================================================
 Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal Volver_Hoja As Boolean = False)
     On Error Resume Next                        '- el cierre no debe fallar aunque la rutina haya dejado algo a medias
-    Prog__APP.Range("APP_Task_Inf") = Form_Running_Rut.TBx_Informe.Text   '- .Text: con el control, 1004 en logs largos
+    Prog__APP.Range("App_Task_Inf") = Form_Running_Rut.TBx_Informe.Text   '- .Text: con el control, 1004 en logs largos
     If Len(Tag) > 0 Then Call Rut_RibbonUI_Guardar_Informe(Tag)
     If Volver_Hoja Then ThisWorkbook.Sheets(Progreso_Hoja).Select
     If Fnc_Get_NestLevel() > 0 Then Call Rut_Reset_State   '- red de seguridad: la rutina se salto algun Rut_On_Functions
@@ -48,10 +48,10 @@ Public Sub Rut_Progreso_Cerrar(Optional ByVal Tag As String = "", Optional ByVal
 End Sub
 '==================================================================================================
 '- Feedback del modulo de copias Rut_Wb_CopSegTimed_USB_HD (skill excel-copseg-backup), que la llama
-'  por su nombre con Application.Run tras cada copia o error: lo deja en APP_Task_Inf, como hacia la
+'  por su nombre con Application.Run tras cada copia o error: lo deja en App_Task_Inf, como hacia la
 '  copia USB antigua. Si se renombra, el modulo de copias deja de llamarla sin avisar.
 Public Sub Rut_CopSeg_Feedback_Host(Msg As String)
-    Prog__APP.Range("APP_Task_Inf") = Msg
+    Prog__APP.Range("App_Task_Inf") = Msg
 End Sub
 '==================================================================================================================================
 '===================================================================================================================================
@@ -59,15 +59,15 @@ Sub Rut_Activar_Programacion()
 Debug.Print "Rut_Activar_Programacion"
     Call RuT_Al_Abrir_WorkBook
     Call Rut_ConfigExcel_RESTABLECER
-    Prog__APP.Range("APP_Task_Inf") = "Estado de Programación Activado  -  " & Now
+    Prog__APP.Range("App_Task_Inf") = "Estado de Programación Activado  -  " & Now
 End Sub
 '===================================================================================================================================
 Sub Rut_Lo_Export_WorkSheet()
 Debug.Print "Rut_Lo_Export_WorkSheet"
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir)
     Call Rut_Lo_Export_WS_Xlsx(Sheets(ActiveSheet.Name), ActiveSheet.Name & "__" & _
-                        Format(Prog__APP.Range("APP_FechCierreCont"), "yyyy-mmm-dd") & "__" & Format(Now(), "(dd-mm-yy hh.mm)"), True, False)
-    Prog__APP.Range("APP_Last_Exp_JIsPPub") = Format(Now(), "dd-mmm-yy hh:mm")
+                        Format(Prog__APP.Range("App_FechCierreCont"), "yyyy-mmm-dd") & "__" & Format(Now(), "(dd-mm-yy hh.mm)"), True, False)
+    Prog__APP.Range("App_Last_Exp_JIsPPub") = Format(Now(), "dd-mmm-yy hh:mm")
 End Sub
 '===================================================================================================================================
 Sub Rut_Lo_Export_Hist_Bdatos()
@@ -75,8 +75,8 @@ Debug.Print "Rut_Lo_Export_Hist_Bdatos"
     Set ActivForm = Form_Running_Rut                      '- lo abre el boton del Ribbon (Rut_Progreso_Abrir)
 '    Call Rut_Lo_Export(Sht__BD, "Histórico_BDatos")
     Call Rut_Lo_Export_WS_Xlsx(Sht__BD, "Histórico_BDatos__a_" & _
-                        Format(Prog__APP.Range("APP_FechCierreCont"), "yyyy-mmm") & "__" & Format(Now(), "(yyyy-mm-dd hhmm)"), False)
-    Prog__APP.Range("APP_Last_BD_Export") = Format(Now(), "dd-mmm-yy hh:mm")
+                        Format(Prog__APP.Range("App_FechCierreCont"), "yyyy-mmm") & "__" & Format(Now(), "(yyyy-mm-dd hhmm)"), False)
+    Prog__APP.Range("App_Last_BD_Export") = Format(Now(), "dd-mmm-yy hh:mm")
     MyRibbon.InvalidateControl "BtnExportBDatos"     '- 1º el Botón, Actualiza solo este Control_ID
 End Sub
 '===================================================================================================================================
@@ -97,9 +97,9 @@ Debug.Print "Rut_Lo_Export_Bdatos"
     H_Inicio = Timer                '- Para saber el tiempo de proceso
     LastTimeLap = Timer             '- Para saber tiempos intermedios
     
-    Dim Arch_New_Name         As String:    Arch_New_Name = "Histórico_BDatos_" & Prog__APP.Range("APP_AnoCont") & "-"
+    Dim Arch_New_Name         As String:    Arch_New_Name = "Histórico_BDatos_" & Prog__APP.Range("App_AnoCont") & "-"
     Call Rut_Lo_Import_LoData_LoDefCol(Lo_BD, Lo_DefCol_BD, DefC_TitColLstObj, Arch_New_Name)
-    Prog__APP.Range("APP_Last_BD_Import") = Format(Now(), "dd-mmm-yy hh:mm")
+    Prog__APP.Range("App_Last_BD_Import") = Format(Now(), "dd-mmm-yy hh:mm")
     
     Sht__BD.Calculate
     Lo_DefCol_BD.ShowTotals = True
@@ -111,13 +111,13 @@ End Sub
 Sub Rut_Reset_App()
     Call Rut_Reset_State            '- Deja a 0 el contador de Rut_Off/On_Functions
     Call RuT_Al_Abrir_WorkBook
-    Prog__APP.Range("APP_Task_Inf") = "App Reset" & vbCrLf & Now
+    Prog__APP.Range("App_Task_Inf") = "App Reset" & vbCrLf & Now
     Call Rut_RibbonUI_Guardar_Informe("Reset")     '- informe en Lo_RibbonUI (supertip de Boss)
 End Sub
 ' ==================================================================================================================================
 Sub Rut_RibbonRefresh()
     Call RefreshRibbon
-    Prog__APP.Range("APP_Task_Inf") = "RibbonX Refreshed " & Now
+    Prog__APP.Range("App_Task_Inf") = "RibbonX Refreshed " & Now
 End Sub
 '===================================================================================================================================
 Sub Rut_Btn_Menu_Aux()
@@ -129,18 +129,18 @@ Sub Rut_Columns_Show_All()
     ActiveSheet.Unprotect
     Columns.EntireColumn.Hidden = False
     Call Rut_Protect_Status_Restore(ThisWorkbook.ActiveSheet)
-    Prog__APP.Range("APP_Task_Inf") = "All columns are visible" & vbCrLf & Now
+    Prog__APP.Range("App_Task_Inf") = "All columns are visible" & vbCrLf & Now
 End Sub
 '===================================================================================================================================
 Sub Rut_OnOff_SW_DelRegNeg()
     If Prog__APP_Switch.Range("Sw_DelRegNeg") Then
         Prog__APP_Switch.Range("Sw_DelRegNeg") = False
         Form_Menu.Lb_SW_DelRegNeg.Visible = False
-        Prog__APP.Range("APP_Task_Inf") = "SW-B DesActivado" & vbCrLf & Now
+        Prog__APP.Range("App_Task_Inf") = "SW-B DesActivado" & vbCrLf & Now
     Else
         Prog__APP_Switch.Range("Sw_DelRegNeg") = True
         Form_Menu.Lb_SW_DelRegNeg.Visible = True
-        Prog__APP.Range("APP_Task_Inf") = "SW-B Activado" & vbCrLf & Now
+        Prog__APP.Range("App_Task_Inf") = "SW-B Activado" & vbCrLf & Now
     End If
 End Sub
 '===================================================================================================================================
@@ -150,7 +150,7 @@ Dim WrkSht          As Worksheet
                 WrkSht.Visible = xlSheetVisible
     Next
     ActiveWindow.DisplayWorkbookTabs = True
-    Prog__APP.Range("APP_Task_Inf") = "All sheets Visible" & vbCrLf & Now
+    Prog__APP.Range("App_Task_Inf") = "All sheets Visible" & vbCrLf & Now
 End Sub
 '===================================================================================================================================
 Sub Rut_Sheets_HideAll()     '- Hide All excep ActiveSheet  ---
@@ -160,7 +160,7 @@ Dim WrkSht          As Worksheet
         If WrkSht.Name <> ActiveSheet.Name Then WrkSht.Visible = xlSheetVeryHidden   'xlSheetVisible   '
     Next
     ActiveWindow.DisplayWorkbookTabs = False
-    Prog__APP.Range("APP_Task_Inf") = "All sheets Hide" & vbCrLf & Now
+    Prog__APP.Range("App_Task_Inf") = "All sheets Hide" & vbCrLf & Now
 End Sub
 '===================================================================================================================================
 '- Alterna la protección de una hoja SIN perder sus permisos (filtrar, ordenar...): al desprotegerla
@@ -201,11 +201,11 @@ Sub Rut_Events_Status_Change()        ' Para permitir las rutinas que se activan
     If Application.EnableEvents Then
         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
         Prog__APP_Switch.Range("Sw_Events") = False
-        Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
+        Prog__APP.Range("App_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
     Else
         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
         Prog__APP_Switch.Range("Sw_Events") = True
-        Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
+        Prog__APP.Range("App_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
     End If
 End Sub
 '===================================================================================================================================
@@ -216,20 +216,20 @@ Sub Rut_Events_Status_Choose(Optional Choose As String = "CHANGE")      ' Para p
                         If Application.EnableEvents Then
                             Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
                             Prog__APP_Switch.Range("Sw_Events") = False
-                            Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
+                            Prog__APP.Range("App_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
                         Else
                             Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
                             Prog__APP_Switch.Range("Sw_Events") = True
-                            Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
+                            Prog__APP.Range("App_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
                         End If
         Case "ON"
                         Application.EnableEvents = True                       ' HABILITA LOS EVENTOS
                         Prog__APP_Switch.Range("Sw_Events") = True
-                        Prog__APP.Range("APP_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
+                        Prog__APP.Range("App_Task_Inf") = "Events Status Change is On" & vbCrLf & Now
         Case "OFF"
                         Application.EnableEvents = False                       ' INHABILITA LOS EVENTOS
                         Prog__APP_Switch.Range("Sw_Events") = False
-                        Prog__APP.Range("APP_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
+                        Prog__APP.Range("App_Task_Inf") = "Events Status Change is OFF" & vbCrLf & Now
     End Select
 End Sub
 '===================================================================================================================================
@@ -263,12 +263,12 @@ MsgBox "Rut_x_Help_ShowHide   -------------- Por ahora está inabiltado"
 '            Next F_Help
 '        End With
 '        ActiveSheet.Shapes("Cuadro_Instrucciones").Visible = True
-'        Prog__APP.Range("APP_Help_State") = "Activados"
-'        Prog__APP.Range("APP_Task_Inf") =   "Estado de Comentarios de Celdas Activado  -  " & Now
+'        Prog__APP.Range("App_Help_State") = "Activados"
+'        Prog__APP.Range("App_Task_Inf") =   "Estado de Comentarios de Celdas Activado  -  " & Now
 '    Else
 '        ActiveSheet.UsedRange.ClearComments
-'        Prog__APP.Range("APP_Help_State") = "Desactivados"
-'        Prog__APP.Range("APP_Task_Inf") =   "Estado de Comentarios de Celdas Desactivado  -  " & Now
+'        Prog__APP.Range("App_Help_State") = "Desactivados"
+'        Prog__APP.Range("App_Task_Inf") =   "Estado de Comentarios de Celdas Desactivado  -  " & Now
 '    End If
 '        'MyRibbon.InvalidateControl "BtnHelpComments"    '- Actualiza solo este botón
 '        'MyRibbon.InvalidateControl "GroupHelp"    '- Actualiza solo este botón
@@ -282,10 +282,10 @@ End Sub
 
 '===================================================================================================================================
 'Sub Rut_OnOff_SW_VerRecNeg()
-'    Prog__APP.Range("APP_VerRecNeg") = Not Prog__APP.Range("APP_VerRecNeg")
-'    If Prog__APP.Range("APP_VerRecNeg") Then Range("Liquid_APP_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_APP_VerRecNeg") = "Ver Rec.Neg."
-'    Call Rut_Liquid_EP_Load(UCase(Range("Liquid_Plan")), Prog__APP.Range("APP_CursAcad"))
-'    Prog__APP.Range("APP_Task_Inf") =   "Visualizar registros negativos: " & Prog__APP.Range("APP_VerRecNeg") & vbCrLf & Now
+'    Prog__APP.Range("App_VerRecNeg") = Not Prog__APP.Range("App_VerRecNeg")
+'    If Prog__APP.Range("App_VerRecNeg") Then Range("Liquid_APP_VerRecNeg") = "Hide Rec.Neg." Else Range("Liquid_APP_VerRecNeg") = "Ver Rec.Neg."
+'    Call Rut_Liquid_EP_Load(UCase(Range("Liquid_Plan")), Prog__APP.Range("App_CursAcad"))
+'    Prog__APP.Range("App_Task_Inf") =   "Visualizar registros negativos: " & Prog__APP.Range("App_VerRecNeg") & vbCrLf & Now
 'End Sub
 '===================================================================================================================================
 '===================================================================================================================================
@@ -298,7 +298,7 @@ End Sub
 '        Next Cont_Col
 'Application.ScreenUpdating = True
 'Solicitudes.Protect
-'Prog__APP.Range("APP_Task_Inf") =   "Columnas Ocultas al Usuario Visibles" & vbCrLf & Now
+'Prog__APP.Range("App_Task_Inf") =   "Columnas Ocultas al Usuario Visibles" & vbCrLf & Now
 'End Sub
 '==================================================================================================================================
 
@@ -318,18 +318,18 @@ End Sub
 '        Pos_Ini = InStr(Cadena, "[[")
 '        Pos_Fin = InStr(Cadena, "]]")
 '        If Pos_Ini * Pos_Fin = 0 Then   '---Controla que existe marca de inicio y fin y que hay algun dato entre marcas
-'            Prog__APP.Range("APP_Task_Inf") =   "Error: No hay lista de Columnas a visualizar, o no empieza por [[, o no acaba por ]]." & vbCrLf & Now
+'            Prog__APP.Range("App_Task_Inf") =   "Error: No hay lista de Columnas a visualizar, o no empieza por [[, o no acaba por ]]." & vbCrLf & Now
 '            Exit Sub
 '        End If
 '
 '        Cadena = Mid(Cadena, Pos_Ini + 2, Pos_Fin - Pos_Ini - 2)    '---extraigo la Cadena
 '        Cadena = Func_Normalizar_Lista_Columnas(Cadena)                           '---si hay espacios, los quito
 '        If Left(Cadena, 5) = "Error" Then
-'            Prog__APP.Range("APP_Task_Inf") =   Cadena & vbCrLf & Now
+'            Prog__APP.Range("App_Task_Inf") =   Cadena & vbCrLf & Now
 '            Exit Sub
 '        End If
 '
-'        Prog__APP.Range("APP_Task_Inf") =   "Lista de Columnas a visualizar: [[" & Cadena & "]]" & vbCrLf & Now
+'        Prog__APP.Range("App_Task_Inf") =   "Lista de Columnas a visualizar: [[" & Cadena & "]]" & vbCrLf & Now
 '        Form_Menu.Tbx_Descripcion = Left(Form_Menu.Tbx_Descripcion, Pos_Ini + 1) & Cadena & Mid(Form_Menu.Tbx_Descripcion, Pos_Fin)
 '
 '        Range(Columns(2), Columns(LastCol_Tb_Solicitudes)).Hidden = True    '---Oculta de la Columna 2 a la última

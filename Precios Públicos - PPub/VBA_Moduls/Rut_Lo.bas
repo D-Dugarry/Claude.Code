@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_Lo"
-' Last Rev. 2026-10-13 00:20
+' Last Rev. 2026-10-13 12:28
 Option Explicit
 
 '- Hojas (por CodeName) cuyas tablas quedan con la fila de totales visible cuando NO tienen fila en Lo_ListObjAPP, ademas de todas
@@ -731,7 +731,7 @@ End Sub
 ' --------------------------------------------------------------------------------------------------
 '###################################################################################################
 ' Borra los nombres ROTOS de todo el libro: los que apuntan a #REF! y los que apuntan a OTRO libro.
-' Son restos de copiar hojas (p. ej. APP_C_Acad_Ant de ambito ConfigMail, que apunta a
+' Son restos de copiar hojas (p. ej. App_C_Acad_Ant de ambito ConfigMail, que apunta a
 ' [EP_202x-2x_BaseDatos-LIQ _V3.xlsm]_ConfigAPP): el de ambito hoja hace sombra al nombre bueno de
 ' ambito libro cuando se lee desde esa hoja. No toca los internos de Excel (_FilterDatabase,
 ' Print_Area...) ni las referencias a tablas (Lo_Organicas[]). Por defecto SOLO LISTA. Desde Inmediato:

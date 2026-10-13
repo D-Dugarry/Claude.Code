@@ -7,7 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-' Last Rev. 2026-10-12 13:05
+' Last Rev. 2026-10-13 12:28
 Option Explicit
 
 Private myRibUI             As IRibbonUI
@@ -51,7 +51,7 @@ Debug.Print "Workbook_Open --------------------------->>> ThisWorkbook "
     
 '    Application.ErrorCheckingOptions.NumberAsText = False
     Form_Usuario.Show
-    Call Rut_RibbonUI_Guardar_Informe("ChangeUser", "Usuario activo: " & Prog__APP.Range("APP_User_Name") & "  -  " & Now)
+    Call Rut_RibbonUI_Guardar_Informe("ChangeUser", "Usuario activo: " & Prog__APP.Range("App_User_Name") & "  -  " & Now)
     Application.CommandBars("Ply").Enabled = True   '- Permite visualizar el Context-Menú Right-ClicK
     Call Rut_Context_Buttons_Hide   '- Oculta las opciones genéricas del Context-Menú Right-ClicK para dejar sólo visible las opciones Custom
     Application.ExecuteExcel4Macro "Show.ToolBar(""Ribbon"",False)"

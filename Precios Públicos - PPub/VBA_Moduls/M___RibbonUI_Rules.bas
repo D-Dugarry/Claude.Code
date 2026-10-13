@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI_Rules"
-' Last Rev. 2026-10-04 13:09
+' Last Rev. 2026-10-13 12:28
 '==================================================================================================
 ' M___RibbonUI_Rules
 '
@@ -27,12 +27,12 @@ Attribute VB_Name = "M___RibbonUI_Rules"
 '   Fnc_SuperTip_Data(Tag)     - array 0..2 (Descripion, Nom_Rut, Informe_Rut) o Empty sin fila.
 '   Fnc_RibbonUI_Rut(Tag)      - Nom_Rut del Tag ("" sin fila). Lo usa el boton RunRutPrueba.
 '   Rut_RibbonUI_Guardar_Informe(Tag, [Texto]) - guarda el informe de la ultima ejecucion en la
-'                    columna Informe_Rut del Tag (Texto o, si se omite, APP_Task_Inf); lo muestra
+'                    columna Informe_Rut del Tag (Texto o, si se omite, App_Task_Inf); lo muestra
 '                    el supertip de Boss. Sin fila, no hace nada.
 '   Rules_Reset                - vacia la cache para que la proxima consulta relea la tabla.
 '   Fnc_Lista_Contiene(Lista, Valor) - True si Valor es un elemento COMPLETO de Lista.
 '
-' REQUIERE: Prog__RibbonUI (Lo_RibbonUI), Prog__APP (APP_User_ID, APP_Task_Inf),
+' REQUIERE: Prog__RibbonUI (Lo_RibbonUI), Prog__APP (App_User_ID, App_Task_Inf),
 '           M_000_Ini_Var_APP (constantes Rib_*).
 '==================================================================================================
 Option Explicit
@@ -90,7 +90,7 @@ Public Function Ribbon_IsVisible(Tag As String) As Boolean
     End If
     If Not Dic_Usuario.Exists(Tag) Then Exit Function      '- un Tag sin fila queda oculto
 
-    Ribbon_IsVisible = Fnc_Lista_Contiene(CStr(Dic_Usuario(Tag)), CStr(Prog__APP.Range("APP_User_ID").Value)) _
+    Ribbon_IsVisible = Fnc_Lista_Contiene(CStr(Dic_Usuario(Tag)), CStr(Prog__APP.Range("App_User_ID").Value)) _
                    And Fnc_Lista_Contiene(CStr(Dic_Hojas(Tag)), ActiveSheet.Name)
     Exit Function
 Fallo:
@@ -123,7 +123,7 @@ Public Sub Rut_RibbonUI_Guardar_Informe(ByVal Tag As String, Optional ByVal Text
     On Error GoTo Fallo
     Pos = Application.Match(Tag, Prog__RibbonUI.ListObjects(1).ListColumns(Rib_Tag).DataBodyRange, 0)
     If IsError(Pos) Then Exit Sub                          '- boton sin fila: no se guarda nada
-    If IsMissing(Texto) Then Texto = Prog__APP.Range("APP_Task_Inf").Value
+    If IsMissing(Texto) Then Texto = Prog__APP.Range("App_Task_Inf").Value
     Informe = Left$(CStr(Texto), 32000)                    '- una celda admite 32.767 caracteres
     If Informe Like "[=+@-]*" Then Informe = "'" & Informe  '- que Excel no lo tome por formula
     Prog__RibbonUI.ListObjects(1).DataBodyRange.Cells(Pos, Rib_Rut_Informe).Value = Informe

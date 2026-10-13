@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-10-12 00:16
+' Last Rev. 2026-10-13 12:28
 Option Explicit
 
 '###################################################################################################################################
@@ -9,7 +9,7 @@ Function Fnc_NEXE_RutaAPP() As String  ' Formatea la Ruta de RED del Excel Actua
     Debug.Print "Fnc_NEXE_RutaAPP: " & Fnc_NEXE_RutaAPP
     If Left(Fnc_NEXE_RutaAPP, 18) = "https://nexe.ua.es" Then
         Fnc_NEXE_RutaAPP = Replace(Fnc_NEXE_RutaAPP, "/", "\")                                        '- Cambio / por \
-        Fnc_NEXE_RutaAPP = Mid(Fnc_NEXE_RutaAPP, InStr(1, Fnc_NEXE_RutaAPP, Prog__APP.Range("APP_User_Mail")) + Len(Prog__APP.Range("APP_User_Mail")))
+        Fnc_NEXE_RutaAPP = Mid(Fnc_NEXE_RutaAPP, InStr(1, Fnc_NEXE_RutaAPP, Prog__APP.Range("App_User_Mail")) + Len(Prog__APP.Range("App_User_Mail")))
         Fnc_NEXE_RutaAPP = Prog__APP.Range("App_User_Unid_Red") & ":" & Fnc_NEXE_RutaAPP                     '- Añado la letra de la Unidad
     End If
 End Function        ' Fnc_Format_Referencia
@@ -24,7 +24,7 @@ Function Fnc_Format_Ruta(Ruta_Red As String) As String  ' Cambia una ruta de la 
     Dim PosMail     As Long
     Fnc_Format_Ruta = Ruta_Red
     If Left(Ruta_Red, 18) <> "https://nexe.ua.es" Then Exit Function
-    Mail = Prog__APP.Range("APP_User_Mail")
+    Mail = Prog__APP.Range("App_User_Mail")
     If Mail = "" Then Exit Function
     PosMail = InStr(1, Ruta_Red, Mail)
     If PosMail = 0 Then Exit Function
