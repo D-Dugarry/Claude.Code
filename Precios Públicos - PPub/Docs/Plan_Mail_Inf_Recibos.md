@@ -408,6 +408,13 @@ tienes abierto, al guardar machacaría el cambio (o al revés).
    - **Filas en `Lo_RibbonUI`:** `Inf_Recibos_Group`, `JIs_Inf_a_BD` y `Mail_Inf_Recibos`, con `Boss,SusanaC,FannyR;RafaG`
      e `Inf_Recibos_TIO`. Volcado (`Lo_RibbonUI_snapshot.csv`) y `Validar_Ribbon.py`: 0 errores.
    - **Formas:** borrada la de `M_132`; la de `M_133` se borra cuando se pruebe el botón.
+   - **Cambio del 2026-10-13, 21:05 (petición del usuario):** los dos botones pasan **dentro del grupo del ábaco**
+     (`ReCalculate_ListObj_Sht_Group`, rotulado «Calc_Inf_Recibos_TIO»), detrás del botón de recalcular; el grupo
+     `Inf_Recibos_Group` desaparece del XML y su fila de `Lo_RibbonUI`, y las de los botones llevan ese `Group-Tag`.
+     Copia previa en `CopiaSeguridad/PPub_BDatos_2026_antes_mover_botones_Inf_Recibos_2026-10-13_2104.xlsm`;
+     `Validar_Ribbon.py`: 0 errores.
+   - **Copia en red, en la carpeta del año contable** (2026-10-13 noche, petición del usuario): `<carpeta>\<App_AnoCont>\`
+     (`...\DOCUMENTOS DUGARRY\2026\`); si no existe, la pregunta lo dice y se crea al copiar. Probado por COM (4 casos).
 5. ⏳ **Pruebas** (sección 5), en los dos ordenadores.
 6. ⏳ **Documentación:** `CLAUDE.md` del proyecto (motor de correo, `ConfigMail`, `M_135`, botones de JIs) y una línea
    en el separador del rango 13 cuando los separadores renombrados estén commiteados. Fila de

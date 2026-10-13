@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-13 20:20
+' Last Rev. 2026-10-13 21:03
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -546,7 +546,8 @@ Debug.Print "OnAct_ReCalculate_ListObj_Sht"
     Call RefreshRibbon                          '- rotulo con la fecha del ultimo calculo
 End Sub
 '------------------------------------------------------------------------------------------
-'- Enviar el Informe de Recibos por correo (grupo Inf_Recibos_Group; Docs/Plan_Mail_Inf_Recibos.md)
+'- Enviar el Informe de Recibos por correo (grupo Calc_Inf_Recibos_TIO, ReCalculate_ListObj_Sht_Group;
+'  Docs/Plan_Mail_Inf_Recibos.md)
 Sub OnAct_Mail_Inf_Recibos(control As IRibbonControl)
 Debug.Print "================== >>> OnAct_Mail_Inf_Recibos"
     Call Rut_Progreso_Abrir("Enviar el Informe de Recibos por correo")
@@ -555,7 +556,8 @@ Debug.Print "================== >>> OnAct_Mail_Inf_Recibos"
 Debug.Print "================== <<< OnAct_Mail_Inf_Recibos"
 End Sub
 '------------------------------------------------------------------------------------------
-'- JI's del Informe de Recibos a BDatos (grupo Inf_Recibos_Group; Docs/Plan_Botones_JIs_Ribbon.md).
+'- JI's del Informe de Recibos a BDatos (grupo Calc_Inf_Recibos_TIO, ReCalculate_ListObj_Sht_Group;
+'  Docs/Plan_Botones_JIs_Ribbon.md).
 '  Sin formulario de progreso, como la forma que sustituye: M_133 deja el resultado en App_Task_Inf.
 Sub OnAct_JIs_Inf_a_BD(control As IRibbonControl)
 Debug.Print "OnAct_JIs_Inf_a_BD"

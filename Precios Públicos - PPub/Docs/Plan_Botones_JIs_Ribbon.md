@@ -13,8 +13,8 @@
 - 🧪 **Botón del Ribbon puesto (2026-10-13)**, con el icono `Copy_JIs`: XML, callback y filas de `Lo_RibbonUI` (sección 5).
   **Falta** importar `M___RibbonUI` y probarlo en Excel; después, borrar la forma «Añadir JI's del Inf. a BD».
 - ✅ Decidido (2026-10-13): las 3 hojas antiguas **se quedan** de momento (D5 = a); **`M_132` se retira** (D6); la
-  **traza de tiempos de `M_130` se quita**. Hecho en el repo; la forma de `M_132` ya está borrada en el libro. Falta
-  quitar el módulo `M_132_Anadir_Num_JIs_al_Inf` del libro e importar el `M_130` sin la traza.
+  **traza de tiempos de `M_130` se quita**. Hecho en el repo y en el libro (el usuario quitó `M_132` e importó `M_130`,
+  `M___RibbonUI` y `M_135`; comprobado con `olevba` a las 21:01).
 
 ## 1. Qué se pide (decisiones del usuario del 2026-10-13)
 
@@ -121,7 +121,9 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 **Hecho el 2026-10-13** (con Excel y el Custom UI Editor cerrados; copia previa en
 `CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm`):
 
-- **XML:** grupo `Inf_Recibos_Group` detrás del ábaco con este botón (icono **`Copy_JIs`**, que ya estaba en el libro) y el
+- **Actualización (21:05, petición del usuario):** los dos botones van **dentro del grupo del ábaco**
+  (`ReCalculate_ListObj_Sht_Group`, «Calc_Inf_Recibos_TIO»), no en un grupo propio; `Inf_Recibos_Group` se quitó.
+- **XML (primera versión):** grupo `Inf_Recibos_Group` detrás del ábaco con este botón (icono **`Copy_JIs`**, que ya estaba en el libro) y el
   de correo (`BtnMail_Inf_Recibos`, icono `Mail`). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del
   plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia `customUI/customUI14.xml`.
 - **Callback** `OnAct_JIs_Inf_a_BD` en `M___RibbonUI`, como el de abajo, con `App_Task_Inf` en vez de `APP_Task_Inf`.

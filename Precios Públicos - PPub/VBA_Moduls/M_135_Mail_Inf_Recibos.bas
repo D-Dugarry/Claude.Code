@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_135_Mail_Inf_Recibos"
-' Last Rev. 2026-10-13 14:13
+' Last Rev. 2026-10-13 21:03
 Option Explicit
 
 '===================================================================================================
@@ -15,7 +15,7 @@ Option Explicit
 ' Subs y funciones públicas:
 '   Fnc_Inf_Recibos_A_Xlsx([ErrMsg])      - Genera el .xlsx en %TEMP% y devuelve su ruta ("" si falla)
 '   Rut_Mail_Inf_Recibos                  - Botón «Enviar por correo»: pregunta, genera el .xlsx, lo
-'                                           copia en la carpeta de red (App_Ruta_Inf_Recibos) si se
+'                                           copia en la carpeta de red (App_Ruta_Inf_Recibos\<año>) si se
 '                                           confirma, y lo envía (lo lanza OnAct_Mail_Inf_Recibos, M___RibbonUI)
 '   Rut_Inf_Recibos_Probar_Xlsx           - Prueba: genera el .xlsx sin enviarlo y lo señala en el
 '                                           Explorador (Inmediato: Call Rut_Inf_Recibos_Probar_Xlsx)
@@ -175,6 +175,8 @@ End Function    ' Fnc_Inf_Recibos_A_Xlsx
 '- Copia en la carpeta de red (2026-10-13): con su propia pregunta, después de la del envío; el .xlsx
 '- se copia en App_Ruta_Inf_Recibos (Fnc_Inf_Recibos_Carpeta_Red) antes de enviarlo. Si la carpeta no
 '- se encuentra, pregunta si se envía el correo de todos modos. Si la copia falla, avisa y envía igual.
+'- Desde el 2026-10-13 (noche), dentro de la subcarpeta del año contable (App_AnoCont):
+'- ...\DOCUMENTOS DUGARRY\2026\. Si no existe, la pregunta lo dice y se crea al copiar.
 Sub Rut_Mail_Inf_Recibos()
     Dim Dest        As String
     Dim DestReal    As String
@@ -193,6 +195,7 @@ Sub Rut_Mail_Inf_Recibos()
     Dim Carpeta_Red As String               '- carpeta de red para la copia ("" si no se encuentra)
     Dim Destino_Red As String               '- el .xlsx en la carpeta de red
     Dim Copiar_Red  As Boolean
+    Dim Crear_Carpeta As Boolean            '- la subcarpeta del año contable no existe: se crea al copiar
     Dim Err_Red     As String
     Dim N_Err       As Long
 
@@ -257,11 +260,16 @@ Sub Rut_Mail_Inf_Recibos()
         End If
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Sin copia en la carpeta de red: " & Replace(Err_Red, vbLf, " "), 0)
     Else
+        '- En la subcarpeta del año contable (petición del usuario, 2026-10-13); si no existe, se crea al copiar
+        If AnoCont <> "" Then Carpeta_Red = Carpeta_Red & "\" & AnoCont
+        Crear_Carpeta = Not Fnc_Inf_Recibos_Existe(Carpeta_Red, True)
         Destino_Red = Carpeta_Red & "\" & Fnc_Inf_Recibos_Nombre() & ".xlsx"
         Pregunta = IIf(SwTest, "MODO PRUEBA (Sw_Test): la carpeta de red es la de verdad." & vbLf & vbLf, "") & _
                    "¿ Copiar también el informe en la carpeta de red ?" & vbLf & vbLf & _
                    Carpeta_Red & vbLf & Mid$(Destino_Red, Len(Carpeta_Red) + 2)
-        If Fnc_Inf_Recibos_Existe(Destino_Red, False) Then
+        If Crear_Carpeta Then
+            Pregunta = Pregunta & vbLf & vbLf & "La carpeta " & AnoCont & " no existe: se creará."
+        ElseIf Fnc_Inf_Recibos_Existe(Destino_Red, False) Then
             Pregunta = Pregunta & vbLf & vbLf & "Ya hay un fichero con ese nombre: se sustituirá."
         End If
         Estilo = vbYesNo + vbQuestion
@@ -284,11 +292,13 @@ Sub Rut_Mail_Inf_Recibos()
     '- La copia en la carpeta de red, antes del envío: si falla, se avisa y el correo se envía igual
     If Copiar_Red Then
         On Error Resume Next
-        FileCopy Ruta, Destino_Red
+        If Crear_Carpeta Then MkDir Carpeta_Red
+        If Err.Number = 0 Then FileCopy Ruta, Destino_Red
         N_Err = Err.Number:     Err_Red = Err.Description
         On Error GoTo 0
         If N_Err = 0 Then
-            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Copiado en la carpeta de red: " & Destino_Red, LastTimeLap)
+            Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", IIf(Crear_Carpeta, "Creada la carpeta " & Carpeta_Red & vbLf, "") & _
+                                 "Copiado en la carpeta de red: " & Destino_Red, LastTimeLap)
         Else
             Call Rut_Mail_Inf_Recibos_Aviso("No se ha podido copiar el informe en la carpeta de red (el correo se envía igual):" & _
                                             vbLf & Destino_Red & vbLf & "Error " & N_Err & ": " & Err_Red & _

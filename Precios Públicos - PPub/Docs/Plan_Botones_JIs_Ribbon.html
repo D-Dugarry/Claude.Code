@@ -69,7 +69,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <ul>
 <li>✅ <strong><code>M_130</code> y <code>M_133</code> cambiados</strong> y probados con una doble ejecución por COM en una copia del libro (sección 4); importados en el libro (comprobado con <code>olevba</code> el 2026-10-13).</li>
 <li>🧪 <strong>Botón del Ribbon puesto (2026-10-13)</strong>, con el icono <code>Copy_JIs</code>: XML, callback y filas de <code>Lo_RibbonUI</code> (sección 5). <strong>Falta</strong> importar <code>M___RibbonUI</code> y probarlo en Excel; después, borrar la forma «Añadir JI's del Inf. a BD».</li>
-<li>✅ Decidido (2026-10-13): las 3 hojas antiguas <strong>se quedan</strong> de momento (D5 = a); <strong><code>M_132</code> se retira</strong> (D6); la <strong>traza de tiempos de <code>M_130</code> se quita</strong>. Hecho en el repo; la forma de <code>M_132</code> ya está borrada en el libro. Falta quitar el módulo <code>M_132_Anadir_Num_JIs_al_Inf</code> del libro e importar el <code>M_130</code> sin la traza.</li>
+<li>✅ Decidido (2026-10-13): las 3 hojas antiguas <strong>se quedan</strong> de momento (D5 = a); <strong><code>M_132</code> se retira</strong> (D6); la <strong>traza de tiempos de <code>M_130</code> se quita</strong>. Hecho en el repo y en el libro (el usuario quitó <code>M_132</code> e importó <code>M_130</code>, <code>M___RibbonUI</code> y <code>M_135</code>; comprobado con <code>olevba</code> a las 21:01).</li>
 </ul>
 <h2>1. Qué se pide (decisiones del usuario del 2026-10-13)</h2>
 <ol>
@@ -149,7 +149,8 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <h2>5. El botón del Ribbon (🧪, puesto el 2026-10-13, falta probarlo en Excel)</h2>
 <p><strong>Hecho el 2026-10-13</strong> (con Excel y el Custom UI Editor cerrados; copia previa en <code>CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm</code>):</p>
 <ul>
-<li><strong>XML:</strong> grupo <code>Inf_Recibos_Group</code> detrás del ábaco con este botón (icono <strong><code>Copy_JIs</code></strong>, que ya estaba en el libro) y el de correo (<code>BtnMail_Inf_Recibos</code>, icono <code>Mail</code>). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia <code>customUI/customUI14.xml</code>.</li>
+<li><strong>Actualización (21:05, petición del usuario):</strong> los dos botones van <strong>dentro del grupo del ábaco</strong> (<code>ReCalculate_ListObj_Sht_Group</code>, «Calc_Inf_Recibos_TIO»), no en un grupo propio; <code>Inf_Recibos_Group</code> se quitó.</li>
+<li><strong>XML (primera versión):</strong> grupo <code>Inf_Recibos_Group</code> detrás del ábaco con este botón (icono <strong><code>Copy_JIs</code></strong>, que ya estaba en el libro) y el de correo (<code>BtnMail_Inf_Recibos</code>, icono <code>Mail</code>). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia <code>customUI/customUI14.xml</code>.</li>
 <li><strong>Callback</strong> <code>OnAct_JIs_Inf_a_BD</code> en <code>M___RibbonUI</code>, como el de abajo, con <code>App_Task_Inf</code> en vez de <code>APP_Task_Inf</code>.</li>
 <li><strong>Filas en <code>Lo_RibbonUI</code></strong>: las dos de la tabla de abajo y la de <code>Mail_Inf_Recibos</code> (<code>Rut_Mail_Inf_Recibos</code>), detrás de las del ábaco. Añadidas por COM en un Excel aparte (eventos y macros apagados).</li>
 <li><strong>Formas:</strong> borrada «Añadir JI's de BD al Inf.» (<code>M_132</code>). Queda «Añadir JI's del Inf. a BD» hasta probar el botón.</li>
