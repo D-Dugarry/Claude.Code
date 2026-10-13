@@ -124,7 +124,7 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 - **Actualización (21:05, petición del usuario):** los dos botones van **dentro del grupo del ábaco**
   (`ReCalculate_ListObj_Sht_Group`, «Calc_Inf_Recibos_TIO»), no en un grupo propio; `Inf_Recibos_Group` se quitó.
 - **XML (primera versión):** grupo `Inf_Recibos_Group` detrás del ábaco con este botón (icono **`Copy_JIs`**, que ya estaba en el libro) y el
-  de correo (`BtnMail_Inf_Recibos`, icono `Mail`). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del
+  de correo (`BtnMail_Inf_Recibos`, icono `Mail`). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» (luego «Prueba en OFF» / «Prueba en ON») del
   plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia `customUI/customUI14.xml`.
 - **Callback** `OnAct_JIs_Inf_a_BD` en `M___RibbonUI`, como el de abajo, con `App_Task_Inf` en vez de `APP_Task_Inf`.
 - **Filas en `Lo_RibbonUI`**: las dos de la tabla de abajo y la de `Mail_Inf_Recibos` (`Rut_Mail_Inf_Recibos`), detrás

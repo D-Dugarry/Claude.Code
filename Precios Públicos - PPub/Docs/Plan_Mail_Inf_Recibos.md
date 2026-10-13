@@ -7,7 +7,7 @@ Además, lo de la sección 7: `M_130`, `M_132`, `M_133` y `Rut_Lo` (`Rut_Names_B
 
 **Etiquetas:** ✅ **Hecho** · 🧪 **Aplicado, falta probarlo en Excel** · ⏳ **Pendiente**
 
-## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba: NO/SÍ» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche); pendiente: importar `M___RibbonUI`, `M_130` y `M_135` y probar los botones (fase 5)
+## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba en OFF/ON» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche); pendiente: importar `M___RibbonUI`, `M_130` y `M_135` y probar los botones (fase 5)
 
 - ✅ Configuración de correo (hoja `ConfigMail`) hecha por el usuario y exportada (`Prog__APP_Mail.cls`).
 - ✅ Sección 7 arreglada el 2026-10-13 en `M_130`, `M_132` y `M_133`, y nueva `Rut_Names_Borrar_Rotos` en `Rut_Lo`.
@@ -365,7 +365,9 @@ tienes abierto, al guardar machacaría el cambio (o al revés).
        prueba…». (El ⚠ no cabe: el `MsgBox` de VBA solo muestra caracteres de Windows-1252.)
      - 🧪 **Las etiquetas del Ribbon** (puestas en el libro el 2026-10-13 noche, junto con la fase 4; falta verlas en
        Excel), que digan el estado: `BtnSW_PruebaON` → **«Prueba: NO»** y `BtnSW_PruebaOFF` →
-       **«Prueba: SÍ»** (solo el `label`; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya
+       **«Prueba: SÍ»**. **A las 22:40 se cambiaron, a petición del usuario, por «Prueba en OFF» (`BtnSW_PruebaON`) y
+       «Prueba en ON» (`BtnSW_PruebaOFF`)**, y la ayuda del botón de correo en `Lo_RibbonUI` dice «Prueba en ON»
+       (solo el `label`; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya
        describen bien estado y acción). Pendiente: el usuario guarda y cierra Excel y confirma que no tiene el
        `customUI14.xml` abierto en el Custom UI Editor; entonces copia del libro en `CopiaSeguridad\`, cambio de las dos
        etiquetas en el zip, verificación de que el resto queda idéntico y aviso al usuario.
