@@ -65,7 +65,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <h1>Plan: enviar por correo el Informe de Recibos (<code>Inf_Recibos_TIO</code>) como <code>.xlsx</code>, y sus botones al Ribbon</h1>
 <p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-12 · <strong>Afecta a:</strong> <code>Rut_Mail_Send</code> (nuevo), <code>M_135_Mail_Inf_Recibos</code> (nuevo), <code>Prog__APP_Mail</code> (hoja nueva, falta exportarla), <code>M___RibbonUI</code> (tres callbacks), <code>customUI14.xml</code> (un grupo con tres botones), <code>Lo_RibbonUI</code> (cuatro filas), nombres rotos (limpieza), documentación. Además, lo de la sección 7: <code>M_130</code>, <code>M_132</code>, <code>M_133</code> y <code>Rut_Lo</code> (<code>Rut_Names_Borrar_Rotos</code>).</p>
 <p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · 🧪 <strong>Aplicado, falta probarlo en Excel</strong> · ⏳ <strong>Pendiente</strong></p>
-<h2>Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; pendiente: etiquetas «Prueba: NO/SÍ» del Ribbon y fase 4 (2026-10-13)</h2>
+<h2>Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba: NO/SÍ» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche); pendiente: importar <code>M___RibbonUI</code>, <code>M_130</code> y <code>M_135</code> y probar los botones (fase 5)</h2>
 <ul>
 <li>✅ Configuración de correo (hoja <code>ConfigMail</code>) hecha por el usuario y exportada (<code>Prog__APP_Mail.cls</code>).</li>
 <li>✅ Sección 7 arreglada el 2026-10-13 en <code>M_130</code>, <code>M_132</code> y <code>M_133</code>, y nueva <code>Rut_Names_Borrar_Rotos</code> en <code>Rut_Lo</code>. <strong>Importados en el libro</strong>: comprobado con <code>olevba</code> en el guardado de las 00:38.</li>
@@ -157,6 +157,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li>Informe final: «Enviado a …» o la causa del fallo. Lo guarda <code>Rut_Progreso_Cerrar</code> en <code>Informe_Rut</code>, y el supertip de Boss enseña así el último envío sin ningún nombre nuevo.</li>
 </ol>
 <h3>3.4 Ribbon: grupo «Informe de Recibos» con tres botones</h3>
+<blockquote><p><strong>Actualizado el 2026-10-13:</strong> al final son <strong>dos</strong> botones (correo y «JI's del Inf. a BD»), porque los JI's de BDatos al informe los pone <code>M_130</code> y <code>M_132</code> se retiró (<code>Docs/Plan_Botones_JIs_Ribbon.md</code>). Lo puesto en el libro está en la fase 4 de la sección 4. Lo de abajo es el diseño original.</p></blockquote>
 <p>⚠️ <strong><code>customUI14.xml</code>: se avisa antes de tocarlo y después.</strong> El Custom UI Editor no deja fichero de bloqueo; si lo tienes abierto, al guardar machacaría el cambio (o al revés).</p>
 <ul>
 <li><strong>XML</strong>: un grupo nuevo junto a <code>ReCalculate_ListObj_Sht_Group</code>, visible solo en <code>Inf_Recibos_TIO</code>. Las imágenes de los botones de JIs se eligen entre las que ya tiene el libro (<code>Table_Add</code>, <code>Import_Blue</code>, <code>Export_JIs</code>…):</li>
@@ -244,7 +245,7 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <li>⚠️ <strong>Envío real por error (2026-10-13, en la primera prueba del usuario desde Inmediato):</strong> el informe llegó a <code>felipe.martinez@…</code> (asunto sin «[PRUEBA]») porque <code>Sw_Test</code> estaba en FALSO. El usuario lo creía activo: en el Ribbon se veía el botón <strong>«Prueba ON»</strong>, que es el que se ve con la prueba <strong>apagada</strong> y significa «pulsa para activarla» (<code>BtnSW_PruebaON</code>, <code>getVisible</code> = <code>Not Sw_Test</code>; con la prueba encendida se ve «Prueba OFF»). El motor hizo lo correcto; la pregunta no avisaba de que el envío era real. Arreglos (decisión del usuario):</li>
 <ul>
 <li>✅ <strong>La pregunta</strong> (en el repo, probada por COM, falta importarla): con un envío real empieza por «¡ ENVÍO REAL !   Va a:  …», con icono de aviso y <strong>«No» por defecto</strong> (<code>vbDefaultButton2</code>: un Intro sin mirar no envía nada); con <code>Sw_Test</code>, «MODO PRUEBA (Sw_Test): irá solo a dugarry@ua.es (no a …)». Ya no usa <code>Func_MsgBox_vbYesNo</code> (que no tiene botón por defecto). El informe del formulario anota «Envío real a …» o «Modo prueba…». (El ⚠ no cabe: el <code>MsgBox</code> de VBA solo muestra caracteres de Windows-1252.)</li>
-<li>⏳ <strong>Las etiquetas del Ribbon</strong>, que digan el estado: <code>BtnSW_PruebaON</code> → <strong>«Prueba: NO»</strong> y <code>BtnSW_PruebaOFF</code> → <strong>«Prueba: SÍ»</strong> (solo el <code>label</code>; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya describen bien estado y acción). Pendiente: el usuario guarda y cierra Excel y confirma que no tiene el <code>customUI14.xml</code> abierto en el Custom UI Editor; entonces copia del libro en <code>CopiaSeguridad\</code>, cambio de las dos etiquetas en el zip, verificación de que el resto queda idéntico y aviso al usuario.</li>
+<li>🧪 <strong>Las etiquetas del Ribbon</strong> (puestas en el libro el 2026-10-13 noche, junto con la fase 4; falta verlas en Excel), que digan el estado: <code>BtnSW_PruebaON</code> → <strong>«Prueba: NO»</strong> y <code>BtnSW_PruebaOFF</code> → <strong>«Prueba: SÍ»</strong> (solo el <code>label</code>; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya describen bien estado y acción). Pendiente: el usuario guarda y cierra Excel y confirma que no tiene el <code>customUI14.xml</code> abierto en el Custom UI Editor; entonces copia del libro en <code>CopiaSeguridad\</code>, cambio de las dos etiquetas en el zip, verificación de que el resto queda idéntico y aviso al usuario.</li>
 </ul>
 <li>🧪 <strong>Copia en la carpeta de red</strong> (petición del usuario, 2026-10-13, escrita desde la sesión de <code>Docs/Plan_Botones_JIs_Ribbon.md</code>):</li>
 <ul>
@@ -271,7 +272,12 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 </ul>
 </ul>
 </ul>
-<li>⏳ <strong>Ribbon:</strong> aviso → XML → aviso; filas en <code>Lo_RibbonUI</code>; volcado y validación; borrar las dos formas.</li>
+<li>🧪 <strong>Ribbon</strong> (2026-10-13 noche, con Excel y el Custom UI Editor cerrados; copia previa en <code>CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm</code>):</li>
+<ul>
+<li><strong>XML:</strong> grupo <code>Inf_Recibos_Group</code> («Informe de Recibos») detrás del ábaco, con dos botones: «JI's del Inf. a BD» (<code>BtnJIs_Inf_a_BD</code>, icono <code>Copy_JIs</code>, <code>OnAct_JIs_Inf_a_BD</code>, de <code>Docs/Plan_Botones_JIs_Ribbon.md</code>) y «Enviar por correo» (<code>BtnMail_Inf_Recibos</code>, icono <code>Mail</code>, <code>OnAct_Mail_Inf_Recibos</code>). Ya no hay botón «JI's de BD al Inf.»: lo hace <code>M_130</code> al calcular, y <code>M_132</code> se retiró. Zip reconstruido y verificado (solo cambia <code>customUI14.xml</code>).</li>
+<li><strong>Filas en <code>Lo_RibbonUI</code>:</strong> <code>Inf_Recibos_Group</code>, <code>JIs_Inf_a_BD</code> y <code>Mail_Inf_Recibos</code>, con <code>Boss,SusanaC,FannyR;RafaG</code> e <code>Inf_Recibos_TIO</code>. Volcado (<code>Lo_RibbonUI_snapshot.csv</code>) y <code>Validar_Ribbon.py</code>: 0 errores.</li>
+<li><strong>Formas:</strong> borrada la de <code>M_132</code>; la de <code>M_133</code> se borra cuando se pruebe el botón.</li>
+</ul>
 <li>⏳ <strong>Pruebas</strong> (sección 5), en los dos ordenadores.</li>
 <li>⏳ <strong>Documentación:</strong> <code>CLAUDE.md</code> del proyecto (motor de correo, <code>ConfigMail</code>, <code>M_135</code>, botones de JIs) y una línea en el separador del rango 13 cuando los separadores renombrados estén commiteados. Fila de <code>Rut_Cambiar_Contrasena_Email</code> en <code>Tb_Tareas</code>.</li>
 </ol>

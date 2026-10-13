@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-10-13 13:18
+' Last Rev. 2026-10-13 20:31
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -40,8 +40,6 @@ Sub Rut_Recalcular_Tabla_Inf_Recibos()
 Debug.Print "Rut_Recalcular_Tabla_Inf_Recibos"
 
     Dim Paso                    As String:      Paso = "leer la configuración y las tablas"   '- para el aviso si algo falla
-    Dim T_Ini                   As Double:      T_Ini = Timer       '- traza de tiempos en Inmediato: Rut_Inf_Recibos_Traza
-    Dim T_Paso                  As Double:      T_Paso = T_Ini
     Dim Msg_Error               As String
     Dim Off_Hecho               As Boolean
     Dim Prot_BD                 As T_Prot_Estado    '- protección de BDatos: Rut_Prot_Save al empezar, Rut_Prot_Restore en Fin
@@ -100,7 +98,7 @@ Dim RwJI            As ListRow
 Dim UltFila     As Integer:     UltFila = Lo_Inf.Range.Row + Lo_Inf.Range.Rows.Count + IIf(Lo_Inf.ShowTotals, 1, 2)
 Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.Count + 2
 
-    Call Rut_Inf_Recibos_Traza(Paso, "preparar las hojas", T_Paso)
+    Paso = "preparar las hojas"
     Call Rut_Off_Functions:     Off_Hecho = True    '- cálculo manual, pantalla y eventos; los restaura Rut_On_Functions en Fin
     Application.DisplayAlerts = False
 
@@ -122,13 +120,13 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     Call Rut_Lo_Sort(Lo_Concept, 1, xlAscending, True)          '- Ordeno por el número de Aplicación-Concepto 1303, 1310, 1311...
     '- BDatos ya no se ordena por Tipo_Rec y Concepto (2026-10-12; unos 7 s): las sumas no dependen del orden, y los módulos que
     '  necesitan un orden lo ponen ellos (limpiando antes los criterios). El orden del informe lo da la ordenación de Lo_Inf.
-    Call Rut_Inf_Recibos_Traza(Paso, "sumar los importes y juntar los JI's de BDatos", T_Paso)
+    Paso = "sumar los importes y juntar los JI's de BDatos"
     Call Rut_Inf_Recibos_Sumas(Lo_BD, Lo_Tipo_Rec, Lo_Concept, Lim_Cierre, APP_AcadPos, APP_AnoCont, Sumas, JIs)
     
     Sht_Inf.Select
     
     '- Vaciar Lo_Inf, Añadir Leyenda con AnoCont y Rellenar Lo_inf ----------------------------------------------
-    Call Rut_Inf_Recibos_Traza(Paso, "vaciar el informe y escribir las cabeceras", T_Paso)
+    Paso = "vaciar el informe y escribir las cabeceras"
     If Not Lo_Inf.DataBodyRange Is Nothing Then Lo_Inf.DataBodyRange.Delete
 
     '-------------- Relleno Tabla para JI's de Tasas por Tipo y por Concepto ------------------------------------
@@ -156,7 +154,7 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
     End With
     
     '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
-    Call Rut_Inf_Recibos_Traza(Paso, "rellenar la tabla", T_Paso)
+    Paso = "rellenar la tabla"
     For F_Tp_Rec = 1 To Lo_Tipo_Rec.ListRows.Count
         
         Tp_Rec = Lo_Tipo_Rec.DataBodyRange.Cells(F_Tp_Rec, 1)
@@ -368,7 +366,7 @@ Sigiente_Concepto:      '- AE 4: sin fila (2026-10-12; antes saltaba a las descr
         Next F_Concept
     Next F_Tp_Rec
     
-    Call Rut_Inf_Recibos_Traza(Paso, "redondear los importes", T_Paso)
+    Paso = "redondear los importes"
     '- Redondear todos los valores a 2 decimales ----------------------
     Dim Lin         As Integer, Col     As Integer
     Dim RngCol      As Range, Celda     As Range
@@ -384,7 +382,7 @@ Sigiente_Concepto:      '- AE 4: sin fila (2026-10-12; antes saltaba a las descr
 SiguienteColumna:
     Next Col
     
-    Call Rut_Inf_Recibos_Traza(Paso, "dar formato al informe y quitar las filas sin importe", T_Paso)
+    Paso = "dar formato al informe y quitar las filas sin importe"
     '- Indento la columna de Descripción de JIs -------------
     Lo_Inf.ListColumns(InfRec_Descrip_JI).DataBodyRange.Select
     Selection.InsertIndent 1
@@ -415,7 +413,7 @@ SiguienteColumna:
     
     '- ------------------------------------------------------
     '- Copio la Tabla explicativa de los Tipos de Recibos: Prog_TipoRec.ListObjects(1) ---
-    Call Rut_Inf_Recibos_Traza(Paso, "copiar la leyenda de los tipos de recibo", T_Paso)
+    Paso = "copiar la leyenda de los tipos de recibo"
     Dim ColIni      As Integer:     ColIni = InfRec_Descrip_JI
     Dim ColFin      As Integer:     ColFin = ColIni + 1
     UltFila = Lo_Inf.TotalsRowRange.Row + 3
@@ -485,7 +483,7 @@ SiguienteColumna:
     End With
     
     '- Filas EURLE (Esc.Univ. Rel.Lab. Elda), las filtro, las copio al final del Informe y las borro de Lo_Inf.
-    Call Rut_Inf_Recibos_Traza(Paso, "separar las filas de EURLE", T_Paso)
+    Paso = "separar las filas de EURLE"
     Dim RowsFind    As Variant
     Dim Rng         As Range
     With Lo_Inf
@@ -502,7 +500,7 @@ SiguienteColumna:
     End With
     
 Finalizar:
-    Call Rut_Inf_Recibos_Traza(Paso, "anotar la fecha del cálculo", T_Paso)
+    Paso = "anotar la fecha del cálculo"
     Call Rut_Lo_Filtros_Quitar(Lo_Inf)
     Sht_Inf.Calculate
     Sht_Inf.Range("d2") = "Último Cálculo: " & Format(Now, "dd mmmm yyyy - hh:mm") & vbLf & "Fecha de cierre contable: " & Prog__APP.Range("App_FechCierreCont") & _
@@ -532,10 +530,7 @@ Fin:
     If Prot_Hecho Then Call Rut_Prot_Restore(Sht__BD, Prot_BD, True)    '- después de Rut_Lo_Totales_Mostrar, que necesita BDatos sin proteger
     Application.DisplayAlerts = True
     On Error GoTo 0
-    Call Rut_Inf_Recibos_Traza(Paso, "restaurar el estado de Excel (Rut_On_Functions)", T_Paso)
     If Off_Hecho Then Call Rut_On_Functions         '- antes, Application.Calculation = Sw_Calculation (Boolean): se ignoraba y quedaba en Manual
-    Call Rut_Inf_Recibos_Traza(Paso, "", T_Paso)
-    Debug.Print "   M_130: TOTAL " & Format(Timer - T_Ini, "0.00") & " s"
     If Msg_Error <> "" Then                         '- el aviso, ya con la pantalla activa
         MsgBox Msg_Error & vbLf & vbLf & "El informe puede haber quedado incompleto: vuelve a calcularlo.", _
                vbExclamation, "Calcular " & Nom_Inf
@@ -731,13 +726,6 @@ Private Function Fnc_Es_Numero_Punto(ByVal Txt As String) As Boolean
     If Len(Txt) - Len(Replace(Txt, ".", "")) > 1 Then Exit Function
     Fnc_Es_Numero_Punto = True
 End Function
-' ----------------------------------------------------------------------------------------------------------------------------------
-'- Traza de tiempos en Inmediato (2026-10-12): al empezar cada paso, escribe lo que ha tardado el anterior.
-Private Sub Rut_Inf_Recibos_Traza(ByRef Paso As String, ByVal Nuevo As String, ByRef T_Paso As Double)
-    Debug.Print "   M_130: " & Format(Timer - T_Paso, "0.00") & " s  " & Paso
-    Paso = Nuevo
-    T_Paso = Timer
-End Sub
 ' ==================================================================================================================================
 'Sub Ejemplo_Selcción_Múltiple()
 '    Union(Cells(44 + 4, 4), Range(Cells(44 + 5, 3), Cells(44 + 3 + 5, 11))).Select

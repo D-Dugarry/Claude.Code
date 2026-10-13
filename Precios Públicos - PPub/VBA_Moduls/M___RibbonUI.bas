@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-13 13:18
+' Last Rev. 2026-10-13 20:20
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -553,6 +553,15 @@ Debug.Print "================== >>> OnAct_Mail_Inf_Recibos"
     Call Rut_Mail_Inf_Recibos
     Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 Debug.Print "================== <<< OnAct_Mail_Inf_Recibos"
+End Sub
+'------------------------------------------------------------------------------------------
+'- JI's del Informe de Recibos a BDatos (grupo Inf_Recibos_Group; Docs/Plan_Botones_JIs_Ribbon.md).
+'  Sin formulario de progreso, como la forma que sustituye: M_133 deja el resultado en App_Task_Inf.
+Sub OnAct_JIs_Inf_a_BD(control As IRibbonControl)
+Debug.Print "OnAct_JIs_Inf_a_BD"
+    Call Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos             '- M_133: deja el resultado en App_Task_Inf
+    Call Rut_RibbonUI_Guardar_Informe(control.Tag)          '- App_Task_Inf -> Informe_Rut (supertip de Boss)
+    Call RefreshRibbon
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________

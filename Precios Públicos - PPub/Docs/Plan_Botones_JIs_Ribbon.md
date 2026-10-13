@@ -8,10 +8,13 @@
 
 ## Estado
 
-- 🧪 **`M_130` y `M_133` cambiados en el repo** y probados con una doble ejecución por COM en una copia del libro (sección 4).
-  **Falta importarlos en el libro.**
-- ⏳ El botón del Ribbon espera el icono (D3).
-- ⏳ Por decidir: D5 (hojas antiguas del informe) y D6 (retirar `M_132`).
+- ✅ **`M_130` y `M_133` cambiados** y probados con una doble ejecución por COM en una copia del libro (sección 4);
+  importados en el libro (comprobado con `olevba` el 2026-10-13).
+- 🧪 **Botón del Ribbon puesto (2026-10-13)**, con el icono `Copy_JIs`: XML, callback y filas de `Lo_RibbonUI` (sección 5).
+  **Falta** importar `M___RibbonUI` y probarlo en Excel; después, borrar la forma «Añadir JI's del Inf. a BD».
+- ✅ Decidido (2026-10-13): las 3 hojas antiguas **se quedan** de momento (D5 = a); **`M_132` se retira** (D6); la
+  **traza de tiempos de `M_130` se quita**. Hecho en el repo; la forma de `M_132` ya está borrada en el libro. Falta
+  quitar el módulo `M_132_Anadir_Num_JIs_al_Inf` del libro e importar el `M_130` sin la traza.
 
 ## 1. Qué se pide (decisiones del usuario del 2026-10-13)
 
@@ -113,7 +116,21 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 - **Al acabar:** BDatos protegida (antes, sin proteger), el contador de `Rut_Off_Functions` a 0, sin filtros y con las
   filas de totales visibles.
 
-## 5. El botón del Ribbon (⏳, espera D3)
+## 5. El botón del Ribbon (🧪, puesto el 2026-10-13, falta probarlo en Excel)
+
+**Hecho el 2026-10-13** (con Excel y el Custom UI Editor cerrados; copia previa en
+`CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm`):
+
+- **XML:** grupo `Inf_Recibos_Group` detrás del ábaco con este botón (icono **`Copy_JIs`**, que ya estaba en el libro) y el
+  de correo (`BtnMail_Inf_Recibos`, icono `Mail`). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del
+  plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia `customUI/customUI14.xml`.
+- **Callback** `OnAct_JIs_Inf_a_BD` en `M___RibbonUI`, como el de abajo, con `App_Task_Inf` en vez de `APP_Task_Inf`.
+- **Filas en `Lo_RibbonUI`**: las dos de la tabla de abajo y la de `Mail_Inf_Recibos` (`Rut_Mail_Inf_Recibos`), detrás
+  de las del ábaco. Añadidas por COM en un Excel aparte (eventos y macros apagados).
+- **Formas:** borrada «Añadir JI's de BD al Inf.» (`M_132`). Queda «Añadir JI's del Inf. a BD» hasta probar el botón.
+- `Validar_Ribbon.py`: 0 errores (5 avisos que ya estaban).
+
+Lo que se preveía:
 
 ⚠️ **`customUI14.xml`: aviso antes y después** (el Custom UI Editor no deja fichero de bloqueo).
 
@@ -154,8 +171,11 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 
 ## 6. Orden de trabajo
 
+**Estado (2026-10-13 noche):** pasos 1, 2 (salvo quitar `M_132` del libro) y 3 hechos, falta probar el botón; el
+cierre del paso 4, hecho (`CLAUDE.md`, el plan del correo, volcado, validación y commit).
+
 1. ✅ **(yo)** `M_130` y `M_133` en el repo, probados por COM (sección 4).
-2. ⏳ **(usuario)** Decidir D6. Después:
+2. ✅ **(usuario)** D6 = retirar `M_132`. Después:
    - importar `M_130_Gen_Inf_Recibos` y `M_133_Anadir_Num_JIs_a_BDatos`;
    - si D6 = retirar, quitar `M_132_Anadir_Num_JIs_al_Inf`;
    - borrar la forma «Añadir JI's de BD al Inf.»;
@@ -174,11 +194,12 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 
 1. ✅ **D1. Pregunta de Enseñanzas Propias:** quitada. `M_130` no pregunta nada.
 2. ✅ **D2. Formulario de progreso:** no.
-3. ⏳ **D3. Icono del botón.** Propuesta: `FichExport` (una figura que se lleva un fichero), que no usa ningún botón.
-   Alternativa: `Table_Add` (dos tablas con una flecha). No conviene `Import`, `Export` ni `Import_Blue`, que son de
-   los botones de BDatos.
+3. ✅ **D3. Icono del botón:** `Copy_JIs` (elegido por el usuario el 2026-10-13; ya estaba entre las imágenes del
+   Ribbon del libro).
 4. ✅ **D4. Rótulo:** «JI's del Inf. a BD».
-5. ⏳ **D5. Hojas antiguas del informe.** En el libro hay tres copias viejas del informe, **muy ocultas** (no salen en
+5. ✅ **D5. Hojas antiguas del informe: a), se quedan como están** (el usuario las mirará más adelante, 2026-10-13).
+   Ojo: la forma «Añadir JI's de BD al Inf.» de `Inf_Recibos_TIO (2)` dará «No se puede ejecutar la macro» en cuanto
+   se quite `M_132` del libro. En el libro hay tres copias viejas del informe, **muy ocultas** (no salen en
    las pestañas). **Sí salen en el menú de hojas del Ribbon** («Select Sheets»), que lista todas las hojas cuyo
    CodeName empieza por `Sht__BD` o `Sht__Inf`, y «Show All» las enseña.
 
@@ -203,8 +224,8 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 
    Recomendación: **b)** como mínimo, para que no quede ningún botón viejo que se pueda pulsar desde otra hoja; **c)** si
    no las quieres como histórico.
-6. ⏳ **D6. Retirar `M_132`** (recomendado): quitar el módulo del libro y el `.bas` del repo. Con 3.1 no lo llama nada,
-   en cuanto se borre su forma. Sin `M_132`, la pregunta de D1 desaparece con él.
+6. ✅ **D6. Retirar `M_132`: sí** (2026-10-13). `.bas` fuera del repo y su forma de `Inf_Recibos_TIO` borrada; el módulo
+   lo quita del libro el usuario. Sin `M_132`, la pregunta de D1 desaparece con él.
 
 ## 8. Visto y sin tocar
 
@@ -214,4 +235,5 @@ En dos copias del libro guardado a las 11:46, cada una en una instancia de Excel
 - **`M_133` escribe los JI's con `.Value`, y las columnas de JI's de BDatos tienen formato General.** Un JI escrito
   como «2026-1» se convertiría en fecha: en BDatos, y ya en el propio informe al teclearlo, si la celda no tiene
   formato de texto. Los JI's de hoy son del tipo «2025-6217» y no se convierten.
-- La traza de tiempos de `M_130` en Inmediato (`Rut_Inf_Recibos_Traza`) sigue pendiente de decidir si se quita.
+- La traza de tiempos de `M_130` en Inmediato (`Rut_Inf_Recibos_Traza`) **se quitó el 2026-10-13** (decisión del
+  usuario). Sus llamadas pasaron a `Paso = "..."`, que es lo que dice el aviso de error.

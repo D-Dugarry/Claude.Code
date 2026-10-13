@@ -67,9 +67,9 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · 🧪 <strong>Aplicado, falta probarlo en Excel</strong> · ⏳ <strong>Pendiente</strong></p>
 <h2>Estado</h2>
 <ul>
-<li>🧪 <strong><code>M_130</code> y <code>M_133</code> cambiados en el repo</strong> y probados con una doble ejecución por COM en una copia del libro (sección 4). <strong>Falta importarlos en el libro.</strong></li>
-<li>⏳ El botón del Ribbon espera el icono (D3).</li>
-<li>⏳ Por decidir: D5 (hojas antiguas del informe) y D6 (retirar <code>M_132</code>).</li>
+<li>✅ <strong><code>M_130</code> y <code>M_133</code> cambiados</strong> y probados con una doble ejecución por COM en una copia del libro (sección 4); importados en el libro (comprobado con <code>olevba</code> el 2026-10-13).</li>
+<li>🧪 <strong>Botón del Ribbon puesto (2026-10-13)</strong>, con el icono <code>Copy_JIs</code>: XML, callback y filas de <code>Lo_RibbonUI</code> (sección 5). <strong>Falta</strong> importar <code>M___RibbonUI</code> y probarlo en Excel; después, borrar la forma «Añadir JI's del Inf. a BD».</li>
+<li>✅ Decidido (2026-10-13): las 3 hojas antiguas <strong>se quedan</strong> de momento (D5 = a); <strong><code>M_132</code> se retira</strong> (D6); la <strong>traza de tiempos de <code>M_130</code> se quita</strong>. Hecho en el repo; la forma de <code>M_132</code> ya está borrada en el libro. Falta quitar el módulo <code>M_132_Anadir_Num_JIs_al_Inf</code> del libro e importar el <code>M_130</code> sin la traza.</li>
 </ul>
 <h2>1. Qué se pide (decisiones del usuario del 2026-10-13)</h2>
 <ol>
@@ -146,7 +146,16 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <ul>
 <li><strong>Al acabar:</strong> BDatos protegida (antes, sin proteger), el contador de <code>Rut_Off_Functions</code> a 0, sin filtros y con las filas de totales visibles.</li>
 </ul>
-<h2>5. El botón del Ribbon (⏳, espera D3)</h2>
+<h2>5. El botón del Ribbon (🧪, puesto el 2026-10-13, falta probarlo en Excel)</h2>
+<p><strong>Hecho el 2026-10-13</strong> (con Excel y el Custom UI Editor cerrados; copia previa en <code>CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm</code>):</p>
+<ul>
+<li><strong>XML:</strong> grupo <code>Inf_Recibos_Group</code> detrás del ábaco con este botón (icono <strong><code>Copy_JIs</code></strong>, que ya estaba en el libro) y el de correo (<code>BtnMail_Inf_Recibos</code>, icono <code>Mail</code>). En la misma edición, las etiquetas «Prueba: NO» / «Prueba: SÍ» del plan del correo. Zip reconstruido y verificado: de 333 entradas solo cambia <code>customUI/customUI14.xml</code>.</li>
+<li><strong>Callback</strong> <code>OnAct_JIs_Inf_a_BD</code> en <code>M___RibbonUI</code>, como el de abajo, con <code>App_Task_Inf</code> en vez de <code>APP_Task_Inf</code>.</li>
+<li><strong>Filas en <code>Lo_RibbonUI</code></strong>: las dos de la tabla de abajo y la de <code>Mail_Inf_Recibos</code> (<code>Rut_Mail_Inf_Recibos</code>), detrás de las del ábaco. Añadidas por COM en un Excel aparte (eventos y macros apagados).</li>
+<li><strong>Formas:</strong> borrada «Añadir JI's de BD al Inf.» (<code>M_132</code>). Queda «Añadir JI's del Inf. a BD» hasta probar el botón.</li>
+<li><code>Validar_Ribbon.py</code>: 0 errores (5 avisos que ya estaban).</li>
+</ul>
+<p>Lo que se preveía:</p>
 <p>⚠️ <strong><code>customUI14.xml</code>: aviso antes y después</strong> (el Custom UI Editor no deja fichero de bloqueo).</p>
 <ul>
 <li><strong>XML</strong>, en <code>TabUserMenu</code>, detrás del grupo del ábaco (<code>ReCalculate_ListObj_Sht_Group</code>). El botón de correo se añadirá a este grupo:</li>
@@ -174,9 +183,10 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 </ul>
 <div class="tw"><table><thead><tr><th><code>Uribbon-Tags</code></th><th><code>Nom_Rut</code></th><th><code>Descripion</code></th></tr></thead><tbody><tr><td><code>Inf_Recibos_Group</code></td><td></td><td>Botones del Informe de Recibos.</td></tr><tr><td><code>JIs_Inf_a_BD</code></td><td><code>Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos</code></td><td>Escribe en los recibos de BDatos los JI's y AD's del informe, por tipo de recibo y concepto. Solo las filas con algún JI; en ellas, una celda vacía o con «·-·» vacía esa columna en sus recibos. Los JI's de BDatos al informe los pone el cálculo del informe (ábaco).</td></tr></tbody></table></div>
 <h2>6. Orden de trabajo</h2>
+<p><strong>Estado (2026-10-13 noche):</strong> pasos 1, 2 (salvo quitar <code>M_132</code> del libro) y 3 hechos, falta probar el botón; el cierre del paso 4, hecho (<code>CLAUDE.md</code>, el plan del correo, volcado, validación y commit).</p>
 <ol>
 <li>✅ <strong>(yo)</strong> <code>M_130</code> y <code>M_133</code> en el repo, probados por COM (sección 4).</li>
-<li>⏳ <strong>(usuario)</strong> Decidir D6. Después:</li>
+<li>✅ <strong>(usuario)</strong> D6 = retirar <code>M_132</code>. Después:</li>
 <ul>
 <li>importar <code>M_130_Gen_Inf_Recibos</code> y <code>M_133_Anadir_Num_JIs_a_BDatos</code>;</li>
 <li>si D6 = retirar, quitar <code>M_132_Anadir_Num_JIs_al_Inf</code>;</li>
@@ -199,9 +209,9 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 <ol>
 <li>✅ <strong>D1. Pregunta de Enseñanzas Propias:</strong> quitada. <code>M_130</code> no pregunta nada.</li>
 <li>✅ <strong>D2. Formulario de progreso:</strong> no.</li>
-<li>⏳ <strong>D3. Icono del botón.</strong> Propuesta: <code>FichExport</code> (una figura que se lleva un fichero), que no usa ningún botón. Alternativa: <code>Table_Add</code> (dos tablas con una flecha). No conviene <code>Import</code>, <code>Export</code> ni <code>Import_Blue</code>, que son de los botones de BDatos.</li>
+<li>✅ <strong>D3. Icono del botón:</strong> <code>Copy_JIs</code> (elegido por el usuario el 2026-10-13; ya estaba entre las imágenes del Ribbon del libro).</li>
 <li>✅ <strong>D4. Rótulo:</strong> «JI's del Inf. a BD».</li>
-<li>⏳ <strong>D5. Hojas antiguas del informe.</strong> En el libro hay tres copias viejas del informe, <strong>muy ocultas</strong> (no salen en las pestañas). <strong>Sí salen en el menú de hojas del Ribbon</strong> («Select Sheets»), que lista todas las hojas cuyo CodeName empieza por <code>Sht__BD</code> o <code>Sht__Inf</code>, y «Show All» las enseña.</li>
+<li>✅ <strong>D5. Hojas antiguas del informe: a), se quedan como están</strong> (el usuario las mirará más adelante, 2026-10-13). Ojo: la forma «Añadir JI's de BD al Inf.» de <code>Inf_Recibos_TIO (2)</code> dará «No se puede ejecutar la macro» en cuanto se quite <code>M_132</code> del libro. En el libro hay tres copias viejas del informe, <strong>muy ocultas</strong> (no salen en las pestañas). <strong>Sí salen en el menú de hojas del Ribbon</strong> («Select Sheets»), que lista todas las hojas cuyo CodeName empieza por <code>Sht__BD</code> o <code>Sht__Inf</code>, y «Show All» las enseña.</li>
 </ol>
 <div class="tw"><table><thead><tr><th>Hoja</th><th>CodeName</th><th>Calculada</th><th>Qué tiene</th></tr></thead><tbody><tr><td><code>Inf_Recibos_TIO (2)</code></td><td><code>Sht__Inf_Recibos_TIO1</code></td><td>17-feb-2026</td><td>El informe de entonces y las <strong>3 formas de entonces</strong>: «Recalcular Tabla» (<code>M_130</code>), «Añadir JI's de BD al Inf.» (<code>M_132</code>) y «Añadir JI's del Inf. a BD» (<code>M_133</code>). No está en ninguna tabla de configuración ni tiene <code>.cls</code> en <code>VBA_Moduls/</code></td></tr><tr><td><code>Inf_Recibos_TIO y EP</code></td><td><code>Sht__Inf_Recibos_TIOyEP</code></td><td>15-feb-2026</td><td>El informe con las filas de Enseñanzas Propias, sin formas. Tiene fila en <code>Prog_Hojas_Names</code> y en <code>Lo_ListObjAPP</code></td></tr><tr><td><code>Inf_RecibosJIs</code></td><td><code>Sht__Inf_RecibosJIs</code></td><td>23-dic-2025</td><td>Un informe anterior, sin formas. Tiene fila en <code>Prog_Hojas_Names</code> y en <code>Lo_ListObjAPP</code></td></tr></tbody></table></div>
 <p>Nada las lee: ni código, ni fórmulas, ni nombres. Son fotos de valores de aquellas fechas. Con este plan solo importa la primera, porque sus formas siguen vivas:</p>
@@ -221,13 +231,13 @@ footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
 </ul>
 <p>Recomendación: <strong>b)</strong> como mínimo, para que no quede ningún botón viejo que se pueda pulsar desde otra hoja; <strong>c)</strong> si no las quieres como histórico.</p>
 <ol>
-<li>⏳ <strong>D6. Retirar <code>M_132</code></strong> (recomendado): quitar el módulo del libro y el <code>.bas</code> del repo. Con 3.1 no lo llama nada, en cuanto se borre su forma. Sin <code>M_132</code>, la pregunta de D1 desaparece con él.</li>
+<li>✅ <strong>D6. Retirar <code>M_132</code>: sí</strong> (2026-10-13). <code>.bas</code> fuera del repo y su forma de <code>Inf_Recibos_TIO</code> borrada; el módulo lo quita del libro el usuario. Sin <code>M_132</code>, la pregunta de D1 desaparece con él.</li>
 </ol>
 <h2>8. Visto y sin tocar</h2>
 <ul>
 <li><strong><code>Rut_Lo_WrkSht_Preparar</code> desprotege la hoja que prepara y no la vuelve a proteger.</strong> BDatos se queda sin proteger tras casi cualquier proceso (<code>M_110</code>, <code>M_210</code>…), no solo tras los de JI's. <code>M_130</code> y <code>M_133</code> ya la dejan como estaba, porque guardan su estado antes de llamar a <code>Preparar</code>; el resto, sin tocar.</li>
 <li><strong><code>M_133</code> escribe los JI's con <code>.Value</code>, y las columnas de JI's de BDatos tienen formato General.</strong> Un JI escrito como «2026-1» se convertiría en fecha: en BDatos, y ya en el propio informe al teclearlo, si la celda no tiene formato de texto. Los JI's de hoy son del tipo «2025-6217» y no se convierten.</li>
-<li>La traza de tiempos de <code>M_130</code> en Inmediato (<code>Rut_Inf_Recibos_Traza</code>) sigue pendiente de decidir si se quita.</li>
+<li>La traza de tiempos de <code>M_130</code> en Inmediato (<code>Rut_Inf_Recibos_Traza</code>) <strong>se quitó el 2026-10-13</strong> (decisión del usuario). Sus llamadas pasaron a <code>Paso = "..."</code>, que es lo que dice el aviso de error.</li>
 </ul>
 </article></main>
 <footer>Generado desde <code>Plan_Botones_JIs_Ribbon.md</code> con <code>md2html.py</code> &middot;

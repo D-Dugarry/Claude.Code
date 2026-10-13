@@ -7,7 +7,7 @@ Además, lo de la sección 7: `M_130`, `M_132`, `M_133` y `Rut_Lo` (`Rut_Names_B
 
 **Etiquetas:** ✅ **Hecho** · 🧪 **Aplicado, falta probarlo en Excel** · ⏳ **Pendiente**
 
-## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; pendiente: etiquetas «Prueba: NO/SÍ» del Ribbon y fase 4 (2026-10-13)
+## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba: NO/SÍ» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche); pendiente: importar `M___RibbonUI`, `M_130` y `M_135` y probar los botones (fase 5)
 
 - ✅ Configuración de correo (hoja `ConfigMail`) hecha por el usuario y exportada (`Prog__APP_Mail.cls`).
 - ✅ Sección 7 arreglada el 2026-10-13 en `M_130`, `M_132` y `M_133`, y nueva `Rut_Names_Borrar_Rotos` en `Rut_Lo`.
@@ -201,6 +201,10 @@ la configuración y la firma son las de JyC, así que se porta **el motor de JyC
 
 ### 3.4 Ribbon: grupo «Informe de Recibos» con tres botones
 
+> **Actualizado el 2026-10-13:** al final son **dos** botones (correo y «JI's del Inf. a BD»), porque los JI's de BDatos
+> al informe los pone `M_130` y `M_132` se retiró (`Docs/Plan_Botones_JIs_Ribbon.md`). Lo puesto en el libro está en la
+> fase 4 de la sección 4. Lo de abajo es el diseño original.
+
 ⚠️ **`customUI14.xml`: se avisa antes de tocarlo y después.** El Custom UI Editor no deja fichero de bloqueo; si lo
 tienes abierto, al guardar machacaría el cambio (o al revés).
 
@@ -359,7 +363,8 @@ tienes abierto, al guardar machacaría el cambio (o al revés).
        envía nada); con `Sw_Test`, «MODO PRUEBA (Sw_Test): irá solo a dugarry@ua.es (no a …)». Ya no usa
        `Func_MsgBox_vbYesNo` (que no tiene botón por defecto). El informe del formulario anota «Envío real a …» o «Modo
        prueba…». (El ⚠ no cabe: el `MsgBox` de VBA solo muestra caracteres de Windows-1252.)
-     - ⏳ **Las etiquetas del Ribbon**, que digan el estado: `BtnSW_PruebaON` → **«Prueba: NO»** y `BtnSW_PruebaOFF` →
+     - 🧪 **Las etiquetas del Ribbon** (puestas en el libro el 2026-10-13 noche, junto con la fase 4; falta verlas en
+       Excel), que digan el estado: `BtnSW_PruebaON` → **«Prueba: NO»** y `BtnSW_PruebaOFF` →
        **«Prueba: SÍ»** (solo el `label`; las ayudas «Activar/Desactivar SW_Prueba» y las del menú contextual ya
        describen bien estado y acción). Pendiente: el usuario guarda y cierra Excel y confirma que no tiene el
        `customUI14.xml` abierto en el Custom UI Editor; entonces copia del libro en `CopiaSeguridad\`, cambio de las dos
@@ -394,7 +399,15 @@ tienes abierto, al guardar machacaría el cambio (o al revés).
        - `C10` vacía;
        - la ruta real de `C10`: `Y:\Espai_ServConta\…\DOCUMENTOS DUGARRY` existe y se pregunta bien. Se contestó «No»:
          no se escribió nada en Nexe.
-4. ⏳ **Ribbon:** aviso → XML → aviso; filas en `Lo_RibbonUI`; volcado y validación; borrar las dos formas.
+4. 🧪 **Ribbon** (2026-10-13 noche, con Excel y el Custom UI Editor cerrados; copia previa en
+   `CopiaSeguridad/PPub_BDatos_2026_antes_Ribbon_Inf_Recibos_2026-10-13_2028.xlsm`):
+   - **XML:** grupo `Inf_Recibos_Group` («Informe de Recibos») detrás del ábaco, con dos botones: «JI's del Inf. a BD»
+     (`BtnJIs_Inf_a_BD`, icono `Copy_JIs`, `OnAct_JIs_Inf_a_BD`, de `Docs/Plan_Botones_JIs_Ribbon.md`) y «Enviar por
+     correo» (`BtnMail_Inf_Recibos`, icono `Mail`, `OnAct_Mail_Inf_Recibos`). Ya no hay botón «JI's de BD al Inf.»: lo
+     hace `M_130` al calcular, y `M_132` se retiró. Zip reconstruido y verificado (solo cambia `customUI14.xml`).
+   - **Filas en `Lo_RibbonUI`:** `Inf_Recibos_Group`, `JIs_Inf_a_BD` y `Mail_Inf_Recibos`, con `Boss,SusanaC,FannyR;RafaG`
+     e `Inf_Recibos_TIO`. Volcado (`Lo_RibbonUI_snapshot.csv`) y `Validar_Ribbon.py`: 0 errores.
+   - **Formas:** borrada la de `M_132`; la de `M_133` se borra cuando se pruebe el botón.
 5. ⏳ **Pruebas** (sección 5), en los dos ordenadores.
 6. ⏳ **Documentación:** `CLAUDE.md` del proyecto (motor de correo, `ConfigMail`, `M_135`, botones de JIs) y una línea
    en el separador del rango 13 cuando los separadores renombrados estén commiteados. Fila de
