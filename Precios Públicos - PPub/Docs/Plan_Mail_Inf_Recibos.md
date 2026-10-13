@@ -7,7 +7,7 @@ Además, lo de la sección 7: `M_130`, `M_132`, `M_133` y `Rut_Lo` (`Rut_Names_B
 
 **Etiquetas:** ✅ **Hecho** · 🧪 **Aplicado, falta probarlo en Excel** · ⏳ **Pendiente**
 
-## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba en OFF/ON» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche); pendiente: importar `M___RibbonUI`, `M_130` y `M_135` y probar los botones (fase 5)
+## Estado: FASE 1 ✅; FASES 2 Y 3 🧪 PROBADAS POR COM; FASE 4 Y ETIQUETAS «Prueba en OFF/ON» 🧪 PUESTAS EN EL LIBRO (2026-10-13 noche; `M___RibbonUI`, `M_130` y `M_135` importados y el proyecto compila, comprobado con `olevba` a las 23:07); pendiente: probar los botones y la copia en `Y:\...\2026\` (fase 5)
 
 - ✅ Configuración de correo (hoja `ConfigMail`) hecha por el usuario y exportada (`Prog__APP_Mail.cls`).
 - ✅ Sección 7 arreglada el 2026-10-13 en `M_130`, `M_132` y `M_133`, y nueva `Rut_Names_Borrar_Rotos` en `Rut_Lo`.
