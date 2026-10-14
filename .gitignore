@@ -21,6 +21,8 @@ NeuroFit Entrenamiento Cognitivo/
 TrainFit Entrenador Personal/
 # Repo propio: D-Dugarry/Robot_PPub_Fusion
 Robot_PPub_Fusión/
+# Repo propio: D-Dugarry/Robot_PPub_Conta
+Robot_PPub_Conta/
 
 # Enseñanzas_Propias/: el .xlsm (datos reales) se excluye con su propio
 # .gitignore local, igual que "Precios Públicos - PPub/"; solo VBA_Moduls/ se versiona.
