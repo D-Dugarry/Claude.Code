@@ -70,6 +70,40 @@ echo "Nombre_De_La_Carpeta/" >> .gitignore
 git add .gitignore && git commit -m "Ignorar <proyecto>: migrado a repo independiente"
 ```
 
+Si la carpeta **se versionaba en el monorepo** (no estaba ignorada), quítala antes del índice:
+`git rm -r -q --cached -- "Nombre_De_La_Carpeta"` (los ficheros siguen en disco).
+
+## D · Proyecto versionado DENTRO del monorepo, conservando su historia (2026-10-14)
+
+Así se migraron PPub, Enseñanzas_Propias y Convert_PDF. El árbol de trabajo **no se toca**:
+los cambios sin commitear siguen como estaban.
+
+```bash
+MONO="f:/__Dugarry UA/Dugarry Proyectos/___Claude.Code"
+F="Nombre De La Carpeta"
+cd "$MONO"
+# 1. Historia de la carpeta en una rama aparte. core.quotepath=off es OBLIGATORIO si el
+#    nombre lleva tildes o eñes: sin él, subtree revienta con «assertion failed».
+git -c core.quotepath=off subtree split --prefix="$F" v3 -b split-tmp
+# 2. Repo nuevo con esa historia, sin tocar los ficheros del disco.
+cd "$MONO/$F"
+git init -b main
+git fetch "$MONO" split-tmp
+git reset --mixed FETCH_HEAD
+# 3. Comprobar ANTES de publicar: mismo árbol y mismo estado que en el monorepo.
+git rev-parse 'HEAD^{tree}'                    # = git -C "$MONO" rev-parse "v3:$F"
+git -c core.quotepath=off status --porcelain --untracked-files=all
+#    (compáralo con el del monorepo para esa carpeta, quitando el prefijo y las comillas)
+# 4. Publicar y sacar la carpeta del monorepo (apartado C).
+gh repo create "Nombre-Del-Repo" --private --source="." --remote=origin --push
+cd "$MONO" && git rm -r -q --cached -- "$F" && echo "$F/" >> .gitignore
+git add .gitignore && git commit -m "$F pasa a su propio repo" && git branch -D split-tmp
+```
+
+⚠️ **La memoria de Claude va por repo git**: tras migrar, las sesiones del proyecto usan
+`F:\.claude\projects\<ruta-codificada>\memory\` (vacía). Mueve allí su memoria de proyecto y
+dale un `MEMORY.md` que enlace a las memorias comunes de la carpeta del monorepo.
+
 ---
 
 ## Convenciones
@@ -105,3 +139,12 @@ git add .gitignore && git commit -m "Ignorar <proyecto>: migrado a repo independ
 | Rename_Files | `Rename_Files` | ✅ migrado (Rename_Files.py recuperado) |
 | PowerBI_PPUA | `PowerBI_PPUA` | ✅ migrado (2026-06-20, proyecto nuevo en main) |
 | PPUA_VBA | `PPUA_VBA` | ✅ migrado (2026-06-21, proyecto nuevo en main; .xlsm fuera de git) |
+| Robot_PPub_Conta | `Robot_PPub_Conta` | ✅ creado (2026-10-14, proyecto nuevo con `nueva-app`) |
+| Convert_PDF_Liquid_EP_to_Excel | `Convert_PDF_Liquid_EP_to_Excel` | ✅ migrado (2026-10-14, apartado D, 13 commits) |
+| Enseñanzas_Propias | `Ensenanzas_Propias` | ✅ migrado (2026-10-14, apartado D, 52 commits) |
+| Precios Públicos - PPub | `Precios-Publicos-PPub` | ✅ migrado (2026-10-14, apartado D, 67 commits) |
+| Corrector_Orientacion_PDF | `Corrector_Orientacion_PDF` | ✅ rama `master` → `main` (2026-10-14) |
+| Sonido_Aviso_Claude | — | Movido a `F:\.claude\sounds\` (2026-10-14, config global) |
+| _Config_Ordenadores | — | Se queda en este monorepo (decisión del usuario) |
+
+Desde el 2026-10-14, que cada proyecto tenga su repo es **regla obligatoria** (`CLAUDE.md` global).
