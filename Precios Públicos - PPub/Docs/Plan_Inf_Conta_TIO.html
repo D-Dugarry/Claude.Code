@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan: Inf_Conta_TIO, el Informe de Recibos sin el INSS</title>
+<style>
+:root{
+  --bg:#f7f7f5; --panel:#fff; --ink:#23211e; --soft:#6b6660; --line:#e2ded7;
+  --accent:#a8563f; --accent-soft:#f2e7e2; --code-bg:#f0eeea; --quote:#fbf7ee;
+  --quote-line:#d8a54a; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16151a; --panel:#1e1d23; --ink:#e6e2dc; --soft:#9d968c; --line:#33313a;
+    --accent:#e29070; --accent-soft:#3a2a26; --code-bg:#26252c; --quote:#2a271f;
+    --quote-line:#b8873a; --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:60rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+article{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:2.5rem clamp(1.1rem,4vw,3rem)}
+h1{font-size:clamp(1.6rem,4vw,2.15rem);line-height:1.2;margin:0 0 1.2rem;
+  letter-spacing:-.02em}
+h2{font-size:1.4rem;margin:2.8rem 0 1rem;padding-bottom:.4rem;
+  border-bottom:2px solid var(--accent-soft);letter-spacing:-.01em}
+h3{font-size:1.12rem;margin:2rem 0 .7rem;color:var(--accent)}
+h4{font-size:1rem;margin:1.5rem 0 .5rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.06em}
+p,li{margin:.7rem 0}
+ul,ol{padding-left:1.4rem}
+li>ul,li>ol{margin:.3rem 0}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+strong{font-weight:650}
+del{color:var(--soft)}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+code{background:var(--code-bg);padding:.12em .38em;border-radius:5px;
+  font:.875em/1.5 "Cascadia Code",Consolas,"SF Mono",monospace;
+  word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:1rem 1.1rem;overflow-x:auto;margin:1.2rem 0}
+pre code{background:none;padding:0;font-size:.85em;line-height:1.55}
+blockquote{margin:1.4rem 0;padding:.9rem 1.2rem;background:var(--quote);
+  border-left:4px solid var(--quote-line);border-radius:0 8px 8px 0}
+blockquote p:first-child{margin-top:0}
+blockquote p:last-child{margin-bottom:0}
+.tw{overflow-x:auto;margin:1.4rem 0;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.925rem}
+th,td{text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{background:var(--accent-soft);font-weight:650;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:color-mix(in srgb,var(--line) 22%,transparent)}
+footer{max-width:60rem;margin:0 auto;padding:0 1.25rem 3rem;
+  color:var(--soft);font-size:.82rem;text-align:center}
+</style>
+</head>
+<body>
+<main><article>
+<h1>Plan: <code>Inf_Conta_TIO</code>, el Informe de Recibos sin el INSS</h1>
+<p><strong>Proyecto:</strong> <code>PPub_BDatos_2026.xlsm</code> · <strong>Fecha:</strong> 2026-10-13 (decisiones, 2026-10-14) · <strong>Afecta a:</strong> <code>M_140_Gen_Inf_Conta_TIO</code>, <code>M_141_Anadir_Num_JIs_a_BDatos</code> y <code>M_142_Mail_Inf_Conta_TIO</code> (nuevos); <code>M_130</code>, <code>M_133</code> y <code>M_135</code> (pasan a ser el motor común, con el mismo resultado de hoy); <code>M_000_Ini_Var_APP</code> (constantes <code>InfCon_*</code>); <code>M___RibbonUI</code> (callbacks); <code>customUI14.xml</code> (dos <code>screentip</code> pasan a <code>getScreentip</code>); <code>Lo_RibbonUI</code> (seis filas); <code>ConfigAPP</code> y <code>Lo_ListObjAPP</code> (nombres y una fila); documentación.</p>
+<p><strong>Etiquetas:</strong> ✅ <strong>Hecho</strong> · 🧪 <strong>Aplicado, falta probarlo en Excel</strong> · ⏳ <strong>Pendiente</strong></p>
+<h2>Estado (2026-10-14 12:55): ✅ TERMINADO. Fases 1-4 en el libro y probadas por el usuario en Excel ("funciona todo")</h2>
+<ul>
+<li>✅ <strong>Fases 1-3 en el repo</strong> (<code>M_000_Ini_Var_APP</code>, <code>M_130</code>, <code>M_133</code>, <code>M_135</code>, <code>Rut_File_Folder_NEXE</code>, <code>M___RibbonUI</code> y los nuevos <code>M_140</code>, <code>M_141</code>, <code>M_142</code>), <strong>probadas por COM</strong> en tres copias del libro de las 09:26 (sección 5.4).</li>
+<li>✅ <strong>Módulos importados por el usuario</strong> (guardado de las 11:51): el código de los 9 módulos del libro es el del repo (comprobado con <code>olevba</code>; solo cambian mayúsculas, que el editor de VBA unifica en todo el proyecto).</li>
+<li>✅ <strong>Fase 4 aplicada al libro (11:56)</strong>, con Excel y el Custom UI Editor cerrados (confirmado por el usuario): XML, 6 filas de <code>Lo_RibbonUI</code> y la fila de <code>Lo_ListObjAPP</code>. Copia previa: <code>CopiaSeguridad/PPub_BDatos_2026_antes_Inf_Conta_TIO_Ribbon_2026-10-14_1155.xlsm</code>. Antes de sustituirlo se comprobó la copia: BDatos, BD_Dupl, BD_ErrDate y los dos informes idénticos (valores y formatos); el mismo código VBA (119 módulos); <code>Validar_Ribbon.py</code>, 0 errores. Excel, al guardar, recalculó el alto automático de las filas 6 y 16 de <code>Inf_Conta_TIO</code> (28 → 15,5): el ábaco los vuelve a ajustar.</li>
+<li>✅ <strong>Probado por el usuario en Excel</strong> (2026-10-14, «funciona todo»): los botones de las dos hojas (5.3).</li>
+<li>✅ <code>App_Last_Calc_Inf_Conta_TIO</code> creado; <code>App_Last_Calc_Inf_Recibos</code> y <code>App_Mail_Inf_Recibos</code> renombrados con <code>_TIO</code> (decisión 9); «Red:» lo entiende el código (decisión 10, <code>Fnc_Ruta_Red</code>). Guardado a las 09:26.</li>
+<li>✅ Decisiones de la sección 7, contestadas por el usuario.</li>
+<li>✅ <strong>En el libro (guardado de las 08:00):</strong> hoja <code>Inf_Conta_TIO</code> (CodeName <code>Sht__Inf_Conta_TIO</code>), tabla <code>Lo_Inf_Conta_TIO</code>, las dos formas borradas e <code>Inf_Recibos_TIO (2)</code> borrada.</li>
+<li>✅ <strong>Nombres de <code>ConfigAPP</code></strong> (guardado de las 09:26): <code>App_Mail_Inf_Recibos_TIO</code> (<code>B7</code>) y <code>App_Mail_Inf_Conta_TIO</code> (<code>B8</code>), los dos con felipe.martinez@gcloud.ua.es; <code>App_RutaRed_Inf_Conta_TIO</code> (<code>C11</code>) y <code>App_RutaRed_Inf_Recibos_TIO</code> (<code>C12</code>), las dos con la misma carpeta (<code>Red:\…\Tesoreria_Felipe\Aa_TESORERIA_FELIPE\DOCUMENTOS DUGARRY</code>); <code>App_Last_Calc_Inf_Conta_TIO</code> (<code>B45</code>) y <code>App_Last_Calc_Inf_Recibos_TIO</code> (<code>B46</code>). Ya no existen <code>App_Ruta_Inf_Recibos</code>, <code>App_RutaRed_Inf_Recibos</code>, <code>App_Last_Calc_Inf_Recibos</code> ni <code>App_Mail_Inf_Recibos</code>.</li>
+<li>⚠️ <strong>Hasta que se importen los módulos nuevos, el ábaco y el correo de <code>Inf_Recibos_TIO</code> fallan en el libro</strong>, porque el código de hoy busca los nombres antiguos: el ábaco calcula, pero da error al anotar la fecha (<code>App_Last_Calc_Inf_Recibos</code>), y el correo no encuentra los destinatarios ni la carpeta.</li>
+</ul>
+<h2>1. Qué se pide (2026-10-13)</h2>
+<ol>
+<li>Una variante de <code>Inf_Recibos_TIO</code> que se llama <strong><code>Inf_Conta_TIO</code></strong>, con dos diferencias:</li>
+<ul>
+<li><strong>No tiene las tres columnas del INSS</strong> (<code>INSS Emi.</code>, <code>INSS Cob.</code> e <code>INSS Pdte</code>).</li>
+<li><strong>Emitido, Cobrado y Pendiente (E, F y G) son la suma</strong> de los importes administrativos y los académicos.</li>
+</ul>
+<li>Tres módulos nuevos, en el rango 140 (el separador <code>M_14___…</code> ya lo creó el usuario): <code>M_140_Gen_Inf_Conta_TIO</code>, <code>M_141_Anadir_Num_JIs_a_BDatos</code> y <code>M_142_Mail_Inf_Conta_TIO</code>.</li>
+<li><strong>Los mismos botones del Ribbon:</strong> el grupo del ábaco ve en qué hoja está y hace lo que toca en cada una.</li>
+</ol>
+<h2>2. Cómo está</h2>
+<h3>2.1 La hoja (guardado del 2026-10-14 08:00, leído como zip)</h3>
+<ul>
+<li><code>Inf_Conta_TIO</code>, CodeName <code>Sht__Inf_Conta_TIO</code>, <strong>tabla <code>Lo_Inf_Conta_TIO</code></strong> en <code>B4:AG20</code>, con fila de totales (<code>SUBTOTAL</code> sobre su propia tabla) y <strong>sin formas</strong>. Es una copia de <code>Inf_Recibos_TIO</code> sin las columnas del INSS: sus valores son los de la copia (<code>B2</code> «Informe Recibos 2026», <code>D2</code> del 13-oct a las 13:27, y E:G con el INSS dentro).</li>
+<li>Tiene 32 columnas: las 35 de <code>Inf_Recibos_TIO</code> menos las 7-9.</li>
+</ul>
+<div class="tw"><table><thead><tr><th>Columnas de la tabla</th><th><code>Inf_Recibos_TIO</code></th><th><code>Inf_Conta_TIO</code></th></tr></thead><tbody><tr><td>Tipo Rec., Enseñanza, Concepto, Emitido, Cobrado, Pendiente</td><td>1-6 (B:G)</td><td>1-6 (B:G)</td></tr><tr><td>INSS Emi., Cob., Pdte.</td><td>7-9 (H:J)</td><td>—</td></tr><tr><td>Cta. Adm. … Acad. Pdte.</td><td>10-17 (K:R)</td><td>7-14 (H:O)</td></tr><tr><td>6 columnas de JI's y AD's</td><td>18-23 (S:X)</td><td>15-20 (P:U)</td></tr><tr><td>Descripción para el JI, Descripción Mov. Contable</td><td>24-25 (Y:Z)</td><td>21-22 (V:W)</td></tr><tr><td>Importes académicos por curso</td><td>26-35 (AA:AJ)</td><td>23-32 (X:AG)</td></tr></tbody></table></div>
+<p>Desde Cta. Adm., <strong>todas las columnas se corren 3 a la izquierda</strong>.</p>
+<ul>
+<li>Títulos de grupo combinados en la fila 2: <code>E2:G2</code>, <code>H2:K2</code>, <code>L2:O2</code>, <code>P2:U2</code> (UXXI-EC) y <code>X2:AG2</code>. Debajo de la tabla, la leyenda de tipos de recibo (U:V) y el bloque EURLE (<code>E31:G31</code>, <code>H31:K31</code>, <code>L31:O31</code>), también de la copia.</li>
+<li><strong>Sin fila</strong> en <code>Lo_ListObjAPP</code> (su fila de totales queda «libre») ni en <code>Prog_Hojas_Names</code>, y sin nombre <code>App_Last_Calc_…</code>. El menú de hojas del Ribbon ya la lista sola (lista todos los CodeName <code>Sht__Inf*</code>).</li>
+</ul>
+<h3>2.2 Lo que hoy está atado a <code>Inf_Recibos_TIO</code></h3>
+<div class="tw"><table><thead><tr><th>Dónde</th><th>Qué</th></tr></thead><tbody><tr><td><code>M_130</code></td><td>La hoja (<code>Sht__Inf_Recibos_TIO</code>), las constantes <code>InfRec_*</code>, la cabecera del bloque EURLE (<code>Range("e2:r2")</code>, fija), el título de <code>B2</code> y <code>App_Last_Calc_Inf_Recibos</code>. Además, <strong>lee de las celdas del INSS</strong> para calcular Adm. y Acad.</td></tr><tr><td><code>M_133</code></td><td>La hoja y las constantes <code>InfRec_TipRec</code>, <code>InfRec_ConcptEco</code> e <code>InfRec_JI_Emi_Adm</code>.</td></tr><tr><td><code>M_135</code></td><td>La hoja, la última columna del adjunto (<code>InfRec_Descrip_Contab</code>), el nombre del <code>.xlsx</code>, <code>App_Last_Calc_Inf_Recibos</code>, <code>App_Mail_Inf_Recibos</code>, <code>App_Ruta_Inf_Recibos</code> (renombrado por el usuario) y los textos (pregunta, asunto y cuerpo, que habla del INSS).</td></tr><tr><td><code>M___RibbonUI</code></td><td><code>OnAct_ReCalculate_ListObj_Sht</code> elige la rutina por CodeName; <code>GetLbl_ReCalculate_ListObj_Sht</code> tiene un caso especial para <code>Inf_Recibos_TIO</code>; <code>OnAct_JIs_Inf_a_BD</code> y <code>OnAct_Mail_Inf_Recibos</code> llaman a una rutina fija. El rótulo del grupo ya sale de la hoja («Calc_» y el nombre).</td></tr><tr><td><code>customUI14.xml</code></td><td>Los dos botones tienen un <code>screentip</code> fijo: «Añadir a BDatos los JI's del informe.» y «Enviar por correo el Informe de Recibos.».</td></tr><tr><td><code>Lo_RibbonUI</code></td><td><code>SheetsNames</code> = <code>Inf_Recibos_TIO</code> en las filas de los tres botones y del grupo (con <code>Inf_RSm</code> en las del ábaco).</td></tr><tr><td><code>Rut_Lo</code></td><td><code>Lo_Totales_Hojas</code> (la regla por defecto de la fila de totales; manda <code>Lo_ListObjAPP</code>).</td></tr></tbody></table></div>
+<h3>2.3 Las cuentas</h3>
+<p>En <code>Inf_Recibos_TIO</code>, <strong>Emitido = Imp.Rec. = INSS + Adm. + Acad.</strong> <code>M_130</code> calcula Adm. como <code>Rec_Imp_Adm</code> menos el INSS, y Acad. como Imp.Rec. menos los dos. En <code>Inf_Conta_TIO</code>, <strong>Emitido = Adm. + Acad.</strong>, es decir, el de <code>Inf_Recibos_TIO</code> menos el INSS. Comprobado con los totales de la captura del 13-oct a las 23:14; cuadra al céntimo:</p>
+<div class="tw"><table><thead><tr><th></th><th><code>Inf_Recibos_TIO</code></th><th>− INSS</th><th>= <code>Inf_Conta_TIO</code></th><th>= Adm. + Acad.</th></tr></thead><tbody><tr><td>Emitido</td><td>26.940.388,22</td><td>26.312,16</td><td><strong>26.914.076,06</strong></td><td>1.870.463,19 + 25.043.612,87</td></tr><tr><td>Cobrado</td><td>15.118.652,76</td><td>24.828,16</td><td><strong>15.093.824,60</strong></td><td>1.634.118,72 + 13.459.705,88</td></tr><tr><td>Pendiente</td><td>11.821.735,46</td><td>1.484,00</td><td><strong>11.820.251,46</strong></td><td>236.344,47 + 11.583.906,99</td></tr></tbody></table></div>
+<p>Con los mismos datos, esos serán los totales de control de la prueba (sección 5). <strong>Todo lo demás</strong> (Adm., Acad., JI's, descripciones e importes por curso) <strong>es igual en los dos informes.</strong></p>
+<p>Dos detalles:</p>
+<ul>
+<li>En las filas <strong>ADM y TNCT</strong>, <code>M_130</code> pone Adm. = Emitido entero y deja Acad. vacía. Si una de esas filas llevara INSS, iría dentro de Adm. en los dos informes. Hoy ninguna lleva.</li>
+<li><code>M_130</code> borra al final las filas con Emitido a cero. En <code>Inf_Conta_TIO</code>, el borrado mirará el Emitido <strong>sin INSS</strong>, así que una fila que solo tuviera INSS desaparecería (en el otro informe se queda). Hoy no hay ninguna así.</li>
+</ul>
+<h2>3. Cómo se hace: un motor común y tres módulos finos (decisión 1)</h2>
+<h3>3.1 La idea</h3>
+<p><code>M_130</code>, <code>M_133</code> y <code>M_135</code> siguen haciendo lo mismo, pero reciben <strong>qué informe</strong> tratan: la hoja, dónde está cada columna, sus nombres de Excel y sus textos. <code>M_140</code>, <code>M_141</code> y <code>M_142</code> solo guardan lo propio de <code>Inf_Conta_TIO</code> y llaman al motor. Así no se duplican las sumas en memoria, las reglas de los JI's ni la copia a <code>.xlsx</code>, que ya están probadas con doble ejecución.</p>
+<ul>
+<li><strong>Mapa de columnas.</strong> Un array <code>Col(1 To 35)</code> indexado por las constantes <code>InfRec_*</code>: dice en qué columna de <strong>este</strong> informe está cada dato (0 = no la tiene). Para <code>Inf_Recibos_TIO</code>, <code>Col(i) = i</code>. Para <code>Inf_Conta_TIO</code>, sale de las constantes nuevas <strong><code>InfCon_*</code></strong> (1-32), que van en <code>M_000_Ini_Var_APP</code> junto a las <code>InfRec_*</code>, y las del INSS valen 0. El motor escribe <code>RwJI.Range(Def.Col(InfRec_Adm_Emi))</code> donde hoy escribe <code>RwJI.Range(InfRec_Adm_Emi)</code>.</li>
+<li><strong>Descripción del informe:</strong> <code>Public Type T_Inf_Def</code> en <code>M_130</code>. Lleva:</li>
+<ul>
+<li>la hoja, el mapa de columnas y si lleva INSS;</li>
+<li>el nombre del informe para los textos («Informe de Recibos» / «Informe Conta») y el título de <code>B2</code>;</li>
+<li>los nombres de Excel de la fecha del cálculo, de los destinatarios y de la carpeta de red;</li>
+<li>el nombre del <code>.xlsx</code>, y el asunto y el cuerpo del correo.</li>
+</ul>
+</ul>
+<p>La rellenan <code>Rut_Inf_Def_Recibos</code> (<code>M_130</code>) y <code>Rut_Inf_Def_Conta</code> (<code>M_140</code>). Una tercera, <code>Fnc_Inf_Def_Hoja(Ws, Def)</code>, rellena la de la hoja que se le pase y devuelve <code>False</code> si no es ninguna de las dos: es la que usan los callbacks.</p>
+<ul>
+<li><strong>Las rutinas públicas de hoy no cambian de nombre</strong>, así que los callbacks, <code>Lo_RibbonUI</code> y lo que las llame siguen igual. Cada una pasa a ser una línea que llama al motor:</li>
+</ul>
+<div class="tw"><table><thead><tr><th>Módulo</th><th>Rutina pública (botón)</th><th>Llama al motor</th></tr></thead><tbody><tr><td><code>M_130</code></td><td><code>Rut_Recalcular_Tabla_Inf_Recibos</code> (sin cambios)</td><td><code>Rut_Inf_Calcular(Def)</code> (el cuerpo de hoy)</td></tr><tr><td><code>M_140</code></td><td><code>Rut_Recalcular_Tabla_Inf_Conta</code> (nueva)</td><td><code>Rut_Inf_Calcular(Def)</code></td></tr><tr><td><code>M_133</code></td><td><code>Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos</code> (sin cambios)</td><td><code>Rut_Inf_JIs_a_BDatos(Def)</code></td></tr><tr><td><code>M_141</code></td><td><code>Rut_Anadir_a_BDatos_JIs_de_Inf_Conta</code> (nueva)</td><td><code>Rut_Inf_JIs_a_BDatos(Def)</code></td></tr><tr><td><code>M_135</code></td><td><code>Rut_Mail_Inf_Recibos</code> y <code>Rut_Inf_Recibos_Probar_Xlsx</code> (sin cambios)</td><td><code>Rut_Mail_Inf(Def)</code> y <code>Fnc_Inf_A_Xlsx(Def, ErrMsg)</code></td></tr><tr><td><code>M_142</code></td><td><code>Rut_Mail_Inf_Conta</code> y <code>Rut_Inf_Conta_Probar_Xlsx</code> (nuevas)</td><td>Los mismos</td></tr></tbody></table></div>
+<p>Las funciones auxiliares de <code>M_135</code> (ruta libre, formas con macro, nombres que sobran, fecha del Robot, carpeta de red) siguen privadas: las usa el motor, que vive en el mismo módulo.</p>
+<h3>3.2 Nombres de Excel de cada informe</h3>
+<div class="tw"><table><thead><tr><th>Para qué</th><th><code>Inf_Recibos_TIO</code></th><th><code>Inf_Conta_TIO</code></th></tr></thead><tbody><tr><td>Fecha del último cálculo (rótulo del ábaco y pregunta del correo)</td><td><code>App_Last_Calc_Inf_Recibos</code> (<code>B45</code>). Propuesta: renombrarlo a <code>App_Last_Calc_Inf_Recibos_TIO</code> (decisión 9)</td><td><strong><code>App_Last_Calc_Inf_Conta_TIO</code>, por crear</strong></td></tr><tr><td>Destinatarios del correo</td><td><code>App_Mail_Inf_Recibos</code> (<code>B7</code>). Propuesta: <code>App_Mail_Inf_Recibos_TIO</code> (decisión 9)</td><td><code>App_Mail_Inf_Conta_TIO</code> (<code>B8</code>)</td></tr><tr><td>Carpeta de red</td><td><code>App_RutaRed_Inf_Recibos_TIO</code> (<code>C12</code>; el antiguo <code>App_Ruta_Inf_Recibos</code>)</td><td><code>App_RutaRed_Inf_Conta_TIO</code> (<code>C11</code>)</td></tr></tbody></table></div>
+<p>Con <code>App_Last_Calc_&lt;nombre de la hoja&gt;</code>, el rótulo del ábaco funciona sin casos especiales: es lo que <code>GetLbl_ReCalculate_ListObj_Sht</code> busca por defecto.</p>
+<h3>3.3 Cálculo: <code>M_130</code> y <code>M_140</code></h3>
+<ul>
+<li>Todas las columnas pasan por el mapa. Las del INSS solo se escriben si el informe las tiene.</li>
+<li><strong>Los importes se calculan en variables</strong> (desde <code>Sumas</code>) y luego se escriben. Hoy Adm. y Acad. se calculan leyendo las celdas del INSS ya escritas, que en <code>Inf_Conta_TIO</code> no existen. La cuenta es la misma, así que <code>Inf_Recibos_TIO</code> da lo mismo que hoy.</li>
+<li><strong>En <code>Inf_Conta_TIO</code>, E/F/G = Adm. + Acad. de cada fila, ya redondeados</strong>, después del redondeo a 2 decimales y antes de borrar las filas sin Emitido. Así cuadran al céntimo con la suma de las columnas. En <code>Inf_Recibos_TIO</code>, Emitido sigue siendo Imp.Rec.</li>
+<li><strong>Cabecera del bloque EURLE:</strong> de la columna de Emitido a la de Acad. Pdte. de la fila 2, según el mapa (<code>E2:R2</code> en un informe y <code>E2:O2</code> en el otro), en lugar del <code>Range("e2:r2")</code> fijo.</li>
+<li>El título de <code>B2</code> («Informe Conta 2026»), la fecha del cálculo, los rótulos de las cabeceras de JI's y de «Año Contable…», la leyenda (U:V en <code>Inf_Conta_TIO</code>) y el aviso de error salen de la descripción del informe.</li>
+<li><strong><code>M_140</code>:</strong> <code>Rut_Recalcular_Tabla_Inf_Conta</code> y <code>Rut_Inf_Def_Conta</code>.</li>
+</ul>
+<h3>3.4 JI's del informe a BDatos: <code>M_133</code> y <code>M_141</code></h3>
+<ul>
+<li>El motor recibe la hoja y las columnas de <code>Tipo_Rec</code>, concepto y primer JI. <strong>Los dos informes escriben en las mismas 6 columnas de BDatos (AR:AW)</strong>, en el mismo orden que sus columnas de JI's:</li>
+</ul>
+<div class="tw"><table><thead><tr><th>BDatos (constante)</th><th>Cabecera en BDatos</th><th>Columna en los informes (<code>Inf_Recibos_TIO</code> / <code>Inf_Conta_TIO</code>)</th></tr></thead><tbody><tr><td>AR (<code>BD_JI_Emi_Adm</code>, 44)</td><td>JI_Emi Adm</td><td>S / P: «JI-2025 o JI-2026, 1303.00, Adm.» (Cta. Aplic. 7400)</td></tr><tr><td>AS (<code>BD_JI_Emi_Acad</code>, 45)</td><td>JI_Emi Acad</td><td>T / Q: «JI-2025 o JI-2026, 1310.xx 00/01/02, Acad.» (7401)</td></tr><tr><td>AT (<code>BD_AD_Emi_Adm</code>, 46)</td><td>AD_Emi Adm</td><td>U / R: «AD-2026, 1303.00, Adm.» (7400)</td></tr><tr><td>AU (<code>BD_AD_Emi_Acad</code>, 47)</td><td>AD_Emi Acad</td><td>V / S: «AD-2026, 1310.xx 00/01/02, Acad.» (7401)</td></tr><tr><td>AV (<code>BD_JI_443_Adm</code>, 48)</td><td>JI_443 Adm</td><td>W / T: «JI-2026, 1303.00, Adm.» (4430)</td></tr><tr><td>AW (<code>BD_JI_443_Acad</code>, 49)</td><td>JI_443 Acad</td><td>X / U: «JI-2026, 1310.xx 00/01/02, Acad.» (4430)</td></tr></tbody></table></div>
+<ul>
+<li>Las reglas no cambian: solo filas con algún JI; en ellas, una celda vacía o con «·-·» vacía esa columna en sus recibos; y se salta el 311.</li>
+<li>El mensaje de <code>App_Task_Inf</code> dice de qué informe salen los JI's.</li>
+<li>Los JI's de BDatos llegan a cada informe al recalcularlo (<code>M_130</code>/<code>M_140</code>, en la pasada en memoria), igual que hoy.</li>
+</ul>
+<h3>3.5 Correo: <code>M_135</code> y <code>M_142</code></h3>
+<ul>
+<li>El motor recibe la hoja, la última columna del adjunto (<code>Descrip_Contab</code>: <strong>B:Z</strong> en un informe y <strong>B:W</strong> en el otro), el nombre del fichero (<strong><code>Inf_Conta_TIO (datos del AAAA-MM-DD).xlsx</code></strong>), los nombres de 3.2 y los textos.</li>
+<li><strong>Asunto:</strong> «PPub - Informe Conta, año contable 2026, cierre 31/12/2026».</li>
+<li><strong>Cuerpo:</strong> «Adjunto el <strong>Informe Conta</strong> de Precios Públicos del año contable 2026 (cursos 2025-26 y 2026-27): importes emitidos, cobrados y pendientes por tipo de recibo y concepto, desglosados en administrativos y académicos, <strong>sin el seguro obligatorio (INSS)</strong>, con los justificantes de ingreso (JI) y la descripción de cada movimiento contable. Las filas de EURLE van aparte, debajo de la tabla.» Y debajo, como hoy, la fecha de descarga, el cierre y el último cálculo.</li>
+<li>Las preguntas y el informe del formulario dicen «Informe Conta» donde hoy dicen «Informe de Recibos». El resto del flujo es el mismo: modo prueba, «¡ ENVÍO REAL !» con No por defecto y copia en <code>&lt;carpeta&gt;\&lt;año&gt;\</code>.</li>
+</ul>
+<h3>3.6 Ribbon: los mismos botones</h3>
+<ul>
+<li><strong><code>M___RibbonUI</code>:</strong></li>
+<ul>
+<li><code>OnAct_ReCalculate_ListObj_Sht</code>: un <code>Case Sht__Inf_Conta_TIO.CodeName</code> → <code>Rut_Recalcular_Tabla_Inf_Conta</code>.</li>
+<li><code>GetLbl_ReCalculate_ListObj_Sht</code>: fuera el caso especial de <code>Inf_Recibos_TIO</code> si se renombra <code>App_Last_Calc_Inf_Recibos</code> (decisión 9).</li>
+<li><code>OnAct_JIs_Inf_a_BD</code> y <code>OnAct_Mail_Inf_Recibos</code>: un <code>Select Case ActiveSheet.CodeName</code> que llama a la rutina de cada hoja; el título del formulario de progreso, también según la hoja.</li>
+<li><strong>Nuevo <code>GetScrTip_Inf</code></strong> (decisión 8): el <code>screentip</code> de los dos botones según la hoja activa. Por ejemplo, «Enviar por correo el Informe Conta.» en <code>Inf_Conta_TIO</code>. Toma el nombre del informe de <code>Fnc_Inf_Def_Hoja</code>. Al cambiar de hoja se vuelve a pedir, porque el <code>Worksheet_Activate</code> de las dos hojas llama a <code>RefreshRibbon</code>.</li>
+</ul>
+<li><strong><code>customUI14.xml</code>:</strong> en <code>BtnJIs_Inf_a_BD</code> y <code>BtnMail_Inf_Recibos</code>, <code>screentip="…"</code> pasa a <code>getScreentip="GetScrTip_Inf"</code>. ⚠️ <strong>Aviso antes y después</strong>: con Excel y el Custom UI Editor cerrados.</li>
+<li><strong><code>Lo_RibbonUI</code>:</strong> en las filas <code>ReCalculate_ListObj_Sht_Group</code>, <code>ReCalculate_ListObj_Sht</code>, <code>JIs_Inf_a_BD</code>, <code>Mail_Inf_Recibos</code> y <code>ExportWorkSheet_Group</code>, añadir <code>Inf_Conta_TIO</code> a <code>SheetsNames</code>. En las de los botones, además, las rutinas nuevas en <code>Nom_Rut</code> y textos que valgan para los dos informes en <code>Descripion</code> (el supertip). Mismos usuarios. Si el botón de exportar tiene que verse también para todos ellos, la fila <code>ExportWorkSheet</code> (hoy solo <code>Boss</code>).</li>
+<li>El informe de la última ejecución (<code>Informe_Rut</code>) es uno por botón: enseñará el de la última hoja en que se usó. El texto dice de qué informe es.</li>
+<li><strong>Orden al importar:</strong> <code>M___RibbonUI</code> nombra <code>Sht__Inf_Conta_TIO</code> y las rutinas de <code>M_140</code>-<code>M_142</code>. No compila hasta que estén importados los módulos nuevos (la hoja con ese CodeName ya está guardada).</li>
+</ul>
+<h3>3.7 El libro</h3>
+<ul>
+<li>✅ Hoja <code>Inf_Conta_TIO</code> / <code>Sht__Inf_Conta_TIO</code>, tabla <code>Lo_Inf_Conta_TIO</code> y formas borradas (usuario, 2026-10-14).</li>
+<li>✅ Nombres de 3.2, creados y renombrados por el usuario (guardado de las 09:26).</li>
+<li>🧪 <strong>Probado en una copia, falta aplicarlo al libro</strong> (fase 4):</li>
+<ul>
+<li><strong><code>Lo_RibbonUI</code>:</strong> <code>Inf_Conta_TIO</code> en <code>SheetsNames</code> de <code>ReCalculate_ListObj_Sht_Group</code>, <code>ReCalculate_ListObj_Sht</code>, <code>JIs_Inf_a_BD</code>, <code>Mail_Inf_Recibos</code>, <code>ExportWorkSheet_Group</code> y <code>ExportWorkSheet</code>; las rutinas nuevas en <code>Nom_Rut</code> y supertips que valen para los dos informes.</li>
+<li><strong><code>Lo_ListObjAPP</code>:</strong> fila de <code>Lo_Inf_Conta_TIO</code> detrás de la de <code>Inf_Recibos_TIO</code>, con <code>Sw_TRow_Hide</code> = FALSO (fila de totales visible) y <code>Sw_Col_Hide</code> vacío (sin mostrar/ocultar columnas, decisión 7).</li>
+<li><strong><code>customUI14.xml</code>:</strong> <code>getScreentip="GetScrTip_Inf"</code> en los dos botones y el comentario del grupo.</li>
+</ul>
+</ul>
+<p>Se hace con <code>f4_libro.ps1</code> (COM, Excel aparte, eventos y macros apagados) y <code>f4_xml.py</code> (zip reconstruido: de 330 entradas solo cambia <code>customUI/customUI14.xml</code>). En la copia, <code>Validar_Ribbon.py</code>: 0 errores, los 5 avisos de antes. El libro guardado por COM pesa menos (53 → 44 MB) solo por la compresión: el contenido sin comprimir es el mismo.</p>
+<h2>4. Fases</h2>
+<ol>
+<li>✅ <strong>(usuario)</strong> Decisiones 9 y 10; <code>App_Last_Calc_Inf_Conta_TIO</code> creado; guardado a las 09:26.</li>
+<li>✅ <strong>(yo) Fase 1, cálculo:</strong> constantes <code>InfCon_*</code> e <code>InfRec_N_Col</code> (<code>M_000_Ini_Var_APP</code>), <code>T_Inf_Def</code>, <code>Rut_Inf_Def_Recibos</code>, <code>Fnc_Inf_Def_Hoja</code> y el motor <code>Rut_Inf_Calcular</code> (<code>M_130</code>), y <code>M_140</code>. Probada (5.4).</li>
+<li>✅ <strong>(yo) Fase 2, JI's:</strong> motor <code>Rut_Inf_JIs_a_BDatos</code> (<code>M_133</code>) y <code>M_141</code>. Probada (5.4).</li>
+<li>✅ <strong>(yo) Fase 3, correo:</strong> motor <code>Rut_Mail_Inf</code>, <code>Fnc_Inf_A_Xlsx</code> y <code>Rut_Inf_Probar_Xlsx</code> (<code>M_135</code>), <code>M_142</code> y <code>Fnc_Ruta_Red</code> (<code>Rut_File_Folder_NEXE</code>). Probada (5.4).</li>
+<li>✅ <strong>(yo) Fase 4, Ribbon:</strong> callbacks en <code>M___RibbonUI</code>; filas, XML y fila de <code>Lo_ListObjAPP</code> aplicados al libro el 2026-10-14 a las 11:56 (3.7), con la confirmación del usuario de que Excel y el Custom UI Editor estaban cerrados.</li>
+<li>✅ <strong>(usuario)</strong> Módulos importados y compilados (guardado de las 11:51; el libro tiene el código del repo). Botones probados en las dos hojas (5.3): «funciona todo».</li>
+<li>✅ <strong>(yo) Cierre:</strong> <code>CLAUDE.md</code>, volcado de las tablas (<code>CustomUI/Volcar_Tareas_y_Ribbon.py</code>), <code>Validar_Ribbon.py</code> (0 errores), este plan y commit (2026-10-14).</li>
+</ol>
+<h2>5. Pruebas</h2>
+<h3>5.1 <code>Inf_Recibos_TIO</code> no cambia (doble ejecución por COM, en dos copias del libro)</h3>
+<ul>
+<li><strong>Ábaco:</strong> módulos de hoy contra los nuevos, con los mismos datos. <code>Herramientas/Comparar_Libros_BD.py --hojas Sht__Inf_Recibos_TIO</code>: 0 diferencias, salvo la hora de <code>D2</code>.</li>
+<li><strong>JI's:</strong> los mismos JI's sembrados en el informe; <code>M_133</code> viejo contra el nuevo. BDatos idéntica.</li>
+<li><strong>Correo:</strong> con las preguntas y el envío simulados. El mismo <code>.xlsx</code> y los mismos textos (salvo los nombres de 3.2).</li>
+</ul>
+<h3>5.2 <code>Inf_Conta_TIO</code></h3>
+<ul>
+<li>H:AG de <code>Inf_Conta_TIO</code> = K:AJ de <code>Inf_Recibos_TIO</code>, fila a fila (mismas filas y en el mismo orden).</li>
+<li>En cada fila, y en el bloque EURLE: E = I + M, F = J + N y G = K + O, exactos.</li>
+<li>Totales = los de control de 2.3 (con los mismos datos).</li>
+<li><code>B2</code>, <code>D2</code>, cabeceras de JI's y «Año Contable…», leyenda en U:V y cabecera del bloque EURLE en E:O.</li>
+<li><code>M_141</code> desde <code>Inf_Conta_TIO</code> deja BDatos igual que <code>M_133</code> desde <code>Inf_Recibos_TIO</code> con los mismos JI's.</li>
+<li><code>M_142</code> (simulado): adjunto B:W llamado <code>Inf_Conta_TIO (datos del …).xlsx</code>, con sus textos, destinatarios y carpeta.</li>
+</ul>
+<h3>5.3 En Excel (usuario)</h3>
+<p>En cada hoja: el rótulo del grupo («Calc_Inf_Recibos_TIO» / «Calc_Inf_Conta_TIO»), el ábaco y su fecha, la ayuda de los dos botones, los JI's y el correo con «Prueba en ON».</p>
+<h3>5.4 Resultado de las pruebas por COM (2026-10-14, ✅)</h3>
+<p>Tres copias del libro guardado a las 09:26, en un Excel aparte (el del usuario, intacto), con los <code>MsgBox</code> y el envío cambiados por respuestas de guion:</p>
+<ul>
+<li><strong>A</strong>, el código del libro (el de hoy, con la fecha del cálculo apuntando a <code>App_Last_Calc_Inf_Recibos_TIO</code>): ábaco, <code>.xlsx</code>, 4 semillas de JI's en <code>Inf_Recibos_TIO</code> y <code>M_133</code>.</li>
+<li><strong>C</strong>, el código nuevo: ábaco de <code>Inf_Recibos_TIO</code>, las mismas semillas y <code>M_133</code> nuevo.</li>
+<li><strong>B</strong>, el código nuevo: los dos ábacos, los dos <code>.xlsx</code>, las semillas en <code>Inf_Conta_TIO</code>, <code>M_141</code> y tres envíos simulados.</li>
+</ul>
+<div class="tw"><table><thead><tr><th>Comprobación</th><th>Resultado</th></tr></thead><tbody><tr><td><code>Inf_Recibos_TIO</code> tras el ábaco, A frente a B (814 celdas: valor, formato, combinadas y altos)</td><td><strong>0 diferencias</strong></td></tr><tr><td><code>Inf_Recibos_TIO</code> tras los JI's, A frente a C</td><td><strong>0 diferencias</strong></td></tr><tr><td>Adjunto <code>Inf_Recibos_TIO (datos del 2026-10-02).xlsx</code>, viejo frente a nuevo (B:Z, 614 celdas)</td><td><strong>0 diferencias</strong></td></tr><tr><td>BDatos (160.538 filas × 69 columnas), A frente a C y A frente a B (<code>M_141</code> desde <code>Inf_Conta_TIO</code>)</td><td><strong>Idéntica.</strong> Solo cambia el texto de <code>App_Task_Inf</code>, a propósito: «JI's de Inf_Conta_TIO a BDatos: …»</td></tr><tr><td><code>Inf_Conta_TIO</code>: B:D y H:AG frente a <code>Inf_Recibos_TIO</code>, 15 filas</td><td><strong>0 diferencias</strong></td></tr><tr><td><code>Inf_Conta_TIO</code>: E = I + M, F = J + N, G = K + O, en las 15 filas y en las 3 de EURLE</td><td><strong>0 errores</strong></td></tr><tr><td>Totales de <code>Inf_Conta_TIO</code></td><td><strong>26.914.076,06 / 15.093.824,60 / 11.820.251,46</strong>, los de control de 2.3</td></tr><tr><td><code>B2</code>, cabeceras, celdas combinadas (E31:O31 de EURLE)</td><td>«Informe Conta 2026»; las mismas combinadas que antes del cálculo</td></tr><tr><td>Adjunto <code>Inf_Conta_TIO (datos del 2026-10-02).xlsx</code></td><td>Tabla <code>B4:W20</code>, la misma comprobación de sumas: 0 errores</td></tr><tr><td>Rótulo del ábaco en <code>Inf_Conta_TIO</code></td><td>La fecha de <code>App_Last_Calc_Inf_Conta_TIO</code></td></tr><tr><td><code>Fnc_Inf_Def_Hoja</code></td><td>Conta y Recibos, Verdadero; BDatos y <code>Nothing</code>, Falso</td></tr><tr><td><code>Fnc_Ruta_Red</code></td><td><code>Red:\Espai\x</code> y <code>RED:\Espai\x</code> → <code>Y:\Espai\x</code>; <code>\Espai\x</code> y <code>F:\x</code>, sin cambios</td></tr><tr><td>Correo 1: Recibos, Sí y Sí</td><td>Asunto y cuerpo de siempre; crea <code>2026\</code> y copia el <code>.xlsx</code></td></tr><tr><td>Correo 2: Conta, Sí y Sí</td><td>«PPub - Informe Conta, año contable 2026, cierre 31/12/2026», cuerpo «sin el seguro obligatorio (INSS)», copia <code>Inf_Conta_TIO (…).xlsx</code> en <code>2026\</code></td></tr><tr><td>Correo 3: Conta con <code>Red:\Espai_ServConta\no_existe_prueba</code></td><td>«No se encuentra la carpeta Y:\Espai_ServConta\no_existe_prueba»; con «No», no se envía nada</td></tr><tr><td>Contador de <code>Rut_Off_Functions</code> al acabar cada paso</td><td>0</td></tr></tbody></table></div>
+<p>Tiempos: ábaco de <code>Inf_Recibos_TIO</code> 2,8 s (viejo) y 2,4 s (nuevo); <code>Inf_Conta_TIO</code> 2,1 s; JI's, unos 2 s.</p>
+<h2>6. Visto y sin tocar</h2>
+<ul>
+<li>En <code>Inf_Recibos_TIO</code>, el título de grupo de E:G dice «Importes Recibos: Acad. + Adm.», pero esas columnas llevan también el INSS. En <code>Inf_Conta_TIO</code>, ese título es exacto.</li>
+<li><strong>El botón de exportar no anota nunca su fecha.</strong> Su rótulo lee <code>App_Last_Exp_&lt;hoja&gt;</code>, pero ninguna rutina lo escribe: <code>Rut_Lo_Export_WorkSheet</code> no lo hace, y el único que se escribe es <code>App_Last_Exp_JIsPPub</code> (<code>M_90</code>). En <code>Inf_Recibos_TIO</code> el rótulo dice «Export WS Exp.», porque su nombre es <code>App_Last_Exp_Inf_Recibos</code>, sin <code>_TIO</code>. Por eso no se crea <code>App_Last_Exp_Inf_Conta_TIO</code>.</li>
+<li><code>Inf_Recibos_TIO (2)</code> la ha borrado el usuario (2026-10-14). Siguen <code>Inf_Recibos_TIO y EP</code> e <code>Inf_RecibosJIs</code>. Se corregirá en el <code>CLAUDE.md</code> en el cierre.</li>
+<li><code>ExportWorkSheet_Group</code> lleva en <code>SheetsNames</code> la hoja <code>_ConfigAPP</code>, que no existe (aviso A3 de <code>Validar_Ribbon.py</code>, de antes).</li>
+</ul>
+<h2>7. Decisiones</h2>
+<ol>
+<li>✅ <strong>Motor común</strong> (2026-10-14). <code>M_130</code>, <code>M_133</code> y <code>M_135</code> reciben qué informe tratan; <code>M_140</code>-<code>M_142</code> son finos.</li>
+<li>✅ <strong>JI's: las mismas 6 columnas de BDatos (AR:AW)</strong> para los dos informes (tabla de 3.4). Son los JI's de los importes Adm. y Acad., que son iguales en los dos. Pasarlos desde cualquiera de los dos escribe en las mismas celdas, y el otro informe los recoge al recalcularlo.</li>
+<li>✅ <strong>Correo de <code>Inf_Conta_TIO</code>:</strong> destinatarios en <code>App_Mail_Inf_Conta_TIO</code> y carpeta en <code>App_RutaRed_Inf_Conta_TIO</code> (los dos, creados por el usuario); la de <code>Inf_Recibos_TIO</code> pasa a <code>App_RutaRed_Inf_Recibos_TIO</code>. Asunto y cuerpo, los propuestos (3.5).</li>
+<li>✅ <strong>Título de <code>B2</code>:</strong> «Informe Conta 2026».</li>
+<li>✅ <strong>Formas:</strong> borradas por el usuario.</li>
+<li>✅ <strong>Tabla:</strong> <code>Lo_Inf_Conta_TIO</code> (renombrada por el usuario).</li>
+<li>✅ <strong>Exportar la hoja, sí; mostrar/ocultar columnas, no</strong> por ahora.</li>
+<li>✅ <strong>Ayuda de los botones variable según la hoja:</strong> <code>getScreentip</code> (3.6).</li>
+<li>✅ <strong>Nombres con <code>_TIO</code></strong> (2026-10-14, renombrados por el usuario): <code>App_Last_Calc_Inf_Recibos_TIO</code> y <code>App_Mail_Inf_Recibos_TIO</code>. El rótulo del ábaco ya no tiene caso especial.</li>
+<li>✅ <strong>El prefijo «Red:» de las rutas de <code>ConfigAPP</code></strong> (2026-10-14, a propósito, para distinguir las rutas de la unidad de red): «Red» se cambia por <code>App_User_Unid_Red</code> (<code>Red:\Espai…</code> → <code>Y:\Espai…</code>). Lo hace <code>Fnc_Ruta_Red</code>, en <code>Rut_File_Folder_NEXE</code>, para que lo pueda usar cualquier rutina; de momento lo usa la carpeta de red del correo (<code>Fnc_Inf_Carpeta_Red</code>, <code>M_135</code>). Las rutas que empiezan por <code>\</code> siguen valiendo como antes. <code>App_RutaRed_Robot_PPub</code> también lleva «Red:», pero no la lee ningún módulo.</li>
+</ol>
+</article></main>
+<footer>Generado desde <code>Plan_Inf_Conta_TIO.md</code> con <code>md2html.py</code> &middot;
+No editar este HTML a mano.</footer>
+</body>
+</html>
