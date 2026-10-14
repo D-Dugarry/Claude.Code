@@ -1,40 +1,45 @@
 Attribute VB_Name = "M_135_Mail_Inf_Recibos"
-' Last Rev. 2026-10-13 21:03
+' Last Rev. 2026-10-14 09:39
 Option Explicit
 
 '===================================================================================================
 ' M_135_Mail_Inf_Recibos
 '
-' Envía por correo el Informe de Recibos (hoja Inf_Recibos_TIO, CodeName Sht__Inf_Recibos_TIO) como
-' un .xlsx con sus columnas B:Z. Plan y decisiones: Docs/Plan_Mail_Inf_Recibos.md.
+' Envía por correo un informe de recibos como .xlsx: el Informe de Recibos (hoja Inf_Recibos_TIO,
+' columnas B:Z) o, con el mismo motor, el Informe Conta (hoja Inf_Conta_TIO, columnas B:W; M_142).
+' Qué informe, sus columnas, sus nombres de Excel y sus textos: T_Inf_Def (M_130). Planes:
+' Docs/Plan_Mail_Inf_Recibos.md y Docs/Plan_Inf_Conta_TIO.md.
 '
 ' El adjunto se hace COPIANDO LA HOJA ENTERA a un libro nuevo y recortándola, no pegando un rango
 ' (el PasteSpecial de JyC M_825): así viajan la tabla con su fila de totales, los altos de fila, las
 ' celdas combinadas y las columnas que estén ocultas en la hoja. La hoja origen no se toca.
 '
 ' Subs y funciones públicas:
-'   Fnc_Inf_Recibos_A_Xlsx([ErrMsg])      - Genera el .xlsx en %TEMP% y devuelve su ruta ("" si falla)
-'   Rut_Mail_Inf_Recibos                  - Botón «Enviar por correo»: pregunta, genera el .xlsx, lo
-'                                           copia en la carpeta de red (App_Ruta_Inf_Recibos\<año>) si se
-'                                           confirma, y lo envía (lo lanza OnAct_Mail_Inf_Recibos, M___RibbonUI)
+'   Rut_Mail_Inf_Recibos                  - Botón «Enviar por correo» en Inf_Recibos_TIO (lo lanza
+'                                           OnAct_Mail_Inf_Recibos, M___RibbonUI). En Inf_Conta_TIO,
+'                                           Rut_Mail_Inf_Conta (M_142)
+'   Rut_Mail_Inf(Def)                     - El motor: pregunta, genera el .xlsx, lo copia en la carpeta de
+'                                           red (<Def.Nom_Ruta>\<año>) si se confirma, y lo envía
+'   Fnc_Inf_A_Xlsx(Def, [ErrMsg])         - Genera el .xlsx en %TEMP% y devuelve su ruta ("" si falla)
 '   Rut_Inf_Recibos_Probar_Xlsx           - Prueba: genera el .xlsx sin enviarlo y lo señala en el
-'                                           Explorador (Inmediato: Call Rut_Inf_Recibos_Probar_Xlsx)
+'                                           Explorador (Inmediato: Call Rut_Inf_Recibos_Probar_Xlsx;
+'                                           Rut_Inf_Conta_Probar_Xlsx en M_142)
 '===================================================================================================
 
 '===================================================================================================
-'- Genera el .xlsx del Informe de Recibos (columnas B:Z) en %TEMP% y devuelve su ruta --------------
-'-   Nombre: "Inf_Recibos_TIO (datos del AAAA-MM-DD).xlsx", con la fecha de la carpeta de descarga del
-'-   Robot (App_Last_Import_Robot_PPub, la anota M_110 al importar); sin esa fecha, "Inf_Recibos_TIO.xlsx".
+'- Genera el .xlsx del informe que describe Def (columnas B:Z o B:W) en %TEMP% y devuelve su ruta --
+'-   Nombre: "<Def.Nom_Xlsx> (datos del AAAA-MM-DD).xlsx", con la fecha de la carpeta de descarga del
+'-   Robot (App_Last_Import_Robot_PPub, la anota M_110 al importar); sin esa fecha, "<Def.Nom_Xlsx>.xlsx".
 '-   Con la hora detrás si hay un libro abierto con ese nombre o si el fichero anterior no se puede borrar.
 '-   Si algo falla, devuelve "" y la causa en ErrMsg. No muestra ningún MsgBox: se lanzará con
 '-   Form_Running_Rut abierto, y un MsgBox se abriría detrás del formulario.
 '-   En la copia: todas las filas y columnas visibles y sin filtros; sin las columnas a la derecha de
-'-   InfRec_Descrip_Contab (Z); sin las "x" de la fila 1 (las del botón Hide Cols_Row1) y con esa fila de
+'-   Descrip_Contab (Z, o W en Inf_Conta_TIO); sin las "x" de la fila 1 (las del botón Hide Cols_Row1) y con esa fila de
 '-   alto normal; con los altos de las demás filas de la hoja; al 100 % de zoom; sin las formas con macro,
 '-   y sin vínculos ni nombres que no sean de la copia.
 '-   Se guarda con el cálculo en Automático: un libro guarda
 '-   el modo de cálculo de Excel, y si el destinatario lo abriera el primero, su Excel quedaría en Manual.
-Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
+Function Fnc_Inf_A_Xlsx(Def As T_Inf_Def, Optional ByRef ErrMsg As String = "") As String
     Dim Ws          As Worksheet
     Dim Lo          As ListObject
     Dim WsAct       As Object               ' hoja activa al empezar, para volver a ella
@@ -60,14 +65,14 @@ Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
     On Error GoTo Err_Xlsx
 
     Paso = "comprobar el informe"
-    Set Ws = Sht__Inf_Recibos_TIO
+    Set Ws = Def.Ws
     Set Lo = Ws.ListObjects(1)
     If Lo.DataBodyRange Is Nothing Then
-        ErrMsg = "El Informe de Recibos está vacío: hay que calcularlo antes de enviarlo."
+        ErrMsg = "El " & Def.Nom & " está vacío: hay que calcularlo antes de enviarlo."
         GoTo Salir
     End If
-    Nombre = Fnc_Inf_Recibos_Nombre()
-    Ruta = Fnc_Inf_Recibos_Ruta_Libre(Environ$("TEMP") & "\", Nombre)
+    Nombre = Fnc_Inf_Nombre(Def)
+    Ruta = Fnc_Inf_Ruta_Libre(Environ$("TEMP") & "\", Nombre)
 
     Paso = "copiar la hoja a un libro nuevo"
     If ActiveWorkbook Is ThisWorkbook Then Set WsAct = ActiveSheet
@@ -91,7 +96,7 @@ Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
     WsN.Cells.EntireRow.Hidden = False
     WsN.Cells.EntireColumn.Hidden = False
     If Not LoN.ShowTotals Then LoN.ShowTotals = True
-    WsN.Range(WsN.Cells(1, LoN.Range.Column + InfRec_Descrip_Contab), _
+    WsN.Range(WsN.Cells(1, LoN.Range.Column + Def.Col(InfRec_Descrip_Contab)), _
               WsN.Cells(1, WsN.Columns.Count)).EntireColumn.Delete
     Set Fila1 = Intersect(WsN.Rows(1), WsN.UsedRange)
     If Not Fila1 Is Nothing Then
@@ -113,7 +118,7 @@ Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
 
     Paso = "quitar las formas con macro, los vínculos y los nombres que sobran"
     For i = WsN.Shapes.Count To 1 Step -1
-        If Fnc_Inf_Recibos_Forma_Con_Macro(WsN.Shapes(i)) Then WsN.Shapes(i).Delete
+        If Fnc_Inf_Forma_Con_Macro(WsN.Shapes(i)) Then WsN.Shapes(i).Delete
     Next i
     Vinculos = WbN.LinkSources(xlExcelLinks)
     If Not IsEmpty(Vinculos) Then
@@ -122,7 +127,7 @@ Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
         Next i
     End If
     For i = WbN.Names.Count To 1 Step -1
-        Call Rut_Inf_Recibos_Nombre_Quitar_Si_Sobra(WbN.Names(i), WbN)
+        Call Rut_Inf_Nombre_Quitar_Si_Sobra(WbN.Names(i), WbN)
     Next i
 
     Paso = "dejar la vista al principio"
@@ -142,7 +147,7 @@ Function Fnc_Inf_Recibos_A_Xlsx(Optional ByRef ErrMsg As String = "") As String
     Application.DisplayAlerts = True
     WbN.Close SaveChanges:=False
     Set WbN = Nothing
-    Fnc_Inf_Recibos_A_Xlsx = Ruta
+    Fnc_Inf_A_Xlsx = Ruta
 
 Salir:
     On Error Resume Next
@@ -162,22 +167,30 @@ Salir:
 Err_Xlsx:
     ErrMsg = "Error " & Err.Number & " al " & Paso & ": " & Err.Description
     Resume Salir
-End Function    ' Fnc_Inf_Recibos_A_Xlsx
+End Function    ' Fnc_Inf_A_Xlsx
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Botón «Enviar por correo» del grupo Informe de Recibos (OnAct_Mail_Inf_Recibos) -----------------
 '- El callback abre y cierra Form_Running_Rut (Rut_Progreso_Abrir / Rut_Progreso_Cerrar): aquí solo
 '- se escribe en su informe. No recalcula el informe: manda lo que hay en la hoja, y la pregunta
-'- enseña la fecha del último cálculo. Destinatarios: App_Mail_Inf_Recibos (hoja ConfigAPP). Con
+'- enseña la fecha del último cálculo. Destinatarios: Def.Nom_Mail (hoja ConfigAPP). Con
 '- Sw_Test, el correo va a App_User_Mail y el .xlsx se queda en %TEMP% para revisarlo.
 '- Preguntas y avisos, por delante del formulario (vbMsgBoxSetForeground + vbSystemModal).
 '- Copia en la carpeta de red (2026-10-13): con su propia pregunta, después de la del envío; el .xlsx
-'- se copia en App_Ruta_Inf_Recibos (Fnc_Inf_Recibos_Carpeta_Red) antes de enviarlo. Si la carpeta no
+'- se copia en Def.Nom_Ruta (Fnc_Inf_Carpeta_Red) antes de enviarlo. Si la carpeta no
 '- se encuentra, pregunta si se envía el correo de todos modos. Si la copia falla, avisa y envía igual.
 '- Desde el 2026-10-13 (noche), dentro de la subcarpeta del año contable (App_AnoCont):
 '- ...\DOCUMENTOS DUGARRY\2026\. Si no existe, la pregunta lo dice y se crea al copiar.
 Sub Rut_Mail_Inf_Recibos()
+    Dim Def         As T_Inf_Def
+    Call Rut_Inf_Def_Recibos(Def)                   '- M_130
+    Call Rut_Mail_Inf(Def)
+End Sub     ' Rut_Mail_Inf_Recibos
+'---------------------------------------------------------------------------------------------------
+'- El motor del botón «Enviar por correo», para el informe que describe Def (hasta el 2026-10-14, el
+'- cuerpo de Rut_Mail_Inf_Recibos). En Inf_Conta_TIO lo lanza Rut_Mail_Inf_Conta (M_142).
+Sub Rut_Mail_Inf(Def As T_Inf_Def)
     Dim Dest        As String
     Dim DestReal    As String
     Dim ErrMsg      As String
@@ -202,19 +215,19 @@ Sub Rut_Mail_Inf_Recibos()
     Set ActivForm = Form_Running_Rut
     H_Inicio = Timer
     LastTimeLap = Timer
-    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: enviar por correo el Informe de Recibos (hoja Inf_Recibos_TIO).", 0)
+    Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Proceso: enviar por correo el " & Def.Nom & " (hoja " & Def.Ws.Name & ").", 0)
 
     '- Lo que dicen la pregunta, el asunto y el cuerpo
     SwTest = CBool(Prog__APP_Switch.Range("Sw_Test").Value)
     AnoCont = CStr(Prog__APP.Range("App_AnoCont").Value)
     Cierre = Format$(Prog__APP.Range("App_FechCierreCont").Value, "dd/mm/yyyy")
-    Ult_Calc = Format$(Prog__APP.Range("App_Last_Calc_Inf_Recibos").Value, "dd/mm/yyyy hh:nn")
-    Descarga = Fnc_Inf_Recibos_Fecha_Robot()                 '- AAAA-MM-DD, o vacía
+    Ult_Calc = Format$(Prog__APP.Range(Def.Nom_Calc).Value, "dd/mm/yyyy hh:nn")
+    Descarga = Fnc_Inf_Fecha_Robot()                 '- AAAA-MM-DD, o vacía
     If Descarga <> "" Then Descarga = Format$(CDate(Descarga), "dd/mm/yyyy")
 
-    Dest = Trim$(CStr(Prog__APP.Range("App_Mail_Inf_Recibos").Value))
+    Dest = Trim$(CStr(Prog__APP.Range(Def.Nom_Mail).Value))
     If Not Fnc_Valid_Email_Lista(Dest, ErrMsg) Then
-        Call Rut_Mail_Inf_Recibos_Aviso("No se ha enviado nada: los destinatarios (App_Mail_Inf_Recibos, hoja ConfigAPP) " & _
+        Call Rut_Mail_Inf_Aviso(Def, "No se ha enviado nada: los destinatarios (" & Def.Nom_Mail & ", hoja ConfigAPP) " & _
                                         "no valen." & vbLf & ErrMsg)
         Exit Sub
     End If
@@ -229,11 +242,11 @@ Sub Rut_Mail_Inf_Recibos()
         Pregunta = "¡ ENVÍO REAL !   Va a:  " & Replace(Dest, ";", "; ") & vbLf & vbLf
         Estilo = vbYesNo + vbExclamation + vbDefaultButton2     '- un Intro sin mirar no envía nada
     End If
-    Pregunta = Pregunta & "¿ Enviar el Informe de Recibos por correo ?" & vbLf & vbLf & _
+    Pregunta = Pregunta & "¿ Enviar el " & Def.Nom & " por correo ?" & vbLf & vbLf & _
                "Último cálculo: " & Ult_Calc & vbLf & _
                "Cierre contable: " & Cierre & _
                IIf(Descarga <> "", vbLf & "Descarga de los recibos: " & Descarga, "")
-    Respuesta = MsgBox(Pregunta, Estilo + vbMsgBoxSetForeground + vbSystemModal, "Enviar el Informe de Recibos")
+    Respuesta = MsgBox(Pregunta, Estilo + vbMsgBoxSetForeground + vbSystemModal, "Enviar el " & Def.Nom)
     If Respuesta <> vbYes Then
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Cancelado a petición del usuario: no se ha enviado nada.", 0)
         Exit Sub
@@ -241,10 +254,10 @@ Sub Rut_Mail_Inf_Recibos()
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", IIf(SwTest, "Modo prueba (Sw_Test): irá solo a " & _
                          Prog__APP.Range("App_User_Mail").Value & ".", "Envío real a " & Replace(Dest, ";", "; ") & "."), 0)
 
-    '- La copia en la carpeta de red (App_Ruta_Inf_Recibos), con su propia pregunta (2026-10-13)
-    Carpeta_Red = Fnc_Inf_Recibos_Carpeta_Red(Err_Red)
+    '- La copia en la carpeta de red (Def.Nom_Ruta), con su propia pregunta (2026-10-13)
+    Carpeta_Red = Fnc_Inf_Carpeta_Red(Def, Err_Red)
     If Carpeta_Red <> "" Then
-        If Not Fnc_Inf_Recibos_Existe(Carpeta_Red, True) Then
+        If Not Fnc_Inf_Existe(Carpeta_Red, True) Then
             Err_Red = "No se encuentra la carpeta " & Carpeta_Red & vbLf & "(¿ está conectada la unidad de red ?)"
             Carpeta_Red = ""
         End If
@@ -252,7 +265,7 @@ Sub Rut_Mail_Inf_Recibos()
     If Carpeta_Red = "" Then
         Respuesta = MsgBox("No se puede copiar el informe en la carpeta de red:" & vbLf & Err_Red & vbLf & vbLf & _
                            "¿ Enviar el correo de todos modos ?", _
-                           vbYesNo + vbExclamation + vbMsgBoxSetForeground + vbSystemModal, "Enviar el Informe de Recibos")
+                           vbYesNo + vbExclamation + vbMsgBoxSetForeground + vbSystemModal, "Enviar el " & Def.Nom)
         If Respuesta <> vbYes Then
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Cancelado: no se puede copiar en la carpeta de red y no se ha " & _
                                  "enviado nada." & vbLf & Err_Red, 0)
@@ -262,28 +275,28 @@ Sub Rut_Mail_Inf_Recibos()
     Else
         '- En la subcarpeta del año contable (petición del usuario, 2026-10-13); si no existe, se crea al copiar
         If AnoCont <> "" Then Carpeta_Red = Carpeta_Red & "\" & AnoCont
-        Crear_Carpeta = Not Fnc_Inf_Recibos_Existe(Carpeta_Red, True)
-        Destino_Red = Carpeta_Red & "\" & Fnc_Inf_Recibos_Nombre() & ".xlsx"
+        Crear_Carpeta = Not Fnc_Inf_Existe(Carpeta_Red, True)
+        Destino_Red = Carpeta_Red & "\" & Fnc_Inf_Nombre(Def) & ".xlsx"
         Pregunta = IIf(SwTest, "MODO PRUEBA (Sw_Test): la carpeta de red es la de verdad." & vbLf & vbLf, "") & _
                    "¿ Copiar también el informe en la carpeta de red ?" & vbLf & vbLf & _
                    Carpeta_Red & vbLf & Mid$(Destino_Red, Len(Carpeta_Red) + 2)
         If Crear_Carpeta Then
             Pregunta = Pregunta & vbLf & vbLf & "La carpeta " & AnoCont & " no existe: se creará."
-        ElseIf Fnc_Inf_Recibos_Existe(Destino_Red, False) Then
+        ElseIf Fnc_Inf_Existe(Destino_Red, False) Then
             Pregunta = Pregunta & vbLf & vbLf & "Ya hay un fichero con ese nombre: se sustituirá."
         End If
         Estilo = vbYesNo + vbQuestion
         If SwTest Then Estilo = Estilo + vbDefaultButton2       '- en modo prueba, un Intro sin mirar no copia
-        Respuesta = MsgBox(Pregunta, Estilo + vbMsgBoxSetForeground + vbSystemModal, "Copiar el Informe de Recibos")
+        Respuesta = MsgBox(Pregunta, Estilo + vbMsgBoxSetForeground + vbSystemModal, "Copiar el " & Def.Nom)
         Copiar_Red = (Respuesta = vbYes)
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", IIf(Copiar_Red, "Se copiará en " & Destino_Red, _
                              "Sin copia en la carpeta de red (respuesta del usuario)."), 0)
     End If
 
     '- El adjunto
-    Ruta = Fnc_Inf_Recibos_A_Xlsx(ErrMsg)
+    Ruta = Fnc_Inf_A_Xlsx(Def, ErrMsg)
     If Ruta = "" Then
-        Call Rut_Mail_Inf_Recibos_Aviso("No se ha enviado nada: no se ha podido generar el .xlsx." & vbLf & ErrMsg)
+        Call Rut_Mail_Inf_Aviso(Def, "No se ha enviado nada: no se ha podido generar el .xlsx." & vbLf & ErrMsg)
         Exit Sub
     End If
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Adjunto: " & Mid$(Ruta, InStrRev(Ruta, "\") + 1), LastTimeLap)
@@ -300,7 +313,7 @@ Sub Rut_Mail_Inf_Recibos()
             Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", IIf(Crear_Carpeta, "Creada la carpeta " & Carpeta_Red & vbLf, "") & _
                                  "Copiado en la carpeta de red: " & Destino_Red, LastTimeLap)
         Else
-            Call Rut_Mail_Inf_Recibos_Aviso("No se ha podido copiar el informe en la carpeta de red (el correo se envía igual):" & _
+            Call Rut_Mail_Inf_Aviso(Def, "No se ha podido copiar el informe en la carpeta de red (el correo se envía igual):" & _
                                             vbLf & Destino_Red & vbLf & "Error " & N_Err & ": " & Err_Red & _
                                             IIf(N_Err = 70, vbLf & "(¿ lo tiene alguien abierto ?)", ""))
         End If
@@ -308,15 +321,15 @@ Sub Rut_Mail_Inf_Recibos()
     End If
 
     '- Asunto y cuerpo (sin los totales: decisión del usuario)
-    Asunto = "PPub - Informe de Recibos, año contable " & AnoCont & ", cierre " & Cierre
+    Asunto = "PPub - " & Def.Nom & ", año contable " & AnoCont & ", cierre " & Cierre
     Cuerpo = "<div style='line-height:1.8; font-family:Arial, sans-serif; font-size:16px;'>" & _
              "<b>Hola</b><br><br>" & _
-             "Adjunto el <b>Informe de Recibos</b> de Precios Públicos del año contable " & AnoCont & _
+             "Adjunto el <b>" & Def.Nom & "</b> de Precios Públicos del año contable " & AnoCont & _
              " (cursos " & Fnc_HTML_Texto(CStr(Prog__APP.Range("App_C_Acad_Ant").Value)) & " y " & _
              Fnc_HTML_Texto(CStr(Prog__APP.Range("App_C_Acad_Pos").Value)) & "): importes emitidos, cobrados " & _
-             "y pendientes por tipo de recibo y concepto, desglosados en seguro obligatorio (INSS), " & _
-             "administrativos y académicos, con los justificantes de ingreso (JI) y la descripción de " & _
-             "cada movimiento contable. Las filas de EURLE van aparte, debajo de la tabla.<br><br>" & _
+             "y pendientes por tipo de recibo y concepto, " & Def.Desglose & ", con los justificantes de " & _
+             "ingreso (JI) y la descripción de cada movimiento contable. Las filas de EURLE van aparte, " & _
+             "debajo de la tabla.<br><br>" & _
              IIf(Descarga <> "", "Recibos descargados el " & Descarga & ". ", "") & _
              "Fecha de cierre contable: " & Cierre & ". Último cálculo del informe: " & Ult_Calc & ".<br><br>" & _
              "</div>"
@@ -326,7 +339,7 @@ Sub Rut_Mail_Inf_Recibos()
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Enviado a " & Replace(DestReal, ";", "; ") & _
                              IIf(SwTest, " (modo prueba, Sw_Test).", "."), LastTimeLap)
     Else
-        Call Rut_Mail_Inf_Recibos_Aviso("No se ha enviado el correo." & vbLf & ErrMsg)
+        Call Rut_Mail_Inf_Aviso(Def, "No se ha enviado el correo." & vbLf & ErrMsg)
     End If
     If SwTest Then
         Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", "Modo prueba: el adjunto se queda para revisarlo en " & Ruta, 0)
@@ -337,46 +350,53 @@ Sub Rut_Mail_Inf_Recibos()
     End If
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", String(100, "-") & vbLf & "Proceso Finalizado. " & _
                          Format(Now(), "dd-mmm-yy hh:mm"), H_Inicio, , , , , , 2)
-End Sub     ' Rut_Mail_Inf_Recibos
+End Sub     ' Rut_Mail_Inf
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Aviso de un fallo del envío: al informe del formulario y en un MsgBox por delante de él ---------
-Private Sub Rut_Mail_Inf_Recibos_Aviso(ByVal Texto As String)
+Private Sub Rut_Mail_Inf_Aviso(Def As T_Inf_Def, ByVal Texto As String)
     Call Rut_TimeLap_Inf(ActivForm, "TBx_Informe", Texto, 0)
-    MsgBox Texto, vbExclamation + vbMsgBoxSetForeground + vbSystemModal, "Enviar el Informe de Recibos"
-End Sub     ' Rut_Mail_Inf_Recibos_Aviso
+    MsgBox Texto, vbExclamation + vbMsgBoxSetForeground + vbSystemModal, "Enviar el " & Def.Nom
+End Sub     ' Rut_Mail_Inf_Aviso
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Prueba de la fase 2, desde Inmediato: Call Rut_Inf_Recibos_Probar_Xlsx --------------------------
 '- Genera el .xlsx sin enviarlo y lo deja en %TEMP%, seleccionado en el Explorador para abrirlo.
 Sub Rut_Inf_Recibos_Probar_Xlsx()
+    Dim Def         As T_Inf_Def
+    Call Rut_Inf_Def_Recibos(Def)                   '- M_130
+    Call Rut_Inf_Probar_Xlsx(Def)
+End Sub     ' Rut_Inf_Recibos_Probar_Xlsx
+'---------------------------------------------------------------------------------------------------
+'- El motor de la prueba, para el informe que describe Def (en Inf_Conta_TIO, Rut_Inf_Conta_Probar_Xlsx, M_142)
+Sub Rut_Inf_Probar_Xlsx(Def As T_Inf_Def)
     Dim Ruta        As String
     Dim ErrMsg      As String
     Dim T_Ini       As Double
 
     T_Ini = Timer
-    Ruta = Fnc_Inf_Recibos_A_Xlsx(ErrMsg)
+    Ruta = Fnc_Inf_A_Xlsx(Def, ErrMsg)
     If Ruta = "" Then
-        Debug.Print "Fnc_Inf_Recibos_A_Xlsx: no se ha generado. " & ErrMsg
+        Debug.Print "Fnc_Inf_A_Xlsx: no se ha generado. " & ErrMsg
         MsgBox "No se ha generado el .xlsx:" & vbLf & vbLf & ErrMsg, _
-               vbExclamation + vbMsgBoxSetForeground, "Prueba del Informe de Recibos en .xlsx"
+               vbExclamation + vbMsgBoxSetForeground, "Prueba del " & Def.Nom & " en .xlsx"
     Else
-        Debug.Print "Fnc_Inf_Recibos_A_Xlsx: " & Format$(Timer - T_Ini, "0.00") & " s, " & Ruta
+        Debug.Print "Fnc_Inf_A_Xlsx: " & Format$(Timer - T_Ini, "0.00") & " s, " & Ruta
         Shell "explorer.exe /select,""" & Ruta & """", vbNormalFocus
         MsgBox "Generado en " & Format$(Timer - T_Ini, "0.0") & " s:" & vbLf & Ruta & vbLf & vbLf & _
                "Está seleccionado en el Explorador para abrirlo y revisarlo.", _
-               vbInformation + vbMsgBoxSetForeground, "Prueba del Informe de Recibos en .xlsx"
+               vbInformation + vbMsgBoxSetForeground, "Prueba del " & Def.Nom & " en .xlsx"
     End If
-End Sub     ' Rut_Inf_Recibos_Probar_Xlsx
+End Sub     ' Rut_Inf_Probar_Xlsx
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Ruta del .xlsx: Carpeta & Nombre & ".xlsx", o con la hora detrás si esa no está libre -----------
 '- No está libre si hay un libro abierto con ese nombre (Excel no deja abrir dos libros con el mismo
 '- nombre, y el SaveAs fallaría) o si el fichero ya existe y no se puede borrar (abierto en otro Excel).
-Private Function Fnc_Inf_Recibos_Ruta_Libre(ByVal Carpeta As String, ByVal Nombre As String) As String
+Private Function Fnc_Inf_Ruta_Libre(ByVal Carpeta As String, ByVal Nombre As String) As String
     Dim Wb          As Workbook
     Dim Ruta        As String
     Dim Libre       As Boolean
@@ -395,23 +415,23 @@ Private Function Fnc_Inf_Recibos_Ruta_Libre(ByVal Carpeta As String, ByVal Nombr
         On Error GoTo 0
     End If
     If Not Libre Then Ruta = Carpeta & Nombre & "_" & Format$(Now, "hhnnss") & ".xlsx"
-    Fnc_Inf_Recibos_Ruta_Libre = Ruta
-End Function    ' Fnc_Inf_Recibos_Ruta_Libre
+    Fnc_Inf_Ruta_Libre = Ruta
+End Function    ' Fnc_Inf_Ruta_Libre
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Si una forma tiene una macro asignada (algunos tipos de forma dan error al leer OnAction) -------
-Private Function Fnc_Inf_Recibos_Forma_Con_Macro(ByVal Forma As Shape) As Boolean
+Private Function Fnc_Inf_Forma_Con_Macro(ByVal Forma As Shape) As Boolean
     On Error Resume Next
-    Fnc_Inf_Recibos_Forma_Con_Macro = (Len(Forma.OnAction) > 0)
-End Function    ' Fnc_Inf_Recibos_Forma_Con_Macro
+    Fnc_Inf_Forma_Con_Macro = (Len(Forma.OnAction) > 0)
+End Function    ' Fnc_Inf_Forma_Con_Macro
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Borra un nombre de la copia si no apunta a un rango de la propia copia (Wb) ---------------------
 '- Así se van los rotos (#REF!), los que apuntan a otro libro y las constantes de PPub que Excel copia
 '- con la hoja (RibbonPtr, el puntero del Ribbon). Los internos de Excel (_FilterDatabase) se quedan.
-Private Sub Rut_Inf_Recibos_Nombre_Quitar_Si_Sobra(ByVal Nm As Name, ByVal Wb As Workbook)
+Private Sub Rut_Inf_Nombre_Quitar_Si_Sobra(ByVal Nm As Name, ByVal Wb As Workbook)
     Dim Rng         As Range
 
     On Error Resume Next
@@ -421,57 +441,61 @@ Private Sub Rut_Inf_Recibos_Nombre_Quitar_Si_Sobra(ByVal Nm As Name, ByVal Wb As
     ElseIf Not Rng.Worksheet.Parent Is Wb Then
         Nm.Delete
     End If
-End Sub     ' Rut_Inf_Recibos_Nombre_Quitar_Si_Sobra
+End Sub     ' Rut_Inf_Nombre_Quitar_Si_Sobra
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Fecha de la carpeta de descarga del Robot (App_Last_Import_Robot_PPub) como "AAAA-MM-DD" --------
 '- "" si la celda está vacía, no es una fecha o el nombre no existe: el adjunto va entonces sin fecha.
-Private Function Fnc_Inf_Recibos_Fecha_Robot() As String
+Private Function Fnc_Inf_Fecha_Robot() As String
     Dim V           As Variant
 
     On Error Resume Next
     V = Prog__APP.Range("App_Last_Import_Robot_PPub").Value
     If IsDate(V) Then
-        Fnc_Inf_Recibos_Fecha_Robot = Format$(CDate(V), "yyyy-mm-dd")
+        Fnc_Inf_Fecha_Robot = Format$(CDate(V), "yyyy-mm-dd")
     ElseIf Not IsEmpty(V) And IsNumeric(V) Then                 '- un número de serie (celda sin formato de fecha)
-        If CDbl(V) > 0 Then Fnc_Inf_Recibos_Fecha_Robot = Format$(CDate(CDbl(V)), "yyyy-mm-dd")
+        If CDbl(V) > 0 Then Fnc_Inf_Fecha_Robot = Format$(CDate(CDbl(V)), "yyyy-mm-dd")
     End If
-End Function    ' Fnc_Inf_Recibos_Fecha_Robot
+End Function    ' Fnc_Inf_Fecha_Robot
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Nombre del .xlsx del informe, sin la extensión: "Inf_Recibos_TIO (datos del AAAA-MM-DD)" --------
-'- ("Inf_Recibos_TIO" sin la fecha del Robot). Lo usan Fnc_Inf_Recibos_A_Xlsx y la copia en la red.
-Private Function Fnc_Inf_Recibos_Nombre() As String
+'- (Def.Nom_Xlsx, sin la fecha del Robot). Lo usan Fnc_Inf_A_Xlsx y la copia en la red.
+Private Function Fnc_Inf_Nombre(Def As T_Inf_Def) As String
     Dim Fecha       As String
 
-    Fnc_Inf_Recibos_Nombre = "Inf_Recibos_TIO"
-    Fecha = Fnc_Inf_Recibos_Fecha_Robot()
-    If Fecha <> "" Then Fnc_Inf_Recibos_Nombre = Fnc_Inf_Recibos_Nombre & " (datos del " & Fecha & ")"
-End Function    ' Fnc_Inf_Recibos_Nombre
+    Fnc_Inf_Nombre = Def.Nom_Xlsx
+    Fecha = Fnc_Inf_Fecha_Robot()
+    If Fecha <> "" Then Fnc_Inf_Nombre = Fnc_Inf_Nombre & " (datos del " & Fecha & ")"
+End Function    ' Fnc_Inf_Nombre
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
-'- Carpeta de red para la copia del informe (App_Ruta_Inf_Recibos, hoja ConfigAPP), sin "\" final --
-'- La celda guarda la ruta sin la unidad ("\Espai_ServConta\..."), como App_RutaRed_Robot_PPub: se le
-'- pone delante la unidad de red del usuario (App_User_Unid_Red, que Form_Usuario cambia con el
-'- teletrabajo). Una ruta completa ("Y:\...", "\\servidor\...") se usa tal cual, y una de la Red Nexe
-'- (https://nexe.ua.es/...) se traduce con Fnc_Format_Ruta. "" y la causa en ErrMsg si falta algo.
-Private Function Fnc_Inf_Recibos_Carpeta_Red(Optional ByRef ErrMsg As String = "") As String
+'- Carpeta de red para la copia del informe (Def.Nom_Ruta, hoja ConfigAPP), sin "\" final ---------
+'- Desde el 2026-10-14 la celda dice "Red:\Espai_ServConta\...": "Red" se cambia por la unidad de red
+'- del usuario (App_User_Unid_Red, que Form_Usuario cambia con el teletrabajo; Fnc_Ruta_Red). Sin
+'- "Red:", una ruta que empieza por "\" también va a esa unidad. Una ruta completa ("Y:\...",
+'- "\\servidor\...") se usa tal cual, y una de la Red Nexe (https://nexe.ua.es/...) se traduce con
+'- Fnc_Format_Ruta. "" y la causa en ErrMsg si falta algo.
+Private Function Fnc_Inf_Carpeta_Red(Def As T_Inf_Def, Optional ByRef ErrMsg As String = "") As String
     Dim Ruta        As String
     Dim Unidad      As String
 
     ErrMsg = ""
     On Error Resume Next
-    Ruta = Trim$(CStr(Prog__APP.Range("App_Ruta_Inf_Recibos").Value))
+    Ruta = Trim$(CStr(Prog__APP.Range(Def.Nom_Ruta).Value))
     Unidad = Trim$(CStr(Prog__APP.Range("App_User_Unid_Red").Value))
     On Error GoTo 0
     If Ruta = "" Then
-        ErrMsg = "Falta la ruta de la carpeta (App_Ruta_Inf_Recibos, hoja ConfigAPP)."
+        ErrMsg = "Falta la ruta de la carpeta (" & Def.Nom_Ruta & ", hoja ConfigAPP)."
         Exit Function
     End If
-    If LCase$(Left$(Ruta, 8)) = "https://" Then             '- Red Nexe: a la unidad local
+    If LCase$(Left$(Ruta, 4)) = "red:" Then                 '- "Red:\...": la unidad de red del usuario (2026-10-14)
+        Ruta = Fnc_Ruta_Red(Ruta, ErrMsg)                   '- Rut_File_Folder_NEXE
+        If Ruta = "" Then Exit Function
+    ElseIf LCase$(Left$(Ruta, 8)) = "https://" Then         '- Red Nexe: a la unidad local
         Ruta = Fnc_URL_Decodificar(Fnc_Format_Ruta(Ruta))
     ElseIf Left$(Ruta, 2) = "\\" Or Mid$(Ruta, 2, 1) = ":" Then
                                                             '- ruta completa: tal cual
@@ -486,18 +510,18 @@ Private Function Fnc_Inf_Recibos_Carpeta_Red(Optional ByRef ErrMsg As String = "
     Do While Right$(Ruta, 1) = "\" And Len(Ruta) > 3
         Ruta = Left$(Ruta, Len(Ruta) - 1)
     Loop
-    Fnc_Inf_Recibos_Carpeta_Red = Ruta
-End Function    ' Fnc_Inf_Recibos_Carpeta_Red
+    Fnc_Inf_Carpeta_Red = Ruta
+End Function    ' Fnc_Inf_Carpeta_Red
 '---------------------------------------------------------------------------------------------------
 
 '===================================================================================================
 '- Si existe la carpeta (Carpeta:=True) o el fichero; False también si la unidad no responde -------
-Private Function Fnc_Inf_Recibos_Existe(ByVal Ruta As String, ByVal Carpeta As Boolean) As Boolean
+Private Function Fnc_Inf_Existe(ByVal Ruta As String, ByVal Carpeta As Boolean) As Boolean
     Dim Atrib       As Long
 
     On Error GoTo No_Existe
     Atrib = GetAttr(Ruta)
-    Fnc_Inf_Recibos_Existe = (((Atrib And vbDirectory) = vbDirectory) = Carpeta)
+    Fnc_Inf_Existe = (((Atrib And vbDirectory) = vbDirectory) = Carpeta)
 No_Existe:
-End Function    ' Fnc_Inf_Recibos_Existe
+End Function    ' Fnc_Inf_Existe
 '---------------------------------------------------------------------------------------------------

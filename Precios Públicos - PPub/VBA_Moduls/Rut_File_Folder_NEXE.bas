@@ -1,5 +1,5 @@
 Attribute VB_Name = "Rut_File_Folder_NEXE"
-' Last Rev. 2026-10-13 12:28
+' Last Rev. 2026-10-14 09:39
 Option Explicit
 
 '###################################################################################################################################
@@ -30,6 +30,27 @@ Function Fnc_Format_Ruta(Ruta_Red As String) As String  ' Cambia una ruta de la 
     If PosMail = 0 Then Exit Function
     Fnc_Format_Ruta = Prog__APP.Range("App_User_Unid_Red") & ":" & Replace(Mid(Ruta_Red, PosMail + Len(Mail)), "/", "\")
 End Function        ' Fnc_Format_Ruta
+'###################################################################################################################################
+Function Fnc_Ruta_Red(ByVal Ruta As String, Optional ByRef ErrMsg As String = "") As String  ' "Red:\..." -> "Y:\..."
+' ==================================================================================================================================
+'- Convención de ConfigAPP desde el 2026-10-14: una ruta que empieza por "Red:" está en la unidad de red del usuario
+'  (App_User_Unid_Red, que Form_Usuario cambia con el teletrabajo), y "Red" se cambia por esa letra:
+'  "Red:\Espai_ServConta\..." -> "Y:\Espai_ServConta\...". Cualquier otra ruta se devuelve tal cual.
+'  "" y la causa en ErrMsg si falta la unidad.
+    Dim Unidad      As String
+    ErrMsg = ""
+    Fnc_Ruta_Red = Ruta
+    If LCase$(Left$(Ruta, 4)) <> "red:" Then Exit Function
+    On Error Resume Next
+    Unidad = Trim$(CStr(Prog__APP.Range("App_User_Unid_Red").Value))
+    On Error GoTo 0
+    If Unidad = "" Then
+        ErrMsg = "Falta la unidad de red del usuario (App_User_Unid_Red, hoja ConfigAPP)."
+        Fnc_Ruta_Red = ""
+        Exit Function
+    End If
+    Fnc_Ruta_Red = Left$(Unidad, 1) & Mid$(Ruta, 4)
+End Function        ' Fnc_Ruta_Red
 '##################################################################################################
         'call Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem, [NomFich], [PathFich])
 Sub Rut_ArchFullName_SeparaEn_NameFile_y_PathFile(Fich_SelectedItem As String, Optional NomFich As String = "", Optional RutaFich As String = "")

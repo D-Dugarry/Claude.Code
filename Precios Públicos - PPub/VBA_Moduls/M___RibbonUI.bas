@@ -1,5 +1,5 @@
 Attribute VB_Name = "M___RibbonUI"
-' Last Rev. 2026-10-13 21:03
+' Last Rev. 2026-10-14 09:39
 '2026-01-01
 '- M___RibbonUI ---------
 Option Explicit
@@ -523,10 +523,9 @@ Debug.Print "GetLbl_ReCalculate_ListObj_Sht_Group", LabelVal
 End Sub
 '------------------------------------------------------------------------------------------
 Sub GetLbl_ReCalculate_ListObj_Sht(control As IRibbonControl, ByRef LabelVal)
-    '- Fecha del ultimo calculo: App_Last_Calc_<hoja>, salvo en Inf_Recibos_TIO, cuya rutina (M_130) la guarda en
-    '  App_Last_Calc_Inf_Recibos (2026-10-12; antes el boton de esa hoja mostraba siempre "Calc_JIs").
+    '- Fecha del ultimo calculo: App_Last_Calc_<hoja>. Desde el 2026-10-14 tambien en Inf_Recibos_TIO (el nombre paso de
+    '  App_Last_Calc_Inf_Recibos a App_Last_Calc_Inf_Recibos_TIO) y en Inf_Conta_TIO: sin casos especiales.
     Dim Nom_Calc    As String:      Nom_Calc = "App_Last_Calc_" & ActiveSheet.Name
-    If ActiveSheet.CodeName = Sht__Inf_Recibos_TIO.CodeName Then Nom_Calc = "App_Last_Calc_Inf_Recibos"
     If Fnc_Range_Exist(Nom_Calc) Then
         LabelVal = Format(Prog__APP.Range(Nom_Calc), "dd-mmm-yy hh:mm")
     Else
@@ -541,29 +540,52 @@ Debug.Print "OnAct_ReCalculate_ListObj_Sht"
     '  y en Inf_Recibos_TIO, la unica hoja donde se veia el boton, esa rutina no existe.
     Select Case ActiveSheet.CodeName
         Case Sht__Inf_Recibos_TIO.CodeName:     Call Rut_Recalcular_Tabla_Inf_Recibos
+        Case Sht__Inf_Conta_TIO.CodeName:       Call Rut_Recalcular_Tabla_Inf_Conta       '- M_140
         Case Sht__Inf_Inf_Rsm.CodeName:         Call Rut_Recalcular_Tabla_Inf_RSm
     End Select
     Call RefreshRibbon                          '- rotulo con la fecha del ultimo calculo
 End Sub
 '------------------------------------------------------------------------------------------
-'- Enviar el Informe de Recibos por correo (grupo Calc_Inf_Recibos_TIO, ReCalculate_ListObj_Sht_Group;
-'  Docs/Plan_Mail_Inf_Recibos.md)
+'- Enviar el informe de la hoja por correo (grupo Calc_<hoja>, ReCalculate_ListObj_Sht_Group): Inf_Recibos_TIO
+'  (M_135, Docs/Plan_Mail_Inf_Recibos.md) o Inf_Conta_TIO (M_142, Docs/Plan_Inf_Conta_TIO.md)
 Sub OnAct_Mail_Inf_Recibos(control As IRibbonControl)
 Debug.Print "================== >>> OnAct_Mail_Inf_Recibos"
-    Call Rut_Progreso_Abrir("Enviar el Informe de Recibos por correo")
-    Call Rut_Mail_Inf_Recibos
+    Dim Def         As T_Inf_Def
+    If Not Fnc_Inf_Def_Hoja(ActiveSheet, Def) Then Exit Sub         '- M_130; el boton solo se ve en esas dos hojas
+    Call Rut_Progreso_Abrir("Enviar el " & Def.Nom & " por correo")
+    Select Case Def.Ws.CodeName
+        Case Sht__Inf_Conta_TIO.CodeName:       Call Rut_Mail_Inf_Conta         '- M_142
+        Case Else:                              Call Rut_Mail_Inf_Recibos       '- M_135
+    End Select
     Call Rut_Progreso_Cerrar(control.Tag, True)     '- True: vuelve a la hoja de partida
 Debug.Print "================== <<< OnAct_Mail_Inf_Recibos"
 End Sub
 '------------------------------------------------------------------------------------------
-'- JI's del Informe de Recibos a BDatos (grupo Calc_Inf_Recibos_TIO, ReCalculate_ListObj_Sht_Group;
-'  Docs/Plan_Botones_JIs_Ribbon.md).
-'  Sin formulario de progreso, como la forma que sustituye: M_133 deja el resultado en App_Task_Inf.
+'- JI's del informe de la hoja a BDatos (grupo Calc_<hoja>, ReCalculate_ListObj_Sht_Group; Docs/Plan_Botones_JIs_Ribbon.md y
+'  Docs/Plan_Inf_Conta_TIO.md): Inf_Recibos_TIO (M_133) o Inf_Conta_TIO (M_141), a las mismas 6 columnas de BDatos.
+'  Sin formulario de progreso, como la forma que sustituye: deja el resultado en App_Task_Inf.
 Sub OnAct_JIs_Inf_a_BD(control As IRibbonControl)
 Debug.Print "OnAct_JIs_Inf_a_BD"
-    Call Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos             '- M_133: deja el resultado en App_Task_Inf
+    Select Case ActiveSheet.CodeName
+        Case Sht__Inf_Recibos_TIO.CodeName:     Call Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos     '- M_133
+        Case Sht__Inf_Conta_TIO.CodeName:       Call Rut_Anadir_a_BDatos_JIs_de_Inf_Conta       '- M_141
+        Case Else:                              Exit Sub
+    End Select
     Call Rut_RibbonUI_Guardar_Informe(control.Tag)          '- App_Task_Inf -> Informe_Rut (supertip de Boss)
     Call RefreshRibbon
+End Sub
+'------------------------------------------------------------------------------------------
+'- Ayuda (screentip) de los botones de JI's y de correo del grupo Calc_<hoja>, segun la hoja activa (2026-10-14; en el
+'  customUI14.xml, getScreentip="GetScrTip_Inf" en lugar de un screentip fijo). Se vuelve a pedir al cambiar de hoja: el
+'  Worksheet_Activate de las dos hojas llama a RefreshRibbon.
+Sub GetScrTip_Inf(control As IRibbonControl, ByRef ReturnedVal)
+    Dim Def         As T_Inf_Def
+    Dim Nom         As String:      Nom = "informe"
+    If Fnc_Inf_Def_Hoja(ActiveSheet, Def) Then Nom = Def.Nom                    '- M_130
+    Select Case control.Tag
+        Case "JIs_Inf_a_BD":        ReturnedVal = "Añadir a BDatos los JI's del " & Nom & "."
+        Case "Mail_Inf_Recibos":    ReturnedVal = "Enviar por correo el " & Nom & "."
+    End Select
 End Sub
 '------------------------------------------------------------------------------------------
 '__________________________________________________________________________________________

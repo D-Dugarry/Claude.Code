@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_133_Anadir_Num_JIs_a_BDatos"
-' Last Rev. 2026-10-13 12:28
+' Last Rev. 2026-10-14 09:39
 '2026-02-14
 Option Explicit
 
@@ -8,14 +8,27 @@ Option Explicit
 '  (Rut_Prot_Save/Rut_Prot_Restore). Se miran las 6 columnas de JI's (antes solo las 4 primeras: una fila con solo JI 4430 se
 '  saltaba), y JI_Sin_Num ("·-·", recibos sin JI) cuenta como vacío: ya no se copia a BDatos como si fuera un JI. El resultado
 '  queda en App_Task_Inf. Los JI's de BDatos al informe los pone ya M_130 al calcularlo (antes, M_132).
+'- 2026-10-14: motor común de los dos informes (Docs/Plan_Inf_Conta_TIO.md). Rut_Inf_JIs_a_BDatos(Def) copia los JI's del
+'  informe que describe Def (T_Inf_Def, M_130): Inf_Recibos_TIO (aquí) o Inf_Conta_TIO (M_141). Los dos, a las mismas 6
+'  columnas de BDatos (BD_JI_Emi_Adm..BD_JI_443_Acad, AR:AW).
 
 ' ==================================================================================================================================
-Sub Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos()
+Sub Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos()    '- botón «JI's del Inf. a BD» en Inf_Recibos_TIO
 ' ==================================================================================================================================
-Debug.Print "Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos"
+    Dim Def         As T_Inf_Def
+    Call Rut_Inf_Def_Recibos(Def)                   '- M_130
+    Call Rut_Inf_JIs_a_BDatos(Def)
+End Sub     '- Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos
+' ==================================================================================================================================
+'- Copia a BDatos los JI's del informe que describe Def (hasta el 2026-10-14, el cuerpo de Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos)
+Sub Rut_Inf_JIs_a_BDatos(Def As T_Inf_Def)
+' ==================================================================================================================================
+Debug.Print "Rut_Inf_JIs_a_BDatos: " & Def.Ws.Name
 
-        Dim Nom_Inf         As String:          Nom_Inf = "Inf_Recibos"
-        Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Sht__Inf_Recibos_TIO
+        Dim Sht_Inf         As Worksheet:       Set Sht_Inf = Def.Ws
+        Dim Col_TipRec      As Integer:         Col_TipRec = Def.Col(InfRec_TipRec)         '- columnas de este informe
+        Dim Col_ConcptEco   As Integer:         Col_ConcptEco = Def.Col(InfRec_ConcptEco)
+        Dim Col_JI          As Integer:         Col_JI = Def.Col(InfRec_JI_Emi_Adm)         '- la primera de las 6 de JI's
         Dim Lo_Inf          As ListObject:      Set Lo_Inf = Sht_Inf.ListObjects(1)
         Dim Lo_BD           As ListObject:      Set Lo_BD = Sht__BD.ListObjects(1)
 
@@ -53,19 +66,19 @@ Dim N_Recibos       As Long                                             '- recib
     Call Rut_Lo_Sort(Lo_BD, BD_Tipo_Rec, xlAscending, True, False)     '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
     Call Rut_Lo_Sort(Lo_BD, BD_Concepto, xlAscending, False)           '- 1303.00 1310.00 1311.00 Etc.
     Sht_Inf.Select
-    Call Rut_Lo_Sort(Lo_Inf, InfRec_TipRec, xlAscending, True, False)  '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
-    Call Rut_Lo_Sort(Lo_Inf, InfRec_ConcptEco, xlAscending, False)     '- 1303.00 1310.00 1311.00 Etc.
+    Call Rut_Lo_Sort(Lo_Inf, Col_TipRec, xlAscending, True, False)  '- Emitida, Aplazado, EjeAnt, ADxAplz, Añeja...
+    Call Rut_Lo_Sort(Lo_Inf, Col_ConcptEco, xlAscending, False)     '- 1303.00 1310.00 1311.00 Etc.
 
     '-------------- Leo la Tabla de JI's de Tasas por Tipo y por Concepto ------------------------------------
     '- Para cada Tipo de Recibos; Emitido, ADxAplz, Aplazado, EjeAnt y Añejo. -----------------------------------
     For F_Inf = 1 To Lo_Inf.ListRows.Count
         Set RwJI = Lo_Inf.ListRows(F_Inf)
-        Tp_Rec = RwJI.Range(InfRec_TipRec)
-        Concept = "1" & RwJI.Range(InfRec_ConcptEco)
+        Tp_Rec = RwJI.Range(Col_TipRec)
+        Concept = "1" & RwJI.Range(Col_ConcptEco)
         Paso = "copiar los JI's de la fila " & F_Inf & " del informe (" & Tp_Rec & ", " & Concept & ")"
         If Left(Concept, 4) = "1311" Then GoTo Siguiente_Concepto                                       '- ¡¡ No podemos hacer de Enseñanzas Propias !!
         '- Los 6 JI's de la fila; los que no son dato (vacíos, blancos, errores y JI_Sin_Num) se escriben vacíos ---------------
-        Valores = RwJI.Range(InfRec_JI_Emi_Adm).Resize(1, JI_N_Col).Value
+        Valores = RwJI.Range(Col_JI).Resize(1, JI_N_Col).Value
         Hay_JI = False
         For K = 1 To JI_N_Col
             If Fnc_JI_Con_Dato(Valores(1, K)) Then Hay_JI = True Else Valores(1, K) = Empty
@@ -95,7 +108,7 @@ Siguiente_Concepto:
 Fin:
     If Err.Number <> 0 Then
         Msg_Error = "Error " & Err.Number & " al " & Paso & ":" & vbLf & Err.Description
-        Debug.Print ">>> Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos -> ERROR " & Err.Number & " al " & Paso & ": " & Err.Description
+        Debug.Print ">>> Rut_Inf_JIs_a_BDatos -> ERROR " & Err.Number & " al " & Paso & ": " & Err.Description
     End If
     On Error GoTo -1                                '- sale del manejador de errores, para que el Resume Next de abajo valga
     On Error Resume Next
@@ -106,9 +119,9 @@ Fin:
     If Prot_Hecho Then Call Rut_Prot_Restore(Sht__BD, Prot_BD, True)    '- después de Rut_Lo_Totales_Mostrar, que necesita BDatos sin proteger
     Application.DisplayAlerts = True
     If Msg_Error <> "" Then
-        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & Replace(Msg_Error, vbLf, " ")
+        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's de " & Sht_Inf.Name & " a BDatos: " & Replace(Msg_Error, vbLf, " ")
     Else
-        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's del informe a BDatos: " & N_Filas & _
+        Prog__APP.Range("App_Task_Inf") = Format(Now, "dd/mm/yyyy hh:mm") & "  JI's de " & Sht_Inf.Name & " a BDatos: " & N_Filas & _
                                           " filas del informe, " & Format(N_Recibos, "#,##0") & " recibos (" & Format(Timer - T_Ini, "0.0") & " s)"
     End If
     On Error GoTo 0
@@ -116,9 +129,9 @@ Fin:
     Debug.Print "   M_133: " & N_Filas & " filas del informe, " & N_Recibos & " recibos, " & Format(Timer - T_Ini, "0.00") & " s"
     If Msg_Error <> "" Then                         '- el aviso, ya con la pantalla activa
         MsgBox Msg_Error & vbLf & vbLf & "Puede que solo se hayan copiado a BDatos los JI's de algunas filas: vuelve a pasarlos.", _
-               vbExclamation, "JI's del informe a BDatos"
+               vbExclamation, "JI's de " & Sht_Inf.Name & " a BDatos"
     Else
         Application.Speech.Speak "Proceso completado puede verificar el resultado.", True
     End If
-End Sub     '- Rut_Anadir_a_BDatos_JIs_de_Inf_Recibos
+End Sub     '- Rut_Inf_JIs_a_BDatos
 '--------------------------------------------------------------------------------------------------------------------------------------

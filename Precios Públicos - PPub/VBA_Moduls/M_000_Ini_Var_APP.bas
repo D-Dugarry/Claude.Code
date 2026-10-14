@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_000_Ini_Var_APP"
-' Last Rev. 2026-10-12 20:44
+' Last Rev. 2026-10-14 09:39
 '- M_00_Ini_Var_APP -----------------------------------------------------------------------------------------------------
 Option Explicit
 
@@ -239,6 +239,41 @@ Public Const InfRec_ImpAcad_Cob_AcadPos  As Integer = 32   ' col: af
 Public Const InfRec_ImpAcad_Pdte         As Integer = 33   ' col: ag
 Public Const InfRec_ADxAplz              As Integer = 34   ' col: ah
 Public Const InfRec_Aplazado             As Integer = 35   ' col: ai
+Public Const InfRec_N_Col                As Integer = 35   '- nº de columnas de la tabla (T_Inf_Def.Col, M_130)
+
+' Tabla Sht__Inf_Conta_TIO.ListObjects(1), Lo_Inf_Conta_TIO (2026-10-14): la de Inf_Recibos_TIO sin las 3 columnas del INSS
+Public Const InfCon_TipRec               As Integer = 1    ' col: a
+Public Const InfCon_Ensenanza            As Integer = 2    ' col: b
+Public Const InfCon_ConcptNom            As Integer = 3    ' col: c
+Public Const InfCon_Tot_Emi              As Integer = 4    ' col: d
+Public Const InfCon_Tot_Cob              As Integer = 5    ' col: e
+Public Const InfCon_Tot_Pdte             As Integer = 6    ' col: f
+Public Const InfCon_Cta_Adm              As Integer = 7    ' col: g
+Public Const InfCon_Adm_Emi              As Integer = 8    ' col: h
+Public Const InfCon_Adm_Cob              As Integer = 9    ' col: i
+Public Const InfCon_Adm_Pdte             As Integer = 10   ' col: j
+Public Const InfCon_ConcptEco            As Integer = 11   ' col: k
+Public Const InfCon_Acad_Emi             As Integer = 12   ' col: l
+Public Const InfCon_Acad_Cob             As Integer = 13   ' col: m
+Public Const InfCon_Acad_Pdte            As Integer = 14   ' col: n
+Public Const InfCon_JI_Emi_Adm           As Integer = 15   ' col: o
+Public Const InfCon_JI_Emi_Acad          As Integer = 16   ' col: p
+Public Const InfCon_AD_Emi_Adm           As Integer = 17   ' col: q
+Public Const InfCon_AD_Emi_Acad          As Integer = 18   ' col: r
+Public Const InfCon_JI_443_Adm           As Integer = 19   ' col: s
+Public Const InfCon_JI_443_Acad          As Integer = 20   ' col: t
+Public Const InfCon_Descrip_JI           As Integer = 21   ' col: u
+Public Const InfCon_Descrip_Contab       As Integer = 22   ' col: v
+Public Const InfCon_ConcptEco2           As Integer = 23   ' col: w
+Public Const InfCon_ImpAcad_Crs_Ant      As Integer = 24   ' col: x
+Public Const InfCon_ImpAcad_Crs_Pos      As Integer = 25   ' col: y
+Public Const InfCon_ImpAcad_EmiAnt       As Integer = 26   ' col: z
+Public Const InfCon_ImpAcad_Emi          As Integer = 27   ' col: aa
+Public Const InfCon_ImpAcad_Cob_AcadAnt  As Integer = 28   ' col: ab
+Public Const InfCon_ImpAcad_Cob_AcadPos  As Integer = 29   ' col: ac
+Public Const InfCon_ImpAcad_Pdte         As Integer = 30   ' col: ad
+Public Const InfCon_ADxAplz              As Integer = 31   ' col: ae
+Public Const InfCon_Aplazado             As Integer = 32   ' col: af
 
 ' Tabla Prog__Menu_Aux.ListObjects(1) --------------------------------
 Public Const DR_Ref                   As Integer = 1    ' col: a
