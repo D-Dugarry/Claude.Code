@@ -1,5 +1,5 @@
 Attribute VB_Name = "M_130_Gen_Inf_Recibos"
-' Last Rev. 2026-10-14 09:39
+' Last Rev. 2026-10-14 13:48
 'Rev.: 2026-02-15
 Option Explicit
 
@@ -14,6 +14,7 @@ Option Explicit
     '- Motor común de los dos informes (2026-10-14; Docs/Plan_Inf_Conta_TIO.md): Rut_Inf_Calcular(Def) calcula el informe que
     '  describe Def (T_Inf_Def): Inf_Recibos_TIO (Rut_Inf_Def_Recibos, aquí) o Inf_Conta_TIO (Rut_Inf_Def_Conta, M_140), que no
     '  tiene las columnas del INSS y en el que Emitido, Cobrado y Pendiente son Adm. + Acad.
+    '- Inf_Conta_TIO lleva debajo una tabla con el total del INSS (2026-10-14, Rut_Inf_Tabla_INSS).
 
 '- Índices del tercer índice de Sumas(tipo de recibo, concepto, Sum_*), que rellena Rut_Inf_Recibos_Sumas ------------------------
 Private Const Sum_Tot_Emi       As Long = 1     '- Imp.Rec. de los emitidos
@@ -109,6 +110,10 @@ Debug.Print "Rut_Inf_Calcular: " & Def.Ws.Name
     Dim K_Col                   As Integer
     Dim INSS_Emi                As Double       '- el INSS de la fila, en variables: Inf_Conta_TIO no tiene sus columnas
     Dim INSS_Cob                As Double
+    Dim Fila_Nueva              As Boolean      '- la fila del informe es nueva (un concepto repetido reescribe la misma)
+    Dim Tot_INSS_Emi            As Double       '- Inf_Conta_TIO: total del INSS para la tabla de debajo (Rut_Inf_Tabla_INSS)
+    Dim Tot_INSS_Cob            As Double
+    Dim Tot_INSS_Pdte           As Double
     For K_Col = 1 To InfRec_N_Col
         C(K_Col) = Def.Col(K_Col)
     Next K_Col
@@ -233,7 +238,8 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
             If Lo_Concept.DataBodyRange.Cells(F_Concept, 14) = 4 Then GoTo Sigiente_Concepto
             Concept = Lo_Concept.DataBodyRange.Cells(F_Concept, 1)
             Paso = "rellenar la tabla (" & Tp_Rec & ", " & Concept & ")"
-            If TipRec_Cncpt <> (Tp_Rec & Concept) Then
+            Fila_Nueva = (TipRec_Cncpt <> (Tp_Rec & Concept))     '- un concepto repetido reescribe la fila del anterior
+            If Fila_Nueva Then
                 Set RwJI = Lo_Inf.ListRows.Add
                 TipRec_Cncpt = Tp_Rec & Concept
             End If
@@ -274,6 +280,13 @@ Dim TRows_LoTipoRec      As Integer:     TRows_LoTipoRec = Lo_Tipo_Rec.ListRows.
                 RwJI.Range(C(InfRec_Adm_INSS_Cob)) = INSS_Cob
                 '- Saldo INSS. Pendiente --------------------------------------------------------------------------------------------
                 RwJI.Range(C(InfRec_Adm_INSS_Pdte)) = INSS_Emi - INSS_Cob
+            End If
+            If Not Def.Con_INSS And Fila_Nueva And Not UCase$(DescripcionB) Like "EURLE*" Then
+                '- Inf_Conta_TIO (2026-10-14): total del INSS para la tabla de debajo, sin EURLE (va aparte) y con cada fila
+                '  redondeada como en Inf_Recibos_TIO: es lo que le falta a la fila de totales para dar la de Inf_Recibos_TIO.
+                Tot_INSS_Emi = Tot_INSS_Emi + Round(INSS_Emi, 2)
+                Tot_INSS_Cob = Tot_INSS_Cob + Round(INSS_Cob, 2)
+                Tot_INSS_Pdte = Tot_INSS_Pdte + Round(INSS_Emi - INSS_Cob, 2)
             End If
 
             '-----------------------------------------------------------------------------------------------------------------------
@@ -498,6 +511,7 @@ SiguienteColumna:
     Paso = "copiar la leyenda de los tipos de recibo"
     Dim ColIni      As Integer:     ColIni = C(InfRec_Descrip_JI)
     Dim ColFin      As Integer:     ColFin = ColIni + 1
+    Dim Fila_INSS   As Long                     '- Inf_Conta_TIO: primera fila de la tabla del total del INSS
     UltFila = Lo_Inf.TotalsRowRange.Row + 3
     TRows_LoTipoRec = Prog_TipoRec.ListObjects(1).ListRows.Count
 '    Prog_TipoRec.ListObjects(1).ListColumns(1).Range.Resize(, 2).Copy Destination:=Cells(UltFila , 3) ' Resize to include the second column
@@ -581,6 +595,16 @@ SiguienteColumna:
         End If
     End With
     
+    '- Inf_Conta_TIO (2026-10-14): tabla con el total del INSS, bajo Concepto NOM, Emitido, Cobrado y Pendiente, 2 filas por debajo
+    '  de lo último que haya bajo la tabla: el bloque de EURLE (columna B) o, si no hay, la leyenda (columna ColIni). Como la
+    '  leyenda, la dibuja cada cálculo.
+    If Not Def.Con_INSS Then
+        Paso = "escribir la tabla del total del INSS"
+        Fila_INSS = WorksheetFunction.Max(Sht_Inf.Cells(Sht_Inf.Rows.Count, Lo_Inf.Range.Column).End(xlUp).Row, _
+                                          Sht_Inf.Cells(Sht_Inf.Rows.Count, ColIni).End(xlUp).Row) + 2
+        Call Rut_Inf_Tabla_INSS(Def, Lo_Inf, Fila_INSS, APP_AnoCont, Tot_INSS_Emi, Tot_INSS_Cob, Tot_INSS_Pdte)
+    End If
+    
 Finalizar:
     Paso = "anotar la fecha del cálculo"
     Call Rut_Lo_Filtros_Quitar(Lo_Inf)
@@ -620,6 +644,82 @@ Fin:
         Application.Speech.Speak "Proceso completado", True
     End If
 End Sub     '- Rut_Inf_Calcular
+' ==================================================================================================================================
+'- Inf_Conta_TIO (2026-10-14): tabla con el total del INSS (emitido, cobrado y pendiente), que este informe no tiene en sus columnas.
+'  Dos filas desde Fila (cabeceras e importes), bajo las columnas Concepto NOM, Emitido, Cobrado y Pendiente de la tabla, con el
+'  formato de la que dibujó el usuario a mano: Arial, oro (Énfasis 4) aclarado un 60 % y un 80 % y bordes finos. Los importes,
+'  con el formato de número de la fila de totales.
+' ==================================================================================================================================
+Private Sub Rut_Inf_Tabla_INSS(Def As T_Inf_Def, Lo_Inf As ListObject, ByVal Fila As Long, ByVal AnoCont As String, _
+                               ByVal Emi As Double, ByVal Cob As Double, ByVal Pdte As Double)
+' ----------------------------------------------------------------------------------------------------------------------------------
+    Dim Ws          As Worksheet:   Set Ws = Lo_Inf.Parent
+    Dim Col0        As Long:        Col0 = Lo_Inf.Range.Column - 1      '- columna de la hoja = Col0 + columna de la tabla
+    Dim C_Nom       As Long:        C_Nom = Col0 + Def.Col(InfRec_ConcptNom)
+    Dim C_Emi       As Long:        C_Emi = Col0 + Def.Col(InfRec_Tot_Emi)
+    Dim C_Cob       As Long:        C_Cob = Col0 + Def.Col(InfRec_Tot_Cob)
+    Dim C_Pdte      As Long:        C_Pdte = Col0 + Def.Col(InfRec_Tot_Pdte)
+    Dim Tabla       As Range
+    Dim Cabeceras   As Range                    '- INSS Emi. e INSS Pdte (la de INSS Cob. va más grande y más clara)
+    Dim Importes    As Range                    '- los de Emi. y Pdte (el de Cob. va más claro)
+
+    Set Tabla = Union(Ws.Cells(Fila, C_Nom).Resize(2), Ws.Cells(Fila, C_Emi).Resize(2), _
+                      Ws.Cells(Fila, C_Cob).Resize(2), Ws.Cells(Fila, C_Pdte).Resize(2))
+    Set Cabeceras = Union(Ws.Cells(Fila, C_Emi), Ws.Cells(Fila, C_Pdte))
+    Set Importes = Union(Ws.Cells(Fila + 1, C_Emi), Ws.Cells(Fila + 1, C_Pdte))
+
+    Ws.Cells(Fila, C_Nom) = "Totales"
+    Ws.Cells(Fila, C_Emi) = "INSS Emi."
+    Ws.Cells(Fila, C_Cob) = "INSS Cob." & vbLf & AnoCont
+    Ws.Cells(Fila, C_Pdte) = "INSS Pdte"
+    Ws.Cells(Fila + 1, C_Nom) = "Imp.Adm. Seguro Obl. INSS"
+    Ws.Cells(Fila + 1, C_Emi) = Round(Emi, 2)
+    Ws.Cells(Fila + 1, C_Cob) = Round(Cob, 2)
+    Ws.Cells(Fila + 1, C_Pdte) = Round(Pdte, 2)
+
+    '- Toda la tabla: Arial negra (Texto 1), centrada en vertical, rellena de oro aclarado un 80 % y con bordes finos ---------------
+    With Tabla
+        .Font.Name = "Arial"
+        .Font.Bold = False
+        .Font.ThemeColor = xlThemeColorLight1
+        .Font.TintAndShade = 0
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .IndentLevel = 0
+        .Interior.Pattern = xlSolid
+        .Interior.ThemeColor = xlThemeColorAccent4
+        .Interior.TintAndShade = 0.8
+        .Borders.LineStyle = xlContinuous
+        .Borders.Weight = xlThin
+        .Borders.ColorIndex = xlAutomatic
+    End With
+    Union(Cabeceras, Importes).Interior.TintAndShade = 0.6     '- las de Emi. y Pdte, oro aclarado un 60 %
+    With Ws.Cells(Fila, C_Nom)                                  '- "Totales": negrita y sin relleno
+        .Font.Bold = True
+        .Font.Size = 16
+        .HorizontalAlignment = xlCenter
+        .Interior.Pattern = xlNone
+    End With
+    With Union(Cabeceras, Ws.Cells(Fila, C_Cob))               '- cabeceras del INSS
+        .Font.Bold = True
+        .Font.TintAndShade = 0.05
+        .HorizontalAlignment = xlCenter
+        .WrapText = True
+    End With
+    Cabeceras.Font.Size = 12
+    Ws.Cells(Fila, C_Cob).Font.Size = 14
+    With Ws.Cells(Fila + 1, C_Nom)                              '- "Imp.Adm. Seguro Obl. INSS"
+        .Font.Size = 18
+        .HorizontalAlignment = xlRight
+        .IndentLevel = 1
+    End With
+    With Union(Importes, Ws.Cells(Fila + 1, C_Cob))            '- los totales
+        .Font.Size = 16
+        .NumberFormat = Lo_Inf.TotalsRowRange.Cells(1, Def.Col(InfRec_Tot_Emi)).NumberFormat
+    End With
+    Ws.Rows(Fila).Resize(2).AutoFit                             '- alto automático (36 y 22,5 el 2026-10-14)
+End Sub     '- Rut_Inf_Tabla_INSS
 ' ==================================================================================================================================
 '- Sumas de BDatos para el informe, en una sola pasada en memoria (2026-10-12). Antes eran 14 SUMIFS por fila del informe (420 en
 '  total, unos 20 s); dan los mismos importes (comprobado con los 420). Sumas(tipo de recibo, concepto, Sum_*), con los criterios
