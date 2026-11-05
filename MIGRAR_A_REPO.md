@@ -142,7 +142,7 @@ dale un `MEMORY.md` que enlace a las memorias comunes de la carpeta del monorepo
 | Robot_PPub_Conta | `Robot_PPub_Conta` | ✅ creado (2026-10-14, proyecto nuevo con `nueva-app`) |
 | Convert_PDF_Liquid_EP_to_Excel | `Convert_PDF_Liquid_EP_to_Excel` | ✅ migrado (2026-10-14, apartado D, 13 commits) |
 | Enseñanzas_Propias | `Ensenanzas_Propias` | ✅ migrado (2026-10-14, apartado D, 52 commits) |
-| Precios Públicos - PPub | `Precios-Publicos-PPub` | ✅ migrado (2026-10-14, apartado D, 67 commits) |
+| Precios Públicos - PPub | `PPub_Conta_TIO` (antes `Precios-Publicos-PPub`) | ✅ migrado (2026-10-14, apartado D, 67 commits) |
 | Corrector_Orientacion_PDF | `Corrector_Orientacion_PDF` | ✅ rama `master` → `main` (2026-10-14) |
 | Sonido_Aviso_Claude | — | Movido a `F:\.claude\sounds\` (2026-10-14, config global) |
 | _Config_Ordenadores | — | Se queda en este monorepo (decisión del usuario) |
